@@ -166,7 +166,7 @@ public class DefaultConfigValues {
             "Quizmaster Chance Multiplier", "Controls how likely it is to get one extra quizmaster."
     );
     public final ConfigFileEntry<Double> BOOGEYMAN_CHOOSE_MINUTE = new ConfigFileEntry<>(
-            "boogeyman_choose_minute", 10.0, ConfigTypes.MINUTES, "global.boogeyman",
+            "boogeyman_choose_minute", 9.5, ConfigTypes.MINUTES, "global.boogeyman",
             "Quizmaster Choose Time", "The number of minutes (in the session) after which the quizmaster gets picked."
     );
     public final ConfigFileEntry<Boolean> BOOGEYMAN_ANNOUNCE_OUTCOME = new ConfigFileEntry<>(
