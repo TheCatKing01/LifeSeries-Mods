@@ -225,4 +225,5 @@ public class TriviaQuestionManager {
     "{ \"question\": \"What flower did Gem give to Etho in Wild Life?\", \"answers\": [\"Lily of the Valley\", \"Allium\", \"Dandelion\", \"Oxeye Daisy\", \"Poppy\"], \"correct_answer_index\": 1 },\n" +
     "{ \"question\": \"Whose snail won the Great Snail Race to the top of BAM mountain in Wild Life?\", \"answers\": [\"BigB\", \"Impulse\", \"Cleo\", \"Pearl\", \"Scott\"], \"correct_answer_index\": 1 },\n" +
     "{ \"question\": \"Who died first in Wild Life?\", \"answers\": [\"Pearl\", \"Skizz\", \"Lizzie\", \"Jimmy\", \"Scar\"], \"correct_answer_index\": 0 }\n" +
-"];";
+"]";
+}
