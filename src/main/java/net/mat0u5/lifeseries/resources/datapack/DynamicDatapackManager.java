@@ -15,9 +15,10 @@ public class DynamicDatapackManager {
     private static final String CONFIG_TABLE_TRIVIA = "./config/lifeseries/wildlife/trivia_reward_loottable_"+DatapackManager.getMinecraftVersion()+".json";
     private static final String CONFIG_TABLE_TASK = "./config/lifeseries/secretlife/task_reward_loottable_"+DatapackManager.getMinecraftVersion()+".json";
 
-    private static final String LOCAL_TABLE_TRIVIA = "/assets/dynamicpack/loottables/trivia_reward_loottable"+DatapackManager.getResourceTriviaPackVersion()+".json";
-    private static final String LOCAL_TABLE_TASK = "/assets/dynamicpack/loottables/task_reward_loottable"+DatapackManager.getResourceTaskPackVersion()+".json";
-    private static final String LOCAL_MCMETA = "/assets/dynamicpack/pack.mcmeta";
+
+    private static final String LOCAL_TABLE_TRIVIA = "/files/dynamicpack/loottables/trivia_reward_loottable"+DatapackManager.getResourceTriviaPackVersion()+".json";
+    private static final String LOCAL_TABLE_TASK = "/files/dynamicpack/loottables/task_reward_loottable"+DatapackManager.getResourceTaskPackVersion()+".json";
+    private static final String LOCAL_MCMETA = "/files/dynamicpack/pack.mcmeta";
 
     private static final String DATAPACK_MAIN = "Life Series Dynamic Datapack";
     private static final String DATAPACK_LOOTTABLE = DATAPACK_MAIN+"/data/lifeseriesdynamic/loot_table";
