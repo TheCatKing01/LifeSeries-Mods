@@ -20,22 +20,22 @@ public abstract class ClientPlayerEntityMixin implements IClientPlayer {
         ClientEvents.onClientTickEnd();
     }
 
-    @Redirect(method = "tickNewAi", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;movementForward:F"))
+    @Redirect(method = "tickNewAi", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;forwardMovement:F"))
     private float overwriteForwardMovement(Input instance) {
         if (ls$stopMovementForTicks > 0) {
             ls$stopMovementForTicks--;
             return 0;
         }
-        return instance.movementForward;
+        return instance.forwardMovement;
     }
 
-    @Redirect(method = "tickNewAi", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;movementSideways:F"))
-    private float overwriteForwardSideways(Input instance) {
+    @Redirect(method = "tickNewAi", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;sidewaysMovement:F"))
+    private float overwriteSidewaysMovement(Input instance) {
         if (ls$stopMovementForTicks > 0) {
             ls$stopMovementForTicks--;
             return 0;
         }
-        return instance.movementSideways;
+        return instance.sidewaysMovement;
     }
 
     @Unique
@@ -45,7 +45,7 @@ public abstract class ClientPlayerEntityMixin implements IClientPlayer {
     @Override
     public void ls$stopMovementFor(int ticks) {
         if (ticks > ls$stopMovementForTicks) {
-            OtherUtils.log("Stoping movement for " + ticks + " ticks.");
+            OtherUtils.log("Stopping movement for " + ticks + " ticks.");
             ls$stopMovementForTicks = ticks;
         }
     }
