@@ -313,7 +313,6 @@ public class WildLifeConfig extends ConfigManager {
         TAB_LIST_SHOW_LIVES.defaultValue = true;
         ONLY_TAKE_LIVES_IN_SESSION.defaultValue = true;
         BOOGEYMAN.defaultValue = true;
-        BOOGEYMAN_CHOOSE_MINUTE.defaultValue = 5.0;
         BOOGEYMAN_ADVANCED_DEATHS.defaultValue = true;
         WATCHERS_IN_TAB.defaultValue = false;
 

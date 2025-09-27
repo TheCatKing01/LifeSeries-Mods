@@ -56,12 +56,18 @@ public class LivesManager {
     }
 
     public void createTeams() {
-        TeamUtils.createTeam("lives_null", "Unassigned", Formatting.GRAY);
-        TeamUtils.createTeam("lives_0", "Dead", Formatting.DARK_GRAY);
-        TeamUtils.createTeam("lives_1", "Red", Formatting.RED);
-        TeamUtils.createTeam("lives_2", "Yellow", Formatting.YELLOW);
-        TeamUtils.createTeam("lives_3", "Green", Formatting.GREEN);
-        TeamUtils.createTeam("lives_4", "Dark Green", Formatting.DARK_GREEN);
+    TeamUtils.createTeam("lives_null", "Unassigned", Formatting.GRAY);
+    TeamUtils.createTeam("lives_0", "Dead", Formatting.DARK_GRAY);
+
+    // Your new mapping:
+    TeamUtils.createTeam("lives_1", "Dark Red", Formatting.DARK_RED);
+    TeamUtils.createTeam("lives_2", "Red", Formatting.RED);
+    TeamUtils.createTeam("lives_3", "Yellow", Formatting.YELLOW);
+    TeamUtils.createTeam("lives_4", "Green", Formatting.GREEN);
+    TeamUtils.createTeam("lives_5", "Dark Green", Formatting.DARK_GREEN);
+    TeamUtils.createTeam("lives_6", "Blue", Formatting.BLUE);
+}
+
     }
 
     public void createScoreboards() {
