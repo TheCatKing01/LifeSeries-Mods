@@ -311,6 +311,7 @@ public class WildLifeConfig extends ConfigManager {
         SPAWN_EGG_ALLOW_ON_SPAWNER.defaultValue = true;
         SPAWNER_RECIPE.defaultValue = true;
         TAB_LIST_SHOW_LIVES.defaultValue = true;
+        TAB_LIST_SHOW_EXACT_LIVES.defaultValue = true;
         ONLY_TAKE_LIVES_IN_SESSION.defaultValue = true;
         BOOGEYMAN.defaultValue = true;
         BOOGEYMAN_ADVANCED_DEATHS.defaultValue = true;
