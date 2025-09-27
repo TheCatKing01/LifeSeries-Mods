@@ -286,20 +286,12 @@ public class NetworkHandlerServer {
             ServerPlayNetworking.send(player, payload);
         }
     }
-    public static void sendNumberPackets(PacketNames name, double number) {
-        for (ServerPlayerEntity player : PlayerUtils.getAllPlayers()) {
-            sendNumberPacket(player, name, number);
-        }
-    }
-
 
     public static void sendNumberPacket(ServerPlayerEntity player, PacketNames name, double number) {
         if (player == null) return;
         NumberPayload payload = new NumberPayload(name.getName(), number);
         ServerPlayNetworking.send(player, payload);
     }
-
-
 
     public static void sendLongPacket(ServerPlayerEntity player, PacketNames name, long number) {
         if (player == null) return;
