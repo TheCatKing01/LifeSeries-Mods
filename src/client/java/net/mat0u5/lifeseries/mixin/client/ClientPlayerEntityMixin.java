@@ -15,6 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = ClientPlayerEntity.class, priority = 1)
 public abstract class ClientPlayerEntityMixin implements IClientPlayer {
 
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void tickHead(CallbackInfo ci) {
+        if (Main.modFullyDisabled()) return;
+        ClientEvents.onClientTickStart();
+    }
     @Inject(method = "tick", at = @At("TAIL"))
     private void tickTail(CallbackInfo ci) {
         ClientEvents.onClientTickEnd();
