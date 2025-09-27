@@ -1,9 +1,13 @@
 package net.mat0u5.lifeseries.seasons.other;
 
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.seasons.subin.SubInManager;
+import net.mat0u5.lifeseries.utils.enums.PacketNames;
+import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
@@ -34,6 +38,7 @@ public class LivesManager {
     public boolean SHOW_DEATH_TITLE = false;
     public boolean ONLY_TAKE_LIVES_IN_SESSION = false;
     public boolean SEE_FRIENDLY_INVISIBLE_PLAYERS = false;
+    public static int MAX_TAB_NUMBER = 4;
 
     public void reload() {
         SHOW_DEATH_TITLE = seasonConfig.FINAL_DEATH_TITLE_SHOW.get(seasonConfig);
@@ -45,29 +50,31 @@ public class LivesManager {
     }
 
     public void updateTeams() {
+        MAX_TAB_NUMBER = 4;
         Collection<Team> allTeams = TeamUtils.getAllTeams();
         if (allTeams == null) return;
         for (Team team : allTeams) {
             String name = team.getName();
             if (name.startsWith("lives_")) {
+                try {
+                    int number = Integer.parseInt(name.replace("lives_",""));
+                    MAX_TAB_NUMBER = Math.max(MAX_TAB_NUMBER, number);
+                }catch(Exception e) {}
                 team.setShowFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
             }
         }
+        NetworkHandlerServer.sendNumberPackets(PacketNames.TAB_LIVES_CUTOFF, MAX_TAB_NUMBER);
     }
 
     public void createTeams() {
-    TeamUtils.createTeam("lives_null", "Unassigned", Formatting.GRAY);
-    TeamUtils.createTeam("lives_0", "Dead", Formatting.DARK_GRAY);
-
-    // Your new mapping:
-    TeamUtils.createTeam("lives_1", "Dark Red", Formatting.DARK_RED);
-    TeamUtils.createTeam("lives_2", "Red", Formatting.RED);
-    TeamUtils.createTeam("lives_3", "Yellow", Formatting.YELLOW);
-    TeamUtils.createTeam("lives_4", "Green", Formatting.GREEN);
-    TeamUtils.createTeam("lives_5", "Dark Green", Formatting.DARK_GREEN);
-    TeamUtils.createTeam("lives_6", "Blue", Formatting.BLUE);
-}
-
+        TeamUtils.createTeam("lives_null", "Unassigned", Formatting.GRAY);
+        TeamUtils.createTeam("lives_0", "Dead", Formatting.DARK_GRAY);
+        TeamUtils.createTeam("lives_1", "Dark Red", Formatting.DARK_RED);
+        TeamUtils.createTeam("lives_2", "Red", Formatting.RED);
+        TeamUtils.createTeam("lives_3", "Yellow", Formatting.YELLOW);
+        TeamUtils.createTeam("lives_4", "Green", Formatting.GREEN);
+        TeamUtils.createTeam("lives_5", "Dark Green", Formatting.DARK_GREEN);
+        TeamUtils.createTeam("lives_6", "Blue", Formatting.BLUE);
     }
 
     public void createScoreboards() {
@@ -161,6 +168,10 @@ public class LivesManager {
         return lives > 0;
     }
 
+    public boolean isDead(ServerPlayerEntity player) {
+        return !isAlive(player);
+    }
+
     public void removePlayerLife(ServerPlayerEntity player) {
         addToPlayerLives(player,-1);
     }
@@ -193,6 +204,7 @@ public class LivesManager {
     }
 
     public void addToPlayerLives(ServerPlayerEntity player, int amount) {
+        if (amount == 0) return;
         Integer currentLives = getPlayerLives(player);
         if (currentLives == null) currentLives = 0;
         int lives = currentLives + amount;
@@ -228,7 +240,7 @@ public class LivesManager {
     }
 
     public void setPlayerLives(ServerPlayerEntity player, int lives) {
-        if (isWatcher(player)) return;
+        if (player == null || isWatcher(player)) return;
         Integer livesBefore = getPlayerLives(player);
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
         if (lives <= 0) {
@@ -238,11 +250,21 @@ public class LivesManager {
             PlayerUtils.safelyPutIntoSurvival(player);
         }
         currentSeason.reloadPlayerTeam(player);
+
+        if (SubInManager.isSubbingIn(player.getUuid())) {
+            String substitutedPlayerName =OtherUtils.profileName(SubInManager.getSubstitutedPlayer(player.getUuid()));
+            setScore(substitutedPlayerName, lives);
+        }
     }
 
     public void setScore(String playerName, int lives) {
         ScoreboardUtils.setScore(ScoreHolder.fromName(playerName), SCOREBOARD_NAME, lives);
         currentSeason.reloadAllPlayerTeams();
+    }
+
+    @Nullable
+    public Integer getScoreLives(String playerName) {
+        return ScoreboardUtils.getScore(ScoreHolder.fromName(playerName), SCOREBOARD_NAME);
     }
 
     @Nullable
@@ -258,7 +280,7 @@ public class LivesManager {
 
     @Nullable
     public Boolean isOnSpecificLives(ServerPlayerEntity player, int check) {
-        if (!isAlive(player)) return null;
+        if (isDead(player)) return null;
         Integer lives = getPlayerLives(player);
         if (lives == null) return null;
         return lives == check;
@@ -272,7 +294,7 @@ public class LivesManager {
 
     @Nullable
     public Boolean isOnAtLeastLives(ServerPlayerEntity player, int check) {
-        if (!isAlive(player)) return null;
+        if (isDead(player)) return null;
         Integer lives = getPlayerLives(player);
         if (lives == null) return null;
         return lives >= check;
@@ -286,7 +308,9 @@ public class LivesManager {
 
 
     public void playerLostAllLives(ServerPlayerEntity player, Integer livesBefore) {
-        player.changeGameMode(GameMode.SPECTATOR);
+        if (livesBefore != null) {
+            player.changeGameMode(GameMode.SPECTATOR);
+        }
         Vec3d pos = player.getPos();
         HashMap<Vec3d, List<Float>> info = new HashMap<>();
         info.put(pos, List.of(player.getYaw(),player.getPitch()));
@@ -341,7 +365,7 @@ public class LivesManager {
 
     public List<ServerPlayerEntity> getAlivePlayers() {
         List<ServerPlayerEntity> players = PlayerUtils.getAllFunctioningPlayers();
-        players.removeIf(player -> !isAlive(player));
+        players.removeIf(this::isDead);
         return players;
     }
 
