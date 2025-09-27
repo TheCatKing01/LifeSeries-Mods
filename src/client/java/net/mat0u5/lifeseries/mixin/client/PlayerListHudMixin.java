@@ -34,8 +34,8 @@ public class PlayerListHudMixin {
         if (objective != null && objective.getName().equals(LivesManager.SCOREBOARD_NAME)) {
             int score = readableScoreboardScore.getScore();
             if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) {
-                if (score >= 4 && !MainClient.TAB_LIST_SHOW_EXACT_LIVES && !Main.DEBUG) {
-                    return Text.literal("4+").setStyle(originalText.getStyle());
+                if (score >= MainClient.TAB_LIST_LIVES_CUTOFF && !MainClient.TAB_LIST_SHOW_EXACT_LIVES && !Main.DEBUG) {
+                    return Text.literal(MainClient.TAB_LIST_LIVES_CUTOFF+"+").setStyle(originalText.getStyle());
                 }
             }
             else {

@@ -7,6 +7,7 @@
   },
   "client": [
     "AbstractClientPlayerEntityMixin",
+    "AbstractSoundInstanceAccessor",
     "AbstractSoundInstanceMixin",
     "CameraMixin",
     "ClientCommonNetworkHandlerMixin",
@@ -24,6 +25,7 @@
     "SoundSystemMixin"
   ],
   "mixins": [
+    "ClientPlayNetworkHandlerMixin",
     "EntityMixin",
     "GameRendererMixin",
     "LivingEntityMixin",

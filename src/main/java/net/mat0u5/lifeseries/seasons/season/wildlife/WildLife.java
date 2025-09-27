@@ -190,8 +190,7 @@ public class WildLife extends Season {
         SizeShifting.MIN_SIZE = WildLifeConfig.WILDCARD_SIZESHIFTING_MIN_SIZE.get(config);
         SizeShifting.MAX_SIZE = WildLifeConfig.WILDCARD_SIZESHIFTING_MAX_SIZE.get(config);
         SizeShifting.SIZE_CHANGE_MULTIPLIER = WildLifeConfig.WILDCARD_SIZESHIFTING_SIZE_CHANGE_MULTIPLIER.get(config);
-        //SizeShifting.SAVE_FROM_FALLING = config.WILDCARD_SIZESHIFTING_PREVENT_SHIFT_FALLING.get(config);
-
+        SizeShifting.FIX_SIZECHANGING_BUGS = WildLifeConfig.WILDCARD_SIZESHIFTING_FIX_BUGS.get(config);
 
         Snail.GLOBAL_SPEED_MULTIPLIER = WildLifeConfig.WILDCARD_SNAILS_SPEED_MULTIPLIER.get(config);
         Snail.SHOULD_DROWN_PLAYER = WildLifeConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get(config);

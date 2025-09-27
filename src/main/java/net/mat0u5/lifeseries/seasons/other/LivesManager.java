@@ -1,9 +1,11 @@
 package net.mat0u5.lifeseries.seasons.other;
 
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
@@ -34,6 +36,7 @@ public class LivesManager {
     public boolean SHOW_DEATH_TITLE = false;
     public boolean ONLY_TAKE_LIVES_IN_SESSION = false;
     public boolean SEE_FRIENDLY_INVISIBLE_PLAYERS = false;
+    public static int MAX_TAB_NUMBER = 4;
 
     public void reload() {
         SHOW_DEATH_TITLE = seasonConfig.FINAL_DEATH_TITLE_SHOW.get(seasonConfig);
@@ -45,14 +48,20 @@ public class LivesManager {
     }
 
     public void updateTeams() {
+        MAX_TAB_NUMBER = 4;
         Collection<Team> allTeams = TeamUtils.getAllTeams();
         if (allTeams == null) return;
         for (Team team : allTeams) {
             String name = team.getName();
             if (name.startsWith("lives_")) {
+                try {
+                    int number = Integer.parseInt(name.replace("lives_",""));
+                    MAX_TAB_NUMBER = Math.max(MAX_TAB_NUMBER, number);
+                }catch(Exception e) {}
                 team.setShowFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
             }
         }
+        NetworkHandlerServer.sendNumberPackets(PacketNames.TAB_LIVES_CUTOFF, MAX_TAB_NUMBER);
     }
 
     public void createTeams() {

@@ -65,6 +65,10 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_sizeshifting_size_change_multiplier", 1.0, "season.sizeshifting",
             "Change Multiplier", "The speed with which you change your size during Size Shifting."
     );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SIZESHIFTING_FIX_BUGS = new ConfigFileEntry<>(
+            "wildcard_sizeshifting_fix_bugs", true, "season.sizeshifting",
+            "Fix Bugs", "Fixes the bug where you fall from blocks when shifting and when you get stuck on blocks when jumping."
+    );
 
     public static final ConfigFileEntry<Integer> WILDCARD_HUNGER_RANDOMIZE_INTERVAL = new ConfigFileEntry<>(
             "wildcard_hunger_randomize_interval_", 1800, ConfigTypes.SECONDS, "season.hunger",
@@ -263,6 +267,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
                 ,WILDCARD_SIZESHIFTING_MAX_SIZE
                 ,WILDCARD_SIZESHIFTING_SIZE_CHANGE_MULTIPLIER
+                ,WILDCARD_SIZESHIFTING_FIX_BUGS
 
                 ,WILDCARD_HUNGER_EFFECT_LEVEL
                 ,WILDCARD_HUNGER_RANDOMIZE_INTERVAL
