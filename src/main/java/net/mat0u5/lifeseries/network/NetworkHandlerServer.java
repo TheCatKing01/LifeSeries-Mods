@@ -328,8 +328,6 @@ public class NetworkHandlerServer {
         }
         sendStringPacket(player, PacketNames.CURRENT_SEASON, currentSeason.getSeason().getId());
         sendStringPacket(player, PacketNames.TABLIST_SHOW_EXACT, String.valueOf(Season.TAB_LIST_SHOW_EXACT_LIVES));
-        sendStringPacket(player, PacketNames.FIX_SIZECHANGING_BUGS, String.valueOf(SizeShifting.FIX_SIZECHANGING_BUGS));
-        sendNumberPacket(player, PacketNames.SIZESHIFTING_CHANGE, SizeShifting.SIZE_CHANGE_STEP * SizeShifting.SIZE_CHANGE_MULTIPLIER);
     }
 
     public static void sendUpdatePackets() {

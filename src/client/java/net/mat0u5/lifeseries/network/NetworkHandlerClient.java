@@ -226,9 +226,6 @@ public class NetworkHandlerClient {
         if (name == PacketNames.PAST_LIFE_CHOOSE_TWIST) {
             MinecraftClient.getInstance().setScreen(new PastLifeChooseTwistScreen());
         }
-        if (name == PacketNames.FIX_SIZECHANGING_BUGS) {
-            MainClient.FIX_SIZECHANGING_BUGS = value.equalsIgnoreCase("true");
-        }
     }
 
     public static void handleNumberPacket(NumberPayload payload) {
@@ -247,12 +244,6 @@ public class NetworkHandlerClient {
         }
         if (name == PacketNames.FAKE_THUNDER && MinecraftClient.getInstance().world != null) {
             MinecraftClient.getInstance().world.setLightningTicksLeft(intNumber);
-        }
-        if (name == PacketNames.TAB_LIVES_CUTOFF) {
-            MainClient.TAB_LIST_LIVES_CUTOFF = intNumber;
-        }
-        if (name == PacketNames.SIZESHIFTING_CHANGE) {
-            MainClient.SIZESHIFTING_CHANGE = (float) number;
         }
     }
 

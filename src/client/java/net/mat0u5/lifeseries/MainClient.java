@@ -63,9 +63,6 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static boolean TAB_LIST_SHOW_EXACT_LIVES = false;
     public static String RUN_COMMAND = "lifeseries config";
     public static boolean COLORED_HEARTS = false;
-    public static int TAB_LIST_LIVES_CUTOFF = 4;
-    public static boolean FIX_SIZECHANGING_BUGS = false;
-    public static float SIZESHIFTING_CHANGE = 0;
     public static boolean COLORED_HEARTS_HARDCORE_LAST_LIFE = true;
     public static boolean COLORED_HEARTS_HARDCORE_ALL_LIVES = false;
 
