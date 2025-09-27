@@ -46,10 +46,7 @@ public enum PacketNames {
     HOLDING_JUMP,
     TRIVIA_ANSWER,
     SHOW_TOTEM,
-    PAST_LIFE_CHOOSE_TWIST,
-
-    // <<< NEW PACKET FOR LIVES MANAGER >>>
-    TAB_LIVES_CUTOFF; 
+    PAST_LIFE_CHOOSE_TWIST;
 
     public static PacketNames fromName(String name) {
         for (PacketNames packet : PacketNames.values()) {
@@ -58,12 +55,12 @@ public enum PacketNames {
             }
         }
         PacketNames returnPacket = PACKET;
-        returnPacket.setName(name); // This changes the name of the PACKET forever, acts as a cache
+        returnPacket.setName(name); // This changes the name of the PACKET forever, which isn't really a problem. In fact, it kinda acts as a sort of cache.
         return returnPacket;
     }
 
-    private String name;
 
+    private String name;
     PacketNames(String name) {
         this.name = name;
     }
