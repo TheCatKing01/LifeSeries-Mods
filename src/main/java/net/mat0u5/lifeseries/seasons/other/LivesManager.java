@@ -61,7 +61,7 @@ public class LivesManager {
                 team.setShowFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
             }
         }
-        NetworkHandlerServer.sendNumberPackets(PacketNames.TAB_LIVES_CUTOFF.getname(), MAX_TAB_NUMBER);
+        NetworkHandlerServer.sendNumberPackets(PacketNames.TAB_LIVES_CUTOFF, MAX_TAB_NUMBER);
     }
 
     public void createTeams() {
