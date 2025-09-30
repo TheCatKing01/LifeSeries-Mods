@@ -35,7 +35,7 @@ public class BoogeymanManager {
     public boolean BOOGEYMAN_ANNOUNCE_OUTCOME = false;
     public List<String> BOOGEYMAN_IGNORE = new ArrayList<>();
     public List<String> BOOGEYMAN_FORCE = new ArrayList<>();
-    public String BOOGEYMAN_MESSAGE = "§7You have been chosen by the Trivia Bots. You must by any means necessary kill a §9blue§7, §2dark green§7, §agreen§7 or §eyellow§7 name by direct action to be cured of the curse. If you fail, you will become a §cred name§7. All loyalties and friendships are removed while you are the Quizmaster.";
+    public String BOOGEYMAN_MESSAGE = "§7You have been chosen by the Trivia Bots. You must by any means necessary kill a §9blue§7, §2dark green§7, §agreen§7 or §eyellow§7 name by direct action to be cured of the curse. If you fail, you will become a §4dark red name§7. All loyalties and friendships are removed while you are the Quizmaster.";
     public boolean BOOGEYMAN_INFINITE = false;
     public int BOOGEYMAN_INFINITE_LAST_PICK = 1800;
     public int BOOGEYMAN_INFINITE_AUTO_FAIL = 360000;
