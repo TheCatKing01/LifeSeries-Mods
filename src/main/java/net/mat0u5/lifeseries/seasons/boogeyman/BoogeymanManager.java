@@ -309,7 +309,6 @@ public class BoogeymanManager {
     }
 
     return boogeyPlayers;
-}
 
     }
 
