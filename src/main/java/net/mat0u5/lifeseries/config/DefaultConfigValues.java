@@ -123,7 +123,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Boolean> GIVELIFE_COMMAND_ENABLED = new ConfigFileEntry<>(
             "givelife_command_enabled", false, "{global.givelife}",
-            "Enable Givelife Command", "Controls whether the '/givelife' command is available."
+            "Givelife Command Enabled", "Controls whether the '/givelife' command is available."
     );
     public final ConfigFileEntry<Integer> GIVELIFE_LIVES_MAX = new ConfigFileEntry<>(
             "givelife_lives_max", 99, "global.givelife",
@@ -242,14 +242,14 @@ public class DefaultConfigValues {
             "Whisper Sound Only For Members", "Makes the whispering sound only play for Society Members, thus making the Society fully secret."
     );
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
-            "enable_simple_life_traders", true, ConfigTypes.TEXT, "{global.simplelife}",
-            "Enable Simple Life Traders", "Allows the wondering traders from Simple Life to spawn."
+            "simple_life", true, ConfigTypes.TEXT, "{global.simplelife}",
+            "Simple Life Traders Enabled", "Enables the wondering traders from Simple Life to spawn."
 
     );
 
     public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
             "complex_life_trades", false, "global.simplelife",
-            "Complex Life Trades", "Changes Simple Life trades to be custom ones made for Complex Life."
+            "Complex Life Trades", "Changes Simple Life trades to be  Complex Life ones."
     );
 
     public final ConfigFileEntry<Boolean> WATCHERS_IN_TAB = new ConfigFileEntry<>(
@@ -278,7 +278,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Boolean> SHOW_ADVANCEMENTS = new ConfigFileEntry<>(
             "show_advancements", true, "global",
-            "Show Advancemenets In Chat", "Controls advancements show up in the chat."
+            "Show Advancements In Chat", "Controls advancements show up in the chat."
     );
 
 
