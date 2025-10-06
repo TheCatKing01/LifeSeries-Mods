@@ -243,7 +243,7 @@ public class DefaultConfigValues {
     );
 
     // Simple Life Config
-    public final ConfigFileEntry<Object> ENABLE_SIMPLE_LIFE_TRADERS = new ConfigFileEntry<>(
+    public final ConfigFileEntry<Object> SIMPLE_LIFE = new ConfigFileEntry<>(
             "enable_simple_life_traders", true, ConfigTypes.TEXT, "{global.simplelife}",
             "Enable Simple Life Traders", "Allows the wondering traders from Simple Life to spawn."
     );

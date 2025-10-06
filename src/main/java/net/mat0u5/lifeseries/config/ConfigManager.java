@@ -61,6 +61,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_BLACKLIST // Group
                 ,BOOGEYMAN // Group
                 ,SECRET_SOCIETY //Group
+                ,SIMPLE_LIFE //Group
                 ,GIVELIFE_COMMAND_ENABLED // Group
                 ,GROUP_FINAL_DEATH // Group
                 ,CUSTOM_ENCHANTER_ALGORITHM
@@ -100,6 +101,8 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,SECRET_SOCIETY_PUNISHMENT_LIVES
                 ,SECRET_SOCIETY_KILLS_REQUIRED
                 ,SECRET_SOCIETY_SOUND_ONLY_MEMBERS
+
+                ,COMPLEX_LIFE_TRADES /
 
                 ,PLAYERS_DROP_ITEMS_ON_FINAL_DEATH
                 ,FINAL_DEATH_TITLE_SHOW

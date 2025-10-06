@@ -51,7 +51,7 @@ public class SimpleLife extends ThirdLife {
         DefaultConfigValues defaults = new DefaultConfigValues();
 
         // Read config values
-        boolean enableSimpleLife = config.get(defaults.GROUP_SIMPLE_LIFE);
+        boolean enableSimpleLife = config.get(defaults.SIMPLE_LIFE);
         boolean complexTrades = config.get(defaults.SIMPLE_LIFE_COMPLEX_TRADES);
 
         // If the main Simple Life toggle is off, skip
