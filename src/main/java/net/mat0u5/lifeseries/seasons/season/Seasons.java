@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season;
 
+import net.mat0u5.lifeseries.config.DefaultConfigValues;
 import net.mat0u5.lifeseries.dependencies.DependencyManager;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.reallife.RealLife;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.SimpleLife;
@@ -13,10 +14,12 @@ import net.mat0u5.lifeseries.seasons.season.unassigned.UnassignedSeason;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public enum Seasons {
+
     UNASSIGNED("Unassigned", "unassigned"),
 
     THIRD_LIFE("Third Life", "thirdlife"),
@@ -30,8 +33,11 @@ public enum Seasons {
     REAL_LIFE("Real Life", "reallife"),
     SIMPLE_LIFE("Simple Life", "simplelife");
 
-    private String name;
-    private String id;
+    private final String name;
+    private final String id;
+
+    // Static config instance for SimpleLife
+    private static final DefaultConfigValues CONFIG_VALUES = new DefaultConfigValues();
 
     Seasons(String name, String id) {
         this.name = name;
@@ -46,48 +52,51 @@ public enum Seasons {
         return id;
     }
 
+    /** Returns a new instance of the Season associated with this enum. */
     public Season getSeasonInstance() {
-        if (this == THIRD_LIFE) return new ThirdLife();
-        if (this == LAST_LIFE) return new LastLife();
-        if (this == DOUBLE_LIFE) return new DoubleLife();
-        if (this == LIMITED_LIFE) return new LimitedLife();
-        if (this == SECRET_LIFE) return new SecretLife();
-        if (this == WILD_LIFE && DependencyManager.wildLifeModsLoaded()) return new WildLife();
-        if (this == PAST_LIFE) return new PastLife();
-
-        if (this == REAL_LIFE) return new RealLife();
-        if (this == SIMPLE_LIFE) return new SimpleLife();
-        return new UnassignedSeason();
+        return switch (this) {
+            case THIRD_LIFE -> new ThirdLife();
+            case LAST_LIFE -> new LastLife();
+            case DOUBLE_LIFE -> new DoubleLife();
+            case LIMITED_LIFE -> new LimitedLife();
+            case SECRET_LIFE -> new SecretLife();
+            case WILD_LIFE -> DependencyManager.wildLifeModsLoaded() ? new WildLife() : new UnassignedSeason();
+            case PAST_LIFE -> new PastLife();
+            case REAL_LIFE -> new RealLife();
+            case SIMPLE_LIFE -> new SimpleLife(CONFIG_VALUES);
+            default -> new UnassignedSeason();
+        };
     }
 
+    /** Returns the path to the logo for this season. */
     public Identifier getLogo() {
-        return Identifier.of("lifeseries","textures/gui/"+this.getId()+".png");
+        return Identifier.of("lifeseries", "textures/gui/" + id + ".png");
     }
 
-    public static Seasons getSeasonFromStringName(String name) {
-        for (Seasons season : Seasons.values()) {
-            if (season.getName().equalsIgnoreCase(name) || season.getId().equalsIgnoreCase(name)) {
-                return season;
-            }
-        }
-        return UNASSIGNED;
+    /** Finds a season by its name or ID (case-insensitive). */
+    public static Seasons getSeasonFromStringName(String input) {
+        return Arrays.stream(values())
+                .filter(season -> season.name.equalsIgnoreCase(input) || season.id.equalsIgnoreCase(input))
+                .findFirst()
+                .orElse(UNASSIGNED);
     }
 
+    /** Returns all seasons except UNASSIGNED. */
     public static List<Seasons> getSeasons() {
-        List<Seasons> allSeasons = new ArrayList<>(List.of(Seasons.values()));
-        allSeasons.remove(UNASSIGNED);
-        return allSeasons;
+        return Arrays.stream(values())
+                .filter(season -> season != UNASSIGNED)
+                .collect(Collectors.toList());
     }
 
+    /** Returns only the April Fools seasons. */
     public static List<Seasons> getAprilFoolsSeasons() {
-        return new ArrayList<>(List.of(REAL_LIFE, SIMPLE_LIFE));
+        return List.of(REAL_LIFE, SIMPLE_LIFE);
     }
 
+    /** Returns a list of all season IDs except UNASSIGNED. */
     public static List<String> getSeasonIds() {
-        List<String> seasonNames = new ArrayList<>();
-        for (Seasons season : getSeasons()) {
-            seasonNames.add(season.getId());
-        }
-        return seasonNames;
+        return getSeasons().stream()
+                .map(Seasons::getId)
+                .collect(Collectors.toList());
     }
 }
