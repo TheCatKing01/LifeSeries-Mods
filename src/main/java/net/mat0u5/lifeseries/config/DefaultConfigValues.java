@@ -242,6 +242,17 @@ public class DefaultConfigValues {
             "Whisper Sound Only For Members", "Makes the whispering sound only play for Society Members, thus making the Society fully secret."
     );
 
+    // Simple Life Config
+    public final ConfigFileEntry<Object> ENABLE_SIMPLE_LIFE_TRADERS = new ConfigFileEntry<>(
+            "enable_simple_life_traders", true, ConfigTypes.TEXT, "{global.simplelife}",
+            "Enable Simple Life Traders", "Allows the wondering traders from Simple Life to spawn."
+    );
+
+    public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
+            "complex_life_trades", true, "global.simplelife",
+            "Complex Life Trades", "Changes Simple Life trades to be custom ones made for Complex Life."
+    );
+
     public final ConfigFileEntry<Boolean> WATCHERS_IN_TAB = new ConfigFileEntry<>(
             "watchers_in_tab", true, "global.watchers",
             "Show Watchers In Tab", "Controls whether Watchers should show up in the tab list."

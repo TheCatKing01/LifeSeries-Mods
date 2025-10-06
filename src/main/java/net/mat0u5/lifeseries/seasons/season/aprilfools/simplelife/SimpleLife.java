@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife;
 
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.DefaultConfigValues;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.thirdlife.ThirdLife;
 import net.minecraft.entity.*;
@@ -25,8 +26,9 @@ import java.util.Optional;
 import java.util.Random;
 
 public class SimpleLife extends ThirdLife {
-    private Random rnd = new Random();
+    private final Random rnd = new Random();
     private int checkCooldown = 0;
+
     @Override
     public Seasons getSeason() {
         return Seasons.SIMPLE_LIFE;
@@ -40,115 +42,116 @@ public class SimpleLife extends ThirdLife {
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
+
+        // Config access
+        ConfigManager config = getConfig();
+        DefaultConfigValues defaults = new DefaultConfigValues();
+
+        boolean enableSimpleLife = config.getBoolean(defaults.ENABLE_SIMPLE_LIFE_TRADERS);
+        boolean complexTrades = config.getBoolean(defaults.COMPLEX_LIFE_TRADES);
+
+        // Only run trader spawning if the "Simple Life" config tab is enabled
+        if (!enableSimpleLife) return;
+
         checkCooldown--;
-        if (checkCooldown <= 0) {
-            checkCooldown = 1200; //1 Minute
-            ServerWorld world = server.getOverworld();
-            if (world == null) return;
-            int traderCount = 0;
-            for (Entity entity : world.iterateEntities()) {
-                if (entity instanceof WanderingTraderEntity) {
-                    traderCount++;
-                }
+        if (checkCooldown > 0) return;
+
+        checkCooldown = 1200; // 1 minute default
+        ServerWorld world = server.getOverworld();
+        if (world == null) return;
+
+        int traderCount = 0;
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof WanderingTraderEntity) {
+                traderCount++;
             }
-            if (traderCount == 0) checkCooldown = 1200; //1 Minute
-            if (traderCount == 1) checkCooldown = 3600; //3 Minutes
-            if (traderCount >= 2) checkCooldown = 200;
-            if (traderCount >= 3) return;
-            for (int i = 0; i < 5; i++) {
-                if (trySpawnTrader(world)) {
-                    break;
-                }
-            }
+        }
+
+        if (traderCount == 0) checkCooldown = 1200; // 1 Minute
+        else if (traderCount == 1) checkCooldown = 3600; // 3 Minutes
+        else if (traderCount >= 2) checkCooldown = 200;
+        if (traderCount >= 3) return;
+
+        for (int i = 0; i < 5; i++) {
+            if (trySpawnTrader(world, complexTrades)) break;
         }
     }
 
-    public boolean trySpawnTrader(ServerWorld world) {
+    public boolean trySpawnTrader(ServerWorld world, boolean complexTrades) {
         PlayerEntity playerEntity = world.getRandomAlivePlayer();
-        if (playerEntity == null) {
-            return true;
-        } else {
-            BlockPos blockPos = playerEntity.getBlockPos();
-            PointOfInterestStorage pointOfInterestStorage = world.getPointOfInterestStorage();
-            Optional<BlockPos> optional = pointOfInterestStorage.getPosition((poiType) -> {
-                return poiType.matchesKey(PointOfInterestTypes.MEETING);
-            }, (pos) -> {
-                return true;
-            }, blockPos, 64, PointOfInterestStorage.OccupationStatus.ANY);
-            BlockPos blockPos2 = (BlockPos)optional.orElse(blockPos);
-            BlockPos blockPos3 = this.getNearbySpawnPos(world, blockPos2, 64);
-            if (blockPos3 != null && this.doesNotSuffocateAt(world, blockPos3)) {
-                WanderingTraderEntity wanderingTraderEntity = (WanderingTraderEntity) EntityType.WANDERING_TRADER.spawn(world, blockPos3, SpawnReason.EVENT);
-                if (wanderingTraderEntity != null) {
-                    for(int j = 0; j < 2; ++j) {
-                        this.spawnLlama(world, wanderingTraderEntity, 4);
-                    }
+        if (playerEntity == null) return true;
 
-                    wanderingTraderEntity.setDespawnDelay(12000);
+        BlockPos blockPos = playerEntity.getBlockPos();
+        PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
+        Optional<BlockPos> optional = poiStorage.getPosition(
+                (poiType) -> poiType.matchesKey(PointOfInterestTypes.MEETING),
+                (pos) -> true,
+                blockPos, 64, PointOfInterestStorage.OccupationStatus.ANY
+        );
+        BlockPos meetingPos = optional.orElse(blockPos);
+        BlockPos spawnPos = this.getNearbySpawnPos(world, meetingPos, 64);
 
-                    TradeOfferList offers = wanderingTraderEntity.getOffers();
-                    offers.clear();
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 10), Optional.empty(), Items.SKELETON_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultStack(), 0, 999999, 0, 0, 0));
+        if (spawnPos == null || !this.doesNotSuffocateAt(world, spawnPos)) return false;
 
-                    int rand = rnd.nextInt(2);
-                    if (rand == 0) offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    if (rand == 1) offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
+        WanderingTraderEntity trader = EntityType.WANDERING_TRADER.spawn(world, spawnPos, SpawnReason.EVENT);
+        if (trader == null) return false;
 
-                    wanderingTraderEntity.setOffersFromServer(offers);
-                    return true;
-                }
-            }
-
-            return false;
+        for (int j = 0; j < 2; ++j) {
+            this.spawnLlama(world, trader, 4);
         }
+
+        trader.setDespawnDelay(12000);
+
+        // Assign trade set based on config
+        TradeOfferList offers = new TradeOfferList();
+        if (!complexTrades) {
+            // Default Simple Life trades
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
+              offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultStack(), 0, 999999, 0, 0, 0));
+        } else {
+            // Complex Life trades (placeholder – same as above for now)
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 10), Optional.empty(), Items.SKELETON_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
+            offers.add(new TradeOffer(new TradedItem(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultStack(), 0, 999999, 0, 0, 0));
+        }
+
+        trader.setOffersFromServer(offers);
+        return true;
     }
 
     private void spawnLlama(ServerWorld world, WanderingTraderEntity wanderingTrader, int range) {
-        BlockPos blockPos = this.getNearbySpawnPos(world, wanderingTrader.getBlockPos(), range);
-        if (blockPos != null) {
-            TraderLlamaEntity traderLlamaEntity = (TraderLlamaEntity)EntityType.TRADER_LLAMA.spawn(world, blockPos, SpawnReason.EVENT);
-            if (traderLlamaEntity != null) {
-                traderLlamaEntity.attachLeash(wanderingTrader, true);
-            }
+        BlockPos pos = this.getNearbySpawnPos(world, wanderingTrader.getBlockPos(), range);
+        if (pos != null) {
+            TraderLlamaEntity llama = EntityType.TRADER_LLAMA.spawn(world, pos, SpawnReason.EVENT);
+            if (llama != null) llama.attachLeash(wanderingTrader, true);
         }
     }
 
     private BlockPos getNearbySpawnPos(WorldView world, BlockPos pos, int range) {
-        BlockPos blockPos = null;
         SpawnLocation spawnLocation = SpawnRestriction.getLocation(EntityType.WANDERING_TRADER);
-
-        for(int i = 0; i < 10; ++i) {
-            int j = pos.getX() + rnd.nextInt(range * 2) - range;
-            int k = pos.getZ() + rnd.nextInt(range * 2) - range;
-            int l = world.getTopY(Heightmap.Type.WORLD_SURFACE, j, k);
-            BlockPos blockPos2 = new BlockPos(j, l, k);
-            if (spawnLocation.isSpawnPositionOk(world, blockPos2, EntityType.WANDERING_TRADER)) {
-                blockPos = blockPos2;
-                break;
-            }
+        for (int i = 0; i < 10; ++i) {
+            int x = pos.getX() + rnd.nextInt(range * 2) - range;
+            int z = pos.getZ() + rnd.nextInt(range * 2) - range;
+            int y = world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z);
+            BlockPos testPos = new BlockPos(x, y, z);
+            if (spawnLocation.isSpawnPositionOk(world, testPos, EntityType.WANDERING_TRADER)) return testPos;
         }
-
-        return blockPos;
+        return null;
     }
 
     private boolean doesNotSuffocateAt(BlockView world, BlockPos pos) {
-        Iterator var3 = BlockPos.iterate(pos, pos.add(1, 2, 1)).iterator();
-
-        BlockPos blockPos;
-        do {
-            if (!var3.hasNext()) {
-                return true;
-            }
-
-            blockPos = (BlockPos)var3.next();
-        } while(world.getBlockState(blockPos).getCollisionShape(world, blockPos).isEmpty());
-
-        return false;
+        for (BlockPos blockPos : BlockPos.iterate(pos, pos.add(1, 2, 1))) {
+            if (!world.getBlockState(blockPos).getCollisionShape(world, blockPos).isEmpty()) return false;
+        }
+        return true;
     }
 }
