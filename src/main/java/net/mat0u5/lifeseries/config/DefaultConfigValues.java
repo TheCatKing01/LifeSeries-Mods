@@ -249,7 +249,7 @@ public class DefaultConfigValues {
 
     public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
             "complex_life_trades", false, "global.simplelife",
-            "Complex Life Trades", "Changes Simple Life trades to be  Complex Life ones."
+            "Complex Life Trades", "Changes Simple Life trades to be Complex Life ones."
     );
 
     public final ConfigFileEntry<Boolean> WATCHERS_IN_TAB = new ConfigFileEntry<>(
