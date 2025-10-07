@@ -16,6 +16,7 @@ public enum ConfigTypes {
     EFFECT_LIST("effectlist"),
     ENCHANT_LIST("enchantlist"),
     BOOGEYMAN("boogeyman"),
+    SIMPLE_LIFE("simplelife"),
     SECONDS("seconds"),
     MINUTES("minutes"),
     STRING_LIST("list"),
@@ -39,7 +40,7 @@ public enum ConfigTypes {
         return this == TEXT;
     }
     public boolean parentBoolean() {
-        return this == BOOLEAN || this == BOOGEYMAN;
+        return this == BOOLEAN || this == BOOGEYMAN || this == SIMPLE_LIFE;
     }
     public boolean parentInteger() {
         return this == INTEGER || this == HEARTS || this == SECONDS;
