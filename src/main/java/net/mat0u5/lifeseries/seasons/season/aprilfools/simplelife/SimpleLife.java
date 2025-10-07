@@ -48,6 +48,9 @@ public class SimpleLife extends ThirdLife {
     public void tick(MinecraftServer server) {
         super.tick(server);
 
+        // Only spawn traders if SIMPLE_LIFE config is enabled
+        if (!config.SIMPLE_LIFE.get(createConfig())) return;
+
         checkCooldown--;
         if (checkCooldown <= 0) {
             checkCooldown = 1200; // 1 minute
@@ -55,16 +58,7 @@ public class SimpleLife extends ThirdLife {
             ServerWorld world = server.getOverworld();
             if (world == null) return;
 
-            int traderCount = 0;
-            for (Entity entity : world.iterateEntities()) {
-                if (entity instanceof WanderingTraderEntity) traderCount++;
-            }
-
-            if (traderCount == 0) checkCooldown = 1200;
-            if (traderCount == 1) checkCooldown = 3600;
-            if (traderCount >= 2) checkCooldown = 200;
-            if (traderCount >= 3) return;
-
+            // Try to spawn trader
             for (int i = 0; i < 5; i++) {
                 if (trySpawnTrader(world)) break;
             }
@@ -79,11 +73,11 @@ public class SimpleLife extends ThirdLife {
         PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
 
         Optional<BlockPos> optionalPos = poiStorage.getPosition(
-            poiType -> poiType.matchesKey(PointOfInterestTypes.MEETING),
-            pos -> true,
-            playerPos,
-            64,
-            PointOfInterestStorage.OccupationStatus.ANY
+                poiType -> poiType.matchesKey(PointOfInterestTypes.MEETING),
+                pos -> true,
+                playerPos,
+                64,
+                PointOfInterestStorage.OccupationStatus.ANY
         );
 
         BlockPos spawnCenter = optionalPos.orElse(playerPos);
@@ -103,13 +97,11 @@ public class SimpleLife extends ThirdLife {
 
                 // Choose between Simple Life or Complex Life trades
                 if (config.COMPLEX_LIFE_TRADES.get(createConfig())) {
-                    // Custom Complex Life trades
+                    // Complex Life trades
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
-
                     offers.add(new TradeOffer(new TradedItem(Items.SAND, 10), Optional.empty(), Items.SUGAR_CANE.getDefaultStack(), 0, 999999, 0, 0, 0));
-
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 32), Optional.empty(), Items.COW_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
@@ -123,13 +115,12 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
 
-
                     int rand = rnd.nextInt(2);
                     if (rand == 0) offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultStack(), 0, 999999, 0, 0, 0));
                     if (rand == 1) offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 10), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultStack(), 0, 999999, 0, 0, 0));
 
                     offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultStack(), 0, 999999, 0, 0, 0));	
+                    offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultStack(), 0, 999999, 0, 0, 0));
 
                 } else {
                     // Default Simple Life trades
