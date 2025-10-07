@@ -63,7 +63,7 @@ public enum Seasons {
             case WILD_LIFE -> DependencyManager.wildLifeModsLoaded() ? new WildLife() : new UnassignedSeason();
             case PAST_LIFE -> new PastLife();
             case REAL_LIFE -> new RealLife();
-            case SIMPLE_LIFE -> new SimpleLife(CONFIG_VALUES);
+            case SIMPLE_LIFE -> new SimpleLife();
             default -> new UnassignedSeason();
         };
     }
