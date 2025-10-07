@@ -26,7 +26,7 @@ import java.util.Random;
 
 public class TraderSpawner extends ThirdLife {
 
-    private final DefaultConfigValues config;
+    private final DefaultConfigValues config = new DefaultConfigValues();
     private final Random rnd = new Random();
     private int checkCooldown = 0;
 
