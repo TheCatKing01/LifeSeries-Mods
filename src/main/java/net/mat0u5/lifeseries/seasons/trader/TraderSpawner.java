@@ -33,6 +33,7 @@ public class TraderSpawner extends ThirdLife {
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
+        System.out.println("[TraderSpawner] SIMPLE_LIFE enabled, checking to spawn traders.");
 
         // Only spawn traders if SIMPLE_LIFE config is enabled
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
@@ -54,6 +55,7 @@ public class TraderSpawner extends ThirdLife {
     public boolean trySpawnTrader(ServerWorld world) {
         PlayerEntity player = world.getRandomAlivePlayer();
         if (player == null) return true;
+        System.out.println("[TraderSpawner] Found player: " + player.getName().getString() + " at " + player.getBlockPos());
 
         BlockPos playerPos = player.getBlockPos();
         PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
@@ -67,6 +69,7 @@ public class TraderSpawner extends ThirdLife {
         );
 
         BlockPos spawnCenter = optionalPos.orElse(playerPos);
+        System.out.println("[TraderSpawner] Spawn center chosen at: " + spawnCenter);
         BlockPos spawnPos = this.getNearbySpawnPos(world, spawnCenter, 64);
 
         if (spawnPos != null && this.doesNotSuffocateAt(world, spawnPos)) {
@@ -134,8 +137,10 @@ public class TraderSpawner extends ThirdLife {
     private void spawnLlama(ServerWorld world, WanderingTraderEntity trader, int range) {
         BlockPos pos = this.getNearbySpawnPos(world, trader.getBlockPos(), range);
         if (pos != null) {
+            System.out.println("[TraderSpawner] Chosen spawn position: " + finalPos);
             TraderLlamaEntity llama = (TraderLlamaEntity) EntityType.TRADER_LLAMA.spawn(world, pos, SpawnReason.EVENT);
             if (llama != null) llama.attachLeash(trader, true);
+            System.out.println("[TraderSpawner] Llama spawned at " + pos + " and leashed to trader.");
         }
     }
 
