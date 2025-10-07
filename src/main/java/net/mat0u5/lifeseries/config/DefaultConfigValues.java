@@ -242,8 +242,9 @@ public class DefaultConfigValues {
             "Whisper Sound Only For Members", "Makes the whispering sound only play for Society Members, thus making the Society fully secret."
     );
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
-            "simple_life", true, ConfigTypes.SIMPLE_LIFE, "{global.simplelife}",
+            "simple_life", false, "{global.simplelife}",
             "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
+
     );
 
     public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(

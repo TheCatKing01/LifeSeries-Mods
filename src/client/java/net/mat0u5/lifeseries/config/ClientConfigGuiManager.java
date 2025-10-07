@@ -145,9 +145,6 @@ public class ClientConfigGuiManager {
             if (booleanObject.configType == ConfigTypes.BOOGEYMAN) {
                 return new BoogeymanConfigEntry(booleanObject.id, booleanObject.name, booleanObject.description, booleanObject.booleanValue, booleanObject.defaultValue);
             }
-            if (booleanObject.configType == ConfigTypes.SIMPLE_LIFE) {
-                return new BoogeymanConfigEntry(booleanObject.id, booleanObject.name, booleanObject.description, booleanObject.booleanValue, booleanObject.defaultValue);
-            }
             return new BooleanConfigEntry(booleanObject.id, booleanObject.name, booleanObject.description, booleanObject.booleanValue, booleanObject.defaultValue);
         }
         else if (object instanceof StringObject stringObject) {

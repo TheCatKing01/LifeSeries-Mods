@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.utils.enums;
+apackage net.mat0u5.lifeseries.utils.enums;
 
 public enum ConfigTypes {
     NULL(""),
@@ -40,7 +40,7 @@ public enum ConfigTypes {
         return this == TEXT;
     }
     public boolean parentBoolean() {
-        return this == BOOLEAN || this == BOOGEYMAN || this == SIMPLE_LIFE;
+        return this == BOOLEAN || this == BOOGEYMAN;
     }
     public boolean parentInteger() {
         return this == INTEGER || this == HEARTS || this == SECONDS;
