@@ -1,4 +1,4 @@
-apackage net.mat0u5.lifeseries.utils.enums;
+package net.mat0u5.lifeseries.utils.enums;
 
 public enum ConfigTypes {
     NULL(""),
