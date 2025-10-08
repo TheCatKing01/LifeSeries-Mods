@@ -56,7 +56,7 @@ public class LimitedLife extends Season {
     private int KILL_NORMAL = 1800;
     private int KILL_BOOGEYMAN = 3600;
     public static boolean TICK_OFFLINE_PLAYERS = false;
-    private final DefaultConfigValues config;
+    private final DefaultConfigValues config = new DefaultConfigValues();
     private final Random rnd = new Random();
     private int checkCooldown = 0;
 
