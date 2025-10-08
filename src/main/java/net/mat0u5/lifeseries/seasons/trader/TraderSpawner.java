@@ -24,7 +24,7 @@ import net.minecraft.world.poi.PointOfInterestTypes;
 import java.util.Optional;
 import java.util.Random;
 
-public class TraderSpawner extends ThirdLife {
+public class Trader extends ThirdLife {
 
     private final DefaultConfigValues config;
     private final Random rnd = new Random();
