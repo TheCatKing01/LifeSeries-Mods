@@ -170,20 +170,24 @@ public class WildLife extends Season {
 
     @Override
     public void tickSessionOn(MinecraftServer server) {
-        // Call the base tick logic
         super.tickSessionOn(server);
+    
+    }
 
-        // Only spawn traders if SIMPLE_LIFE config is enabled
+    @Override
+    public void tick(MinecraftServer server) {
+        super.tick(server);
+
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
 
         checkCooldown--;
         if (checkCooldown <= 0) {
-            checkCooldown = 1200; // 1 minute
+            checkCooldown = 1200;
 
             ServerWorld world = server.getOverworld();
             if (world == null) return;
 
-            // Try to spawn trader
+
             for (int i = 0; i < 5; i++) {
                 if (trySpawnTrader(world)) break;
             }
@@ -191,11 +195,6 @@ public class WildLife extends Season {
 
         // Custom session ticking logic
         WildcardManager.tickSessionOn();
-    }
-
-    @Override
-    public void tick(MinecraftServer server) {
-        super.tick(server);
         WildcardManager.tick();
     }
 
