@@ -171,7 +171,7 @@ public class WildLife extends Season {
     @Override
     public void tickSessionOn(MinecraftServer server) {
         // Call the base tick logic
-        super.tick(server);
+        super.tickSessionOn(server);
 
         // Only spawn traders if SIMPLE_LIFE config is enabled
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
