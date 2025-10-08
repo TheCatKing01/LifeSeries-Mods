@@ -519,6 +519,5 @@ public class WildLife extends Season {
         }
         return true;
     }
-}
 
 }
