@@ -7,6 +7,7 @@ import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.thirdlife.ThirdLife;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
@@ -14,17 +15,19 @@ import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.mob.SpawnRestriction;
+import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.passive.TraderLlamaEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
+import net.minecraft.scoreboard.ScoreHolder;
+import net.minecraft.scoreboard.ScoreboardEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.TradeOffer;
@@ -40,10 +43,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
 
+import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
 public class LimitedLife extends Season {
-
     public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /boogeyman";
     public static final String COMMANDS_TEXT = "/claimkill, /lives";
 
@@ -56,7 +59,7 @@ public class LimitedLife extends Season {
     private final DefaultConfigValues config;
     private final Random rnd = new Random();
     private int checkCooldown = 0;
-    private int secondCounter = 0;
+
 
     @Override
     public Seasons getSeason() {
@@ -93,20 +96,23 @@ public class LimitedLife extends Season {
         return COMMANDS_TEXT;
     }
 
-    @Override
     public void displayTimers(MinecraftServer server) {
         String message = "";
         if (currentSession.statusNotStarted()) {
             message = "Session has not started";
-        } else if (currentSession.statusStarted()) {
+        }
+        else if (currentSession.statusStarted()) {
             message = currentSession.getRemainingTimeStr();
-        } else if (currentSession.statusPaused()) {
+        }
+        else if (currentSession.statusPaused()) {
             message = "Session has been paused";
-        } else if (currentSession.statusFinished()) {
+        }
+        else if (currentSession.statusFinished()) {
             message = "Session has ended";
         }
 
         for (ServerPlayerEntity player : PlayerUtils.getAllPlayers()) {
+
             if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
                 long timestamp = SessionTimerStates.OFF.getValue();
                 if (currentSession.statusNotStarted()) timestamp = SessionTimerStates.NOT_STARTED.getValue();
@@ -125,13 +131,15 @@ public class LimitedLife extends Season {
                     if (livesManager.isAlive(player)) {
                         Integer playerLivesInt = livesManager.getPlayerLives(player);
                         playerLives = playerLivesInt == null ? -1 : playerLivesInt;
-                    } else {
+                    }
+                    else {
                         playerLives = -1;
                     }
                     String livesColor = livesManager.getColorForLives(player).toString();
-                    NetworkHandlerServer.sendLongPacket(player, PacketNames.fromName(PacketNames.LIMITED_LIFE_TIMER.getName() + livesColor), playerLives);
+                    NetworkHandlerServer.sendLongPacket(player, PacketNames.fromName(PacketNames.LIMITED_LIFE_TIMER.getName()+livesColor), playerLives);
                 }
-            } else {
+            }
+            else {
                 MutableText fullMessage = Text.empty();
                 if (currentSession.displayTimer.contains(player.getUuid())) {
                     fullMessage.append(Text.literal(message).formatted(Formatting.GRAY));
@@ -145,6 +153,7 @@ public class LimitedLife extends Season {
         }
     }
 
+    private int secondCounter = 0;
     @Override
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
@@ -167,17 +176,24 @@ public class LimitedLife extends Season {
     }
 
     @Override
-    public void onPlayerDeath(ServerPlayerEntity player, net.minecraft.entity.damage.DamageSource source) {
+    public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
         SessionTranscript.onPlayerDeath(player, source);
-        if (source != null && source.getAttacker() instanceof ServerPlayerEntity attacker && player != attacker) {
-            onPlayerKilledByPlayer(player, attacker);
-            return;
+        if (source != null) {
+            if (source.getAttacker() instanceof ServerPlayerEntity serverAttacker) {
+                if (player != source.getAttacker()) {
+                    onPlayerKilledByPlayer(player, serverAttacker);
+                    return;
+                }
+            }
         }
-        if (player.getPrimeAdversary() instanceof ServerPlayerEntity adversary && player != adversary) {
-            onPlayerKilledByPlayer(player, adversary);
-            return;
+        if (player.getPrimeAdversary() != null) {
+            if (player.getPrimeAdversary() instanceof ServerPlayerEntity serverAdversary) {
+                if (player != player.getPrimeAdversary()) {
+                    onPlayerKilledByPlayer(player, serverAdversary);
+                    return;
+                }
+            }
         }
-
         onPlayerDiedNaturally(player);
         if (livesManager.canChangeLivesNaturally(player)) {
             livesManager.addToPlayerLives(player, DEATH_NORMAL);
@@ -193,23 +209,36 @@ public class LimitedLife extends Season {
         boolean wasBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
         super.onClaimKill(killer, victim);
 
-        if (!wasBoogeyCure && wasAllowedToAttack && livesManager.canChangeLivesNaturally()) {
-            livesManager.addToPlayerLives(killer, KILL_NORMAL);
-            PlayerUtils.sendTitle(killer, Text.literal(OtherUtils.formatSecondsToReadable(KILL_NORMAL)).formatted(Formatting.GREEN), 20, 80, 20);
-        } else if (livesManager.canChangeLivesNaturally()) {
-            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN - DEATH_NORMAL);
+        if (!wasBoogeyCure) {
+            if (wasAllowedToAttack && livesManager.canChangeLivesNaturally()) {
+                livesManager.addToPlayerLives(killer, KILL_NORMAL);
+                PlayerUtils.sendTitle(killer, Text.literal(OtherUtils.formatSecondsToReadable(KILL_NORMAL)).formatted(Formatting.GREEN), 20, 80, 20);
+            }
+        }
+        else if (livesManager.canChangeLivesNaturally()) {
+            //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
+
+            boolean wasAlive = false;
+
+            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN-DEATH_NORMAL);
             String msgKiller = OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN);
 
-            boolean wasAlive = livesManager.isAlive(victim);
-            if (wasAlive) livesManager.addToPlayerLives(victim, DEATH_BOOGEYMAN - DEATH_NORMAL);
+            if (livesManager.isAlive(victim)) {
+                livesManager.addToPlayerLives(victim, DEATH_BOOGEYMAN-DEATH_NORMAL);
+                wasAlive = true;
+            }
             livesManager.addToPlayerLives(killer, KILL_BOOGEYMAN);
-
             if (livesManager.isAlive(victim)) {
                 PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
                 PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
-            } else if (wasAlive && SHOW_DEATH_TITLE) {
-                PlayerUtils.sendTitleWithSubtitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), livesManager.getDeathMessage(victim), 20, 80, 20);
-            } else {
+            }
+            else if (wasAlive && SHOW_DEATH_TITLE) {
+                PlayerUtils.sendTitleWithSubtitle(killer,
+                        Text.literal(msgKiller).formatted(Formatting.GREEN),
+                        livesManager.getDeathMessage(victim),
+                        20, 80, 20);
+            }
+            else {
                 PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
             }
         }
@@ -224,21 +253,40 @@ public class LimitedLife extends Season {
         if (!wasBoogeyCure && livesManager.canChangeLivesNaturally()) {
             boolean wasFinalKill = livesManager.isAlive(victim) || !SHOW_DEATH_TITLE;
             if (wasAllowedToAttack) {
-                livesManager.addToPlayerLives(killer, KILL_NORMAL);
                 String msgKiller = OtherUtils.formatSecondsToReadable(KILL_NORMAL);
-                if (wasFinalKill) PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
-                else PlayerUtils.sendTitleWithSubtitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), livesManager.getDeathMessage(victim), 20, 80, 20);
+                livesManager.addToPlayerLives(killer, KILL_NORMAL);
+                if (wasFinalKill) {
+                    PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
+                }
+                else {
+                    PlayerUtils.sendTitleWithSubtitle(killer,
+                            Text.literal(msgKiller).formatted(Formatting.GREEN),
+                            livesManager.getDeathMessage(victim),
+                            20, 80, 20);
+                }
             }
+            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_NORMAL);
             livesManager.addToPlayerLives(victim, DEATH_NORMAL);
-            if (wasFinalKill) PlayerUtils.sendTitle(victim, Text.literal(OtherUtils.formatSecondsToReadable(DEATH_NORMAL)).formatted(Formatting.RED), 20, 80, 20);
-        } else if (livesManager.canChangeLivesNaturally()) {
+            if (wasFinalKill) {
+                PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
+            }
+        }
+        else if (livesManager.canChangeLivesNaturally()) {
+
+            //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
+            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN);
+            String msgKiller = OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN);
             livesManager.addToPlayerLives(victim, DEATH_BOOGEYMAN);
             livesManager.addToPlayerLives(killer, KILL_BOOGEYMAN);
+
             if (livesManager.isAlive(victim) || !SHOW_DEATH_TITLE) {
-                PlayerUtils.sendTitle(victim, Text.literal(OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN)).formatted(Formatting.RED), 20, 80, 20);
-                PlayerUtils.sendTitleWithSubtitle(killer, Text.of("§aYou are cured!"), Text.literal(OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN)).formatted(Formatting.GREEN), 20, 80, 20);
-            } else {
-                PlayerUtils.sendTitleWithSubtitle(killer, Text.of("§aYou are cured, " + OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN)), livesManager.getDeathMessage(victim), 20, 80, 20);
+                PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
+                PlayerUtils.sendTitleWithSubtitle(killer,Text.of("§aYou are cured!"), Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
+            }
+            else {
+                PlayerUtils.sendTitleWithSubtitle(killer,Text.of("§aYou are cured, "+msgKiller),
+                        livesManager.getDeathMessage(victim)
+                        , 20, 80, 20);
             }
         }
     }
@@ -271,12 +319,12 @@ public class LimitedLife extends Season {
 
     public static Integer getNextLivesColorLives(Integer currentLives) {
         if (currentLives == null) return null;
+
         if (currentLives > LimitedLifeLivesManager.DEFAULT_TIME) return LimitedLifeLivesManager.DEFAULT_TIME;
         else if (currentLives > LimitedLifeLivesManager.YELLOW_TIME) return LimitedLifeLivesManager.YELLOW_TIME;
         else if (currentLives > LimitedLifeLivesManager.RED_TIME) return LimitedLifeLivesManager.RED_TIME;
         return 0;
     }
-
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
@@ -287,6 +335,7 @@ public class LimitedLife extends Season {
         checkCooldown--;
         if (checkCooldown <= 0) {
             checkCooldown = 1200; // 1 minute
+
             ServerWorld world = server.getOverworld();
             if (world == null) return;
 
@@ -303,6 +352,7 @@ public class LimitedLife extends Season {
 
         BlockPos playerPos = player.getBlockPos();
         PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
+
         Optional<BlockPos> optionalPos = poiStorage.getPosition(
                 poiType -> poiType.matchesKey(PointOfInterestTypes.MEETING),
                 pos -> true,
@@ -317,13 +367,18 @@ public class LimitedLife extends Season {
         if (spawnPos != null && this.doesNotSuffocateAt(world, spawnPos)) {
             WanderingTraderEntity trader = (WanderingTraderEntity) EntityType.WANDERING_TRADER.spawn(world, spawnPos, SpawnReason.EVENT);
             if (trader != null) {
+
+                // Spawn llamas
                 for (int j = 0; j < 2; j++) spawnLlama(world, trader, 4);
+
                 trader.setDespawnDelay(12000);
 
                 TradeOfferList offers = trader.getOffers();
                 offers.clear();
 
+                // Choose between Simple Life or Complex Life trades
                 if (config.COMPLEX_LIFE_TRADES.get(createConfig())) {
+                    // Complex Life trades
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
@@ -348,7 +403,6 @@ public class LimitedLife extends Season {
                     offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultStack(), 0, 999999, 0, 0, 0));
 
-                    // ... Add your complex trades here (same as original code)
                 } else {
                     // Default Simple Life trades
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
@@ -368,6 +422,7 @@ public class LimitedLife extends Season {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -381,7 +436,7 @@ public class LimitedLife extends Season {
 
     private BlockPos getNearbySpawnPos(WorldView world, BlockPos pos, int range) {
         BlockPos finalPos = null;
-        SpawnRestriction.SpawnLocation spawnLocation = SpawnRestriction.getLocation(EntityType.WANDERING_TRADER);
+        SpawnLocation spawnLocation = SpawnRestriction.getLocation(EntityType.WANDERING_TRADER);
 
         for (int i = 0; i < 10; i++) {
             int x = pos.getX() + rnd.nextInt(range * 2) - range;
