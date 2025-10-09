@@ -47,6 +47,7 @@ public class SimpleLife extends ThirdLife {
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
+        checkCooldown--;
 
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
 
