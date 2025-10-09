@@ -177,19 +177,30 @@ public class WildLife extends Season {
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
+        checkCooldown--;
 
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
 
-        checkCooldown--;
         if (checkCooldown <= 0) {
-            checkCooldown = 1200;
-
+            checkCooldown = 1200; //1 Minute
             ServerWorld world = server.getOverworld();
             if (world == null) return;
+            int traderCount = 0;
+            for (Entity entity : world.iterateEntities()) {
+                if (entity instanceof WanderingTraderEntity) {
+                    traderCount++;
+                }
+            }
+            int maxTraders = config.TRADERS_MAX_AMOUNT.get(createConfig());
 
+            if (traderCount == 0) checkCooldown = 1200; // 1 minute
+            if (traderCount >= 1) checkCooldown = 1800; // 1.5 minutes
+            if (traderCount >= maxTraders) return;
 
             for (int i = 0; i < 5; i++) {
-                if (trySpawnTrader(world)) break;
+                if (trySpawnTrader(world)) {
+                    break;
+                }
             }
         }
 
@@ -441,7 +452,10 @@ public class WildLife extends Season {
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIRT, 5), Optional.empty(), Items.SAND.getDefaultStack(), 0, 999999, 0, 0, 0));
-                    offers.add(new TradeOffer(new TradedItem(Items.SAND, 10), Optional.empty(), Items.SUGAR_CANE.getDefaultStack(), 0, 999999, 0, 0, 0));
+
+                    offers.add(new TradeOffer(new TradedItem(Items.SAND, 10), Optional.empty(), Items.SUGAR_CANE.getDefaultStack(), 0, 999999, 0, 0, 0));]
+
+                    offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 2), Optional.empty(), Items.COBBLESTONE.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 32), Optional.empty(), Items.COW_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
@@ -454,11 +468,13 @@ public class WildLife extends Season {
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 20), Optional.empty(), Items.DIAMOND.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
+                    offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultStack(), 0, 999999, 0, 0, 0));
+
+                    offers.add(new TradeOffer(new TradedItem(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS.getDefaultStack(), 0, 999999, 0, 0, 0));
 
                     int rand = rnd.nextInt(2);
                     if (rand == 0) offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultStack(), 0, 999999, 0, 0, 0));
                     if (rand == 1) offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 10), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultStack(), 0, 999999, 0, 0, 0));
-
                     offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultStack(), 0, 999999, 0, 0, 0));
 
