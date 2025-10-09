@@ -63,7 +63,7 @@ public class SimpleLife extends ThirdLife {
             int maxTraders = config.TRADERS_MAX_AMOUNT.get(createConfig());
 
             if (traderCount == 0) checkCooldown = 1200; // 1 minute
-            else if (traderCount >= 1) checkCooldown = 1800; // 1.5 minutes
+            if (traderCount >= 1) checkCooldown = 1800; // 1.5 minutes
             if (traderCount >= maxTraders) return;
 
             for (int i = 0; i < 5; i++) {
