@@ -48,19 +48,29 @@ public class SimpleLife extends ThirdLife {
     public void tick(MinecraftServer server) {
         super.tick(server);
 
-        // Only spawn traders if SIMPLE_LIFE config is enabled
         if (!config.SIMPLE_LIFE.get(createConfig())) return;
 
-        checkCooldown--;
         if (checkCooldown <= 0) {
-            checkCooldown = 1200; // 1 minute
-
+            checkCooldown = 1200; //1 Minute
             ServerWorld world = server.getOverworld();
             if (world == null) return;
+            int traderCount = 0;
+            for (Entity entity : world.iterateEntities()) {
+                if (entity instanceof WanderingTraderEntity) {
+                    traderCount++;
+                }
+            }
+            int maxTraders = config.TRADERS_MAX_AMOUNT.get(createConfig());
 
-            // Try to spawn trader
+            if (traderCount == 0) checkCooldown = 1200; // 1 minute
+            else if (traderCount >= 1) checkCooldown = 1800; // 1.5 minutes
+
+            if (traderCount >= maxTraders) return;
+
             for (int i = 0; i < 5; i++) {
-                if (trySpawnTrader(world)) break;
+                if (trySpawnTrader(world)) {
+                    break;
+                }
             }
         }
     }
@@ -106,12 +116,12 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.OAK_PLANKS, 32), Optional.empty(), Items.COW_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
 
-                    offers.add(new TradeOffer(new TradedItem(Items.COBBLESTONE, 10), Optional.empty(), Items.IRON_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
+                    offers.add(new TradeOffer(new TradedItem(Items.COBBLESTONE, 5), Optional.empty(), Items.IRON_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.COBBLESTONE, 10), Optional.empty(), Items.GOLD_INGOT.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.COBBLESTONE, 1), Optional.empty(), Items.REDSTONE.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.COBBLESTONE, 1), Optional.empty(), Items.GRAVEL.getDefaultStack(), 0, 999999, 0, 0, 0));
 
-                    offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 20), Optional.empty(), Items.DIAMOND.getDefaultStack(), 0, 999999, 0, 0, 0));
+                    offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 10), Optional.empty(), Items.DIAMOND.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
 

@@ -159,7 +159,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Integer> BOOGEYMAN_MIN_AMOUNT = new ConfigFileEntry<>(
             "boogeyman_min_amount", 1, "global.boogeyman",
-            "Minimum Boogeyman Amount", "The minimum amount of Boogeymen a session can have."
+            "Minimum Boogeyman Amount", ".The minimum amount of Boogeymen a session can have"
     );
     public final ConfigFileEntry<Integer> BOOGEYMAN_MAX_AMOUNT = new ConfigFileEntry<>(
             "boogeyman_max_amount", 99, "global.boogeyman",
@@ -244,9 +244,11 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
             "simple_life", false, "{global.simplelife}",
             "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
-
     );
-
+        public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
+            "traders_max_amount", 3, "global.simplelife",
+            "Maximum Trader Amount", "The maximum amount of Traders that can be spawned in at one time."
+    );
     public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
             "complex_life_trades", false, "global.simplelife",
             "Complex Life Trades", "Changes Simple Life trades to be Complex Life ones."
