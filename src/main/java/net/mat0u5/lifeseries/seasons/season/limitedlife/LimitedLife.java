@@ -410,7 +410,7 @@ public class LimitedLife extends Season {
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultStack(), 0, 999999, 0, 0, 0));
                     offers.add(new TradeOffer(new TradedItem(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultStack(), 0, 999999, 0, 0, 0));
 
-                    offers.add(new TradeOffer(new TradedItem(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS.getDefaultStack(), 0, 999999, 0, 0, 0));
+                    offers.add(new TradeOffer(new TradedItem(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS_LAZULI.getDefaultStack(), 0, 999999, 0, 0, 0));
 
                     int rand = rnd.nextInt(2);
                     if (rand == 0) offers.add(new TradeOffer(new TradedItem(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultStack(), 0, 999999, 0, 0, 0));
