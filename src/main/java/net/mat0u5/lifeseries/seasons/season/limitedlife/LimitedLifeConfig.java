@@ -111,6 +111,9 @@ public class LimitedLifeConfig extends ConfigManager {
         defaultEntries.remove(GIVELIFE_CAN_REVIVE);
         defaultEntries.remove(TAB_LIST_SHOW_EXACT_LIVES);
         defaultEntries.remove(SECRET_SOCIETY_PUNISHMENT_LIVES);
+        defaultEntries.remove(RANDOM_LIVES);
+        defaultEntries.remove(RANDOM_LIVES_MIN);
+        defaultEntries.remove(RANDOM_LIVES_MAX);
         return defaultEntries;
     }
 

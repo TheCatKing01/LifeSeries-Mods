@@ -9,6 +9,14 @@ public class SimpleLifeConfig extends ThirdLifeConfig {
     }
 
     @Override
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
+        defaultEntries.remove(RANDOM_LIVES);
+        defaultEntries.remove(RANDOM_LIVES_MIN);
+        defaultEntries.remove(RANDOM_LIVES_MAX);
+        return defaultEntries;
+
+    @Override
     public void instantiateProperties() {
         SIMPLE_LIFE.defaultValue = true;
     }

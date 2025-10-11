@@ -1,334 +1,378 @@
 package net.mat0u5.lifeseries.config;
 
-import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
+import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.ConfigPayload;
+import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
-public class DefaultConfigValues {
+public abstract class ConfigManager extends DefaultConfigValues {
 
-    public final ConfigFileEntry<Double> SPAWN_EGG_DROP_CHANCE = new ConfigFileEntry<>(
-            "spawn_egg_drop_chance", 0.05, ConfigTypes.PERCENTAGE, "global.spawnegg",
-            "Spawn Egg Drop Chance", "Modifies the chance of mobs dropping their spawn egg. (0.05 = 5%)"
-    );
-    public final ConfigFileEntry<Boolean> SPAWN_EGG_DROP_ONLY_NATURAL = new ConfigFileEntry<>(
-            "spawn_egg_drop_only_natural", true, "global.spawnegg",
-            "Spawn Egg Only Natural Drops", "Controls whether spawn eggs should only drop from mobs that spawn naturally (no breeding, spawners, etc)."
-    );
-    public final ConfigFileEntry<Boolean> CREATIVE_IGNORE_BLACKLIST = new ConfigFileEntry<>(
-            "creative_ignore_blacklist", true, "global.blacklist",
-            "Creative Ignore Blacklist", "Controls whether players in creative mode are able to bypass the blacklists."
-    );
-    //? if < 1.21.9 {
-    public final ConfigFileEntry<Integer> WORLDBORDER_SIZE = new ConfigFileEntry<>(
-            "worldborder_size", 500, "global",
-            "Worldborder Size", "Sets the worldborder size."
-    );
-    //?} else {
-    /*public final ConfigFileEntry<Object> WORLDBORDER_GROUP = new ConfigFileEntry<>(
-            "worldborder_sizes", null, ConfigTypes.TEXT, "{global.worldborder}",
-            "Worldborder Sizes", ""
-    );
-    public final ConfigFileEntry<Integer> WORLDBORDER_SIZE = new ConfigFileEntry<>(
-            "worldborder_size", 500, "global.worldborder",
-            "Worldborder Size", "Sets the worldborder size in the overworld."
-    );
-    public final ConfigFileEntry<Integer> WORLDBORDER_NETHER_SIZE = new ConfigFileEntry<>(
-            "worldborder_nether_size", 500, "global.worldborder",
-            "Worldborder Nether Size", "Sets the worldborder size in the nether."
-    );
-    public final ConfigFileEntry<Integer> WORLDBORDER_END_SIZE = new ConfigFileEntry<>(
-            "worldborder_end_size", 500, "global.worldborder",
-            "Worldborder End Size", "Sets the worldborder size in the end."
-    );
-    *///?}
-    public final ConfigFileEntry<Boolean> KEEP_INVENTORY = new ConfigFileEntry<>(
-            "keep_inventory", true, "global",
-            "Keep Inventory", "Decides whether players drop their items when they die."
-    );
-    public final ConfigFileEntry<Boolean> PLAYERS_DROP_ITEMS_ON_FINAL_DEATH = new ConfigFileEntry<>(
-            "players_drop_items_on_final_death", false, "global.finaldeath",
-            "Players Drop Items on Final Death", "Controls whether players drop their items on the final death (even if keepInventory is on)."
-    );
-    public final ConfigFileEntry<Boolean> FINAL_DEATH_TITLE_SHOW = new ConfigFileEntry<>(
-            "final_death_title_show", true, "global.finaldeath",
-            "Show Death Title on Final Death", "Controls whether the death title (the one covering like half the screen) should show up when a player fully dies."
-    );
-    public final ConfigFileEntry<String> BLACKLIST_BANNED_ENCHANTS = new ConfigFileEntry<>(
-            "blacklist_banned_enchants", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist",
-            "Blacklisted Enchants", "List of banned enchants."
-    );
-    public final ConfigFileEntry<Boolean> MUTE_DEAD_PLAYERS = new ConfigFileEntry<>(
-            "mute_dead_players", false, "global",
-            "Mute Dead Players", "Controls whether dead players should be allowed to type in chat."
-    );
-    public final ConfigFileEntry<String> BLACKLIST_BANNED_POTION_EFFECTS = new ConfigFileEntry<>(
-            "blacklist_banned_potion_effects", "[strength, instant_health, instant_damage]", ConfigTypes.EFFECT_LIST, "global.blacklist",
-            "Banned Potion Effects", "List of banned potion effects."
-    );
-    public final ConfigFileEntry<Boolean> SPAWNER_RECIPE = new ConfigFileEntry<>(
-            "spawner_recipe", false, "global.spawnegg",
-            "Spawner Recipe", "Controls whether the spawner crafting recipe is enabled."
-    );
-    public final ConfigFileEntry<Boolean> SPAWN_EGG_ALLOW_ON_SPAWNER = new ConfigFileEntry<>(
-            "spawn_egg_allow_on_spawner", false, "global.spawnegg",
-            "Spawn Egg Allow on Spawners", "Controls whether players should be able to use the spawn eggs on spawners."
-    );
-    public final ConfigFileEntry<Integer> MAX_PLAYER_HEALTH = new ConfigFileEntry<>(
-            "max_player_health", 20, ConfigTypes.HEARTS, "{global.health}",
-            "Default Health", "The amount of health (half-hearts) every player will have by default."
-    );
-    public final ConfigFileEntry<Boolean> SHOW_HEALTH_BELOW_NAME = new ConfigFileEntry<>(
-            "show_health_below_name", false, "global.health",
-            "Show Health Below Name", "Show the HP a player is on below their username."
-    );
-    public final ConfigFileEntry<Integer> DEFAULT_LIVES = new ConfigFileEntry<>(
-            "default_lives", 3, "global.lives",
-            "Default Lives", "The number of lives every player will have by default."
-    );
-    public final ConfigFileEntry<Boolean> ONLY_TAKE_LIVES_IN_SESSION = new ConfigFileEntry<>(
-            "only_take_lives_in_session", false, "global.lives",
-            "Only Lose Lives In Session", "Makes players only lose lives when they die while a session is active."
-    );
-    public final ConfigFileEntry<Boolean> CUSTOM_ENCHANTER_ALGORITHM = new ConfigFileEntry<>(
-            "custom_enchanter_algorithm", false, "global",
-            "Custom Enchanter Algorithm", "Modifies the enchanting table algorithm to allow players to get all enchants even without bookshelves."
-    );
-    public final ConfigFileEntry<String> BLACKLIST_ITEMS = new ConfigFileEntry<>(
-            "blacklist_items", "[]", ConfigTypes.ITEM_LIST, "global.blacklist",
-            "Blacklisted Items", "List of banned items."
-    );
-    public final ConfigFileEntry<String> BLACKLIST_BLOCKS = new ConfigFileEntry<>(
-            "blacklist_blocks", "[]", ConfigTypes.BLOCK_LIST, "global.blacklist",
-            "Blacklisted Blocks", "List of banned blocks."
-    );
-    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS = new ConfigFileEntry<>(
-            "blacklist_clamped_enchants", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist",
-            "Clamped Enchants", "List of enchantments clamped to level 1 (any higher levels will be set to lvl1)."
-    );
-    public final ConfigFileEntry<String> FINAL_DEATH_TITLE_SUBTITLE = new ConfigFileEntry<>(
-            "final_death_title_subtitle", "ran out of lives!", "global.finaldeath",
-            "Death Subtitle", "The subtitle that shows when a player dies (requires Show Death Title on Final Death to be set to true)."
-    );
-    public final ConfigFileEntry<String> FINAL_DEATH_MESSAGE = new ConfigFileEntry<>(
-            "final_death_message", "${player} ran out of lives.", "global.finaldeath",
-            "Final Death Message", "The message that gets shown in chat when a player fully dies."
-    );
-    public final ConfigFileEntry<Boolean> FINAL_DEATH_LIGHTNING = new ConfigFileEntry<>(
-            "final_death_lightning", true, "global.finaldeath",
-            "Final Death Lightning", "Spawns a harmless (no damage) lightning strike when a player fully dies."
-    );
-    public final ConfigFileEntry<String> FINAL_DEATH_SOUND = new ConfigFileEntry<>(
-            "final_death_sound", "minecraft:entity.lightning_bolt.thunder", "global.finaldeath",
-            "Final Death Sound", "The sound that gets played to all players when anyone fully dies."
-    );
-    public final ConfigFileEntry<Boolean> GIVELIFE_COMMAND_ENABLED = new ConfigFileEntry<>(
-            "givelife_command_enabled", false, "{global.givelife}",
-            "Givelife Command Enabled", "Controls whether the '/givelife' command is available."
-    );
-    public final ConfigFileEntry<Integer> GIVELIFE_LIVES_MAX = new ConfigFileEntry<>(
-            "givelife_lives_max", 99, "global.givelife",
-            "Max Givelife Lives", "The maximum amount of lives a player can have from other players giving them lives using /givelife."
-    );
-    public final ConfigFileEntry<Boolean> GIVELIFE_BROADCAST = new ConfigFileEntry<>(
-            "givelife_broadcast", false, "global.givelife",
-            "Broadcast Givelife", "Broadcasts the message when a player gives a life to another player using /givelife."
-    );
-    public final ConfigFileEntry<Boolean> GIVELIFE_CAN_REVIVE = new ConfigFileEntry<>(
-            "givelife_can_revive", false, "global.givelife",
-            "Givelife Can Revive Dead Players", "Controls whether players can revive dead players using /givelife."
-    );
-    public final ConfigFileEntry<Boolean> TAB_LIST_SHOW_DEAD_PLAYERS = new ConfigFileEntry<>(
-            "tab_list_show_dead_players", true, "global",
-            "Tab List Show Dead Players", "Controls whether dead players show up in the tab list."
-    );
-    public final ConfigFileEntry<Boolean> TAB_LIST_SHOW_LIVES = new ConfigFileEntry<>(
-            "tab_list_show_lives", false, "{global.lives.showlives}",
-            "Tab List Show Lives", "Controls whether you can see the players' lives in the tab list."
-    );
-    public final ConfigFileEntry<Boolean> TAB_LIST_SHOW_EXACT_LIVES = new ConfigFileEntry<>(
-            "tab_list_show_exact_lives", false, "global.lives.showlives",
-            "Show EXACT Lives", "Shows the actual number of lives when above 4 instead of just '4+'."
-    );
-    public final ConfigFileEntry<Boolean> LOCATOR_BAR = new ConfigFileEntry<>(
-            "locator_bar", false, "global",
-            "Locator Bar", "Enables the player Locator Bar."
-    );
-    public final ConfigFileEntry<Boolean> BOOGEYMAN = new ConfigFileEntry<>(
-            "boogeyman", false, ConfigTypes.BOOGEYMAN, "{global.boogeyman}",
-            "Boogeyman Enabled", "Enables the boogeyman."
-    );
-    public final ConfigFileEntry<Integer> BOOGEYMAN_MIN_AMOUNT = new ConfigFileEntry<>(
-            "boogeyman_min_amount", 1, "global.boogeyman",
-            "Minimum Boogeyman Amount", ".The minimum amount of Boogeymen a session can have"
-    );
-    public final ConfigFileEntry<Integer> BOOGEYMAN_MAX_AMOUNT = new ConfigFileEntry<>(
-            "boogeyman_max_amount", 99, "global.boogeyman",
-            "Maximum Boogeyman Amount", "The maximum amount of Boogeymen a session can have."
-    );
-    public final ConfigFileEntry<Boolean> BOOGEYMAN_ADVANCED_DEATHS = new ConfigFileEntry<>(
-            "boogeyman_advanced_deaths", false, "global.boogeyman",
-            "Advanced Deaths", "Enables the advanced deaths (seen in Past Life), where you actually die by different causes instead of your lives just being set to 1."
-    );
-    public final ConfigFileEntry<String> BOOGEYMAN_IGNORE = new ConfigFileEntry<>(
-            "boogeyman_ignore", "[]", "global.boogeyman",
-            "Boogeyman Ignore List", "A list of players that cannot become the boogeyman."
-    );
-    public final ConfigFileEntry<String> BOOGEYMAN_FORCE = new ConfigFileEntry<>(
-            "boogeyman_force", "[]", "global.boogeyman",
-            "Boogeyman Force List", "A list of players that are forced to become the boogeyman."
-    );
-    public final ConfigFileEntry<String> BOOGEYMAN_MESSAGE = new ConfigFileEntry<>(
-            "boogeyman_message", "§7You are the Boogeyman. You must by any means necessary kill a §2dark green§7, §agreen§7 or §eyellow§7 name by direct action to be cured of the curse. If you fail, you will become a §cred name§7. All loyalties and friendships are removed while you are the Boogeyman.", "global.boogeyman", "Boogeyman Message", "The message that shows up when you become a Boogeyman."
-    );
-    public final ConfigFileEntry<Double> BOOGEYMAN_CHANCE_MULTIPLIER = new ConfigFileEntry<>(
-            "boogeyman_chance_multiplier", 0.5, ConfigTypes.PERCENTAGE, "global.boogeyman",
-            "Boogeyman Chance Multiplier", "Controls how likely it is to get one extra boogeyman."
-    );
-    public final ConfigFileEntry<Double> BOOGEYMAN_CHOOSE_MINUTE = new ConfigFileEntry<>(
-            "boogeyman_choose_minute", 10.0, ConfigTypes.MINUTES, "global.boogeyman",
-            "Boogeyman Choose Time", "The number of minutes (in the session) after which the boogeyman gets picked."
-    );
-    public final ConfigFileEntry<Boolean> BOOGEYMAN_ANNOUNCE_OUTCOME = new ConfigFileEntry<>(
-            "boogeyman_announce_outcome", true, "global.boogeyman",
-            "Boogeyman Announce Outcome", "Shows a message in chat when the boogeyman succeeds or fails."
-    );
-    public final ConfigFileEntry<Boolean> BOOGEYMAN_INFINITE = new ConfigFileEntry<>(
-            "boogeyman_infinite", false, "{global.boogeyman.infinite}",
-            "Boogeyman Infinite Rolling", "When any boogeyman is cured, a new one will replace them immediatelly."
-    );
-    public final ConfigFileEntry<Integer> BOOGEYMAN_INFINITE_LAST_PICK = new ConfigFileEntry<>(
-            "boogeyman_infinite_last_pick", 1800, ConfigTypes.SECONDS, "global.boogeyman.infinite",
-            "Last Roll Before End Of Session", "Controls how long before the end of session the infinite boogey picking will stop, in seconds."
-    );
-    public final ConfigFileEntry<Integer> BOOGEYMAN_INFINITE_AUTO_FAIL = new ConfigFileEntry<>(
-            "boogeyman_infinite_auto_fail", 360000, ConfigTypes.SECONDS, "global.boogeyman.infinite",
-            "Automatic Fail", "Controls how long a Boogeyman has to kill someone before they automatically fail, in seconds."
-    );
+    protected Properties properties = new Properties();
+    protected String folderPath;
+    protected String filePath;
 
-    public final ConfigFileEntry<Boolean> SECRET_SOCIETY = new ConfigFileEntry<>(
-            "secret_society", false, "{global.society}",
-            "Secret Society Enabled", "Enables the Secret Society in the session."
-    );
-    public final ConfigFileEntry<Integer> SECRET_SOCIETY_MEMBER_AMOUNT = new ConfigFileEntry<>(
-            "secret_society_member_amount", 3, "global.society",
-            "Member Amount", "The number of players that are a part of the Secret Society"
-    );
-    public final ConfigFileEntry<Double> SECRET_SOCIETY_START_TIME = new ConfigFileEntry<>(
-            "secret_society_start_time", 5.0, ConfigTypes.MINUTES, "global.society",
-            "Society Start Time", "Controls when in the session the Society will start, in minutes."
-    );
-    public final ConfigFileEntry<String> SECRET_SOCIETY_FORCE = new ConfigFileEntry<>(
-            "secret_society_force", "[]", "global.society",
-            "Member Force List", "A list of players that are forced to become a Member in the society."
-    );
-    public final ConfigFileEntry<String> SECRET_SOCIETY_IGNORE = new ConfigFileEntry<>(
-            "secret_society_ignore", "[]", "global.society",
-            "Member Ignore List", "A list of players that cannot become a Member in the society."
-    );
-    public final ConfigFileEntry<String> SECRET_SOCIETY_WORDS = new ConfigFileEntry<>(
-            "secret_society_words", "[Hammer, Magnet, Throne, Gravity, Puzzle, Spiral, Pivot, Flare]", "global.society",
-            "Random Words", "List of words that can be picked as the secret word."
-    );
-    public final ConfigFileEntry<Integer> SECRET_SOCIETY_PUNISHMENT_LIVES = new ConfigFileEntry<>(
-            "secret_society_punishment_lives", -2, "global.society",
-            "Punishment Lives", "The amount of lives all Members of the society lose if they fail."
-    );
-    public final ConfigFileEntry<Integer> SECRET_SOCIETY_KILLS_REQUIRED = new ConfigFileEntry<>(
-            "secret_society_kills_required", 2, "global.society",
-            "Kills Required To Succeed", "The number of kills the Members need to succeed in the Society."
-    );
-    public final ConfigFileEntry<Boolean> SECRET_SOCIETY_SOUND_ONLY_MEMBERS = new ConfigFileEntry<>(
-            "secret_society_sound_only_members", false, "global.society",
-            "Whisper Sound Only For Members", "Makes the whispering sound only play for Society Members, thus making the Society fully secret."
-    );
-    public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
-            "simple_life", false, "{global.simplelife}",
-            "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
-    );
-    public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
-            "traders_max_amount", 3, "global.simplelife",
-            "Maximum Trader Amount", "The maximum amount of Traders that can be spawned in at one time."
-    );
-    public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
-            "complex_life_trades", false, "global.simplelife",
-            "Complex Life Trades", "Changes Simple Life trades to be Complex Life ones."
-    );
+    protected ConfigManager(String folderPath, String filePath) {
+        this.folderPath = folderPath;
+        this.filePath = folderPath + "/" + filePath;
+        createFileIfNotExists();
+        loadProperties();
+        renamedProperties();
+        instantiateProperties();
+    }
 
-    public final ConfigFileEntry<Boolean> WATCHERS_IN_TAB = new ConfigFileEntry<>(
-            "watchers_in_tab", true, "global.watchers",
-            "Show Watchers In Tab", "Controls whether Watchers should show up in the tab list."
-    );
-    public final ConfigFileEntry<Boolean> WATCHERS_MUTED = new ConfigFileEntry<>(
-            "watchers_muted", false, "global.watchers",
-            "Mute Watchers", "Controls whether the Watchers should be allowed to type in chat."
-    );
-    public final ConfigFileEntry<Boolean> ALLOW_SELF_DEFENSE = new ConfigFileEntry<>(
-            "allow_self_defense", true, "global",
-            "Allow Self Defense Kills", "Controls whether self-defense kills should count as unjustified."
-    );
-    public final ConfigFileEntry<Boolean> SEE_FRIENDLY_INVISIBLE_PLAYERS = new ConfigFileEntry<>(
-            "see_friendly_invisible_players", false, "global",
-            "See Friendly Invisible Players", "Controls whether players can see other invisible players on the same life color."
-    );
-    public final ConfigFileEntry<Boolean> SHOW_LOGIN_COMMAND_INFO = new ConfigFileEntry<>(
-            "show_login_command_info", true, "global",
-            "Show Command Info On Login", "Controls whether players get a message in chat showing the available commands when the login."
-    );
-    public final ConfigFileEntry<Boolean> HIDE_UNJUSTIFIED_KILL_MESSAGES = new ConfigFileEntry<>(
-            "hide_unjustified_kills", false, "global",
-            "Hide Unjustified Kill Messages", "Controls whether unjustified kill messages show up in admin chat."
-    );
-    public final ConfigFileEntry<Boolean> SHOW_ADVANCEMENTS = new ConfigFileEntry<>(
-            "show_advancements", true, "global",
-            "Show Advancements In Chat", "Controls advancements show up in the chat."
-    );
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        return new ArrayList<>(List.of(
+                GROUP_GLOBAL // Group
+                ,GROUP_SEASON // Group
 
+                ,GROUP_LIVES // Group
+                ,DEFAULT_LIVES
+                ,ONLY_TAKE_LIVES_IN_SESSION
+                ,RANDOM_LIVES // Group
+                ,TAB_LIST_SHOW_LIVES // Group
+
+                ,MAX_PLAYER_HEALTH // Group
+                ,KEEP_INVENTORY
+
+                //? if < 1.21.9 {
+                ,WORLDBORDER_SIZE
+                //?} else {
+                /*,WORLDBORDER_GROUP
+                ,WORLDBORDER_SIZE
+                ,WORLDBORDER_NETHER_SIZE
+                ,WORLDBORDER_END_SIZE
+                *///?}
+                //? if >= 1.21.6 {
+                /*,LOCATOR_BAR
+                 *///?}
+                ,ALLOW_SELF_DEFENSE
+                ,SEE_FRIENDLY_INVISIBLE_PLAYERS
+                ,SHOW_LOGIN_COMMAND_INFO
+                ,HIDE_UNJUSTIFIED_KILL_MESSAGES
+                ,SHOW_ADVANCEMENTS
+
+
+                ,GROUP_BLACKLIST // Group
+                ,BOOGEYMAN // Group
+                ,SECRET_SOCIETY //Group
+                ,SIMPLE_LIFE //Group
+                ,GIVELIFE_COMMAND_ENABLED // Group
+                ,GROUP_FINAL_DEATH // Group
+                ,CUSTOM_ENCHANTER_ALGORITHM
+                ,MUTE_DEAD_PLAYERS
+                ,TAB_LIST_SHOW_DEAD_PLAYERS
+                ,GROUP_SPAWN_EGG // Group
+                ,GROUP_WATCHERS // Group
+
+
+                //Group stuff
+                ,SHOW_HEALTH_BELOW_NAME
+                ,BLACKLIST_ITEMS
+                ,BLACKLIST_BLOCKS
+                ,BLACKLIST_CLAMPED_ENCHANTS
+                ,BLACKLIST_BANNED_ENCHANTS
+                ,BLACKLIST_BANNED_POTION_EFFECTS
+                ,CREATIVE_IGNORE_BLACKLIST
+
+                ,BOOGEYMAN_MIN_AMOUNT
+                ,BOOGEYMAN_MAX_AMOUNT
+                ,BOOGEYMAN_ADVANCED_DEATHS
+                ,BOOGEYMAN_CHANCE_MULTIPLIER
+                ,BOOGEYMAN_IGNORE
+                ,BOOGEYMAN_FORCE
+                ,BOOGEYMAN_MESSAGE
+                ,BOOGEYMAN_CHOOSE_MINUTE
+                ,BOOGEYMAN_ANNOUNCE_OUTCOME
+                ,BOOGEYMAN_INFINITE // Group
+                ,BOOGEYMAN_INFINITE_LAST_PICK
+                ,BOOGEYMAN_INFINITE_AUTO_FAIL
+
+                ,SECRET_SOCIETY_MEMBER_AMOUNT
+                ,SECRET_SOCIETY_START_TIME
+                ,SECRET_SOCIETY_WORDS
+                ,SECRET_SOCIETY_FORCE
+                ,SECRET_SOCIETY_IGNORE
+                ,SECRET_SOCIETY_PUNISHMENT_LIVES
+                ,SECRET_SOCIETY_KILLS_REQUIRED
+                ,SECRET_SOCIETY_SOUND_ONLY_MEMBERS
+
+                ,TRADERS_MAX_AMOUNT
+                ,COMPLEX_LIFE_TRADES
+
+                ,PLAYERS_DROP_ITEMS_ON_FINAL_DEATH
+                ,FINAL_DEATH_TITLE_SHOW
+                ,FINAL_DEATH_TITLE_SUBTITLE
+                ,FINAL_DEATH_MESSAGE
+                ,FINAL_DEATH_LIGHTNING
+                ,FINAL_DEATH_SOUND
+
+                ,GIVELIFE_LIVES_MAX
+                ,GIVELIFE_BROADCAST
+                ,GIVELIFE_CAN_REVIVE
+
+                ,RANDOM_LIVES_MIN
+                ,RANDOM_LIVES_MAX
+
+                ,TAB_LIST_SHOW_EXACT_LIVES
+
+                ,SPAWN_EGG_DROP_CHANCE
+                ,SPAWN_EGG_DROP_ONLY_NATURAL
+                ,SPAWN_EGG_ALLOW_ON_SPAWNER
+                ,SPAWNER_RECIPE
+
+                ,WATCHERS_IN_TAB
+                ,WATCHERS_MUTED
+        ));
+    }
+
+    protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
+        return new ArrayList<>(List.of());
+    }
+
+    protected List<ConfigFileEntry<?>> getAllConfigEntries() {
+        List<ConfigFileEntry<?>> allEntries = new ArrayList<>();
+        allEntries.addAll(getDefaultConfigEntries());
+        allEntries.addAll(getSeasonSpecificConfigEntries());
+        return allEntries;
+    }
+
+    protected void instantiateProperties() {
+        for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
+            if (entry.defaultValue instanceof Integer integerValue) {
+                getOrCreateInt(entry.key, integerValue);
+            } else if (entry.defaultValue instanceof Boolean booleanValue) {
+                getOrCreateBoolean(entry.key, booleanValue);
+            } else if (entry.defaultValue instanceof Double doubleValue) {
+                getOrCreateDouble(entry.key, doubleValue);
+            } else if (entry.defaultValue instanceof String stringValue) {
+                getOrCreateProperty(entry.key, stringValue);
+            }
+        }
+    }
+
+    public void sendConfigTo(ServerPlayerEntity player) {
+        int index = 0;
+        for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
+            sendConfigEntry(player, entry, index);
+            index++;
+        }
+    }
+
+    public void sendConfigEntry(ServerPlayerEntity player, ConfigFileEntry<?> entry, int index) {
+        NetworkHandlerServer.sendConfig(player, getConfigPayload(entry, index));
+    }
+
+    public ConfigPayload getConfigPayload(ConfigFileEntry<?> entry, int index) {
+        String value = "";
+        if (!entry.type.parentText()) {
+            value = getPropertyAsString(entry.key, entry.defaultValue);
+        }
+        String defaultValue = "";
+        if (entry.defaultValue != null) {
+            defaultValue = entry.defaultValue.toString();
+        }
+        List<String> args = new ArrayList<>(List.of(value, defaultValue, entry.groupInfo));
+        if (entry.args != null) {
+            args.addAll(entry.args);
+        }
+        return new ConfigPayload(entry.type.toString(), entry.key, index, entry.displayName, entry.description, args);
+    }
+
+    private String getPropertyAsString(String key, Object defaultValue) {
+        if (defaultValue instanceof Integer intValue) {
+            return String.valueOf(getOrCreateInt(key, intValue));
+        } else if (defaultValue instanceof Boolean booleanValue) {
+            return String.valueOf(getOrCreateBoolean(key, booleanValue));
+        } else if (defaultValue instanceof Double doubleValue) {
+            return String.valueOf(getOrCreateDouble(key, doubleValue));
+        } else if (defaultValue instanceof String stringValue) {
+            return getOrCreateProperty(key, stringValue);
+        }
+        return defaultValue.toString();
+    }
+
+
+    protected void renamedProperties() {
+        renamedProperty("show_death_title_on_last_death", "final_death_title_show");
+        renamedProperty("players_drop_items_on_last_death", "players_drop_items_on_final_death");
+        renamedProperty("blacklist_banned_potions", "blacklist_banned_potion_effects");
+        renamedProperty("auto_keep_inventory", "keep_inventory");
+        renamedProperty("beoadcast_secret_keeper", "broadcast_secret_keeper");
+    }
+
+    private void renamedProperty(String from, String to) {
+        if (properties.containsKey(from)) {
+            if (!properties.containsKey(to)) {
+                String value = getProperty(from);
+                if (value != null) {
+                    setProperty(to, value);
+                }
+            }
+            removeProperty(from);
+        }
+    }
+
+
+    public static void moveOldMainFileIfExists() {
+        File newFolder = new File("./config/lifeseries/main/");
+        if (!newFolder.exists()) {
+            if (!newFolder.mkdirs()) {
+                Main.LOGGER.error("Failed to create folder {}", newFolder);
+                return;
+            }
+        }
+
+        File oldFile = new File("./config/"+ Main.MOD_ID+".properties");
+        if (!oldFile.exists()) return;
+        File newFile = new File("./config/lifeseries/main/"+ Main.MOD_ID+".properties");
+        if (newFile.exists()) {
+            if (oldFile.delete()) {
+                Main.LOGGER.info("Deleted old config file.");
+            }
+        }
+        else {
+            try {
+                Files.move(oldFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Main.LOGGER.info("Moved old config file.");
+            } catch (IOException e) {
+                Main.LOGGER.info("Failed to move old config file.");
+            }
+        }
+    }
+
+    private void createFileIfNotExists() {
+        if (folderPath == null || filePath == null) return;
+        File configDir = new File(folderPath);
+        if (!configDir.exists()) {
+            if (!configDir.mkdirs()) {
+                Main.LOGGER.error("Failed to create folder {}", configDir);
+                return;
+            }
+        }
+
+        File configFile = new File(filePath);
+        if (!configFile.exists()) {
+            try {
+                if (!configFile.createNewFile()) {
+                    Main.LOGGER.error("Failed to create file {}", configFile);
+                    return;
+                }
+                try (OutputStream output = new FileOutputStream(configFile)) {
+                    instantiateProperties();
+                    properties.store(output, null);
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void loadProperties() {
+        if (folderPath == null || filePath == null) return;
+
+        properties = new Properties();
+        try (InputStream input = new FileInputStream(filePath)) {
+            properties.load(input);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void setProperty(String key, String value) {
+        if (folderPath == null || filePath == null) return;
+        properties.setProperty(key, value);
+        try (OutputStream output = new FileOutputStream(filePath)) {
+            properties.store(output, null);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void removeProperty(String key) {
+        if (folderPath == null || filePath == null) return;
+        if (!properties.containsKey(key)) return;
+        properties.remove(key);
+        try (OutputStream output = new FileOutputStream(filePath)) {
+            properties.store(output, null);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void setPropertyCommented(String key, String value, String comment) {
+        if (folderPath == null || filePath == null) return;
+        properties.setProperty(key, value);
+        try (OutputStream output = new FileOutputStream(filePath)) {
+            properties.store(output, comment);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void resetProperties(String comment) {
+        properties.clear();
+        try (OutputStream output = new FileOutputStream(filePath)) {
+            properties.store(output, comment);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     /*
-     * Group Entries
+        Various getters
      */
-    public final ConfigFileEntry<Object> GROUP_GLOBAL = new ConfigFileEntry<>(
-            "group_global", null, ConfigTypes.TEXT, "{global}[no_sidebar]",
-            "General Settings", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_SEASON = new ConfigFileEntry<>(
-            "group_season", null, ConfigTypes.TEXT, "{season}[no_sidebar]",
-            "Season Specific Settings", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_LIVES = new ConfigFileEntry<>(
-            "group_lives", null, ConfigTypes.TEXT, "{global.lives}",
-            "Lives Stuff", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_BLACKLIST = new ConfigFileEntry<>(
-            "group_blacklist", null, ConfigTypes.TEXT, "{global.blacklist}",
-            "Blacklists", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_FINAL_DEATH = new ConfigFileEntry<>(
-            "group_final_death", null, ConfigTypes.TEXT, "{global.finaldeath}",
-            "Final Death", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_SPAWN_EGG = new ConfigFileEntry<>(
-            "group_spawn_egg", null, ConfigTypes.TEXT, "{global.spawnegg}",
-            "Spawn Egg", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_WATCHERS = new ConfigFileEntry<>(
-            "group_watchers", null, ConfigTypes.TEXT, "{global.watchers}",
-            "Watchers §7('/watcher' command)", ""
-    );
 
-    public static final List<String> RELOAD_NEEDED = List.of(
-            "spawner_recipe"
-    );
-    public final ConfigFileEntry<Boolean> RANDOM_LIVES = new ConfigFileEntry<>(
-            "random_lives", false, "{global.lives.random}",
-            "Roll Random Lives", "Comtrols whether lives traders are rolled in a session."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
-            "random_lives_min", 2, "global.lives.random",
-            "Random Lives Min", "The minumum lives you can get from the random roll."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MAX = new ConfigFileEntry<>(
-            "random_lives_max", 6, "global.lives.random",
-            "Random Lives Max", "The maximum lives you can get from the random roll."
-    );
+    public String getProperty(String key) {
+        if (folderPath == null || filePath == null) return null;
+        if (properties == null) return null;
+
+        if (properties.containsKey(key)) {
+            return properties.getProperty(key);
+        }
+        return null;
+    }
+
+    public String getOrCreateProperty(String key, String defaultValue) {
+        if (folderPath == null || filePath == null) return "";
+        if (properties == null) return "";
+
+        if (properties.containsKey(key)) {
+            return properties.getProperty(key);
+        }
+        setProperty(key, defaultValue);
+        return defaultValue;
+    }
+
+    public boolean getOrCreateBoolean(String key, boolean defaultValue) {
+        String value = getOrCreateProperty(key, String.valueOf(defaultValue));
+        if (value == null) return defaultValue;
+        if (value.equalsIgnoreCase("true")) return true;
+        if (value.equalsIgnoreCase("false")) return false;
+        return defaultValue;
+    }
+
+    public double getOrCreateDouble(String key, double defaultValue) {
+        String value = getOrCreateProperty(key, String.valueOf(defaultValue));
+        if (value == null) return defaultValue;
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception ignored) {}
+        return defaultValue;
+    }
+
+    public int getOrCreateInt(String key, int defaultValue) {
+        String value = getOrCreateProperty(key, String.valueOf(defaultValue));
+        if (value == null) return defaultValue;
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception ignored) {}
+        return defaultValue;
+    }
 }

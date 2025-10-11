@@ -17,6 +17,9 @@ public class PastLifeConfig extends ConfigManager {
     protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
         List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
         defaultEntries.remove(BOOGEYMAN_MESSAGE);
+        defaultEntries.remove(RANDOM_LIVES);
+        defaultEntries.remove(RANDOM_LIVES_MIN);
+        defaultEntries.remove(RANDOM_LIVES_MAX);
         return defaultEntries;
     }
 

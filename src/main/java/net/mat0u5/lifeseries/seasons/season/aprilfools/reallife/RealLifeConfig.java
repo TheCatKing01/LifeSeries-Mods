@@ -7,4 +7,11 @@ public class RealLifeConfig extends ThirdLifeConfig {
     public RealLifeConfig() {
         super("./config/"+ Main.MOD_ID+"/aprilfools","reallife.properties");
     }
+    @Override
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
+        defaultEntries.remove(RANDOM_LIVES);
+        defaultEntries.remove(RANDOM_LIVES_MIN);
+        defaultEntries.remove(RANDOM_LIVES_MAX);
+        return defaultEntries;
 }

@@ -115,6 +115,14 @@ public class SecretLifeConfig extends ConfigManager {
     }
 
     @Override
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
+        defaultEntries.remove(RANDOM_LIVES);
+        defaultEntries.remove(RANDOM_LIVES_MIN);
+        defaultEntries.remove(RANDOM_LIVES_MAX);
+        return defaultEntries;
+
+    @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         return new ArrayList<>(List.of(
                 PLAYERS_DROP_TASK_ON_DEATH
