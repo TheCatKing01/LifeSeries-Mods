@@ -14,4 +14,5 @@ public class RealLifeConfig extends ThirdLifeConfig {
         defaultEntries.remove(RANDOM_LIVES_MIN);
         defaultEntries.remove(RANDOM_LIVES_MAX);
         return defaultEntries;
+    }
 }

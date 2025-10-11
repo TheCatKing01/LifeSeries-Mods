@@ -63,6 +63,7 @@ public class ThirdLifeConfig extends ConfigManager {
         defaultEntries.remove(RANDOM_LIVES_MIN);
         defaultEntries.remove(RANDOM_LIVES_MAX);
         return defaultEntries;
+    }
 
     @Override
     public void instantiateProperties() {

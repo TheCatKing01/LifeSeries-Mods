@@ -121,6 +121,7 @@ public class SecretLifeConfig extends ConfigManager {
         defaultEntries.remove(RANDOM_LIVES_MIN);
         defaultEntries.remove(RANDOM_LIVES_MAX);
         return defaultEntries;
+    }
 
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
