@@ -57,33 +57,8 @@ public class LastLifeConfig extends ConfigManager {
     );
 
 
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
-            "random_lives_min", 2, "season",
-            "Random Lives Min", "The minumum lives you can get from the random roll."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MAX = new ConfigFileEntry<>(
-            "random_lives_max", 6, "season",
-            "Random Lives Max", "The maximum lives you can get from the random roll."
-    );
-
-
     public LastLifeConfig() {
         super("./config/"+ Main.MOD_ID,"lastlife.properties");
-    }
-
-    @Override
-    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
-        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
-        defaultEntries.remove(DEFAULT_LIVES);
-        return defaultEntries;
-    }
-
-    @Override
-    protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
-        return new ArrayList<>(List.of(
-                RANDOM_LIVES_MIN
-                ,RANDOM_LIVES_MAX
-        ));
     }
 
     @Override

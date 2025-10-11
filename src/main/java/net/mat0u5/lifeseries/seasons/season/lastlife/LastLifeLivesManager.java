@@ -23,13 +23,16 @@ public class LastLifeLivesManager extends LivesManager {
     public boolean assignedLives = false;
 
     public SessionAction actionChooseLives = new SessionAction(
-            OtherUtils.minutesToTicks(1),"§7Assign lives if necessary §f[00:01:00]", "Assign lives if necessary"
+            OtherUtils.minutesToTicks(1),
+            "§7Assign lives if necessary §f[00:01:00]",
+            "Assign lives if necessary"
     ) {
         @Override
         public void trigger() {
             assignRandomLivesToUnassignedPlayers();
         }
     };
+
     Random rnd = new Random();
 
     public void assignRandomLivesToUnassignedPlayers() {
@@ -44,10 +47,28 @@ public class LastLifeLivesManager extends LivesManager {
     }
 
     public void assignRandomLives(List<ServerPlayerEntity> players) {
+        // ✅ Check if random lives are enabled before doing any rolling logic
+        if (!LastLife.RANDOM_LIVES_ENABLED) {
+            // Just assign DEFAULT_LIVES directly, no rolling visuals
+            for (ServerPlayerEntity player : players) {
+                livesManager.setPlayerLives(player, LastLife.DEFAULT_LIVES);
+                SessionTranscript.assignRandomLives(player, LastLife.DEFAULT_LIVES);
+                PlayerUtils.sendTitle(
+                        player,
+                        TextUtils.format("§aYou have {} lives.", livesManager.getFormattedLives(LastLife.DEFAULT_LIVES)),
+                        0, 60, 20
+                );
+            }
+            PlayerUtils.playSoundToPlayers(players, SoundEvents.BLOCK_NOTE_BLOCK_PLING.value());
+            currentSeason.reloadAllPlayerTeams();
+            return;
+        }
+
+        // ✅ If random lives *are* enabled, do the normal rolling sequence
         players.forEach(this::resetPlayerLife);
         PlayerUtils.sendTitleToPlayers(players, Text.literal("You will have...").formatted(Formatting.GRAY), 10, 40, 10);
         int delay = 60;
-        TaskScheduler.scheduleTask(delay, ()-> rollLives(players));
+        TaskScheduler.scheduleTask(delay, () -> rollLives(players));
     }
 
     public void rollLives(List<ServerPlayerEntity> players) {
@@ -58,7 +79,7 @@ public class LastLifeLivesManager extends LivesManager {
         int totalSize = players.size();
         int chosenNotRandomly = LastLife.ROLL_MIN_LIVES;
         for (ServerPlayerEntity player : players) {
-            int diff = LastLife.ROLL_MAX_LIVES-LastLife.ROLL_MIN_LIVES+2;
+            int diff = LastLife.ROLL_MAX_LIVES - LastLife.ROLL_MIN_LIVES + 2;
             if (chosenNotRandomly <= LastLife.ROLL_MAX_LIVES && totalSize > diff) {
                 lives.put(player, chosenNotRandomly);
                 chosenNotRandomly++;
@@ -70,7 +91,6 @@ public class LastLifeLivesManager extends LivesManager {
         }
 
         TaskScheduler.scheduleTask(delay, () -> {
-            //Show the actual amount of lives for one cycle
             for (Map.Entry<ServerPlayerEntity, Integer> playerEntry : lives.entrySet()) {
                 Integer livesNum = playerEntry.getValue();
                 ServerPlayerEntity player = playerEntry.getKey();
@@ -83,7 +103,6 @@ public class LastLifeLivesManager extends LivesManager {
         delay += 20;
 
         TaskScheduler.scheduleTask(delay, () -> {
-            //Show "x lives." screen
             for (Map.Entry<ServerPlayerEntity, Integer> playerEntry : lives.entrySet()) {
                 Integer livesNum = playerEntry.getValue();
                 ServerPlayerEntity player = playerEntry.getKey();
@@ -93,7 +112,7 @@ public class LastLifeLivesManager extends LivesManager {
                 livesManager.setPlayerLives(player, livesNum);
             }
             PlayerUtils.playSoundToPlayers(lives.keySet(), SoundEvents.BLOCK_END_PORTAL_SPAWN);
-            currentSeason. reloadAllPlayerTeams();
+            currentSeason.reloadAllPlayerTeams();
         });
     }
 
@@ -122,7 +141,7 @@ public class LastLifeLivesManager extends LivesManager {
     public int getRandomLife() {
         int minLives = LastLife.ROLL_MIN_LIVES;
         int maxLives = LastLife.ROLL_MAX_LIVES;
-        return rnd.nextInt(minLives, maxLives+1);
+        return rnd.nextInt(minLives, maxLives + 1);
     }
 
     public boolean onlyOnePossibleLife() {
@@ -130,7 +149,7 @@ public class LastLifeLivesManager extends LivesManager {
     }
 
     public int getRandomLife(int except) {
-        if (!onlyOnePossibleLife()){
+        if (!onlyOnePossibleLife()) {
             int tries = 0;
             while (tries < 100) {
                 tries++;
