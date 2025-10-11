@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.seasons.season.thirdlife;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.config.ConfigFileEntry;
 
 import java.util.ArrayList;
 import java.util.List;
