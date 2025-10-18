@@ -57,14 +57,6 @@ public class ThirdLifeConfig extends ConfigManager {
     }
 
     @Override
-    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
-        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
-        defaultEntries.remove(RANDOM_LIVES);
-        defaultEntries.remove(RANDOM_LIVES_MIN);
-        defaultEntries.remove(RANDOM_LIVES_MAX);
-        return defaultEntries;
-
-    @Override
     public void instantiateProperties() {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);

@@ -319,16 +319,4 @@ public class DefaultConfigValues {
     public static final List<String> RELOAD_NEEDED = List.of(
             "spawner_recipe"
     );
-    public final ConfigFileEntry<Boolean> RANDOM_LIVES = new ConfigFileEntry<>(
-            "random_lives", false, "{global.lives.random}",
-            "Roll Random Lives", "Comtrols whether lives traders are rolled in a session."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
-            "random_lives_min", 2, "global.lives.random",
-            "Random Lives Min", "The minumum lives you can get from the random roll."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MAX = new ConfigFileEntry<>(
-            "random_lives_max", 6, "global.lives.random",
-            "Random Lives Max", "The maximum lives you can get from the random roll."
-    );
 }
