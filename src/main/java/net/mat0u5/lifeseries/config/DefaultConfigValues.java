@@ -245,7 +245,7 @@ public class DefaultConfigValues {
             "simple_life", false, "{global.simplelife}",
             "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
     );
-    public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
+        public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
             "traders_max_amount", 3, "global.simplelife",
             "Maximum Trader Amount", "The maximum amount of Traders that can be spawned in at one time."
     );
