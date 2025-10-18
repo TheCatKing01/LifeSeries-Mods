@@ -5,7 +5,6 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Mimicry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
@@ -24,7 +23,7 @@ public class SuperpowersWildcard extends Wildcard {
 
     public static void setBlacklist(String blacklist) {
         blacklistedPowers = new ArrayList<>();
-        String[] powers = blacklist.replace("[","").replace("]","").split(",");
+        String[] powers = blacklist.replace("[", "").replace("]", "").split(",");
         for (String powerName : powers) {
             Superpowers power = Superpowers.fromString(powerName.trim());
             if (power == null || power == Superpowers.NULL) continue;
@@ -55,9 +54,7 @@ public class SuperpowersWildcard extends Wildcard {
 
     public static void resetSuperpower(ServerPlayerEntity player) {
         UUID uuid = player.getUuid();
-        if (!playerSuperpowers.containsKey(uuid)) {
-            return;
-        }
+        if (!playerSuperpowers.containsKey(uuid)) return;
         playerSuperpowers.get(uuid).turnOff();
         playerSuperpowers.remove(uuid);
     }
@@ -71,9 +68,14 @@ public class SuperpowersWildcard extends Wildcard {
         resetAllSuperpowers();
         List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
         blacklistedPowers.forEach(implemented::remove);
+
+        // Remove the "LISTENING" superpower for now since voice chat is disabled
+        implemented.remove(Superpowers.LISTENING);
+
         boolean shouldIncludeNecromancy = implemented.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded();
         boolean shouldRandomizeNecromancy = false;
         double necromancyRandomizeChance = 0;
+
         if (shouldIncludeNecromancy) {
             int alivePlayersNum = livesManager.getAlivePlayers().size();
             int deadPlayersNum = livesManager.getDeadPlayers().size();
@@ -81,10 +83,9 @@ public class SuperpowersWildcard extends Wildcard {
             if (totalPlayersNum >= 6) {
                 implemented.remove(Superpowers.NECROMANCY);
                 shouldRandomizeNecromancy = true;
-                necromancyRandomizeChance = (double)deadPlayersNum / (double)alivePlayersNum;
+                necromancyRandomizeChance = (double) deadPlayersNum / (double) alivePlayersNum;
             }
-        }
-        else {
+        } else {
             implemented.remove(Superpowers.NECROMANCY);
         }
 
@@ -92,40 +93,38 @@ public class SuperpowersWildcard extends Wildcard {
         int pos = 0;
         List<ServerPlayerEntity> allPlayers = livesManager.getAlivePlayers();
         Collections.shuffle(allPlayers);
+
         for (ServerPlayerEntity player : allPlayers) {
-            Superpowers power = implemented.get(pos%implemented.size());
-            if (power == Superpowers.LISTENING && !VoicechatMain.isConnectedToSVC(player.getUuid())) {
-                pos++;
-                power = implemented.get(pos%implemented.size());
-            }
+            Superpowers power = implemented.get(pos % implemented.size());
+
             if (assignedSuperpowers.containsKey(player.getUuid())) {
                 power = assignedSuperpowers.get(player.getUuid());
                 assignedSuperpowers.remove(player.getUuid());
-            }
-            else if (shouldIncludeNecromancy && shouldRandomizeNecromancy) {
+            } else if (shouldIncludeNecromancy && shouldRandomizeNecromancy) {
                 if (player.getRandom().nextDouble() <= necromancyRandomizeChance) {
                     power = Superpowers.NECROMANCY;
                 }
             }
+
             if (power == Superpowers.NECROMANCY) {
                 implemented.remove(Superpowers.NECROMANCY);
                 shouldIncludeNecromancy = false;
             }
+
             Superpower instance = power.getInstance(player);
             if (instance != null) playerSuperpowers.put(player.getUuid(), instance);
             pos++;
         }
+
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayers(allPlayers, SoundEvent.of(Identifier.of("minecraft","wildlife_superpowers")), 0.2f, 1);
+            PlayerUtils.playSoundToPlayers(allPlayers, SoundEvent.of(Identifier.of("minecraft", "wildlife_superpowers")), 0.2f, 1);
         }
     }
 
     public static void rollRandomSuperpowerForPlayer(ServerPlayerEntity player) {
-        List<Superpowers> implemented = new java.util.ArrayList<>(Superpowers.getImplemented());
+        List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
         implemented.remove(Superpowers.NECROMANCY);
-        if (!VoicechatMain.isConnectedToSVC(player.getUuid())) {
-            implemented.remove(Superpowers.LISTENING);
-        }
+        implemented.remove(Superpowers.LISTENING); // disable listening power entirely
         Collections.shuffle(implemented);
 
         Superpowers power = implemented.getFirst();
@@ -138,7 +137,7 @@ public class SuperpowersWildcard extends Wildcard {
         if (instance != null) playerSuperpowers.put(player.getUuid(), instance);
 
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft","wildlife_superpowers")), 0.2f, 1);
+            PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft", "wildlife_superpowers")), 0.2f, 1);
         }
     }
 
@@ -149,7 +148,7 @@ public class SuperpowersWildcard extends Wildcard {
         Superpower instance = superpower.getInstance(player);
         if (instance != null) playerSuperpowers.put(player.getUuid(), instance);
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft","wildlife_superpowers")), 0.2f, 1);
+            PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft", "wildlife_superpowers")), 0.2f, 1);
         }
     }
 
@@ -157,8 +156,7 @@ public class SuperpowersWildcard extends Wildcard {
         if (playerSuperpowers.containsKey(player.getUuid())) {
             if (livesManager.isAlive(player)) {
                 playerSuperpowers.get(player.getUuid()).onKeyPressed();
-            }
-            else {
+            } else {
                 PlayerUtils.displayMessageToPlayer(player, Text.literal("Dead players can't use superpowers!"), 60);
             }
         }
