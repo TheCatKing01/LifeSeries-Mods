@@ -2,9 +2,6 @@ package net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.seasons.season.thirdlife.ThirdLifeConfig;
-import net.mat0u5.lifeseries.config.ConfigFileEntry;
-
-import java.util.List;
 
 public class SimpleLifeConfig extends ThirdLifeConfig {
     public SimpleLifeConfig() {
