@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.option.KeyBinding.Category;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,8 +32,8 @@ public class ClientKeybinds {
     public static KeyBinding openConfig;
     public static KeyBinding runCommand;
 
-    // Keybind category
-    public static final String KEYBIND_ID = "key.category.lifeseries.general";
+    // Keybind category (compatible with all versions)
+    public static final Category KEYBIND_CATEGORY = new Category("lifeseries.general");
 
     // === Called every tick ===
     public static void tick() {
@@ -53,12 +54,10 @@ public class ClientKeybinds {
         checkPower(superspeed, "superspeed");
         checkPower(necromancy, "necromancy");
 
-        // Dev command key
         if (runCommand != null && runCommand.wasPressed() && VersionControl.isDevVersion()) {
             NetworkHandlerClient.pressRunCommandKey();
         }
 
-        // Open config key
         if (openConfig != null && openConfig.wasPressed()) {
             NetworkHandlerClient.pressOpenConfigKey();
         }
@@ -76,7 +75,6 @@ public class ClientKeybinds {
 
     // === Register all keybinds ===
     public static void registerKeybinds() {
-
         timeControl = registerKey("timeControl", GLFW.GLFW_KEY_T);
         creaking = registerKey("creaking", GLFW.GLFW_KEY_C);
         windCharge = registerKey("windCharge", GLFW.GLFW_KEY_W);
@@ -94,21 +92,19 @@ public class ClientKeybinds {
         superspeed = registerKey("superspeed", GLFW.GLFW_KEY_S);
         necromancy = registerKey("necromancy", GLFW.GLFW_KEY_N);
 
-        // Open config
         openConfig = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lifeseries.openconfig",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
-                KEYBIND_ID
+                KEYBIND_CATEGORY
         ));
 
-        // Dev command
         if (VersionControl.isDevVersion()) {
             runCommand = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.lifeseries.runcommand",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_RIGHT_ALT,
-                    KEYBIND_ID
+                    KEYBIND_CATEGORY
             ));
         }
     }
@@ -119,7 +115,7 @@ public class ClientKeybinds {
                 "key.lifeseries." + name.toLowerCase(),
                 InputUtil.Type.KEYSYM,
                 defaultKey,
-                KEYBIND_ID
+                KEYBIND_CATEGORY
         ));
     }
 }
