@@ -27,15 +27,29 @@ public class ClientKeybinds {
     public static KeyBinding superspeed;
     public static KeyBinding necromancy;
 
+<<<<<<< HEAD
     // === Config and dev keys ===
     public static KeyBinding openConfig;
     public static KeyBinding runCommand;
 
     // Keybind category
     public static final String KEYBIND_ID = "key.category.lifeseries.general";
+=======
+    // === Misc ===
+    public static KeyBinding openConfig;
+    public static KeyBinding runCommand;
+
+    // === Keybind Category ===
+    //? if <= 1.21.6 {
+    public static final String KEYBIND_ID = "key.category.lifeseries.general";
+    //?} else {
+    /* public static final KeyBinding.Category KEYBIND_ID = new KeyBinding.Category(Identifier.of("lifeseries", "general")); */
+    //?}
+>>>>>>> 72ca144fb514d698f429265e6e89139f09790593
 
     // === Called every tick ===
     public static void tick() {
+<<<<<<< HEAD
         checkPower(timeControl, "time_control");
         checkPower(creaking, "creaking");
         checkPower(windCharge, "wind_charge");
@@ -95,6 +109,67 @@ public class ClientKeybinds {
         necromancy = registerKey("necromancy", GLFW.GLFW_KEY_N);
 
         // Open config
+=======
+        checkPress(timeControl, "TimeControl");
+        checkPress(creaking, "Creaking");
+        checkPress(windCharge, "WindCharge");
+        checkPress(astralProjection, "AstralProjection");
+        checkPress(superPunch, "SuperPunch");
+        checkPress(mimicry, "Mimicry");
+        checkPress(teleportation, "Teleportation");
+        checkPress(listening, "Listening");
+        checkPress(shadowPlay, "ShadowPlay");
+        checkPress(flight, "Flight");
+        checkPress(playerDisguise, "PlayerDisguise");
+        checkPress(animalDisguise, "AnimalDisguise");
+        checkPress(tripleJump, "TripleJump");
+        checkPress(invisibility, "Invisibility");
+        checkPress(superspeed, "Superspeed");
+        checkPress(necromancy, "Necromancy");
+
+        // Dev & UI bindings
+        while (openConfig != null && openConfig.wasPressed()) {
+            NetworkHandlerClient.pressOpenConfigKey();
+        }
+        while (runCommand != null && runCommand.wasPressed() && VersionControl.isDevVersion()) {
+            NetworkHandlerClient.pressRunCommandKey();
+        }
+    }
+
+    private static void checkPress(KeyBinding binding, String powerName) {
+        while (binding != null && binding.wasPressed()) {
+            NetworkHandlerClient.pressPowerKey(powerName);
+        }
+    }
+
+    public static void registerKeybinds() {
+        // Default key (same as old superpower)
+        int defaultKey = GLFW.GLFW_KEY_G;
+
+        // === Core Powers ===
+        timeControl = register("timecontrol", defaultKey);
+        windCharge = register("windcharge", defaultKey);
+        astralProjection = register("astralprojection", defaultKey);
+        superPunch = register("superpunch", defaultKey);
+        mimicry = register("mimicry", defaultKey);
+        teleportation = register("teleportation", defaultKey);
+        listening = register("listening", defaultKey);
+        shadowPlay = register("shadowplay", defaultKey);
+        playerDisguise = register("playerdisguise", defaultKey);
+        animalDisguise = register("animaldisguise", defaultKey);
+        tripleJump = register("triplejump", defaultKey);
+        invisibility = register("invisibility", defaultKey);
+        superspeed = register("superspeed", defaultKey);
+        necromancy = register("necromancy", defaultKey);
+
+        // === Version-Locked Powers ===
+        if (VersionControl.isAtLeast("1.21.2")) {
+            flight = register("flight", defaultKey);
+            creaking = register("creaking", defaultKey);
+        }
+
+        // === Misc ===
+>>>>>>> 72ca144fb514d698f429265e6e89139f09790593
         openConfig = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lifeseries.openconfig",
                 InputUtil.Type.KEYSYM,
@@ -102,7 +177,10 @@ public class ClientKeybinds {
                 KEYBIND_ID
         ));
 
+<<<<<<< HEAD
         // Dev command
+=======
+>>>>>>> 72ca144fb514d698f429265e6e89139f09790593
         if (VersionControl.isDevVersion()) {
             runCommand = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.lifeseries.runcommand",
@@ -113,10 +191,16 @@ public class ClientKeybinds {
         }
     }
 
+<<<<<<< HEAD
     // Helper method to reduce duplication
     private static KeyBinding registerKey(String name, int defaultKey) {
         return KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lifeseries." + name.toLowerCase(),
+=======
+    private static KeyBinding register(String name, int defaultKey) {
+        return KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.lifeseries." + name,
+>>>>>>> 72ca144fb514d698f429265e6e89139f09790593
                 InputUtil.Type.KEYSYM,
                 defaultKey,
                 KEYBIND_ID
