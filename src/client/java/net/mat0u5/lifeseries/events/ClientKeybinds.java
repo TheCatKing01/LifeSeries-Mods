@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.option.KeyBinding.Category;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
@@ -32,10 +31,10 @@ public class ClientKeybinds {
     public static KeyBinding openConfig;
     public static KeyBinding runCommand;
 
-    // Keybind category (compatible with all versions)
-    public static final Category KEYBIND_CATEGORY = new Category("lifeseries.general");
+    // Category for all keybinds (string for compatibility)
+    public static final String KEYBIND_ID = "key.category.lifeseries.general";
 
-    // === Called every tick ===
+    // Called every tick
     public static void tick() {
         checkPower(timeControl, "time_control");
         checkPower(creaking, "creaking");
@@ -54,16 +53,18 @@ public class ClientKeybinds {
         checkPower(superspeed, "superspeed");
         checkPower(necromancy, "necromancy");
 
+        // Dev command
         if (runCommand != null && runCommand.wasPressed() && VersionControl.isDevVersion()) {
             NetworkHandlerClient.pressRunCommandKey();
         }
 
+        // Open config
         if (openConfig != null && openConfig.wasPressed()) {
             NetworkHandlerClient.pressOpenConfigKey();
         }
     }
 
-    // Helper to check power key and send packet
+    // Helper to check individual power keybinds
     private static void checkPower(KeyBinding key, String powerName) {
         if (key != null && key.wasPressed()) {
             NetworkHandlerClient.sendStringPacket(
@@ -73,7 +74,7 @@ public class ClientKeybinds {
         }
     }
 
-    // === Register all keybinds ===
+    // Register all keybinds
     public static void registerKeybinds() {
         timeControl = registerKey("timeControl", GLFW.GLFW_KEY_T);
         creaking = registerKey("creaking", GLFW.GLFW_KEY_C);
@@ -92,30 +93,32 @@ public class ClientKeybinds {
         superspeed = registerKey("superspeed", GLFW.GLFW_KEY_S);
         necromancy = registerKey("necromancy", GLFW.GLFW_KEY_N);
 
+        // Config key
         openConfig = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lifeseries.openconfig",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
-                KEYBIND_CATEGORY
+                KEYBIND_ID
         ));
 
+        // Dev key
         if (VersionControl.isDevVersion()) {
             runCommand = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.lifeseries.runcommand",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_RIGHT_ALT,
-                    KEYBIND_CATEGORY
+                    KEYBIND_ID
             ));
         }
     }
 
-    // Helper method to reduce duplication
+    // Helper method to register individual powers
     private static KeyBinding registerKey(String name, int defaultKey) {
         return KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lifeseries." + name.toLowerCase(),
                 InputUtil.Type.KEYSYM,
                 defaultKey,
-                KEYBIND_CATEGORY
+                KEYBIND_ID
         ));
     }
 }
