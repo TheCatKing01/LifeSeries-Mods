@@ -23,8 +23,8 @@
             }
           ],
           "structure_overrides": [
-            "minecraft:stronghold",
-            "minecraft:village"
+            "minecraft:strongholds",
+            "minecraft:villages"
           ]
         }
       }
