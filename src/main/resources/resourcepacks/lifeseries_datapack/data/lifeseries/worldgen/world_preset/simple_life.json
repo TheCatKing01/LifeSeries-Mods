@@ -44,10 +44,6 @@
               "height": 4,
               "block": "minecraft:netherrack"
             }
-          ],
-          "structure_overrides": [
-            "minecraft:fortress",
-            "minecraft:bastion_remnants"
           ]
         }
       }
