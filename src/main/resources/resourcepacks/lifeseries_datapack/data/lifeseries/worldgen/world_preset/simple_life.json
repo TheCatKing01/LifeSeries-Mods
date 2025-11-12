@@ -23,29 +23,9 @@
             }
           ],
           "structure_overrides": [
-            "minecraft:strongholds",
-            "minecraft:villages"
+            "minecraft:stronghold",
+            "minecraft:village"
           ]
-        }
-      }
-    },
-    "minecraft:the_end": {
-      "type": "minecraft:the_end",
-      "generator": {
-        "type": "minecraft:flat",
-        "settings": {
-          "biome": "minecraft:the_end",
-          "layers": [
-            {
-              "height": 46,
-              "block": "minecraft:air"
-            },
-            {
-              "height": 4,
-              "block": "minecraft:end_stone"
-            }
-          ],
-          "structure_overrides": []
         }
       }
     },
@@ -65,7 +45,20 @@
               "block": "minecraft:netherrack"
             }
           ],
-          "structure_overrides": []
+          "structure_overrides": [
+            "minecraft:fortress",
+            "minecraft:bastion_remnants"
+          ]
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "settings": "minecraft:end",
+        "biome_source": {
+          "type": "minecraft:the_end"
         }
       }
     }
