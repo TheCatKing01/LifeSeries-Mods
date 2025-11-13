@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "lifeseries:simple_life"
+    "lifeseries:simple_life",
+    "lifeseries:simple_life_normal_end"
   ]
 }

@@ -16,6 +16,12 @@ public class ModRegistries {
             IdentifierHelper.mod("simple_life")
     );
 
+public class ModRegistries {
+    public static final ResourceKey<WorldPreset> SIMPLE_LIFE_NORMAL_END = ResourceKey.create(
+            Registries.WORLD_PRESET,
+            IdentifierHelper.mod("simple_life_normal_end")
+    );
+
     public static void registerModStuff() {
         registerCommands();
         registerEvents();
