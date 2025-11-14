@@ -11,15 +11,22 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 public class ModRegistries {
+	
+	public static final ResourceKey<WorldPreset> SMALL_BIOMES = ResourceKey.create(
+            Registries.WORLD_PRESET,
+            IdentifierHelper.mod("small_biomes")
+    );
+	
+	public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
+            Registries.WORLD_PRESET,
+            IdentifierHelper.mod("simple")
+    );
+
     public static final ResourceKey<WorldPreset> SIMPLE_LIFE = ResourceKey.create(
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("simple_life")
     );
-
-    public static final ResourceKey<WorldPreset> SIMPLE_LIFE_NORMAL_END = ResourceKey.create(
-            Registries.WORLD_PRESET,
-            IdentifierHelper.mod("simple_life_normal_end")
-    );
+	
 
     public static void registerModStuff() {
         registerCommands();

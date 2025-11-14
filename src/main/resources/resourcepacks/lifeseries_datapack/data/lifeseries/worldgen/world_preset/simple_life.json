@@ -29,6 +29,26 @@
         }
       }
     },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "minecraft:the_end",
+          "layers": [
+            {
+              "height": 46,
+              "block": "minecraft:air"
+            },
+            {
+              "height": 4,
+              "block": "minecraft:end_stone"
+            }
+          ],
+          "structure_overrides": []
+        }
+      }
+    },
     "minecraft:the_nether": {
       "type": "minecraft:the_nether",
       "generator": {
@@ -44,29 +64,8 @@
               "height": 4,
               "block": "minecraft:netherrack"
             }
-          ]
-        }
-      }
-    },
-    "minecraft:the_end": {
-      "type": "minecraft:the_end",
-      "generator": {
-        "type": "minecraft:flat",
-        "settings": {
-          "biome": "minecraft:end_highlands",
-          "layers": [
-            {
-              "height": 46,
-              "block": "minecraft:air"
-            },
-            {
-              "height": 4,
-              "block": "minecraft:end_stone"
-            }
           ],
-          "structure_overrides": [
-            "minecraft:end_cities"
-          ]
+          "structure_overrides": []
         }
       }
     }

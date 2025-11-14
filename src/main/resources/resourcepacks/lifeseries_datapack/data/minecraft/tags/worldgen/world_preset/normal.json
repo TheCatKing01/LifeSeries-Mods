@@ -1,7 +1,8 @@
 {
   "replace": false,
   "values": [
-    "lifeseries:simple_life",
-    "lifeseries:simple_life_normal_end"
+    "lifeseries:small_biomes",
+	"lifeseries:simple",
+    "lifeseries:simple_life"
   ]
 }
