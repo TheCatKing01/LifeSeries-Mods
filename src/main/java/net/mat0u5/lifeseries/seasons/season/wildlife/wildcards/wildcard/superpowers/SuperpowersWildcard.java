@@ -10,7 +10,7 @@ import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier; // ✅ Fixed import
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -21,7 +21,6 @@ public class SuperpowersWildcard extends Wildcard {
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
     public static List<Superpowers> blacklistedPowers = List.of();
 
-    // Multiple powers per player
     private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
     public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
     public static int ZOMBIES_HEALTH = 8;
@@ -74,7 +73,7 @@ public class SuperpowersWildcard extends Wildcard {
     public static void rollRandomSuperpowers() {
         List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
         blacklistedPowers.forEach(implemented::remove);
-        implemented.remove(Superpowers.LISTENING); // disabled
+        implemented.remove(Superpowers.LISTENING);
 
         boolean shouldIncludeNecromancy = implemented.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded();
         boolean shouldRandomizeNecromancy = false;
