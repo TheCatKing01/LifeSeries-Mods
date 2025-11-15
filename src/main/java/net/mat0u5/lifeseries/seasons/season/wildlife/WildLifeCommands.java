@@ -280,15 +280,36 @@ public class WildLifeCommands extends Command {
         return 1;
     }
 
-    public int skipSuperpowerCooldown(ServerCommandSource source) {
+    public int getSuperpower(ServerCommandSource source, ServerPlayerEntity player) {
         if (checkBanned(source)) return -1;
-        ServerPlayerEntity player = source.getPlayer();
-        if (player == null) return -1;
-        Superpower superpower = SuperpowersWildcard.getSuperpowerInstance(player);
-        if (superpower == null) {
-            source.sendError(Text.of("You do not have an active superpower"));
-            return -1;
+
+        // Get ALL powers the player has
+        Set<Superpower> powers = SuperpowersWildcard.playerSuperpowers.get(player.getUuid());
+
+        if (powers == null || powers.isEmpty()) {
+            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has no superpowers.", player));
+            return 1;
         }
+
+        List<String> powerNames = new ArrayList<>();
+        for (Superpower p : powers) {
+            Superpowers type;
+            if (p instanceof Mimicry mimicry) {
+                type = mimicry.getMimickedPower().getSuperpower();
+            } else {
+                type = p.getSuperpower();
+            }
+            powerNames.add(type.getString());
+        }
+
+        OtherUtils.sendCommandFeedbackQuiet(
+                source,
+                TextUtils.format("{} has the following superpowers: {}", player, String.join(", ", powerNames))
+        );
+
+        return 1;
+    }
+
         superpower.cooldown = 0;
         NetworkHandlerServer.sendLongPacket(player, PacketNames.SUPERPOWER_COOLDOWN, 0);
 
