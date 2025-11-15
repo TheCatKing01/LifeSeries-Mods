@@ -3,22 +3,26 @@ package net.mat0u5.lifeseries.config;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.entries.*;
 import net.mat0u5.lifeseries.gui.config.ConfigScreen;
-import net.mat0u5.lifeseries.gui.config.entries.*;
 import net.mat0u5.lifeseries.gui.config.entries.ConfigEntry;
+import net.mat0u5.lifeseries.gui.config.entries.GroupConfigEntry;
+import net.mat0u5.lifeseries.gui.config.entries.NumberConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.extra.*;
 import net.mat0u5.lifeseries.gui.config.entries.extra.time.MinutesConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.extra.time.SecondsConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.main.*;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.interfaces.IEntryGroupHeader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClientConfigGuiManager {
     public static void openConfig() {
-        ConfigScreen.Builder builder = new ConfigScreen.Builder(MinecraftClient.getInstance().currentScreen, Text.of("Life Series Config"));
+        ConfigScreen.Builder builder = new ConfigScreen.Builder(Minecraft.getInstance().screen, Component.nullToEmpty("Life Series Config"));
         if (!ClientConfigNetwork.configObjects.isEmpty()) {
             ConfigScreen.Builder.CategoryBuilder categoryGeneral = builder.addCategory("Server");
             addConfig(categoryGeneral, ClientConfigNetwork.configObjects);
@@ -31,7 +35,7 @@ public class ClientConfigGuiManager {
             addTestingCategory(builder);
         }
 
-        MinecraftClient.getInstance().setScreen(builder.build());
+        Minecraft.getInstance().setScreen(builder.build());
     }
 
     public static void addConfig(ConfigScreen.Builder.CategoryBuilder category, Map<Integer, ConfigObject> allConfigObjects) {
@@ -180,6 +184,12 @@ public class ClientConfigGuiManager {
             }
             return new IntegerConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
         }
+        else if (object instanceof NullableIntegerObject intObject) {
+            if (intObject.configType == ConfigTypes.LIVES_ENTRY) {
+                return new LivesConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
+            }
+            return new NullableIntegerConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
+        }
         else if (object instanceof DoubleObject doubleObject) {
             if (doubleObject.configType == ConfigTypes.PERCENTAGE) {
                 return new PercentageConfigEntry(doubleObject.id, doubleObject.name, doubleObject.description, doubleObject.doubleValue, doubleObject.defaultValue);
@@ -190,6 +200,9 @@ public class ClientConfigGuiManager {
             return new DoubleConfigEntry(doubleObject.id, doubleObject.name, doubleObject.description, doubleObject.doubleValue, doubleObject.defaultValue);
         }
         else if (object instanceof TextObject textObject) {
+            if (textObject.configType == ConfigTypes.TEAM_ENTRY) {
+                return new TeamConfigEntry(textObject.id, textObject.args);
+            }
             return new TextConfigEntry(textObject.id, textObject.name, textObject.description, textObject.clickable);
         }
         return null;

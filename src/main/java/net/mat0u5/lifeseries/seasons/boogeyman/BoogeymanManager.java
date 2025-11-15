@@ -5,23 +5,20 @@ import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.scores.ScoreHolder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
 
@@ -39,10 +36,14 @@ public class BoogeymanManager {
     public boolean BOOGEYMAN_INFINITE = false;
     public int BOOGEYMAN_INFINITE_LAST_PICK = 1800;
     public int BOOGEYMAN_INFINITE_AUTO_FAIL = 360000;
+    public boolean BOOGEYMAN_TEAM_NOTICE = false;
+    public int BOOGEYMAN_KILLS_NEEDED = 1;
+    public boolean BOOGEYMAN_STEAL_LIFE = false;
 
     public List<Boogeyman> boogeymen = new ArrayList<>();
     public List<UUID> rolledPlayers = new ArrayList<>();
     public boolean boogeymanChosen = false;
+    public boolean boogeymanListChanged = false;
 
     public void addSessionActions() {
         if (!BOOGEYMAN_ENABLED) return;
@@ -52,8 +53,8 @@ public class BoogeymanManager {
                 public void trigger() {
                     if (!BOOGEYMAN_ENABLED) return;
                     if (boogeymanChosen) return;
-                    PlayerUtils.broadcastMessage(Text.literal("The Boogeyman is being chosen in 5 minutes.").formatted(Formatting.RED));
-                    PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER);
+                    PlayerUtils.broadcastMessage(Component.literal("The Boogeyman is being chosen in 5 minutes.").withStyle(ChatFormatting.RED));
+                    PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
                 }
             }
         );
@@ -63,8 +64,8 @@ public class BoogeymanManager {
                 public void trigger() {
                     if (!BOOGEYMAN_ENABLED) return;
                     if (boogeymanChosen) return;
-                    PlayerUtils.broadcastMessage(Text.literal("The Boogeyman is being chosen in 1 minute.").formatted(Formatting.RED));
-                    PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER);
+                    PlayerUtils.broadcastMessage(Component.literal("The Boogeyman is being chosen in 1 minute.").withStyle(ChatFormatting.RED));
+                    PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
                 }
             }
         );
@@ -82,10 +83,10 @@ public class BoogeymanManager {
         );
     }
 
-    public boolean isBoogeyman(ServerPlayerEntity player) {
+    public boolean isBoogeyman(ServerPlayer player) {
         if (player == null) return false;
         for (Boogeyman boogeyman : boogeymen) {
-            if (boogeyman.uuid.equals(player.getUuid())) {
+            if (boogeyman.uuid.equals(player.getUUID())) {
                 return true;
             }
         }
@@ -93,73 +94,116 @@ public class BoogeymanManager {
     }
 
 
-    public boolean isBoogeymanThatCanBeCured(ServerPlayerEntity player, ServerPlayerEntity victim) {
+    public boolean isBoogeymanThatCanBeCured(ServerPlayer player, ServerPlayer victim) {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return false;
         if (boogeyman.cured) return false;
         if (boogeyman.failed) return false;
-        if (livesManager.isOnLastLife(victim, true)) return false;
+        List<ServerPlayer> nonReds = livesManager.getNonRedPlayers();
+        nonReds.remove(player);
+        if (victim.ls$isOnLastLife(true) && !nonReds.isEmpty()) return false;
         return true;
     }
 
-    public Boogeyman getBoogeyman(ServerPlayerEntity player) {
+    public Boogeyman getBoogeyman(ServerPlayer player) {
         if (player == null) return null;
         for (Boogeyman boogeyman : boogeymen) {
-            if (boogeyman.uuid.equals(player.getUuid())) {
+            if (boogeyman.uuid.equals(player.getUUID())) {
                 return boogeyman;
             }
         }
         return null;
     }
 
-    public void addBoogeyman(ServerPlayerEntity player) {
-        if (!BOOGEYMAN_ENABLED) return;
-        if (!rolledPlayers.contains(player.getUuid())) {
-            rolledPlayers.add(player.getUuid());
+    public Boogeyman addBoogeyman(ServerPlayer player) {
+        if (!BOOGEYMAN_ENABLED) return null;
+        if (!rolledPlayers.contains(player.getUUID())) {
+            rolledPlayers.add(player.getUUID());
         }
         Boogeyman newBoogeyman = new Boogeyman(player);
         boogeymen.add(newBoogeyman);
         boogeymanChosen = true;
+        boogeymanListChanged = true;
+        return newBoogeyman;
     }
 
-    public void addBoogeymanManually(ServerPlayerEntity player) {
+    public void addBoogeymanManually(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
-        addBoogeyman(player);
-        player.sendMessage(Text.of("§c [NOTICE] You are now a Boogeyman!"));
+        Boogeyman newBoogeyman = addBoogeyman(player);
+        player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are now a Boogeyman!"));
+        messageBoogeyman(newBoogeyman, player);
     }
 
-    public void removeBoogeymanManually(ServerPlayerEntity player) {
+    public void removeBoogeymanManually(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
         boogeymen.remove(boogeyman);
         if (boogeymen.isEmpty()) boogeymanChosen = false;
-        player.sendMessage(Text.of("§c [NOTICE] You are no longer a Boogeyman!"));
+        player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
     }
 
     public void resetBoogeymen() {
         if (server == null) return;
         for (Boogeyman boogeyman : boogeymen) {
-            ServerPlayerEntity player = PlayerUtils.getPlayer(boogeyman.uuid);
+            ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
             if (player == null) continue;
-            player.sendMessage(Text.of("§c [NOTICE] You are no longer a Boogeyman!"));
+            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
         }
         boogeymen = new ArrayList<>();
         boogeymanChosen = false;
         rolledPlayers = new ArrayList<>();
     }
 
-    public void cure(ServerPlayerEntity player) {
+    public void reset(ServerPlayer player) {
+        if (!BOOGEYMAN_ENABLED) return;
+        Boogeyman boogeyman = getBoogeyman(player);
+        if (boogeymen == null) return;
+        if (boogeyman.failed || boogeyman.cured) {
+            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] Your Boogeyman  fail/cure status has been reset"));
+        }
+        boogeyman.failed = false;
+        boogeyman.cured = false;
+        boogeyman.died = false;
+        boogeyman.resetKills();
+    }
+
+    public void cure(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeymen == null) return;
         boogeyman.failed = false;
         if (boogeyman.cured) return;
         boogeyman.cured = true;
-        PlayerUtils.sendTitle(player,Text.of("§aYou are cured!"), 20, 30, 20);
-        PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft","lastlife_boogeyman_cure")));
+        PlayerUtils.sendTitle(player,Component.nullToEmpty("§aYou are cured!"), 20, 30, 20);
+        PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_cure")));
+
+        boolean stealLife = BOOGEYMAN_STEAL_LIFE && livesManager.canChangeLivesNaturally();
+
         if (BOOGEYMAN_ANNOUNCE_OUTCOME) {
-            PlayerUtils.broadcastMessage(TextUtils.format("{}§7 is cured of the Boogeyman curse!", player));
+            if (stealLife) {
+                PlayerUtils.broadcastMessage(TextUtils.format("{}§7 is cured of the Boogeyman curse and gained a life for succeeding!", player));
+            }
+            else {
+                PlayerUtils.broadcastMessage(TextUtils.format("{}§7 is cured of the Boogeyman curse!", player));
+            }
+        }
+        if (stealLife) {
+            player.ls$addLife();
+        }
+    }
+
+    public void onBoogeymanKill(ServerPlayer player) {
+        if (!BOOGEYMAN_ENABLED) return;
+        Boogeyman boogeyman = getBoogeyman(player);
+        if (boogeymen == null) return;
+        if (boogeyman.cured || boogeyman.failed) return;
+        boogeyman.onKill();
+        if (boogeyman.shouldCure()) {
+            cure(player);
+        }
+        else {
+            player.sendSystemMessage(TextUtils.formatLoosely("§7You still need {} {} to be cured of the curse.", boogeyman.killsNeeded, TextUtils.pluralize("kill", boogeyman.killsNeeded)));
         }
     }
 
@@ -169,10 +213,10 @@ public class BoogeymanManager {
         int remainingTicks = currentSession.getRemainingTime();
         if (remainingTicks <= OtherUtils.secondsToTicks(BOOGEYMAN_INFINITE_LAST_PICK)) return;
 
-        PlayerUtils.broadcastMessage(Text.literal("A new boogeyman is about to be chosen.").formatted(Formatting.RED));
-        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER);
+        PlayerUtils.broadcastMessage(Component.literal("A new boogeyman is about to be chosen.").withStyle(ChatFormatting.RED));
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
         TaskScheduler.scheduleTask(100, () -> {
-            List<ServerPlayerEntity> allowedPlayers = getAllowedBoogeyPlayers();
+            List<ServerPlayer> allowedPlayers = getAllowedBoogeyPlayers();
             if (allowedPlayers.isEmpty()) return;
             Collections.shuffle(allowedPlayers);
             TaskScheduler.scheduleTask(180, () -> chooseBoogeymen(allowedPlayers, BoogeymanRollType.INFINITE));
@@ -181,32 +225,32 @@ public class BoogeymanManager {
 
     public void prepareToChooseBoogeymen() {
         if (!BOOGEYMAN_ENABLED) return;
-        PlayerUtils.broadcastMessage(Text.literal("The Boogeyman is about to be chosen.").formatted(Formatting.RED));
-        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER);
+        PlayerUtils.broadcastMessage(Component.literal("The Boogeyman is about to be chosen.").withStyle(ChatFormatting.RED));
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
         TaskScheduler.scheduleTask(100, () -> {
             resetBoogeymen();
             chooseBoogeymen(livesManager.getAlivePlayers(), BoogeymanRollType.NORMAL);
         });
     }
 
-    public void showRolling(List<ServerPlayerEntity> allowedPlayers) {
+    public void showRolling(List<ServerPlayer> allowedPlayers) {
         PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(allowedPlayers, Text.literal("3").formatted(Formatting.GREEN),0,35,0);
+        PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("3").withStyle(ChatFormatting.GREEN),0,35,0);
 
         TaskScheduler.scheduleTask(30, () -> {
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Text.literal("2").formatted(Formatting.YELLOW),0,35,0);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("2").withStyle(ChatFormatting.YELLOW),0,35,0);
         });
         TaskScheduler.scheduleTask(60, () -> {
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Text.literal("1").formatted(Formatting.RED),0,35,0);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("1").withStyle(ChatFormatting.RED),0,35,0);
         });
         TaskScheduler.scheduleTask(90, () -> {
-            PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.of(Identifier.ofVanilla("lastlife_boogeyman_wait")));
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Text.literal("You are...").formatted(Formatting.YELLOW),10,50,20);
+            PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_wait")));
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("You are...").withStyle(ChatFormatting.YELLOW),10,50,20);
         });
     }
-    public void chooseBoogeymen(List<ServerPlayerEntity> allowedPlayers, BoogeymanRollType rollType) {
+    public void chooseBoogeymen(List<ServerPlayer> allowedPlayers, BoogeymanRollType rollType) {
         if (!BOOGEYMAN_ENABLED) return;
         allowedPlayers.removeIf(this::isBoogeyman);
         showRolling(allowedPlayers);
@@ -227,7 +271,7 @@ public class BoogeymanManager {
         }
 
         int chooseBoogeymen = BOOGEYMAN_AMOUNT_MIN;
-        List<ServerPlayerEntity> nonRedPlayers = livesManager.getNonRedPlayers();
+        List<ServerPlayer> nonRedPlayers = livesManager.getNonRedPlayers();
         while(BOOGEYMAN_CHANCE_MULTIPLIER >= Math.random() && chooseBoogeymen < nonRedPlayers.size()) {
             chooseBoogeymen++;
         }
@@ -237,15 +281,15 @@ public class BoogeymanManager {
         return chooseBoogeymen;
     }
 
-    public void boogeymenChooseRandom(List<ServerPlayerEntity> allowedPlayers, BoogeymanRollType rollType) {
+    public void boogeymenChooseRandom(List<ServerPlayer> allowedPlayers, BoogeymanRollType rollType) {
         if (!BOOGEYMAN_ENABLED) return;
         if (BOOGEYMAN_AMOUNT_MAX <= 0) return;
         if (BOOGEYMAN_AMOUNT_MAX < BOOGEYMAN_AMOUNT_MIN) return;
         allowedPlayers.removeIf(this::isBoogeyman);
         if (allowedPlayers.isEmpty()) return;
 
-        List<ServerPlayerEntity> normalPlayers = new ArrayList<>();
-        List<ServerPlayerEntity> boogeyPlayers = new ArrayList<>();
+        List<ServerPlayer> normalPlayers = new ArrayList<>();
+        List<ServerPlayer> boogeyPlayers = new ArrayList<>();
 
 
         if (rollType != BoogeymanRollType.INFINITE) {
@@ -257,10 +301,10 @@ public class BoogeymanManager {
             boogeyPlayers.add(allowedPlayers.getFirst());
         }
 
-        for (ServerPlayerEntity player : allowedPlayers) {
+        for (ServerPlayer player : allowedPlayers) {
             if (rollType != BoogeymanRollType.INFINITE) {
-                if (rolledPlayers.contains(player.getUuid())) continue;
-                rolledPlayers.add(player.getUuid());
+                if (rolledPlayers.contains(player.getUUID())) continue;
+                rolledPlayers.add(player.getUUID());
             }
             if (boogeyPlayers.contains(player)) continue;
             normalPlayers.add(player);
@@ -269,31 +313,31 @@ public class BoogeymanManager {
         handleBoogeymanLists(normalPlayers, boogeyPlayers);
     }
 
-    public List<ServerPlayerEntity> getRandomBoogeyPlayers(List<ServerPlayerEntity> allowedPlayers, BoogeymanRollType rollType) {
-        List<ServerPlayerEntity> boogeyPlayers = new ArrayList<>();
-        List<ServerPlayerEntity> nonRedPlayers = livesManager.getNonRedPlayers();
+    public List<ServerPlayer> getRandomBoogeyPlayers(List<ServerPlayer> allowedPlayers, BoogeymanRollType rollType) {
+        List<ServerPlayer> boogeyPlayers = new ArrayList<>();
+        List<ServerPlayer> nonRedPlayers = livesManager.getNonRedPlayers();
         Collections.shuffle(nonRedPlayers);
         int chooseBoogeymen = getBoogeymanAmount(rollType);
 
-        for (ServerPlayerEntity player : nonRedPlayers) {
+        for (ServerPlayer player : nonRedPlayers) {
             // First loop for the forced boogeymen
             if (isBoogeyman(player)) continue;
             if (!allowedPlayers.contains(player)) continue;
-            if (rolledPlayers.contains(player.getUuid())) continue;
-            if (BOOGEYMAN_IGNORE.contains(player.getNameForScoreboard().toLowerCase())) continue;
-            if (BOOGEYMAN_FORCE.contains(player.getNameForScoreboard().toLowerCase())) {
+            if (rolledPlayers.contains(player.getUUID())) continue;
+            if (BOOGEYMAN_IGNORE.contains(player.getScoreboardName().toLowerCase(Locale.ROOT))) continue;
+            if (BOOGEYMAN_FORCE.contains(player.getScoreboardName().toLowerCase(Locale.ROOT))) {
                 boogeyPlayers.add(player);
                 chooseBoogeymen--;
             }
         }
-        for (ServerPlayerEntity player : nonRedPlayers) {
+        for (ServerPlayer player : nonRedPlayers) {
             // Second loop for the non-forced boogeymen
             if (chooseBoogeymen <= 0) break;
             if (isBoogeyman(player)) continue;
             if (!allowedPlayers.contains(player)) continue;
-            if (rolledPlayers.contains(player.getUuid())) continue;
-            if (BOOGEYMAN_IGNORE.contains(player.getNameForScoreboard().toLowerCase())) continue;
-            if (BOOGEYMAN_FORCE.contains(player.getNameForScoreboard().toLowerCase())) continue;
+            if (rolledPlayers.contains(player.getUUID())) continue;
+            if (BOOGEYMAN_IGNORE.contains(player.getScoreboardName().toLowerCase(Locale.ROOT))) continue;
+            if (BOOGEYMAN_FORCE.contains(player.getScoreboardName().toLowerCase(Locale.ROOT))) continue;
             if (boogeyPlayers.contains(player)) continue;
 
             boogeyPlayers.add(player);
@@ -302,26 +346,29 @@ public class BoogeymanManager {
         return boogeyPlayers;
     }
 
-    public List<ServerPlayerEntity> getAllowedBoogeyPlayers() {
-        List<ServerPlayerEntity> result = new ArrayList<>(livesManager.getNonRedPlayers());
+    public List<ServerPlayer> getAllowedBoogeyPlayers() {
+        List<ServerPlayer> result = new ArrayList<>(livesManager.getNonRedPlayers());
         result.removeIf(this::isBoogeyman);
         return result;
     }
 
-    public void handleBoogeymanLists(List<ServerPlayerEntity> normalPlayers, List<ServerPlayerEntity> boogeyPlayers) {
-        PlayerUtils.playSoundToPlayers(normalPlayers, SoundEvent.of(Identifier.of("minecraft","lastlife_boogeyman_no")));
-        PlayerUtils.playSoundToPlayers(boogeyPlayers, SoundEvent.of(Identifier.of("minecraft","lastlife_boogeyman_yes")));
-        PlayerUtils.sendTitleToPlayers(normalPlayers, Text.literal("NOT the Boogeyman.").formatted(Formatting.GREEN),10,50,20);
-        PlayerUtils.sendTitleToPlayers(boogeyPlayers, Text.literal("The Boogeyman.").formatted(Formatting.RED),10,50,20);
-        for (ServerPlayerEntity boogey : boogeyPlayers) {
-            addBoogeyman(boogey);
-            messageBoogeyman(boogey);
+    public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
+        PlayerUtils.playSoundToPlayers(normalPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
+        PlayerUtils.playSoundToPlayers(boogeyPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_yes")));
+        PlayerUtils.sendTitleToPlayers(normalPlayers, Component.literal("NOT the Boogeyman.").withStyle(ChatFormatting.GREEN),10,50,20);
+        PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Boogeyman.").withStyle(ChatFormatting.RED),10,50,20);
+        for (ServerPlayer boogey : boogeyPlayers) {
+            Boogeyman boogeyman = addBoogeyman(boogey);
+            messageBoogeyman(boogeyman, boogey);
         }
         SessionTranscript.boogeymenChosen(boogeyPlayers);
     }
 
-    public void messageBoogeyman(ServerPlayerEntity boogey) {
-        boogey.sendMessage(Text.of(BOOGEYMAN_MESSAGE));
+    public void messageBoogeyman(Boogeyman boogeyman, ServerPlayer boogey) {
+        boogey.sendSystemMessage(Component.nullToEmpty(BOOGEYMAN_MESSAGE));
+        if (boogeyman != null && boogeyman.killsNeeded != 1) {
+            boogey.sendSystemMessage(TextUtils.formatLoosely("§7You need {} {} to be cured of the curse.", boogeyman.killsNeeded, TextUtils.pluralize("kill", boogeyman.killsNeeded)));
+        }
     }
 
     public void sessionEnd() {
@@ -331,12 +378,12 @@ public class BoogeymanManager {
             if (boogeyman.died) continue;
 
             if (!boogeyman.cured && !boogeyman.failed) {
-                ServerPlayerEntity player = PlayerUtils.getPlayer(boogeyman.uuid);
+                ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
                 if (player == null) {
                     if (BOOGEYMAN_ANNOUNCE_OUTCOME) {
                         PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been dropped to their §cLast Life§7.", boogeyman.name));
                     }
-                    ScoreboardUtils.setScore(ScoreHolder.fromName(boogeyman.name), LivesManager.SCOREBOARD_NAME, 1);
+                    ScoreboardUtils.setScore(ScoreHolder.forNameOnly(boogeyman.name), LivesManager.SCOREBOARD_NAME, 1);
                     continue;
                 }
                 playerFailBoogeyman(player, true);
@@ -344,11 +391,11 @@ public class BoogeymanManager {
         }
     }
 
-    public void playerFailBoogeymanManually(ServerPlayerEntity player, boolean sendMessage) {
+    public void playerFailBoogeymanManually(ServerPlayer player, boolean sendMessage) {
         playerFailBoogeyman(player, sendMessage);
     }
 
-    public boolean playerFailBoogeyman(ServerPlayerEntity player, boolean sendMessage) {
+    public boolean playerFailBoogeyman(ServerPlayer player, boolean sendMessage) {
         if (!BOOGEYMAN_ENABLED) return false;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeymen == null) return false;
@@ -357,10 +404,10 @@ public class BoogeymanManager {
         if (boogeyman.failed) return false;
         boogeyman.failed = true;
 
-        boolean canChangeLives = livesManager.isAlive(player) && !livesManager.isOnLastLife(player, true);
+        boolean canChangeLives = player.ls$isAlive() && !player.ls$isOnLastLife(true);
 
         if (BOOGEYMAN_ADVANCED_DEATHS) {
-            PlayerUtils.sendTitle(player,Text.of("§cThe curse consumes you.."), 20, 30, 20);
+            PlayerUtils.sendTitle(player,Component.nullToEmpty("§cThe curse consumes you.."), 20, 30, 20);
             if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
                 PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been consumed by the curse.", player));
             }
@@ -369,34 +416,34 @@ public class BoogeymanManager {
             }
         }
         else {
-            PlayerUtils.sendTitle(player,Text.of("§cYou have failed."), 20, 30, 20);
-            PlayerUtils.playSoundToPlayer(player, SoundEvent.of(Identifier.of("minecraft","lastlife_boogeyman_fail")));
+            PlayerUtils.sendTitle(player,Component.nullToEmpty("§cYou have failed."), 20, 30, 20);
+            PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_fail")));
             if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
                 PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been dropped to their §cLast Life§7.", player));
             }
             if (canChangeLives) {
-                livesManager.setPlayerLives(player, 1);
+                player.ls$setLives(1);
             }
         }
         return true;
     }
 
-    public void playerLostAllLives(ServerPlayerEntity player) {
+    public void playerLostAllLives(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
         boogeyman.died = true;
     }
 
-    public void onPlayerFinishJoining(ServerPlayerEntity player) {
+    public void onPlayerFinishJoining(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         if (!boogeymanChosen) return;
-        if (rolledPlayers.contains(player.getUuid())) return;
-        if (livesManager.isDead(player)) return;
+        if (rolledPlayers.contains(player.getUUID())) return;
+        if (player.ls$isDead()) return;
         if (boogeymen.size() >= BOOGEYMAN_AMOUNT_MAX) return;
         if (currentSession.statusNotStarted() || currentSession.statusFinished()) return;
         TaskScheduler.scheduleTask(40, () -> {
-            player.sendMessage(Text.of("§cSince you were not present when the Boogeyman was being chosen, your chance to become the Boogeyman is now. Good luck!"));
+            player.sendSystemMessage(Component.nullToEmpty("§cSince you were not present when the Boogeyman was being chosen, your chance to become the Boogeyman is now. Good luck!"));
             chooseBoogeymen(new ArrayList<>(List.of(player)), BoogeymanRollType.LATE_JOIN);
         });
     }
@@ -414,16 +461,19 @@ public class BoogeymanManager {
         BOOGEYMAN_IGNORE.clear();
         BOOGEYMAN_FORCE.clear();
         for (String name : seasonConfig.BOOGEYMAN_IGNORE.get(seasonConfig).replaceAll("\\[","").replaceAll("]","").replaceAll(" ","").trim().split(",")) {
-            if (!name.isEmpty()) BOOGEYMAN_IGNORE.add(name.toLowerCase());
+            if (!name.isEmpty()) BOOGEYMAN_IGNORE.add(name.toLowerCase(Locale.ROOT));
         }
         for (String name : seasonConfig.BOOGEYMAN_FORCE.get(seasonConfig).replaceAll("\\[","").replaceAll("]","").replaceAll(" ","").trim().split(",")) {
-            if (!name.isEmpty()) BOOGEYMAN_FORCE.add(name.toLowerCase());
+            if (!name.isEmpty()) BOOGEYMAN_FORCE.add(name.toLowerCase(Locale.ROOT));
         }
         BOOGEYMAN_CHOOSE_MINUTE = seasonConfig.BOOGEYMAN_CHOOSE_MINUTE.get(seasonConfig);
         BOOGEYMAN_ANNOUNCE_OUTCOME = seasonConfig.BOOGEYMAN_ANNOUNCE_OUTCOME.get(seasonConfig);
         BOOGEYMAN_INFINITE = seasonConfig.BOOGEYMAN_INFINITE.get(seasonConfig);
         BOOGEYMAN_INFINITE_LAST_PICK = seasonConfig.BOOGEYMAN_INFINITE_LAST_PICK.get(seasonConfig);
         BOOGEYMAN_INFINITE_AUTO_FAIL = seasonConfig.BOOGEYMAN_INFINITE_AUTO_FAIL.get(seasonConfig);
+        BOOGEYMAN_TEAM_NOTICE = seasonConfig.BOOGEYMAN_TEAM_NOTICE.get(seasonConfig);
+        BOOGEYMAN_KILLS_NEEDED = seasonConfig.BOOGEYMAN_KILLS_NEEDED.get(seasonConfig);
+        BOOGEYMAN_STEAL_LIFE = seasonConfig.BOOGEYMAN_STEAL_LIFE.get(seasonConfig);
     }
 
     public void onDisabledBoogeyman() {
@@ -439,6 +489,36 @@ public class BoogeymanManager {
             infiniteBoogeymenTick(boogeyman);
             autoFailTick(boogeyman);
             failedMessagesTick(boogeyman);
+        }
+        if (boogeymanListChanged) {
+            boogeymanListChanged = false;
+            if (BOOGEYMAN_TEAM_NOTICE) {
+                sendBoogeymanTeamNotice();
+            }
+        }
+    }
+
+    public void sendBoogeymanTeamNotice() {
+        for (Boogeyman boogeyman : boogeymen) {
+            ServerPlayer player = boogeyman.getPlayer();
+            if (player == null) continue;
+
+            List<Component> boogeymenList = new ArrayList<>();
+            for (Boogeyman otherBoogeyman : boogeymen) {
+                ServerPlayer otherPlayer = otherBoogeyman.getPlayer();
+                if (otherPlayer == player) continue;
+                if (otherPlayer != null) {
+                    boogeymenList.add(otherPlayer.getDisplayName());
+                }
+                else {
+                    boogeymenList.add(Component.nullToEmpty(otherBoogeyman.name));
+                }
+            }
+
+            if (!boogeymenList.isEmpty()) {
+                player.sendSystemMessage(TextUtils.format("Current Boogeymen: {}", boogeymenList));
+
+            }
         }
     }
 
@@ -461,10 +541,10 @@ public class BoogeymanManager {
         int warningTime = (BOOGEYMAN_INFINITE_AUTO_FAIL - 5*60);
         if (boogeymanTime >= warningTime && warningTime >= 0) {
             if (!warningAutoFail.contains(boogeyman.uuid)) {
-                ServerPlayerEntity player = boogeyman.getPlayer();
+                ServerPlayer player = boogeyman.getPlayer();
                 if (player != null) {
                     warningAutoFail.add(boogeyman.uuid);
-                    player.sendMessage(Text.of("§cYou only have 5 minutes left to kill someone as the Boogeyman before you fail!"));
+                    player.sendSystemMessage(Component.nullToEmpty("§cYou only have 5 minutes left to kill someone as the Boogeyman before you fail!"));
                 }
             }
         }
@@ -473,7 +553,7 @@ public class BoogeymanManager {
         }
 
         if (boogeymanTime >= BOOGEYMAN_INFINITE_AUTO_FAIL) {
-            ServerPlayerEntity player = boogeyman.getPlayer();
+            ServerPlayer player = boogeyman.getPlayer();
             if (player != null) {
                 if (!playerFailBoogeyman(player, true)) {
                     boogeyman.failed = true;
@@ -489,16 +569,16 @@ public class BoogeymanManager {
             return;
         }
         if (afterFailedMessaged.contains(boogeyman.uuid)) return;
-        ServerPlayerEntity player = boogeyman.getPlayer();
+        ServerPlayer player = boogeyman.getPlayer();
         if (player == null) return;
         if (!player.isAlive()) return;
         if (AdvancedDeathsManager.hasQueuedDeath(player)) return;
         afterFailLogic(player);
     }
 
-    public void afterFailLogic(ServerPlayerEntity player) {
+    public void afterFailLogic(ServerPlayer player) {
         if (!afterFailedMessages()) return;
-        afterFailedMessaged.add(player.getUuid());
+        afterFailedMessaged.add(player.getUUID());
         int delay = 20;
         if (!BOOGEYMAN_ADVANCED_DEATHS) {
             delay = 140;
@@ -508,11 +588,11 @@ public class BoogeymanManager {
         }
 
         TaskScheduler.scheduleTask(delay, () -> {
-            PlayerUtils.sendTitle(player, Text.of("§cYour lives are taken..."), 20, 80, 20);
+            PlayerUtils.sendTitle(player, Component.nullToEmpty("§cYour lives are taken..."), 20, 80, 20);
         });
         delay += 140;
         TaskScheduler.scheduleTask(delay, () -> {
-            PlayerUtils.sendTitle(player, Text.of("§c...Now take theirs."), 20, 80, 20);
+            PlayerUtils.sendTitle(player, Component.nullToEmpty("§c...Now take theirs."), 20, 80, 20);
         });
     }
 

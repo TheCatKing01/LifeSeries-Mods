@@ -1,12 +1,13 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers;
 
-import net.mat0u5.lifeseries.compatibilities.DependencyManager;
+import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.*;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public enum Superpowers {
     NULL,
@@ -29,7 +30,7 @@ public enum Superpowers {
     NECROMANCY;
 
     @Nullable
-    public Superpower getInstance(ServerPlayerEntity player) {
+    public Superpower getInstance(ServerPlayer player) {
         if (this == TIME_CONTROL) return new TimeControl(player);
         if (this == WIND_CHARGE) return new WindCharge(player);
         if (this == ASTRAL_PROJECTION) return new AstralProjection(player);
@@ -44,17 +45,17 @@ public enum Superpowers {
         if (this == SUPERSPEED) return new Superspeed(player);
         if (this == NECROMANCY) return new Necromancy(player);
         //? if >= 1.21.2 {
-        /*if (this == CREAKING) return new Creaking(player);
+        /*if (this == CREAKING) return new CreakingPower(player);
         if (this == FLIGHT) return new Flight(player);
         *///?}
-        if (DependencyManager.voicechatLoaded()) {
+        if (CompatibilityManager.voicechatLoaded()) {
             if (this == LISTENING) return new Listening(player);
         }
         return null;
     }
 
     public String getString() {
-        return this.toString().toLowerCase();
+        return this.toString().toLowerCase(Locale.ROOT);
     }
 
     public static List<Superpowers> getImplemented() {
@@ -64,7 +65,7 @@ public enum Superpowers {
         result.remove(CREAKING);
         result.remove(FLIGHT);
         //?}
-        if (!DependencyManager.voicechatLoaded()) {
+        if (!CompatibilityManager.voicechatLoaded()) {
             result.remove(LISTENING);
         }
         return result;
@@ -94,7 +95,7 @@ public enum Superpowers {
 
     public static Superpowers fromString(String superpower) {
         try {
-            return Enum.valueOf(Superpowers.class, superpower.toUpperCase());
+            return Enum.valueOf(Superpowers.class, superpower.toUpperCase(Locale.ROOT));
         } catch(Exception e) {}
         return Superpowers.NULL;
     }

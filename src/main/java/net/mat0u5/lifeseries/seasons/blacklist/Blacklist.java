@@ -1,37 +1,35 @@
 package net.mat0u5.lifeseries.seasons.blacklist;
 
 import net.mat0u5.lifeseries.Main;
-import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
-import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -42,20 +40,40 @@ import java.util.Optional;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
 import static net.mat0u5.lifeseries.Main.server;
 
+//? if <= 1.21.9 {
+import net.minecraft.resources.ResourceLocation;
+ //?} else {
+/*import net.minecraft.resources.Identifier;
+*///?}
+
 public class Blacklist {
-    public List<Identifier> loadedListItemIdentifier;
+    //? if <= 1.21.9 {
+    public List<ResourceLocation> loadedListItemIdentifier;
+    public List<ResourceLocation> loadedRecipeBlacklist;
+    //?} else {
+    /*public List<Identifier> loadedListItemIdentifier;
+    public List<Identifier> loadedRecipeBlacklist;
+    *///?}
     private List<Item> loadedListItem;
     private List<Block> loadedListBlock;
-    private List<RegistryKey<Enchantment>> loadedListEnchants;
-    private List<RegistryKey<Enchantment>> loadedBannedEnchants;
+    private List<ResourceKey<Enchantment>> loadedListEnchants;
+    private List<ResourceKey<Enchantment>> loadedBannedEnchants;
 
-    private List<RegistryEntry<StatusEffect>> loadedBannedEffects;
+    private List<Holder<MobEffect>> loadedBannedEffects;
     
     public boolean CREATIVE_IGNORE_BLACKLIST = true;
 
     public List<String> loadItemBlacklist() {
         if (seasonConfig == null) return new ArrayList<>();
         String raw = seasonConfig.BLACKLIST_ITEMS.get(seasonConfig);
+        raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
+        if (raw.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(Arrays.asList(raw.split(",")));
+    }
+
+    public List<String> loadRecipeBlacklist() {
+        if (seasonConfig == null) return new ArrayList<>();
+        String raw = seasonConfig.BLACKLIST_RECIPES.get(seasonConfig);
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -96,23 +114,25 @@ public class Blacklist {
     public List<Item> getItemBlacklist() {
         if (loadedListItem != null) return loadedListItem;
         List<Item> newList = new ArrayList<>();
-        List<Identifier> newListIdentifier = new ArrayList<>();
-
-        if (seasonConfig != null) {
-            if (!seasonConfig.SPAWNER_RECIPE.get(seasonConfig)) {
-                newListIdentifier.add(Identifier.of("lifeseries", "spawner_recipe"));
-            }
-        }
+        //? if <= 1.21.9 {
+        List<ResourceLocation> newListIdentifier = new ArrayList<>();
+        //?} else {
+        /*List<Identifier> newListIdentifier = new ArrayList<>();
+        *///?}
 
         for (String itemId : loadItemBlacklist()) {
             if (!itemId.contains(":")) itemId = "minecraft:" + itemId;
 
             try {
-                Identifier id = Identifier.of(itemId);
-                RegistryKey<Item> key = RegistryKey.of(Registries.ITEM.getKey(), id);
+                var id = IdentifierHelper.parse(itemId);
+                ResourceKey<Item> key = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
 
                 // Check if the block exists in the registry
-                Item item = Registries.ITEM.get(key);
+                //? if <= 1.21 {
+                Item item = BuiltInRegistries.ITEM.get(key);
+                //?} else {
+                /*Item item = BuiltInRegistries.ITEM.getValue(key);
+                *///?}
                 if (item != null) {
                     newListIdentifier.add(id);
                     newList.add(item);
@@ -129,6 +149,50 @@ public class Blacklist {
         return newList;
     }
 
+    //? if <= 1.21.9 {
+    public List<ResourceLocation> getRecipeBlacklist() {
+    //?} else {
+    /*public List<Identifier> getRecipeBlacklist() {
+    *///?}
+        if (loadedRecipeBlacklist != null) return loadedRecipeBlacklist;
+        //? if <= 1.21.9 {
+        List<ResourceLocation> newList = new ArrayList<>();
+        //?} else {
+        /*List<Identifier> newList = new ArrayList<>();
+         *///?}
+
+        if (seasonConfig != null) {
+            if (!seasonConfig.SPAWNER_RECIPE.get(seasonConfig)) {
+                newList.add(IdentifierHelper.mod("spawner_recipe"));
+            }
+        }
+
+        for (String itemId : loadRecipeBlacklist()) {
+            if (!itemId.contains(":")) itemId = "minecraft:" + itemId;
+
+            try {
+                var id = IdentifierHelper.parse(itemId);
+                ResourceKey<Item> key = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
+
+                //? if <= 1.21 {
+                Item item = BuiltInRegistries.ITEM.get(key);
+                //?} else {
+                /*Item item = BuiltInRegistries.ITEM.getValue(key);
+                 *///?}
+                if (item != null) {
+                    newList.add(id);
+                } else {
+                    OtherUtils.throwError("[CONFIG] Invalid item: " + itemId);
+                }
+            } catch (Exception e) {
+                OtherUtils.throwError("[CONFIG] Error parsing item ID: " + itemId);
+            }
+        }
+
+        loadedRecipeBlacklist = newList;
+        return newList;
+    }
+
     public List<Block> getBlockBlacklist() {
         if (loadedListBlock != null) return loadedListBlock;
         List<Block> newList = new ArrayList<>();
@@ -137,11 +201,15 @@ public class Blacklist {
             if (!blockId.contains(":")) blockId = "minecraft:" + blockId;
 
             try {
-                Identifier id = Identifier.of(blockId);
-                RegistryKey<Block> key = RegistryKey.of(Registries.BLOCK.getKey(), id);
+                var id = IdentifierHelper.parse(blockId);
+                ResourceKey<Block> key = ResourceKey.create(BuiltInRegistries.BLOCK.key(), id);
 
                 // Check if the block exists in the registry
-                Block block = Registries.BLOCK.get(key);
+                //? if <= 1.21 {
+                Block block = BuiltInRegistries.BLOCK.get(key);
+                //?} else {
+                /*Block block = BuiltInRegistries.BLOCK.getValue(key);
+                *///?}
                 if (block != null) {
                     newList.add(block);
                 } else {
@@ -156,29 +224,33 @@ public class Blacklist {
         return newList;
     }
 
-    public List<RegistryKey<Enchantment>> getClampedEnchants() {
+    public List<ResourceKey<Enchantment>> getClampedEnchants() {
         if (server == null) return new ArrayList<>();
 
         if (loadedListEnchants != null) return loadedListEnchants;
-        List<RegistryKey<Enchantment>> newList = new ArrayList<>();
+        List<ResourceKey<Enchantment>> newList = new ArrayList<>();
 
-        Registry<Enchantment> enchantmentRegistry = server.getRegistryManager()
+        Registry<Enchantment> enchantmentRegistry = server.registryAccess()
 
                 //? if <=1.21 {
-                .get(RegistryKey.ofRegistry(Identifier.of("minecraft", "enchantment")));
+                .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
                  //?} else
-                /*.getOrThrow(RegistryKey.ofRegistry(Identifier.of("minecraft", "enchantment")));*/
+                /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));*/
 
 
         for (String enchantmentId : loadClampedEnchants()) {
             if (!enchantmentId.contains(":")) enchantmentId = "minecraft:" + enchantmentId;
 
             try {
-                Identifier id = Identifier.of(enchantmentId);
+                var id = IdentifierHelper.parse(enchantmentId);
+                //? if <= 1.21 {
                 Enchantment enchantment = enchantmentRegistry.get(id);
+                //?} else {
+                /*Enchantment enchantment = enchantmentRegistry.getValue(id);
+                *///?}
 
                 if (enchantment != null) {
-                    newList.add(enchantmentRegistry.getKey(enchantment).orElseThrow());
+                    newList.add(enchantmentRegistry.getResourceKey(enchantment).orElseThrow());
                 } else {
                     OtherUtils.throwError("[CONFIG] Invalid enchantment: " + enchantmentId);
                 }
@@ -191,29 +263,33 @@ public class Blacklist {
         return newList;
     }
 
-    public List<RegistryKey<Enchantment>> getBannedEnchants() {
+    public List<ResourceKey<Enchantment>> getBannedEnchants() {
         if (server == null) return new ArrayList<>();
 
         if (loadedBannedEnchants != null) return loadedBannedEnchants;
-        List<RegistryKey<Enchantment>> newList = new ArrayList<>();
+        List<ResourceKey<Enchantment>> newList = new ArrayList<>();
 
-        Registry<Enchantment> enchantmentRegistry = server.getRegistryManager()
+        Registry<Enchantment> enchantmentRegistry = server.registryAccess()
 
                 //? if <=1.21 {
-                .get(RegistryKey.ofRegistry(Identifier.of("minecraft", "enchantment")));
+                .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
         //?} else
-        /*.getOrThrow(RegistryKey.ofRegistry(Identifier.of("minecraft", "enchantment")));*/
+        /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));*/
 
 
         for (String enchantmentId : loadBlacklistedEnchants()) {
             if (!enchantmentId.contains(":")) enchantmentId = "minecraft:" + enchantmentId;
 
             try {
-                Identifier id = Identifier.of(enchantmentId);
+                var id = IdentifierHelper.parse(enchantmentId);
+                //? if <= 1.21 {
                 Enchantment enchantment = enchantmentRegistry.get(id);
+                //?} else {
+                /*Enchantment enchantment = enchantmentRegistry.getValue(id);
+                *///?}
 
                 if (enchantment != null) {
-                    newList.add(enchantmentRegistry.getKey(enchantment).orElseThrow());
+                    newList.add(enchantmentRegistry.getResourceKey(enchantment).orElseThrow());
                 } else {
                     OtherUtils.throwError("[CONFIG] Invalid enchantment: " + enchantmentId);
                 }
@@ -226,27 +302,31 @@ public class Blacklist {
         return newList;
     }
 
-    public List<RegistryEntry<StatusEffect>> getBannedEffects() {
+    public List<Holder<MobEffect>> getBannedEffects() {
         if (server == null) return new ArrayList<>();
 
         if (loadedBannedEffects != null) return loadedBannedEffects;
-        List<RegistryEntry<StatusEffect>> newList = new ArrayList<>();
+        List<Holder<MobEffect>> newList = new ArrayList<>();
 
-        Registry<StatusEffect> effectsRegistry = server.getRegistryManager()
+        Registry<MobEffect> effectsRegistry = server.registryAccess()
         //? if <=1.21 {
-        .get(RegistryKey.ofRegistry(Identifier.of("minecraft", "mob_effect")));
+        .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
         //?} else
-        /*.getOrThrow(RegistryKey.ofRegistry(Identifier.of("minecraft", "mob_effect")));*/
+        /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));*/
 
         for (String potionId : loadBannedPotions()) {
             if (!potionId.contains(":")) potionId = "minecraft:" + potionId;
 
             try {
-                Identifier id = Identifier.of(potionId);
-                StatusEffect enchantment = effectsRegistry.get(id);
+                var id = IdentifierHelper.parse(potionId);
+                //? if <= 1.21 {
+                MobEffect enchantment = effectsRegistry.get(id);
+                //?} else {
+                /*MobEffect enchantment = effectsRegistry.getValue(id);
+                *///?}
 
                 if (enchantment != null) {
-                    newList.add(effectsRegistry.getEntry(enchantment));
+                    newList.add(effectsRegistry.wrapAsHolder(enchantment));
                 } else {
                     OtherUtils.throwError("[CONFIG] Invalid effect: " + potionId);
                 }
@@ -263,55 +343,57 @@ public class Blacklist {
         if (Main.server == null) return;
 
         CREATIVE_IGNORE_BLACKLIST = seasonConfig.CREATIVE_IGNORE_BLACKLIST.get(seasonConfig);
-        
+
         loadedListItem = null;
         loadedListBlock = null;
         loadedListEnchants = null;
         loadedBannedEnchants = null;
         loadedBannedEffects = null;
+        loadedRecipeBlacklist = null;
         getItemBlacklist();
         getBlockBlacklist();
         getClampedEnchants();
         getBannedEnchants();
         getBannedEffects();
+        getRecipeBlacklist();
     }
 
-    public ActionResult onBlockUse(ServerPlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-        if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return ActionResult.PASS;
-        processItemStack(player, player.getStackInHand(hand));
+    public InteractionResult onBlockUse(ServerPlayer player, Level level, InteractionHand hand, BlockHitResult hitResult) {
+        if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return InteractionResult.PASS;
+        processItemStack(player, player.getItemInHand(hand));
         BlockPos blockPos = hitResult.getBlockPos();
-        BlockState block = world.getBlockState(blockPos);
-        if (block.isAir()) return ActionResult.PASS;
+        BlockState block = level.getBlockState(blockPos);
+        if (block.isAir()) return InteractionResult.PASS;
         if (getBlockBlacklist().contains(block.getBlock())) {
-            world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
-            return ActionResult.FAIL;
+            level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    public ActionResult onBlockAttack(ServerPlayerEntity player, World world, BlockPos pos) {
-        if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return ActionResult.PASS;
-        if (world.isClient()) return ActionResult.PASS;
-        BlockState block = world.getBlockState(pos);
-        if (block.isAir()) return ActionResult.PASS;
+    public InteractionResult onBlockAttack(ServerPlayer player, Level level, BlockPos pos) {
+        if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return InteractionResult.PASS;
+        if (level.isClientSide()) return InteractionResult.PASS;
+        BlockState block = level.getBlockState(pos);
+        if (block.isAir()) return InteractionResult.PASS;
         if (getBlockBlacklist().contains(block.getBlock())) {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
-            return ActionResult.FAIL;
+            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    public void onCollision(ServerPlayerEntity player, ItemStack stack, CallbackInfo ci) {
+    public void onCollision(ServerPlayer player, ItemStack stack, CallbackInfo ci) {
         if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return;
         processItemStack(player, stack);
     }
 
-    public void onInventoryUpdated(ServerPlayerEntity player) {
+    public void onInventoryUpdated(ServerPlayer player) {
         if (Main.server == null) return;
-        PlayerInventory inventory = player.getInventory();
+        Inventory inventory = player.getInventory();
         if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return;
-        for (int i = 0; i < inventory.size(); i++) {
-            processItemStack(player, inventory.getStack(i));
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            processItemStack(player, inventory.getItem(i));
         }
         PlayerUtils.updatePlayerInventory(player);
     }
@@ -325,21 +407,21 @@ public class Blacklist {
         if (getItemBlacklist().contains(item)) return true;
         if (item != Items.POTION && item != Items.LINGERING_POTION && item != Items.SPLASH_POTION) return false;
 
-        PotionContentsComponent potions = itemStack.getComponents().get(DataComponentTypes.POTION_CONTENTS);
+        PotionContents potions = itemStack.getComponents().get(DataComponents.POTION_CONTENTS);
         if (potions == null) return false;
-        for (StatusEffectInstance effect : potions.getEffects()) {
-            if (getBannedEffects().contains(effect.getEffectType())) return true;
+        for (MobEffectInstance effect : potions.getAllEffects()) {
+            if (getBannedEffects().contains(effect.getEffect())) return true;
         }
         return false;
     }
 
-    public void processItemStack(ServerPlayerEntity player, ItemStack itemStack) {
+    public void processItemStack(ServerPlayer player, ItemStack itemStack) {
         if (player.isCreative() && CREATIVE_IGNORE_BLACKLIST) return;
         if (itemStack.isEmpty()) return;
         if (itemStack.getItem() == Items.AIR) return;
         if (isBlacklistedItem(itemStack) && !ItemStackUtils.hasCustomComponentEntry(itemStack, "IgnoreBlacklist")) {
             itemStack.setCount(0);
-            player.getInventory().updateItems();
+            player.getInventory().tick();
             return;
         }
 
@@ -359,54 +441,54 @@ public class Blacklist {
             *///?}
             if (remove) {
                 itemStack.setCount(0);
-                player.getInventory().updateItems();
+                player.getInventory().tick();
                 return;
             }
             return;
         }
-        ItemEnchantmentsComponent enchants = itemStack.getComponents().get(DataComponentTypes.ENCHANTMENTS);
-        ItemEnchantmentsComponent enchantsStored = itemStack.getComponents().get(DataComponentTypes.STORED_ENCHANTMENTS);
+        ItemEnchantments enchants = itemStack.getComponents().get(DataComponents.ENCHANTMENTS);
+        ItemEnchantments enchantsStored = itemStack.getComponents().get(DataComponents.STORED_ENCHANTMENTS);
         if (enchants != null) {
-            itemStack.set(DataComponentTypes.ENCHANTMENTS, clampAndBlacklistEnchantments(enchants));
+            itemStack.set(DataComponents.ENCHANTMENTS, clampAndBlacklistEnchantments(enchants));
         }
         if (enchantsStored != null) {
-            itemStack.set(DataComponentTypes.STORED_ENCHANTMENTS, clampAndBlacklistEnchantments(enchantsStored));
+            itemStack.set(DataComponents.STORED_ENCHANTMENTS, clampAndBlacklistEnchantments(enchantsStored));
         }
     }
 
-    public ItemEnchantmentsComponent clampAndBlacklistEnchantments(ItemEnchantmentsComponent enchants) {
-        ItemEnchantmentsComponent afterBlacklist = blacklistEnchantments(enchants);
+    public ItemEnchantments clampAndBlacklistEnchantments(ItemEnchantments enchants) {
+        ItemEnchantments afterBlacklist = blacklistEnchantments(enchants);
         clampEnchantments(afterBlacklist);
         return afterBlacklist;
     }
 
-    public ItemEnchantmentsComponent blacklistEnchantments(ItemEnchantmentsComponent enchants) {
+    public ItemEnchantments blacklistEnchantments(ItemEnchantments enchants) {
         if (enchants.isEmpty()) return enchants;
-        List<RegistryKey<Enchantment>> banned = getBannedEnchants();
+        List<ResourceKey<Enchantment>> banned = getBannedEnchants();
         if (banned.isEmpty()) return enchants;
-        List<it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<RegistryEntry<Enchantment>>> toRemove = new ArrayList<>();
-        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<RegistryEntry<Enchantment>> enchant : enchants.getEnchantmentEntries()) {
-            Optional<RegistryKey<Enchantment>> enchantRegistry = enchant.getKey().getKey();
+        List<it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>>> toRemove = new ArrayList<>();
+        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
+            Optional<ResourceKey<Enchantment>> enchantRegistry = enchant.getKey().unwrapKey();
             if (enchantRegistry.isEmpty()) continue;
             if (banned.contains(enchantRegistry.get())) {
                 toRemove.add(enchant);
             }
         }
         if (toRemove.isEmpty()) return enchants;
-        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
+        ItemEnchantments.Mutable builder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
 
-        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<RegistryEntry<Enchantment>> enchant : enchants.getEnchantmentEntries()) {
+        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
             if (toRemove.contains(enchant)) continue;
-            builder.add(enchant.getKey(), enchant.getIntValue());
+            builder.upgrade(enchant.getKey(), enchant.getIntValue());
         }
 
-        return builder.build();
+        return builder.toImmutable();
     }
 
-    public void clampEnchantments(ItemEnchantmentsComponent enchants) {
-        List<RegistryKey<Enchantment>> clamp = getClampedEnchants();
-        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<RegistryEntry<Enchantment>> enchant : enchants.getEnchantmentEntries()) {
-            Optional<RegistryKey<Enchantment>> enchantRegistry = enchant.getKey().getKey();
+    public void clampEnchantments(ItemEnchantments enchants) {
+        List<ResourceKey<Enchantment>> clamp = getClampedEnchants();
+        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
+            Optional<ResourceKey<Enchantment>> enchantRegistry = enchant.getKey().unwrapKey();
             if (enchantRegistry.isEmpty()) continue;
             if (clamp.contains(enchantRegistry.get())) {
                 enchant.setValue(1);

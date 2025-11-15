@@ -7,10 +7,10 @@ import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 
@@ -24,37 +24,69 @@ public class DoubleLifeCommands extends Command {
     }
 
     @Override
-    public Text getBannedText() {
-        return Text.of("This command is only available when playing Double Life.");
+    public Component getBannedText() {
+        return Component.nullToEmpty("This command is only available when playing Double Life.");
     }
 
     @Override
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             literal("soulmate")
                 .requires(PermissionManager::isAdmin)
                 .then(literal("get")
-                    .then(argument("player", EntityArgumentType.player())
-                        .executes(context -> getSoulmate(context.getSource(), EntityArgumentType.getPlayer(context, "player")))
+                    .then(argument("player", EntityArgument.player())
+                        .executes(context -> getSoulmate(context.getSource(), EntityArgument.getPlayer(context, "player")))
                     )
                 )
                 .then(literal("set")
-                    .then(argument("player", EntityArgumentType.player())
-                        .then(argument("soulmate", EntityArgumentType.player())
-                            .executes(context -> setSoulmate(
-                                context.getSource(),
-                                EntityArgumentType.getPlayer(context, "player"),
-                                EntityArgumentType.getPlayer(context, "soulmate")
-                            ))
+                        .then(argument("player", EntityArgument.player())
+                                .then(argument("soulmate", EntityArgument.player())
+                                        .executes(context -> setSoulmate(
+                                                context.getSource(),
+                                                EntityArgument.getPlayer(context, "player"),
+                                                EntityArgument.getPlayer(context, "soulmate")
+                                        ))
+                                )
                         )
-                    )
+                )
+                .then(literal("force")
+                        .then(argument("player", EntityArgument.player())
+                                .then(argument("soulmate", EntityArgument.player())
+                                        .executes(context -> forceSoulmate(
+                                                context.getSource(),
+                                                EntityArgument.getPlayer(context, "player"),
+                                                EntityArgument.getPlayer(context, "soulmate")
+                                        ))
+                                )
+                        )
+                        .then(literal("reset")
+                                .executes(context -> forceSoulmate(
+                                        context.getSource(), null, null
+                                ))
+                        )
+                )
+                .then(literal("prevent")
+                        .then(argument("player", EntityArgument.player())
+                                .then(argument("soulmate", EntityArgument.player())
+                                        .executes(context -> preventSoulmate(
+                                                context.getSource(),
+                                                EntityArgument.getPlayer(context, "player"),
+                                                EntityArgument.getPlayer(context, "soulmate")
+                                        ))
+                                )
+                        )
+                        .then(literal("reset")
+                                .executes(context -> preventSoulmate(
+                                        context.getSource(), null, null
+                                ))
+                        )
                 )
                 .then(literal("list")
                     .executes(context -> listSoulmates(context.getSource()))
                 )
                 .then(literal("reset")
-                    .then(argument("player", EntityArgumentType.players())
-                        .executes(context -> resetSoulmate(context.getSource(), EntityArgumentType.getPlayers(context, "player")))
+                    .then(argument("player", EntityArgument.players())
+                        .executes(context -> resetSoulmate(context.getSource(), EntityArgument.getPlayers(context, "player")))
                     )
                 )
                 .then(literal("resetAll")
@@ -66,19 +98,93 @@ public class DoubleLifeCommands extends Command {
         );
     }
 
-    public int setSoulmate(ServerCommandSource source, ServerPlayerEntity player, ServerPlayerEntity soulmate) {
+    public int preventSoulmate(CommandSourceStack source, ServerPlayer player, ServerPlayer soulmate) {
+        if (checkBanned(source)) return -1;
+
+        if (player == null && soulmate == null) {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Soulmate prevent entries were reset"));
+            return 1;
+        }
+
+        if (player == null) return -1;
+
+        DoubleLife season = ((DoubleLife) currentSeason);
+
+        if (season.hasSoulmate(player)) {
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            return -1;
+        }
+
+        if (season.hasSoulmate(soulmate)) {
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            return -1;
+        }
+        if (player.getUUID() == soulmate.getUUID()) {
+            source.sendFailure(Component.nullToEmpty("You cannot specify the same player twice"));
+            return -1;
+        }
+
+        season.preventSoulmates(player,soulmate);
+
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate now cannot be {} when the next randomization happens.", player, soulmate));
+        return 1;
+    }
+
+    public int forceSoulmate(CommandSourceStack source, ServerPlayer player, ServerPlayer soulmate) {
+        if (checkBanned(source)) return -1;
+
+        if (player == null && soulmate == null) {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Soulmate force entries were reset"));
+            return 1;
+        }
+
+        if (player == null) return -1;
+
+        DoubleLife season = ((DoubleLife) currentSeason);
+
+        if (season.hasSoulmate(player)) {
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            return -1;
+        }
+
+        if (season.hasSoulmate(soulmate)) {
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            return -1;
+        }
+        if (player.getUUID() == soulmate.getUUID()) {
+            source.sendFailure(Component.nullToEmpty("You cannot specify the same player twice"));
+            return -1;
+        }
+
+        if (DoubleLife.soulmatesForce.containsKey(player.getUUID()) || DoubleLife.soulmatesForce.containsValue(player.getUUID())) {
+            source.sendFailure(TextUtils.formatPlain("{} is already forced with someone", player));
+            return -1;
+        }
+
+        if (DoubleLife.soulmatesForce.containsKey(soulmate.getUUID()) || DoubleLife.soulmatesForce.containsValue(soulmate.getUUID())) {
+            source.sendFailure(TextUtils.formatPlain("{} is already forced with someone", soulmate));
+            return -1;
+        }
+
+        season.forceSoulmates(player,soulmate);
+
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate will be {} when the next randomization happens.", player, soulmate));
+        return 1;
+    }
+
+    public int setSoulmate(CommandSourceStack source, ServerPlayer player, ServerPlayer soulmate) {
         if (checkBanned(source)) return -1;
         if (player == null) return -1;
 
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (season.hasSoulmate(player)) {
-            source.sendError(TextUtils.formatPlain("{} already has a soulmate", player));
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
             return -1;
         }
 
         if (season.hasSoulmate(soulmate)) {
-            source.sendError(TextUtils.formatPlain("{} already has a soulmate", player));
+            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
             return -1;
         }
 
@@ -89,37 +195,37 @@ public class DoubleLifeCommands extends Command {
         return 1;
     }
 
-    public int getSoulmate(ServerCommandSource source, ServerPlayerEntity player) {
+    public int getSoulmate(CommandSourceStack source, ServerPlayer player) {
         if (checkBanned(source)) return -1;
         if (player == null) return -1;
 
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (!season.hasSoulmate(player)) {
-            source.sendError(TextUtils.formatPlain("{} does not have a soulmate", player));
+            source.sendFailure(TextUtils.formatPlain("{} does not have a soulmate", player));
             return -1;
         }
         if (!season.isSoulmateOnline(player)) {
-            source.sendError(TextUtils.formatPlain("{} 's soulmate is not online right now", player));
+            source.sendFailure(TextUtils.formatPlain("{} 's soulmate is not online right now", player));
             return -1;
         }
 
-        ServerPlayerEntity soulmate = season.getSoulmate(player);
+        ServerPlayer soulmate = season.getSoulmate(player);
         if (soulmate == null) return -1;
 
         OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate is {}", player, soulmate));
         return 1;
     }
 
-    public int resetSoulmate(ServerCommandSource source, Collection<ServerPlayerEntity> players) {
+    public int resetSoulmate(CommandSourceStack source, Collection<ServerPlayer> players) {
         if (checkBanned(source)) return -1;
         if (players == null) return -1;
         if (players.isEmpty()) return -1;
 
         DoubleLife season = ((DoubleLife) currentSeason);
 
-        List<ServerPlayerEntity> affected = new ArrayList<>();
-        for (ServerPlayerEntity player : players) {
+        List<ServerPlayer> affected = new ArrayList<>();
+        for (ServerPlayer player : players) {
             if (season.hasSoulmate(player)) {
                 season.resetSoulmate(player);
                 season.saveSoulmates();
@@ -128,7 +234,7 @@ public class DoubleLifeCommands extends Command {
         }
 
         if (affected.isEmpty()) {
-            source.sendError(Text.of("No target was found"));
+            source.sendFailure(Component.nullToEmpty("No target was found"));
             return -1;
         }
         if (affected.size() == 1) {
@@ -139,18 +245,18 @@ public class DoubleLifeCommands extends Command {
         return 1;
     }
 
-    public int resetAllSoulmates(ServerCommandSource source) {
+    public int resetAllSoulmates(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
 
         DoubleLife season = ((DoubleLife) currentSeason);
 
         season.resetAllSoulmates();
 
-        OtherUtils.sendCommandFeedback(source, Text.of("All soulmate entries were reset"));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("All soulmate entries were reset"));
         return 1;
     }
 
-    public int listSoulmates(ServerCommandSource source) {
+    public int listSoulmates(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
 
         DoubleLife season = ((DoubleLife) currentSeason);
@@ -160,8 +266,8 @@ public class DoubleLifeCommands extends Command {
             noSoulmates = false;
             Object text1 = entry.getKey();
             Object text2 = entry.getValue();
-            ServerPlayerEntity player = PlayerUtils.getPlayer(entry.getKey());
-            ServerPlayerEntity soulmate = PlayerUtils.getPlayer(entry.getValue());
+            ServerPlayer player = PlayerUtils.getPlayer(entry.getKey());
+            ServerPlayer soulmate = PlayerUtils.getPlayer(entry.getValue());
             if (player != null) text1 = player;
             if (soulmate != null) text2 = soulmate;
 
@@ -169,15 +275,15 @@ public class DoubleLifeCommands extends Command {
         }
 
         if (noSoulmates) {
-            source.sendError(Text.of("There are no soulmates currently assigned"));
+            source.sendFailure(Component.nullToEmpty("There are no soulmates currently assigned"));
         }
         return 1;
     }
 
-    public int rollSoulmates(ServerCommandSource source) {
+    public int rollSoulmates(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         DoubleLife season = ((DoubleLife) currentSeason);
-        OtherUtils.sendCommandFeedback(source, Text.of("§7Rolling soulmates..."));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Rolling soulmates..."));
         season.rollSoulmates();
         return 1;
     }

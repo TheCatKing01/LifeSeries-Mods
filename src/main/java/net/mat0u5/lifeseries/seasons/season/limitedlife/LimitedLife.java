@@ -13,19 +13,20 @@ import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.ScoreboardEntry;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.ScoreHolder;
 
 import java.util.Collection;
 
-import static net.mat0u5.lifeseries.Main.*;
-import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
+import static net.mat0u5.lifeseries.Main.currentSession;
+import static net.mat0u5.lifeseries.Main.seasonConfig;
 
 public class LimitedLife extends Season {
     public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /boogeyman";
@@ -37,6 +38,7 @@ public class LimitedLife extends Season {
     private int KILL_NORMAL = 1800;
     private int KILL_BOOGEYMAN = 3600;
     public static boolean TICK_OFFLINE_PLAYERS = false;
+    public static boolean SHOW_TIME_BELOW_NAME = false;
 
     @Override
     public Seasons getSeason() {
@@ -88,7 +90,7 @@ public class LimitedLife extends Season {
             message = "Session has ended";
         }
 
-        for (ServerPlayerEntity player : PlayerUtils.getAllPlayers()) {
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
 
             if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
                 long timestamp = SessionTimerStates.OFF.getValue();
@@ -103,10 +105,10 @@ public class LimitedLife extends Season {
                     NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, timestamp);
                 }
 
-                if (livesManager.hasAssignedLives(player) && livesManager.getPlayerLives(player) != null) {
+                if (player.ls$hasAssignedLives() && player.ls$getLives() != null) {
                     long playerLives;
-                    if (livesManager.isAlive(player)) {
-                        Integer playerLivesInt = livesManager.getPlayerLives(player);
+                    if (player.ls$isAlive()) {
+                        Integer playerLivesInt = player.ls$getLives();
                         playerLives = playerLivesInt == null ? -1 : playerLivesInt;
                     }
                     else {
@@ -117,15 +119,15 @@ public class LimitedLife extends Season {
                 }
             }
             else {
-                MutableText fullMessage = Text.empty();
-                if (currentSession.displayTimer.contains(player.getUuid())) {
-                    fullMessage.append(Text.literal(message).formatted(Formatting.GRAY));
+                MutableComponent fullMessage = Component.empty();
+                if (currentSession.displayTimer.contains(player.getUUID())) {
+                    fullMessage.append(Component.literal(message).withStyle(ChatFormatting.GRAY));
                 }
-                if (livesManager.hasAssignedLives(player)) {
-                    if (!fullMessage.getString().isEmpty()) fullMessage.append(Text.of("  |  "));
+                if (player.ls$hasAssignedLives()) {
+                    if (!fullMessage.getString().isEmpty()) fullMessage.append(Component.nullToEmpty("  |  "));
                     fullMessage.append(livesManager.getFormattedLives(player));
                 }
-                player.sendMessage(fullMessage, true);
+                player.displayClientMessage(fullMessage, true);
             }
         }
     }
@@ -139,33 +141,33 @@ public class LimitedLife extends Season {
         secondCounter--;
         if (secondCounter <= 0) {
             secondCounter = 20;
-            livesManager.getAlivePlayers().forEach(livesManager::removePlayerLife);
+            livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
 
             if (TICK_OFFLINE_PLAYERS) {
-                Collection<ScoreboardEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-                for (ScoreboardEntry entry : entries) {
+                Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+                for (PlayerScoreEntry entry : entries) {
                     if (entry.value() <= 0) continue;
                     if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
-                    ScoreboardUtils.setScore(ScoreHolder.fromName(entry.owner()), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
+                    ScoreboardUtils.setScore(ScoreHolder.forNameOnly(entry.owner()), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
                 }
             }
         }
     }
 
     @Override
-    public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+    public void onPlayerDeath(ServerPlayer player, DamageSource source) {
         SessionTranscript.onPlayerDeath(player, source);
         if (source != null) {
-            if (source.getAttacker() instanceof ServerPlayerEntity serverAttacker) {
-                if (player != source.getAttacker()) {
+            if (source.getEntity() instanceof ServerPlayer serverAttacker) {
+                if (player != source.getEntity()) {
                     onPlayerKilledByPlayer(player, serverAttacker);
                     return;
                 }
             }
         }
-        if (player.getPrimeAdversary() != null) {
-            if (player.getPrimeAdversary() instanceof ServerPlayerEntity serverAdversary) {
-                if (player != player.getPrimeAdversary()) {
+        if (player.getKillCredit() != null) {
+            if (player.getKillCredit() instanceof ServerPlayer serverAdversary) {
+                if (player != player.getKillCredit()) {
                     onPlayerKilledByPlayer(player, serverAdversary);
                     return;
                 }
@@ -173,105 +175,109 @@ public class LimitedLife extends Season {
         }
         onPlayerDiedNaturally(player);
         if (livesManager.canChangeLivesNaturally(player)) {
-            livesManager.addToPlayerLives(player, DEATH_NORMAL);
-            if (livesManager.isAlive(player)) {
-                PlayerUtils.sendTitle(player, Text.literal(OtherUtils.formatSecondsToReadable(DEATH_NORMAL)).formatted(Formatting.RED), 20, 80, 20);
+            player.ls$addLives(DEATH_NORMAL);
+            if (player.ls$isAlive()) {
+                sendTimeTitle(player, DEATH_NORMAL, ChatFormatting.RED);
             }
         }
     }
 
+    public void sendTimeTitle(ServerPlayer player, int timeSeconds, ChatFormatting style) {
+        sendTimeTitle(player, Component.literal(OtherUtils.formatSecondsToReadable(timeSeconds)).withStyle(style));
+    }
+    public void sendTimeTitle(ServerPlayer player, Component text) {
+        PlayerUtils.sendTitle(player, text, 20, 80, 20);
+    }
+
     @Override
-    public void onClaimKill(ServerPlayerEntity killer, ServerPlayerEntity victim) {
+    public void onClaimKill(ServerPlayer killer, ServerPlayer victim) {
         boolean wasAllowedToAttack = isAllowedToAttack(killer, victim, false);
         boolean wasBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
         super.onClaimKill(killer, victim);
 
         if (!wasBoogeyCure) {
             if (wasAllowedToAttack && livesManager.canChangeLivesNaturally()) {
-                livesManager.addToPlayerLives(killer, KILL_NORMAL);
-                PlayerUtils.sendTitle(killer, Text.literal(OtherUtils.formatSecondsToReadable(KILL_NORMAL)).formatted(Formatting.GREEN), 20, 80, 20);
+                killer.ls$addLives(KILL_NORMAL);
+                sendTimeTitle(killer, KILL_NORMAL, ChatFormatting.GREEN);
             }
         }
         else if (livesManager.canChangeLivesNaturally()) {
             //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
 
-            boolean wasAlive = false;
-
-            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN-DEATH_NORMAL);
-            String msgKiller = OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN);
-
-            if (livesManager.isAlive(victim)) {
-                livesManager.addToPlayerLives(victim, DEATH_BOOGEYMAN-DEATH_NORMAL);
-                wasAlive = true;
+            boolean wasAlive = victim.ls$isAlive();
+            if (wasAlive) {
+                victim.ls$addLives(DEATH_BOOGEYMAN-DEATH_NORMAL);
             }
-            livesManager.addToPlayerLives(killer, KILL_BOOGEYMAN);
-            if (livesManager.isAlive(victim)) {
-                PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
-                PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
-            }
-            else if (wasAlive && SHOW_DEATH_TITLE) {
-                PlayerUtils.sendTitleWithSubtitle(killer,
-                        Text.literal(msgKiller).formatted(Formatting.GREEN),
-                        livesManager.getDeathMessage(victim),
-                        20, 80, 20);
+            killer.ls$addLives(KILL_BOOGEYMAN);
+            boolean isAlive = victim.ls$isAlive();
+
+            if (isAlive) {
+                sendTimeTitle(killer, KILL_BOOGEYMAN, ChatFormatting.GREEN);
+                sendTimeTitle(victim, (DEATH_BOOGEYMAN-DEATH_NORMAL), ChatFormatting.RED);
             }
             else {
-                PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
+                //Is dead right now
+                if (wasAlive && SHOW_DEATH_TITLE) {
+                    String msgKiller = OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN);
+                    PlayerUtils.sendTitleWithSubtitle(killer,
+                            Component.literal(msgKiller).withStyle(ChatFormatting.GREEN),
+                            livesManager.getDeathMessage(victim),
+                            20, 80, 20);
+                }
+                else {
+                    sendTimeTitle(killer, KILL_BOOGEYMAN, ChatFormatting.GREEN);
+                }
             }
         }
     }
 
     @Override
-    public void onPlayerKilledByPlayer(ServerPlayerEntity victim, ServerPlayerEntity killer) {
+    public void onPlayerKilledByPlayer(ServerPlayer victim, ServerPlayer killer) {
         boolean wasAllowedToAttack = isAllowedToAttack(killer, victim, false);
         boolean wasBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
         super.onPlayerKilledByPlayer(victim, killer);
 
         if (!wasBoogeyCure && livesManager.canChangeLivesNaturally()) {
-            boolean wasFinalKill = livesManager.isAlive(victim) || !SHOW_DEATH_TITLE;
+            Component victimDeathMessage = livesManager.getDeathMessage(victim);
+
+            boolean wasAlive = victim.ls$isAlive();
+            victim.ls$addLives(DEATH_NORMAL);
+            boolean isAlive = victim.ls$isAlive();
+
             if (wasAllowedToAttack) {
-                String msgKiller = OtherUtils.formatSecondsToReadable(KILL_NORMAL);
-                livesManager.addToPlayerLives(killer, KILL_NORMAL);
-                if (wasFinalKill) {
-                    PlayerUtils.sendTitle(killer, Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
-                }
-                else {
+                killer.ls$addLives(KILL_NORMAL);
+                if ((wasAlive && !isAlive) && SHOW_DEATH_TITLE) {
                     PlayerUtils.sendTitleWithSubtitle(killer,
-                            Text.literal(msgKiller).formatted(Formatting.GREEN),
-                            livesManager.getDeathMessage(victim),
+                            Component.literal(OtherUtils.formatSecondsToReadable(KILL_NORMAL)).withStyle(ChatFormatting.GREEN),
+                            victimDeathMessage,
                             20, 80, 20);
                 }
+                else {
+                    sendTimeTitle(killer, KILL_NORMAL, ChatFormatting.GREEN);
+                }
             }
-            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_NORMAL);
-            livesManager.addToPlayerLives(victim, DEATH_NORMAL);
-            if (wasFinalKill) {
-                PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
+            if (isAlive) {
+                sendTimeTitle(victim, DEATH_NORMAL, ChatFormatting.RED);
             }
         }
         else if (livesManager.canChangeLivesNaturally()) {
 
             //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
-            String msgVictim = OtherUtils.formatSecondsToReadable(DEATH_BOOGEYMAN);
             String msgKiller = OtherUtils.formatSecondsToReadable(KILL_BOOGEYMAN);
-            livesManager.addToPlayerLives(victim, DEATH_BOOGEYMAN);
-            livesManager.addToPlayerLives(killer, KILL_BOOGEYMAN);
 
-            if (livesManager.isAlive(victim) || !SHOW_DEATH_TITLE) {
-                PlayerUtils.sendTitle(victim, Text.literal(msgVictim).formatted(Formatting.RED), 20, 80, 20);
-                PlayerUtils.sendTitleWithSubtitle(killer,Text.of("§aYou are cured!"), Text.literal(msgKiller).formatted(Formatting.GREEN), 20, 80, 20);
+            victim.ls$addLives(DEATH_BOOGEYMAN);
+            killer.ls$addLives(KILL_BOOGEYMAN);
+
+            if (victim.ls$isAlive() || !SHOW_DEATH_TITLE) {
+                sendTimeTitle(victim, DEATH_BOOGEYMAN, ChatFormatting.RED);
+                PlayerUtils.sendTitleWithSubtitle(killer,Component.nullToEmpty("§aYou are cured!"), Component.literal(msgKiller).withStyle(ChatFormatting.GREEN), 20, 80, 20);
             }
             else {
-                PlayerUtils.sendTitleWithSubtitle(killer,Text.of("§aYou are cured, "+msgKiller),
+                PlayerUtils.sendTitleWithSubtitle(killer,Component.nullToEmpty("§aYou are cured, "+msgKiller),
                         livesManager.getDeathMessage(victim)
                         , 20, 80, 20);
             }
         }
-    }
-
-    @Override
-    public boolean isAllowedToAttack(ServerPlayerEntity attacker, ServerPlayerEntity victim, boolean allowSelfDefense) {
-        if (livesManager.isOnSpecificLives(attacker, 2, false) && livesManager.isOnAtLeastLives(victim, 3, false)) return true;
-        return super.isAllowedToAttack(attacker, victim, allowSelfDefense);
     }
 
     @Override
@@ -287,6 +293,7 @@ public class LimitedLife extends Season {
         KILL_BOOGEYMAN = LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get(config);
         TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get(config);
         LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get(config);
+        SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get(config);
     }
 
     @Override

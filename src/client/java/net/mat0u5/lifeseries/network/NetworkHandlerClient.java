@@ -1,84 +1,97 @@
 package net.mat0u5.lifeseries.network;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.MainClient;
 import net.mat0u5.lifeseries.config.ClientConfig;
+import net.mat0u5.lifeseries.config.ClientConfigGuiManager;
 import net.mat0u5.lifeseries.config.ClientConfigNetwork;
 import net.mat0u5.lifeseries.features.Morph;
 import net.mat0u5.lifeseries.features.SnailSkinsClient;
 import net.mat0u5.lifeseries.features.Trivia;
-import net.mat0u5.lifeseries.config.ClientConfigGuiManager;
 import net.mat0u5.lifeseries.gui.other.ChooseWildcardScreen;
 import net.mat0u5.lifeseries.gui.other.PastLifeChooseTwistScreen;
-import net.mat0u5.lifeseries.gui.other.SnailTextureInfoScreen;
 import net.mat0u5.lifeseries.gui.seasons.ChooseSeasonScreen;
 import net.mat0u5.lifeseries.gui.seasons.SeasonInfoScreen;
-import net.mat0u5.lifeseries.mixin.client.InGameHudAccessor;
+import net.mat0u5.lifeseries.mixin.client.GuiAccessor;
 import net.mat0u5.lifeseries.network.packets.*;
 import net.mat0u5.lifeseries.render.TextHud;
 import net.mat0u5.lifeseries.render.VignetteRenderer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Hunger;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
 import net.mat0u5.lifeseries.utils.ClientResourcePacks;
-import net.mat0u5.lifeseries.utils.ClientTaskScheduler;
 import net.mat0u5.lifeseries.utils.ClientUtils;
 import net.mat0u5.lifeseries.utils.enums.HandshakeStatus;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
+import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
+import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class NetworkHandlerClient {
     public static void registerClientReceiver() {
+        ClientLoginNetworking.registerGlobalReceiver(IdentifierHelper.mod("preloginpacket"),
+                (client, handler, buf, listenerAdder) -> {
+                    return CompletableFuture.completedFuture(
+                            PacketByteBufs.create().writeBoolean(true)
+                    );
+                }
+        );
+
         ClientPlayNetworking.registerGlobalReceiver(NumberPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleNumberPacket(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(StringPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleStringPacket(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleHandshake(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(TriviaQuestionPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> Trivia.receiveTrivia(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(LongPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleLongPacket(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(PlayerDisguisePayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handlePlayerDisguise(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleConfigPacket(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(StringListPayload.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleStringListPacket(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(SidetitlePacket.ID, (payload, context) -> {
-            MinecraftClient client = context.client();
+            Minecraft client = context.client();
             client.execute(() -> handleSidetitle(payload));
         });
         ClientPlayNetworking.registerGlobalReceiver(SnailTexturePacket.ID, (payload, context) -> {
@@ -90,8 +103,8 @@ public class NetworkHandlerClient {
 
     public static void handleSidetitle(SidetitlePacket payload) {
         MainClient.sideTitle = payload.text();
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.inGameHud instanceof InGameHudAccessor hudAccessor) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.gui instanceof GuiAccessor hudAccessor) {
             TextHud.sideTitleRemainTicks = hudAccessor.ls$titleFadeInTicks() + hudAccessor.ls$titleStayTicks() + hudAccessor.ls$titleFadeOutTicks();
         }
     }
@@ -108,11 +121,40 @@ public class NetworkHandlerClient {
                 String morphTypeStr = value.get(1);
                 EntityType<?> morphType = null;
                 if (!morphTypeStr.equalsIgnoreCase("null") && !morphUUIDStr.isEmpty()) {
-                    morphType = Registries.ENTITY_TYPE.get(Identifier.of(morphTypeStr));
+                    //? if <= 1.21 {
+                    morphType = BuiltInRegistries.ENTITY_TYPE.get(IdentifierHelper.parse(morphTypeStr));
+                    //?} else {
+                    /*morphType = BuiltInRegistries.ENTITY_TYPE.getValue(IdentifierHelper.parse(morphTypeStr));
+                    *///?}
                 }
                 if (VersionControl.isDevVersion()) Main.LOGGER.info("[PACKET_CLIENT] Received morph packet: {} ({})", morphType, morphUUID);
                 MorphManager.setFromPacket(morphUUID, morphType);
             } catch (Exception e) {}
+        }
+
+        if (name == PacketNames.HUNGER_NON_EDIBLE) {
+            Hunger.nonEdible.clear();
+            for (String itemId : value) {
+                if (!itemId.contains(":")) itemId = "minecraft:" + itemId;
+
+                try {
+                    var id = IdentifierHelper.parse(itemId);
+                    ResourceKey<Item> key = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
+
+                    //? if <= 1.21 {
+                    Item item = BuiltInRegistries.ITEM.get(key);
+                    //?} else {
+                    /*Item item = BuiltInRegistries.ITEM.getValue(key);
+                     *///?}
+                    if (item != null) {
+                        Hunger.nonEdible.add(item);
+                    } else {
+                        OtherUtils.throwError("[CONFIG] Invalid item: " + itemId);
+                    }
+                } catch (Exception e) {
+                    OtherUtils.throwError("[CONFIG] Error parsing item ID: " + itemId);
+                }
+            }
         }
     }
 
@@ -145,8 +187,8 @@ public class NetworkHandlerClient {
             MainClient.clientActiveWildcards = newList;
         }
 
-        if (name == PacketNames.JUMP && MinecraftClient.getInstance().player != null) {
-            MinecraftClient.getInstance().player.jump();
+        if (name == PacketNames.JUMP && Minecraft.getInstance().player != null) {
+            Minecraft.getInstance().player.jumpFromGround();
         }
 
         if (name == PacketNames.RESET_TRIVIA) {
@@ -154,7 +196,7 @@ public class NetworkHandlerClient {
         }
 
         if (name == PacketNames.SELECT_WILDCARDS) {
-            MinecraftClient.getInstance().setScreen(new ChooseWildcardScreen());
+            Minecraft.getInstance().setScreen(new ChooseWildcardScreen());
         }
 
         if (name == PacketNames.CLEAR_CONFIG) {
@@ -166,15 +208,11 @@ public class NetworkHandlerClient {
 
 
         if (name == PacketNames.SELECT_SEASON) {
-            MinecraftClient.getInstance().setScreen(new ChooseSeasonScreen(!value.isEmpty()));
+            Minecraft.getInstance().setScreen(new ChooseSeasonScreen(!value.isEmpty()));
         }
         if (name == PacketNames.SEASON_INFO) {
             Seasons season = Seasons.getSeasonFromStringName(value);
-            if (season != Seasons.UNASSIGNED) MinecraftClient.getInstance().setScreen(new SeasonInfoScreen(season));
-        }
-
-        if (name == PacketNames.SNAIL_TEXTURES_INFO) {
-            MinecraftClient.getInstance().setScreen(new SnailTextureInfoScreen());
+            if (season != Seasons.UNASSIGNED) Minecraft.getInstance().setScreen(new SeasonInfoScreen(season));
         }
 
         if (name == PacketNames.PREVENT_GLIDING) {
@@ -190,14 +228,14 @@ public class NetworkHandlerClient {
             MainClient.TAB_LIST_SHOW_EXACT_LIVES = value.equalsIgnoreCase("true");
         }
         if (name == PacketNames.SHOW_TOTEM) {
-            ItemStack totemItem = Items.TOTEM_OF_UNDYING.getDefaultStack();
+            ItemStack totemItem = Items.TOTEM_OF_UNDYING.getDefaultInstance();
             if (value.equalsIgnoreCase("task") || value.equalsIgnoreCase("task_red")) {
                 totemItem = AnimationUtils.getSecretLifeTotemItem(value.equalsIgnoreCase("task_red"));
             }
-            MinecraftClient.getInstance().gameRenderer.showFloatingItem(totemItem);
+            Minecraft.getInstance().gameRenderer.displayItemActivation(totemItem);
         }
         if (name == PacketNames.PAST_LIFE_CHOOSE_TWIST) {
-            MinecraftClient.getInstance().setScreen(new PastLifeChooseTwistScreen());
+            Minecraft.getInstance().setScreen(new PastLifeChooseTwistScreen());
         }
         if (name == PacketNames.FIX_SIZECHANGING_BUGS) {
             MainClient.FIX_SIZECHANGING_BUGS = value.equalsIgnoreCase("true");
@@ -224,8 +262,8 @@ public class NetworkHandlerClient {
             MainClient.snailAir = intNumber;
             MainClient.snailAirTimestamp = System.currentTimeMillis();
         }
-        if (name == PacketNames.FAKE_THUNDER && MinecraftClient.getInstance().world != null) {
-            MinecraftClient.getInstance().world.setLightningTicksLeft(intNumber);
+        if (name == PacketNames.FAKE_THUNDER && Minecraft.getInstance().level != null) {
+            Minecraft.getInstance().level.setSkyFlashTime(intNumber);
         }
         if (name == PacketNames.TAB_LIVES_CUTOFF) {
             MainClient.TAB_LIST_LIVES_CUTOFF = intNumber;
@@ -329,7 +367,7 @@ public class NetworkHandlerClient {
 
             //Check if client version is compatible with the server version
             if (clientVersion < serverCompatibility) {
-                Text disconnectText = Text.literal("[Life Series Mod] Client-Server version mismatch!\n" +
+                Component disconnectText = Component.literal("[Life Series Mod] Client-Server version mismatch!\n" +
                         "Update the client version to at least version "+serverCompatibilityStr);
                 ClientUtils.disconnect(disconnectText);
                 return;
@@ -337,7 +375,7 @@ public class NetworkHandlerClient {
 
             //Check if server version is compatible with the client version
             if (serverVersion < clientCompatibility) {
-                Text disconnectText = Text.literal("[Life Series Mod] Server-Client version mismatch!\n" +
+                Component disconnectText = Component.literal("[Life Series Mod] Server-Client version mismatch!\n" +
                         "The client version is too new for the server.\n" +
                         "Either update the server, or downgrade the client version to " + serverVersionStr);
                 ClientUtils.disconnect(disconnectText);
@@ -348,7 +386,7 @@ public class NetworkHandlerClient {
             //Isolated enviroment -> mod versions must be IDENTICAL between client and server
             //Check if client version is the same as the server version
             if (!clientVersionStr.equalsIgnoreCase(serverVersionStr)) {
-                Text disconnectText = Text.literal("[Life Series Mod] Client-Server version mismatch!\n" +
+                Component disconnectText = Component.literal("[Life Series Mod] Client-Server version mismatch!\n" +
                         "You must join with version "+serverCompatibilityStr);
                 ClientUtils.disconnect(disconnectText);
                 return;
@@ -401,6 +439,10 @@ public class NetworkHandlerClient {
 
     public static void sendStringPacket(PacketNames name, String value) {
         ClientPlayNetworking.send(new StringPayload(name.getName(), value));
+    }
+
+    public static void sendStringListPacket(PacketNames name, List<String> value) {
+        ClientPlayNetworking.send(new StringListPayload(name.getName(), value));
     }
 
     public static void sendNumberPacket(PacketNames name, double value) {

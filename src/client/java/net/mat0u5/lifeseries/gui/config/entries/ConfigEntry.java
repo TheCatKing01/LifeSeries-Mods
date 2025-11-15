@@ -1,27 +1,26 @@
 package net.mat0u5.lifeseries.gui.config.entries;
 
 import net.mat0u5.lifeseries.gui.config.ConfigScreen;
+import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 //? if >= 1.21.9 {
-/*import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 *///?}
 
 public abstract class ConfigEntry {
@@ -40,7 +39,7 @@ public abstract class ConfigEntry {
 
     public static final int MAX_DESCRIPTION_WIDTH = 250;
 
-    protected TextRenderer textRenderer;
+    protected Font textRenderer;
     protected ConfigScreen screen;
     protected final String fieldName;
     protected final String displayName;
@@ -48,19 +47,20 @@ public abstract class ConfigEntry {
     protected boolean hasError = false;
     protected String errorMessage = "";
 
-    protected ButtonWidget resetButton;
+    protected Button resetButton;
     public float highlightAlpha = 0.0f;
     protected boolean isHovered = false;
     private boolean isFocused = false;
     protected GroupConfigEntry<?> parentGroup;
     protected List<GroupConfigEntry<?>> groupTopology = new ArrayList<>();
     private boolean isNew = false;
+    public boolean changedForever = false;
 
     public ConfigEntry(String fieldName, String displayName, String description) {
         this.fieldName = fieldName;
         this.displayName = displayName;
         this.description = description;
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.textRenderer = Minecraft.getInstance().font;
         initializeResetButton();
     }
 
@@ -72,12 +72,12 @@ public abstract class ConfigEntry {
         if (!hasResetButton()) {
             return;
         }
-        resetButton = ButtonWidget.builder(Text.of("Reset"), this::onResetClicked)
-                .dimensions(0, 0, RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT)
+        resetButton = Button.builder(Component.nullToEmpty("Reset"), this::onResetClicked)
+                .bounds(0, 0, RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT)
                 .build();
     }
 
-    private void onResetClicked(ButtonWidget button) {
+    private void onResetClicked(Button button) {
         resetToDefault();
         markChanged();
     }
@@ -86,7 +86,7 @@ public abstract class ConfigEntry {
         this.screen = screen;
     }
 
-    public void render(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void render(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         isHovered = hovered;
         updateHighlightAnimation(tickDelta);
 
@@ -98,7 +98,7 @@ public abstract class ConfigEntry {
         int textColor = hasError() ? TextColors.PASTEL_RED : TextColors.WHITE;
         int labelX = x + LABEL_OFFSET_X;
         int labelY = y + LABEL_OFFSET_Y;
-        context.drawTextWithShadow(textRenderer, getDisplayName(), labelX, labelY, textColor);
+        context.drawString(textRenderer, getDisplayName(), labelX, labelY, textColor);
 
         int resetButtonX = x + width - RESET_BUTTON_WIDTH + RESET_BUTTON_OFFSET_X;
         if (hasResetButton()) {
@@ -109,30 +109,30 @@ public abstract class ConfigEntry {
         }
 
         if (hasError()) {
-            RenderUtils.drawTextRight(context, textRenderer, TextColors.PASTEL_RED, Text.of("⚠"), x + width + ERROR_LABEL_OFFSET_X, y + ERROR_LABEL_OFFSET_Y);
+            RenderUtils.drawTextRight(context, textRenderer, TextColors.PASTEL_RED, Component.nullToEmpty("⚠"), x + width + ERROR_LABEL_OFFSET_X, y + ERROR_LABEL_OFFSET_Y);
             if (isHovered) {
-                Text errorText = TextUtils.format("§cERROR:\n{}",getErrorMessage());
+                Component errorText = TextUtils.format("§cERROR:\n{}",getErrorMessage());
                 //? if <= 1.21.5 {
-                context.drawTooltip(textRenderer, textRenderer.wrapLines(errorText, MAX_DESCRIPTION_WIDTH), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
+                context.renderTooltip(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
                  //?} else {
-                /*context.drawTooltip(textRenderer, textRenderer.wrapLines(errorText, MAX_DESCRIPTION_WIDTH), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+                /*context.setTooltipForNextFrame(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
                 *///?}
             }
         }
         else if (description != null && !description.isEmpty()) {
-            if (mouseX >= labelX&& mouseX <= labelX + textRenderer.getWidth(getDisplayName()) &&
-                mouseY >= labelY && mouseY <= labelY + textRenderer.fontHeight) {
-                Text descriptionText = getDisplayName().formatted(Formatting.UNDERLINE).append("§r\n"+description);
+            if (mouseX >= labelX&& mouseX <= labelX + textRenderer.width(getDisplayName()) &&
+                mouseY >= labelY && mouseY <= labelY + textRenderer.lineHeight) {
+                Component descriptionText = getDisplayName().withStyle(ChatFormatting.UNDERLINE).append("§r\n"+description);
                 //? if <= 1.21.5 {
-                context.drawTooltip(textRenderer, textRenderer.wrapLines(descriptionText, MAX_DESCRIPTION_WIDTH), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
+                context.renderTooltip(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
                  //?} else {
-                /*context.drawTooltip(textRenderer, textRenderer.wrapLines(descriptionText, MAX_DESCRIPTION_WIDTH), HoveredTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+                /*context.setTooltipForNextFrame(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
                 *///?}
             }
         }
 
         if (isNew) {
-            context.drawTextWithShadow(textRenderer, "New", 2, labelY, TextColors.LIGHT_GRAY_A128);
+            context.drawString(textRenderer, "New", 2, labelY, TextColors.LIGHT_GRAY_A128);
         }
 
 
@@ -170,21 +170,21 @@ public abstract class ConfigEntry {
         return charTypedEntry(chr, modifiers);
     }
     //?} else {
-    /*protected abstract boolean mouseClickedEntry(Click click, boolean doubled);
-    protected abstract boolean keyPressedEntry(KeyInput keyInput);
-    protected abstract boolean charTypedEntry(CharInput charInput);
-    public boolean mouseClicked(Click click, boolean doubled) {
+    /*protected abstract boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled);
+    protected abstract boolean keyPressedEntry(KeyEvent keyInput);
+    protected abstract boolean charTypedEntry(CharacterEvent charInput);
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (hasResetButton() && resetButton.mouseClicked(click, doubled)) {
             return true;
         }
         return mouseClickedEntry(click, doubled);
     }
 
-    public boolean keyPressed(KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         return keyPressedEntry(keyInput);
     }
 
-    public boolean charTyped(CharInput charInput) {
+    public boolean charTyped(CharacterEvent charInput) {
         return charTypedEntry(charInput);
     }
     *///?}
@@ -215,7 +215,7 @@ public abstract class ConfigEntry {
         return PREFFERED_HEIGHT;
     }
 
-    protected abstract void renderEntry(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
+    protected abstract void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
     public abstract void resetToDefault();
 
     public abstract Object getValue();
@@ -227,7 +227,7 @@ public abstract class ConfigEntry {
     public abstract ConfigTypes getValueType();
     public abstract void setValue(Object value);
 
-    public boolean modified() {
+    public boolean isModified() {
         return !Objects.equals(getValue(), getStartingValue());
     }
 
@@ -239,8 +239,8 @@ public abstract class ConfigEntry {
         return fieldName;
     }
 
-    public MutableText getDisplayName() {
-        return Text.literal(displayName);
+    public MutableComponent getDisplayName() {
+        return Component.literal(displayName);
     }
 
     public String getDescription() {
@@ -276,7 +276,27 @@ public abstract class ConfigEntry {
         }
     }
 
+    public void markChangedForever() {
+        changedForever = true;
+    }
+
     public boolean hasResetButton() {
         return true;
+    }
+
+    public boolean sendToServer() {
+        return true;
+    }
+
+    public boolean isSearchable() {
+        return true;
+    }
+
+    public void onSave() {
+        NetworkHandlerClient.sendConfigUpdate(
+                getValueType().toString(),
+                getFieldName(),
+                List.of(getValueAsString())
+        );
     }
 }

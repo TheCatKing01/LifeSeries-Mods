@@ -4,35 +4,43 @@ import com.mojang.authlib.GameProfile;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.ServerTickRateManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static net.mat0u5.lifeseries.Main.server;
 
+//? if <= 1.21.9
+import net.minecraft.world.level.GameRules;
+//? if > 1.21.9
+/*import net.minecraft.world.level.gamerules.GameRule;*/
+
 public class OtherUtils {
     private static final Random rnd = new Random();
 
-    public static void log(Text message) {
-        for (ServerPlayerEntity player : PlayerUtils.getAllPlayers()) {
-            player.sendMessage(message, false);
+    public static void log(Component message) {
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            player.displayClientMessage(message, false);
         }
         Main.LOGGER.info(message.getString());
     }
 
     public static void log(String string) {
-        Text message = Text.of(string);
-        for (ServerPlayerEntity player : PlayerUtils.getAllPlayers()) {
-            player.sendMessage(message, false);
+        Component message = Component.nullToEmpty(string);
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            player.displayClientMessage(message, false);
         }
         Main.LOGGER.info(string);
     }
@@ -156,20 +164,16 @@ public class OtherUtils {
     public static void executeCommand(String command) {
         try {
             if (server == null) return;
-            CommandManager manager = server.getCommandManager();
-            ServerCommandSource commandSource = server.getCommandSource().withSilent();
-            //? if <= 1.21.9 {
-            manager.executeWithPrefix(commandSource, command);
-            //?} else {
-            /*manager.parseAndExecute(commandSource, command);
-            *///?}
+            Commands manager = server.getCommands();
+            CommandSourceStack commandSource = server.createCommandSourceStack().withSuppressedOutput();
+            manager.performPrefixedCommand(commandSource, command);
         } catch (Exception e) {
             Main.LOGGER.error("Error executing command: " + command, e);
         }
     }
 
     public static void throwError(String error) {
-        PlayerUtils.broadcastMessageToAdmins(Text.of("§c"+error));
+        PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§c"+error));
         Main.LOGGER.error(error);
     }
 
@@ -178,7 +182,7 @@ public class OtherUtils {
             int index = rnd.nextInt(from, to + 1);
             name += index;
         }
-        return SoundEvent.of(Identifier.of("minecraft", name));
+        return SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(name));
     }
 
     public static String getTimeAndDate() {
@@ -214,14 +218,14 @@ public class OtherUtils {
         }
     }
 
-    public static void sendCommandFeedback(ServerCommandSource source, Text text) {
+    public static void sendCommandFeedback(CommandSourceStack source, Component text) {
         if (source == null || text == null) return;
-        source.sendFeedback(() -> text, true);
+        source.sendSuccess(() -> text, true);
     }
 
-    public static void sendCommandFeedbackQuiet(ServerCommandSource source, Text text) {
+    public static void sendCommandFeedbackQuiet(CommandSourceStack source, Component text) {
         if (source == null || text == null) return;
-        source.sendFeedback(() -> text, false);
+        source.sendSuccess(() -> text, false);
     }
 
     public static UUID profileId(GameProfile profile) {
@@ -240,5 +244,48 @@ public class OtherUtils {
         *///?}
     }
 
+    //? if <= 1.21.9 {
+    public static boolean getBooleanGameRule(ServerLevel level, GameRules.Key<GameRules.BooleanValue> gamerule) {
+        return level.getGameRules().getBoolean(gamerule);
+    }
+    public static <T extends GameRules.Value<T>> void setBooleanGameRule(ServerLevel level, GameRules.Key<GameRules.BooleanValue> gamerule, boolean value) {
+        level.getGameRules().getRule(gamerule).set(value, server);
+    }
+    //?} else {
+    /*public static boolean getBooleanGameRule(ServerLevel level, GameRule<?> gamerule) {
+        if (level.getGameRules().get(gamerule) instanceof Boolean bool) {
+            return bool;
+        }
+        return false;
+    }
+    public static void setBooleanGameRule(ServerLevel level, GameRule<Boolean> gamerule, Boolean value) {
+        level.getGameRules().set(gamerule, value, server);
+    }
+    *///?}
 
+    public static void setFreezeGame(boolean frozen) {
+        if (server == null) return;
+        ServerTickRateManager serverTickRateManager = server.tickRateManager();
+
+        if (serverTickRateManager.isFrozen() == frozen)  return;
+
+        if (frozen) {
+            if (serverTickRateManager.isSprinting()) {
+                serverTickRateManager.stopSprinting();
+            }
+
+            if (serverTickRateManager.isSteppingForward()) {
+                serverTickRateManager.stopStepping();
+            }
+        }
+
+        serverTickRateManager.setFrozen(frozen);
+
+        if (frozen) {
+            PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7The game is frozen"));
+        }
+        else {
+            PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7The game is no longer frozen."));
+        }
+    }
 }

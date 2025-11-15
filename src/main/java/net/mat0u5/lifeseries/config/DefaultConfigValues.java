@@ -89,6 +89,14 @@ public class DefaultConfigValues {
             "only_take_lives_in_session", false, "global.lives",
             "Only Lose Lives In Session", "Makes players only lose lives when they die while a session is active."
     );
+    public final ConfigFileEntry<Boolean> TICK_FREEZE_NOT_IN_SESSION = new ConfigFileEntry<>(
+            "tick_freeze_not_in_session", false, "global[new]",
+            "Tick Freeze When Not In Session", "Automatically freezes the game when the session is paused or ended or not started."
+    );
+    public final ConfigFileEntry<Boolean> LIVES_SYSTEM_DISABLED = new ConfigFileEntry<>(
+            "lives_system_disabled", false, "global.lives",
+            "Fully Disable Lives System", "Fully disables the lives system, if you want to implement a custom on for example :)"
+    );
     public final ConfigFileEntry<Boolean> CUSTOM_ENCHANTER_ALGORITHM = new ConfigFileEntry<>(
             "custom_enchanter_algorithm", false, "global",
             "Custom Enchanter Algorithm", "Modifies the enchanting table algorithm to allow players to get all enchants even without bookshelves."
@@ -104,6 +112,10 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS = new ConfigFileEntry<>(
             "blacklist_clamped_enchants", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist",
             "Clamped Enchants", "List of enchantments clamped to level 1 (any higher levels will be set to lvl1)."
+    );
+    public final ConfigFileEntry<String> BLACKLIST_RECIPES = new ConfigFileEntry<>(
+            "blacklist_recipes", "[]", ConfigTypes.ITEM_LIST, "global.blacklist[new]",
+            "Blacklisted Recipes", "List of banned recipes - items you can't craft."
     );
     public final ConfigFileEntry<String> FINAL_DEATH_TITLE_SUBTITLE = new ConfigFileEntry<>(
             "final_death_title_subtitle", "ran out of lives!", "global.finaldeath",
@@ -204,6 +216,18 @@ public class DefaultConfigValues {
             "boogeyman_infinite_auto_fail", 360000, ConfigTypes.SECONDS, "global.boogeyman.infinite",
             "Automatic Fail", "Controls how long a Boogeyman has to kill someone before they automatically fail, in seconds."
     );
+    public final ConfigFileEntry<Boolean> BOOGEYMAN_TEAM_NOTICE = new ConfigFileEntry<>(
+            "boogeyman_team_notice", false, "global.boogeyman",
+            "Boogeyman Team Notice", "Shows every Boogeyman a list of the other players that are also Boogeymen in chat."
+    );
+    public final ConfigFileEntry<Integer> BOOGEYMAN_KILLS_NEEDED = new ConfigFileEntry<>(
+            "boogeyman_kills_needed", 1, "global.boogeyman",
+            "Boogyeman Kills Needed", "Controls how many kills you need as the Boogeyman to be cured."
+    );
+    public final ConfigFileEntry<Boolean> BOOGEYMAN_STEAL_LIFE = new ConfigFileEntry<>(
+            "boogeyman_steal_life", false, "global.boogeyman",
+            "Boogeyman Steal Life", "When a boogeyman gets cured, they gain a life for completing their task."
+    );
 
     public final ConfigFileEntry<Boolean> SECRET_SOCIETY = new ConfigFileEntry<>(
             "secret_society", false, "{global.society}",
@@ -270,6 +294,10 @@ public class DefaultConfigValues {
             "show_advancements", true, "global",
             "Show Advancements In Chat", "Controls advancements show up in the chat."
     );
+    public final ConfigFileEntry<Boolean> BROADCAST_LIFE_GAIN = new ConfigFileEntry<>(
+            "broadcast_life_gain", false, "global[new]",
+            "Broadcast Kill Life Gain", "Shows a message in chat when a player gains a life by killing a player."
+    );
 
 
 
@@ -284,8 +312,8 @@ public class DefaultConfigValues {
             "group_season", null, ConfigTypes.TEXT, "{season}[no_sidebar]",
             "Season Specific Settings", ""
     );
-    public final ConfigFileEntry<Object> GROUP_LIVES = new ConfigFileEntry<>(
-            "group_lives", null, ConfigTypes.TEXT, "{global.lives}",
+    public final ConfigFileEntry<Object> GROUP_GLOBAL_LIVES = new ConfigFileEntry<>(
+            "group_global_lives", null, ConfigTypes.TEXT, "{global.lives}",
             "Lives Stuff", ""
     );
     public final ConfigFileEntry<Object> GROUP_BLACKLIST = new ConfigFileEntry<>(
@@ -305,7 +333,26 @@ public class DefaultConfigValues {
             "Watchers §7('/watcher' command)", ""
     );
 
+    public final ConfigFileEntry<Object> GROUP_LIVES = new ConfigFileEntry<>(
+            "group_lives", null, ConfigTypes.TEXT, "{lives}",
+            "Lives Manager", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_TEAMS = new ConfigFileEntry<>(
+            "group_teams", null, ConfigTypes.TEXT, "{teams}",
+            "Teams Manager", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_DATAPACK = new ConfigFileEntry<>(
+            "group_datapack", null, ConfigTypes.TEXT, "{datapack}",
+            "Datapack Integration", ""
+    );
+
+
+    public final ConfigFileEntry<Object> NO_SEASON_SPECIFIC = new ConfigFileEntry<>(
+            "no_season_specific", null, ConfigTypes.TEXT, "season",
+            "There are no season specific entries", ""
+    );
+
     public static final List<String> RELOAD_NEEDED = List.of(
-            "spawner_recipe"
+            "spawner_recipe", "blacklist_items", "blacklist_recipes"
     );
 }

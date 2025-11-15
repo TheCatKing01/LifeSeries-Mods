@@ -7,28 +7,29 @@ import net.mat0u5.lifeseries.resources.ResourceHandler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SnailSkins {
 
-    public static void sendTexturesTo(ServerPlayerEntity player) {
+    public static void sendTexturesTo(ServerPlayer player) {
         sendTexturesTo(List.of(player));
     }
 
-    public static void sendTexturesTo(List<ServerPlayerEntity> players) {
+    public static void sendTexturesTo(List<ServerPlayer> players) {
         for (File file : getAllSkinFiles()) {
             try {
-                String name = file.getName().toLowerCase().replaceAll(".png","");
+                String name = file.getName().toLowerCase(Locale.ROOT).replaceAll(".png","");
                 byte[] textureData = Files.readAllBytes(file.toPath());
 
                 SnailTexturePacket packet = new SnailTexturePacket(name, textureData);
-                for (ServerPlayerEntity player : players) {
+                for (ServerPlayer player : players) {
                     if (VersionControl.isDevVersion()) {
                         Main.LOGGER.info(TextUtils.formatString("Sending snail texture '{}' to {}", name, player));
                     }
@@ -52,7 +53,7 @@ public class SnailSkins {
             if (files == null) return result;
             for (File file : files) {
                 if (!file.isFile()) continue;
-                String name = file.getName().toLowerCase();
+                String name = file.getName().toLowerCase(Locale.ROOT);
                 if (name.equalsIgnoreCase("example.png")) continue;
                 if (!name.endsWith(".png")) continue;
                 result.add(file);
@@ -66,7 +67,7 @@ public class SnailSkins {
     public static List<String> getAllSkins() {
         List<String> result = new ArrayList<>();
         for (File file : getAllSkinFiles()) {
-            String name = file.getName().toLowerCase().replaceAll(".png","");
+            String name = file.getName().toLowerCase(Locale.ROOT).replaceAll(".png","");
             result.add(name);
         }
         return result;

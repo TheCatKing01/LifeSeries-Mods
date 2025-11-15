@@ -3,7 +3,7 @@ package net.mat0u5.lifeseries.gui.config.entries;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.interfaces.IEntryGroupHeader;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfigEntry implements IEntryGroupHeader {
     protected static final int RANGE_LABEL_OFFSET_X = -12;
@@ -32,9 +32,9 @@ public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfi
 
     @Override
     protected void initializeTextField() {
-        setText(value.toString());
-        if (textField.getWidth()-6 < textRenderer.getWidth(value.toString())) {
-            textField.setCursorToStart(false);
+        setText(getValueAsString());
+        if (textField.getWidth()-6 < textRenderer.width(getValueAsString())) {
+            textField.moveCursorToStart(false);
         }
     }
 
@@ -56,13 +56,13 @@ public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfi
     }
 
     @Override
-    protected void renderAdditionalContent(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderAdditionalContent(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         if (minValue != null && maxValue != null) {
             String rangeText = TextUtils.formatString("({}-{})", minValue, maxValue);
-            int rangeWidth = textRenderer.getWidth(rangeText);
+            int rangeWidth = textRenderer.width(rangeText);
             int entryWidth = getEntryContentWidth(width);
 
-            context.drawTextWithShadow(textRenderer, rangeText,
+            context.drawString(textRenderer, rangeText,
                     x + entryWidth - rangeWidth - textField.getWidth() + RANGE_LABEL_OFFSET_X,
                     getTextFieldPosY(y, height)  + RANGE_LABEL_OFFSET_Y, TextColors.LIGHT_GRAY);
         }
@@ -72,7 +72,7 @@ public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfi
     public void setValue(Object value) {
         if (isValidType(value)) {
             this.value = castValue(value);
-            setText(value.toString());
+            setText(getValueAsString());
         }
     }
 
@@ -91,6 +91,7 @@ public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfi
 
     @Override
     public String getValueAsString() {
+        if (value == null) return "";
         return value.toString();
     }
 
@@ -101,6 +102,7 @@ public abstract class NumberConfigEntry<T extends Number> extends TextFieldConfi
 
     @Override
     public String getDefaultValueAsString() {
+        if (defaultValue == null) return "";
         return defaultValue.toString();
     }
 

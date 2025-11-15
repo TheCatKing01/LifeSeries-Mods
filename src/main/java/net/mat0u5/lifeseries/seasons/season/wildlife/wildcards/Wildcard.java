@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Callback;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 
 import static net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager.getSeason;
@@ -32,4 +33,8 @@ public abstract class Wildcard {
     public void tick() {}
     public void softTick() {}
 
+
+    public static boolean isFinale() {
+        return WildcardManager.FINALE || (WildcardManager.isActiveWildcard(Wildcards.CALLBACK) && Callback.NERFED_WILDCARDS);
+    }
 }

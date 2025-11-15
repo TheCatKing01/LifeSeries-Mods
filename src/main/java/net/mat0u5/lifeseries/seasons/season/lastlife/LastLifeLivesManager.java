@@ -1,22 +1,20 @@
 package net.mat0u5.lifeseries.seasons.season.lastlife;
 
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
-import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
-import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class LastLifeLivesManager extends LivesManager {
 
@@ -34,30 +32,30 @@ public class LastLifeLivesManager extends LivesManager {
 
     public void assignRandomLivesToUnassignedPlayers() {
         assignedLives = true;
-        List<ServerPlayerEntity> assignTo = new ArrayList<>();
-        for (ServerPlayerEntity player : PlayerUtils.getAllFunctioningPlayers()) {
-            if (livesManager.hasAssignedLives(player)) continue;
+        List<ServerPlayer> assignTo = new ArrayList<>();
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+            if (player.ls$hasAssignedLives()) continue;
             assignTo.add(player);
         }
         if (assignTo.isEmpty()) return;
         assignRandomLives(assignTo);
     }
 
-    public void assignRandomLives(List<ServerPlayerEntity> players) {
+    public void assignRandomLives(List<ServerPlayer> players) {
         players.forEach(this::resetPlayerLife);
-        PlayerUtils.sendTitleToPlayers(players, Text.literal("You will have...").formatted(Formatting.GRAY), 10, 40, 10);
+        PlayerUtils.sendTitleToPlayers(players, Component.literal("You will have...").withStyle(ChatFormatting.GRAY), 10, 40, 10);
         int delay = 60;
         TaskScheduler.scheduleTask(delay, ()-> rollLives(players));
     }
 
-    public void rollLives(List<ServerPlayerEntity> players) {
+    public void rollLives(List<ServerPlayer> players) {
         int delay = showRandomNumbers(players) + 20;
 
-        HashMap<ServerPlayerEntity, Integer> lives = new HashMap<>();
+        HashMap<ServerPlayer, Integer> lives = new HashMap<>();
 
         int totalSize = players.size();
         int chosenNotRandomly = LastLife.ROLL_MIN_LIVES;
-        for (ServerPlayerEntity player : players) {
+        for (ServerPlayer player : players) {
             int diff = LastLife.ROLL_MAX_LIVES-LastLife.ROLL_MIN_LIVES+2;
             if (chosenNotRandomly <= LastLife.ROLL_MAX_LIVES && totalSize > diff) {
                 lives.put(player, chosenNotRandomly);
@@ -71,10 +69,10 @@ public class LastLifeLivesManager extends LivesManager {
 
         TaskScheduler.scheduleTask(delay, () -> {
             //Show the actual amount of lives for one cycle
-            for (Map.Entry<ServerPlayerEntity, Integer> playerEntry : lives.entrySet()) {
+            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
                 Integer livesNum = playerEntry.getValue();
-                ServerPlayerEntity player = playerEntry.getKey();
-                Text textLives = livesManager.getFormattedLives(livesNum);
+                ServerPlayer player = playerEntry.getKey();
+                Component textLives = getFormattedLives(livesNum);
                 PlayerUtils.sendTitle(player, textLives, 0, 25, 0);
             }
             PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
@@ -84,20 +82,20 @@ public class LastLifeLivesManager extends LivesManager {
 
         TaskScheduler.scheduleTask(delay, () -> {
             //Show "x lives." screen
-            for (Map.Entry<ServerPlayerEntity, Integer> playerEntry : lives.entrySet()) {
+            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
                 Integer livesNum = playerEntry.getValue();
-                ServerPlayerEntity player = playerEntry.getKey();
-                Text textLives = TextUtils.format("{}§a lives.", livesManager.getFormattedLives(livesNum));
+                ServerPlayer player = playerEntry.getKey();
+                Component textLives = TextUtils.format("{}§a {}.", getFormattedLives(livesNum), TextUtils.pluralize("life","lives", livesNum));
                 PlayerUtils.sendTitle(player, textLives, 0, 60, 20);
                 SessionTranscript.assignRandomLives(player, livesNum);
-                livesManager.setPlayerLives(player, livesNum);
+                setPlayerLives(player, livesNum);
             }
-            PlayerUtils.playSoundToPlayers(lives.keySet(), SoundEvents.BLOCK_END_PORTAL_SPAWN);
+            PlayerUtils.playSoundToPlayers(lives.keySet(), SoundEvents.END_PORTAL_SPAWN);
             currentSeason. reloadAllPlayerTeams();
         });
     }
 
-    public int showRandomNumbers(List<ServerPlayerEntity> players) {
+    public int showRandomNumbers(List<ServerPlayer> players) {
         int currentDelay = 0;
         int lastLives = -1;
         for (int i = 0; i < 80; i++) {
@@ -111,7 +109,7 @@ public class LastLifeLivesManager extends LivesManager {
             lastLives = lives;
 
             TaskScheduler.scheduleTask(currentDelay, () -> {
-                PlayerUtils.sendTitleToPlayers(players, livesManager.getFormattedLives(lives), 0, 25, 0);
+                PlayerUtils.sendTitleToPlayers(players, getFormattedLives(lives), 0, 25, 0);
                 PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
             });
         }
@@ -147,10 +145,10 @@ public class LastLifeLivesManager extends LivesManager {
         assignedLives = false;
     }
 
-    public void onPlayerFinishJoining(ServerPlayerEntity player) {
+    public void onPlayerFinishJoining(ServerPlayer player) {
         if (!assignedLives) return;
-        if (livesManager.hasAssignedLives(player)) return;
-        if (WatcherManager.isWatcher(player)) return;
+        if (hasAssignedLives(player)) return;
+        if (player.ls$isWatcher()) return;
         PlayerUtils.broadcastMessageToAdmins(TextUtils.format("§7Assigning random lives to {}§7...", player));
         assignRandomLives(new ArrayList<>(List.of(player)));
     }
