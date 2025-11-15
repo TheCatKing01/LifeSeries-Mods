@@ -16,29 +16,20 @@ import java.util.*;
 import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class SuperpowersWildcard extends Wildcard {
-
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
     public static List<Superpowers> blacklistedPowers = List.of();
 
-    // Multiple powers per player
-    protected static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
+    // Multiple powers per player now
+    private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
     public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
 
-    // ✅ Your new function — correctly placed inside the class
-    public static void showPlayerSuperpowers(ServerPlayerEntity player) {
-        UUID uuid = player.getUuid();
-        Set<Superpower> powers = playerSuperpowers.get(uuid);
-
-        if (powers == null || powers.isEmpty()) {
-            PlayerUtils.displayMessageToPlayer(player, Text.literal("You don't have any superpowers!"), 80);
-            return;
-        }
-
-        PlayerUtils.displayMessageToPlayer(player, Text.literal("Your superpowers:"), 100);
-
-        for (Superpower power : powers) {
-            String name = power.getSuperpower().getString();
-            PlayerUtils.displayMessageToPlayer(player, Text.literal(" - " + name), 80);
+    public static void setBlacklist(String blacklist) {
+        blacklistedPowers = new ArrayList<>();
+        String[] powers = blacklist.replace("[", "").replace("]", "").split(",");
+        for (String powerName : powers) {
+            Superpowers power = Superpowers.fromString(powerName.trim());
+            if (power == null || power == Superpowers.NULL) continue;
+            blacklistedPowers.add(power);
         }
     }
 
@@ -91,7 +82,7 @@ public class SuperpowersWildcard extends Wildcard {
             if (totalPlayersNum >= 6) {
                 implemented.remove(Superpowers.NECROMANCY);
                 shouldRandomizeNecromancy = true;
-                necromancyRandomizeChance = (double) deadPlayersNum / alivePlayersNum;
+                necromancyRandomizeChance = (double) deadPlayersNum / (double) alivePlayersNum;
             }
         } else {
             implemented.remove(Superpowers.NECROMANCY);
@@ -104,9 +95,9 @@ public class SuperpowersWildcard extends Wildcard {
 
         for (ServerPlayerEntity player : allPlayers) {
             Superpowers power = implemented.get(pos % implemented.size());
-
             if (assignedSuperpowers.containsKey(player.getUuid())) {
-                power = assignedSuperpowers.remove(player.getUuid());
+                power = assignedSuperpowers.get(player.getUuid());
+                assignedSuperpowers.remove(player.getUuid());
             } else if (shouldIncludeNecromancy && shouldRandomizeNecromancy) {
                 if (player.getRandom().nextDouble() <= necromancyRandomizeChance) {
                     power = Superpowers.NECROMANCY;
@@ -137,9 +128,9 @@ public class SuperpowersWildcard extends Wildcard {
         Collections.shuffle(implemented);
 
         Superpowers power = implemented.getFirst();
-
         if (assignedSuperpowers.containsKey(player.getUuid())) {
-            power = assignedSuperpowers.remove(player.getUuid());
+            power = assignedSuperpowers.get(player.getUuid());
+            assignedSuperpowers.remove(player.getUuid());
         }
 
         Superpower instance = power.getInstance(player);
@@ -152,7 +143,7 @@ public class SuperpowersWildcard extends Wildcard {
         }
     }
 
-    // Now adds instead of replacing
+    // Allows stacking powers instead of replacing
     public static void setSuperpower(ServerPlayerEntity player, Superpowers superpower) {
         Superpower instance = superpower.getInstance(player);
         if (instance != null) {
@@ -202,14 +193,18 @@ public class SuperpowersWildcard extends Wildcard {
         return false;
     }
 
+    // --- BACKWARD COMPATIBILITY SECTION ---
+
     @Nullable
     public static Superpower getSuperpowerInstance(ServerPlayerEntity player) {
         Set<Superpower> powers = playerSuperpowers.get(player.getUuid());
         if (powers == null || powers.isEmpty()) return null;
 
+        // Prefer an active one
         for (Superpower power : powers) {
             if (power.active) return power;
         }
+        // Otherwise return first
         return powers.iterator().next();
     }
 
