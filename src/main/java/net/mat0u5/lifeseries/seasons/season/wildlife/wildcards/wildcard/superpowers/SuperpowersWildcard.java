@@ -67,7 +67,6 @@ public class SuperpowersWildcard extends Wildcard {
     }
 
     public static void rollRandomSuperpowers() {
-        resetAllSuperpowers();
         List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
         blacklistedPowers.forEach(implemented::remove);
         implemented.remove(Superpowers.LISTENING); // disabled
