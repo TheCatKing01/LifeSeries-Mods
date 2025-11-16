@@ -132,7 +132,7 @@ public class WildLifeCommands extends Command {
         );
         dispatcher.register(
             literal("superpower")
-                .requires(source -> source.hasPermission(2))
+			    .requires(PermissionManager::isAdmin)
                 .then(literal("add")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
@@ -169,31 +169,30 @@ public class WildLifeCommands extends Command {
                     )
                 )
         );
+        
+		dispatcher.register(
+            literal("superhearts")
+                .requires(PermissionManager::isAdmin)
+					.then(literal("allowMultiplePowers")
+                        .then(argument("value", BoolArgumentType.bool())
+							.executes(context -> {
+								boolean value = BoolArgumentType.getBool(context, "value");
 
-        dispatcher.register(
-                literal("superhearts")
-                        .requires(PermissionManager::isAdmin)
-                        .then(literal("multiplePowers")
-                                .then(argument("value", BoolArgumentType.bool())
-                                        .executes(context -> {
-                                            boolean value = BoolArgumentType.getBool(context, "value");
-
-                                            if (value) {
-                                                OtherUtils.sendCommandFeedback(
-                                                        context.getSource(),
-                                                        Component.nullToEmpty("§aMultiple superpowers can now be active using Superhearts.")
-                                                );
-                                            } else {
-                                                OtherUtils.sendCommandFeedback(
-                                                        context.getSource(),
-                                                        Component.nullToEmpty("§cMultiple superpowers can no longer be active using Superhearts.")
-                                                );
-                                            }
-
-                                            return 1;
-                                        })
-                                )
-                        )
+									if (value) {
+										OtherUtils.sendCommandFeedback(
+											context.getSource(),
+											Component.nullToEmpty("§aMultiple superpowers can now be active using Superhearts.")
+                                    );
+									} else {
+										OtherUtils.sendCommandFeedback(
+											context.getSource(),
+											Component.nullToEmpty("§cMultiple superpowers can no longer be active using Superhearts.")
+                                    );
+								}
+								return 1;
+							})
+						)
+					)
         );
                 
         dispatcher.register(
