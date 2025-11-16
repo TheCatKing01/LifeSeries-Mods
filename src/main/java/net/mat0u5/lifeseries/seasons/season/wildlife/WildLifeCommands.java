@@ -146,7 +146,7 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("rollPowers")
+                .then(literal("addRandom")
                     .executes(context -> setRandomSuperpowers(context.getSource()))
                 )
                 .then(literal("getMostRecent")
