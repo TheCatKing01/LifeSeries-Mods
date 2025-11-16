@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.seasons.season.wildlife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -131,7 +132,7 @@ public class WildLifeCommands extends Command {
         dispatcher.register(
             literal("superpower")
                 .requires(PermissionManager::isAdmin)
-                .then(literal("set")
+                .then(literal("add")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
                             .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
@@ -144,10 +145,10 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("setRandom")
+                .then(literal("addRandom")
                     .executes(context -> setRandomSuperpowers(context.getSource()))
                 )
-                .then(literal("get")
+                .then(literal("getMostRecent")
                     .then(argument("player", EntityArgument.player())
                         .executes(context -> getSuperpower(context.getSource(), EntityArgument.getPlayer(context, "player")))
                     )
@@ -166,6 +167,27 @@ public class WildLifeCommands extends Command {
                         )
                     )
                 )
+                    .then(literal("superhearts")
+                                    .then(literal("multiplePowers")
+                                                    .then(argument("value", BoolArgumentType.bool())
+                                                                    .executes(context -> {boolean value = BoolArgumentType.getBool(context, "value");
+
+                                                                        if (value) {OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
+                                                                                            "§aMultiple superpowers can now be active using Superhearts."
+                                                                                    )
+                                                                            );
+                                                                        } else {
+                                                                            OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
+                                                                                            "§cMultiple superpowers can no longer be active using Superhearts."
+                                                                                    )
+                                                                            );
+                                                                        }
+
+                                                                        return 1;
+                                                                    })
+                                                    )
+                                    )
+                    )
         );
         dispatcher.register(
             literal("hunger")
@@ -331,7 +353,7 @@ public class WildLifeCommands extends Command {
     public int setRandomSuperpowers(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         SuperpowersWildcard.rollRandomSuperpowers();
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Randomized everyone's superpowers"));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("A randomized superpower was added to everyone"));
         return 1;
     }
 
@@ -344,10 +366,10 @@ public class WildLifeCommands extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated {}'s superpower", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all of {}'s superpowers", targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated the superpower of {} targets", targets.size()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all superpowers of {} targets", targets.size()));
         }
         return 1;
     }
@@ -355,7 +377,7 @@ public class WildLifeCommands extends Command {
     public int getSuperpower(CommandSourceStack source, ServerPlayer player) {
         if (checkBanned(source)) return -1;
         Superpowers superpower = SuperpowersWildcard.getSuperpower(player);
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s superpower is: {}", player,  superpower.getString()));
+        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s most recent superpower is: {}", player,  superpower.getString()));
         return 1;
     }
 
@@ -378,10 +400,10 @@ public class WildLifeCommands extends Command {
             SuperpowersWildcard.setSuperpower(player, superpower);
         }
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {}'s superpower to {}", targets.iterator().next(), name));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {}", targets.iterator().next(), name));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Set the superpower to {} for {} targets", name, targets.size()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {} targets", name, targets.size()));
         }
         return 1;
     }
