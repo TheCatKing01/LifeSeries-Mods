@@ -169,14 +169,6 @@ public class WildLifeCommands extends Command {
                     )
                 )
         );
-        
-		dispatcher.register(
-            literal("superheart")
-                .requires(PermissionManager::isAdmin)
-					.then(literal("allowMultiplePowers")
-						.executes(context -> 1)
-					)
-        );
                 
         dispatcher.register(
             literal("hunger")
