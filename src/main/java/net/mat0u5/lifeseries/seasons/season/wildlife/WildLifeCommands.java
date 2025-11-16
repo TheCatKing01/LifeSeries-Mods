@@ -174,24 +174,7 @@ public class WildLifeCommands extends Command {
             literal("superheart")
                 .requires(PermissionManager::isAdmin)
 					.then(literal("allowMultiplePowers")
-                        .then(argument("value", BoolArgumentType.bool())
-							.executes(context -> {
-								boolean value = BoolArgumentType.getBool(context, "value");
-
-									if (value) {
-										OtherUtils.sendCommandFeedback(
-											context.getSource(),
-											Component.nullToEmpty("Multiple superpowers can now be active using Superhearts")
-                                    );
-									} else {
-										OtherUtils.sendCommandFeedback(
-											context.getSource(),
-											Component.nullToEmpty("Multiple superpowers can no longer be active using Superhearts")
-                                    );
-								}
-								return 1;
-							})
-						)
+						.executes(context -> 1)
 					)
         );
                 
