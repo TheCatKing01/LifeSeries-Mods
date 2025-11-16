@@ -87,6 +87,7 @@ public class WildLifeCommands extends Command {
                         )
                 )
         );
+		
         dispatcher.register(
             literal("snail")
                 .then(literal("names")
@@ -172,7 +173,7 @@ public class WildLifeCommands extends Command {
         dispatcher.register(
                 literal("superhearts")
                         .requires(PermissionManager::isAdmin)
-                        .then(literal("allowMultiplePowers")
+                        .then(literal("multiplePowers")
                                 .then(argument("value", BoolArgumentType.bool())
                                         .executes(context -> {
                                             boolean value = BoolArgumentType.getBool(context, "value");
