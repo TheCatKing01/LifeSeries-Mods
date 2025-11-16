@@ -131,7 +131,7 @@ public class WildLifeCommands extends Command {
         );
         dispatcher.register(
             literal("superpower")
-                .requires(PermissionManager::isAdmin)
+                .requires(source -> source.hasPermission(2))
                 .then(literal("add")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
@@ -167,28 +167,32 @@ public class WildLifeCommands extends Command {
                         )
                     )
                 )
-                    .then(literal("superhearts")
-                                    .then(literal("multiplePowers")
-                                                    .then(argument("value", BoolArgumentType.bool())
-                                                                    .executes(context -> {boolean value = BoolArgumentType.getBool(context, "value");
-
-                                                                        if (value) {OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
-                                                                                            "§aMultiple superpowers can now be active using Superhearts."
-                                                                                    )
-                                                                            );
-                                                                        } else {
-                                                                            OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
-                                                                                            "§cMultiple superpowers can no longer be active using Superhearts."
-                                                                                    )
-                                                                            );
-                                                                        }
-
-                                                                        return 1;
-                                                                    })
-                                                    )
-                                    )
-                    )
         );
+
+        dispatcher.register(
+                literal("superhearts")
+                        .requires(PermissionManager::isAdmin)
+                        .then(literal("allowMultiplePowers")
+                                        .then(argument("value", BoolArgumentType.bool())
+                                                .executes(context -> {boolean value = BoolArgumentType.getBool(context, "value");
+
+                                                    if (value) {OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
+                                                                    "§aMultiple superpowers can now be active using Superhearts."
+                                                            )
+                                                    );
+                                                    } else {
+                                                        OtherUtils.sendCommandFeedback(context.getSource(), Component.nullToEmpty(
+                                                                        "§cMultiple superpowers can no longer be active using Superhearts."
+                                                                )
+                                                        );
+                                                    }
+
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+                
         dispatcher.register(
             literal("hunger")
                 .requires(PermissionManager::isAdmin)
@@ -353,7 +357,7 @@ public class WildLifeCommands extends Command {
     public int setRandomSuperpowers(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         SuperpowersWildcard.rollRandomSuperpowers();
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("A randomized superpower was added to everyone"));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
         return 1;
     }
 
@@ -369,7 +373,7 @@ public class WildLifeCommands extends Command {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all of {}'s superpowers", targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all superpowers of {} targets", targets.size()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all superpowers from {} targets", targets.size()));
         }
         return 1;
     }
@@ -400,7 +404,7 @@ public class WildLifeCommands extends Command {
             SuperpowersWildcard.setSuperpower(player, superpower);
         }
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {}", targets.iterator().next(), name));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {}", name, targets.iterator().next()));
         }
         else {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {} targets", name, targets.size()));
