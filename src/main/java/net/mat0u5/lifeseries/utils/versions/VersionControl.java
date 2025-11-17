@@ -125,4 +125,4 @@ public class VersionControl {
         if (Main.ISOLATED_ENVIRONMENT) return MOD_VERSION;
         return "1.4.3.1";
     }
-}a
+}
