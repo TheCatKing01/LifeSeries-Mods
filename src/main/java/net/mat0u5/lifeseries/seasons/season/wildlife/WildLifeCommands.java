@@ -36,7 +36,7 @@ public class WildLifeCommands extends Command {
 
     @Override
     public boolean isAllowed() {
-		return true;
+        return currentSeason.getSeason() == Seasons.WILD_LIFE;
     }
 
     @Override
@@ -146,7 +146,7 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("randomize")
+                .then(literal("addRandom")
                     .executes(context -> setRandomSuperpowers(context.getSource()))
                 )
                 .then(literal("getMostRecent")
