@@ -27,6 +27,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -146,8 +147,11 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("addRandom")
+                .then(literal("randomize")
                     .executes(context -> setRandomSuperpowers(context.getSource()))
+					                    .then(argument("player", EntityArgument.players())
+                            .executes(context -> setRandomSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                    )
                 )
                 .then(literal("getMostRecent")
                     .then(argument("player", EntityArgument.player())
@@ -281,7 +285,7 @@ public class WildLifeCommands extends Command {
 
         if (name == null) {
             for (ServerPlayer player : targets) {
-                SuperpowersWildcard.assignedSuperpowers.remove(player.getUUID());
+                SuperpowersWildcard.preAssignedSuperpowers.remove(player.getUUID());
             }
             if (targets.size() == 1) {
                 OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {}'s superpower assignment", targets.iterator().next()));
@@ -303,7 +307,7 @@ public class WildLifeCommands extends Command {
         }
 
         for (ServerPlayer player : targets) {
-            SuperpowersWildcard.assignedSuperpowers.put(player.getUUID(), superpower);
+            SuperpowersWildcard.preAssignedSuperpowers.put(player.getUUID(), superpower);
         }
 
         if (targets.size() == 1) {
@@ -337,6 +341,19 @@ public class WildLifeCommands extends Command {
         OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
         return 1;
     }
+	
+	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+        SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {}", targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {} targets", targets.size()));
+        }
+        return 1;
+    }
+
 
     public int resetSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
