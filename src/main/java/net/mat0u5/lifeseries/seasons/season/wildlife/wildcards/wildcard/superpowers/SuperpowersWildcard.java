@@ -88,31 +88,32 @@ public class SuperpowersWildcard extends Wildcard {
 
         List<ServerPlayer> prioritized = new ArrayList<>();
 
-        // 1) Preassigned players first
+        // Preassigned first
         for (ServerPlayer p : players) {
             if (preAssignedSuperpowers.containsKey(p.getUUID()))
                 prioritized.add(p);
         }
 
-        // 2) Others after
+        // Others after
         for (ServerPlayer p : players) {
             if (!prioritized.contains(p))
                 prioritized.add(p);
         }
 
-        // Assign powers
+        // Assign NEW powers (STACKING)
         for (ServerPlayer p : prioritized) {
-            if (hasPower(p))
-                continue;
 
             Superpowers sp = getRandomPower(p);
+            if (sp == Superpowers.NULL)
+                continue; // no new power available
+
             Superpower inst = sp.getInstance(p);
 
             if (inst != null)
                 playerSuperpowers.computeIfAbsent(p.getUUID(), k -> new HashSet<>()).add(inst);
         }
 
-        // Play theme
+        // Intro sound
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
             PlayerUtils.playSoundToPlayers(
                     players,
@@ -127,8 +128,9 @@ public class SuperpowersWildcard extends Wildcard {
 
     private static Superpowers getRandomPower(ServerPlayer player) {
 
-        // Preassigned takes priority
         UUID uuid = player.getUUID();
+
+        // Preassigned takes priority
         if (preAssignedSuperpowers.containsKey(uuid)) {
             Superpowers s = preAssignedSuperpowers.remove(uuid);
             return s;
@@ -136,60 +138,51 @@ public class SuperpowersWildcard extends Wildcard {
 
         // Collect eligible powers
         List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
-
         implemented.removeAll(blacklistedPowers);
 
         if (CompatibilityManager.voicechatLoaded() &&
-            !VoicechatMain.isConnectedToSVC(player.getUUID())) {
+                !VoicechatMain.isConnectedToSVC(player.getUUID())) {
             implemented.remove(Superpowers.LISTENING);
         }
 
-        // Remove already-assigned powers
-        List<Superpowers> available = new ArrayList<>(implemented);
-
-        for (Set<Superpower> set : playerSuperpowers.values()) {
-            for (Superpower sp : set) {
-                available.remove(sp.getSuperpower());
-            }
+        // Collect already owned powers
+        Set<Superpowers> owned = new HashSet<>();
+        Set<Superpower> existing = playerSuperpowers.get(player.getUUID());
+        if (existing != null) {
+            for (Superpower sp : existing)
+                owned.add(sp.getSuperpower());
         }
 
-        Collections.shuffle(available);
+        // Filter to only UNOWNED powers
+        List<Superpowers> available = new ArrayList<>();
+        for (Superpowers s : implemented) {
+            if (!owned.contains(s))
+                available.add(s);
+        }
 
-        boolean necroPossible = false;
-
+        // Necromancy probability logic
         if (available.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded()) {
 
             int alive = livesManager.getAlivePlayers().size();
             int dead = livesManager.getDeadPlayers().size();
 
             if (alive + dead >= 6) {
-                necroPossible = true;
-
                 double chance = (double) dead / (double) alive;
                 if (player.getRandom().nextDouble() <= chance) {
                     return Superpowers.NECROMANCY;
                 }
             }
-        }
 
-        if (!necroPossible) {
             available.remove(Superpowers.NECROMANCY);
         }
 
-        // Queue: unassigned first, assigned powers at end
-        List<Superpowers> queue = new ArrayList<>(available);
+        // No new powers left
+        if (available.isEmpty())
+            return Superpowers.NULL;
 
-        for (Set<Superpower> set : playerSuperpowers.values()) {
-            for (Superpower sp : set) {
-                Superpowers type = sp.getSuperpower();
-                if (implemented.contains(type)) {
-                    queue.remove(type);
-                    queue.add(type);
-                }
-            }
-        }
-
-        return queue.get(0);
+        // Pick a random NEW power
+        Collections.shuffle(available, player.getRandom());
+        return available.get(0);
     }
 
     public static void setSuperpower(ServerPlayer player, Superpowers sp) {
@@ -235,20 +228,6 @@ public class SuperpowersWildcard extends Wildcard {
     }
 
     public static boolean hasActivePower(ServerPlayer player, Superpowers type) {
-        Set<Superpower> set = playerSuperpowers.get(player.getUUID());
-        if (set == null) return false;
-
-        for (Superpower p : set) {
-            if (p instanceof Mimicry mimic && type != Superpowers.MIMICRY) {
-                if (mimic.getMimickedPower().getSuperpower() == type) return true;
-            } else if (p.getSuperpower() == type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean hasActivatedPower(ServerPlayer player, Superpowers type) {
         Set<Superpower> set = playerSuperpowers.get(player.getUUID());
         if (set == null) return false;
 
