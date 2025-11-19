@@ -82,22 +82,45 @@ public class SuperpowersWildcard extends Wildcard {
         rollRandomSuperpowers(livesManager.getAlivePlayers());
     }
 
-    public static void rollRandomSuperpowers(List<ServerPlayer> players) {
-        players.removeIf(ServerPlayer::ls$isDead);
-        players.removeIf(ServerPlayer::ls$isWatcher);
+        boolean shouldIncludeNecromancy = implemented.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded();
+        boolean shouldRandomizeNecromancy = false;
+        double necromancyRandomizeChance = 0;
 
-        List<ServerPlayer> prioritized = new ArrayList<>();
-
-        // 1) Preassigned players first
-        for (ServerPlayer p : players) {
-            if (preAssignedSuperpowers.containsKey(p.getUUID()))
-                prioritized.add(p);
+        if (shouldIncludeNecromancy) {
+            int alivePlayersNum = livesManager.getAlivePlayers().size();
+            int deadPlayersNum = livesManager.getDeadPlayers().size();
+            int totalPlayersNum = alivePlayersNum + deadPlayersNum;
+            if (totalPlayersNum >= 6) {
+                implemented.remove(Superpowers.NECROMANCY);
+                shouldRandomizeNecromancy = true;
+                necromancyRandomizeChance = (double) deadPlayersNum / (double) alivePlayersNum;
+            }
+        } else {
+            implemented.remove(Superpowers.NECROMANCY);
         }
 
-        // 2) Others after
-        for (ServerPlayer p : players) {
-            if (!prioritized.contains(p))
-                prioritized.add(p);
+        Collections.shuffle(implemented);
+        int pos = 0;
+        List<ServerPlayer> allPlayers = livesManager.getAlivePlayers();
+        Collections.shuffle(allPlayers);
+
+            Superpowers power = implemented.get(pos % implemented.size());
+
+            if (power == Superpowers.LISTENING && CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
+                pos++;
+                power = implemented.get(pos % implemented.size());
+            }
+
+            if (assignedSuperpowers.containsKey(player.getUUID())) {
+                power = assignedSuperpowers.get(player.getUUID());
+                assignedSuperpowers.remove(player.getUUID());
+            } else if (shouldIncludeNecromancy && shouldRandomizeNecromancy && player.getRandom().nextDouble() <= necromancyRandomizeChance) {
+                power = Superpowers.NECROMANCY;
+            }
+
+            if (power == Superpowers.NECROMANCY) {
+                implemented.remove(Superpowers.NECROMANCY);
+                shouldIncludeNecromancy = false;
         }
 
         // Assign powers
@@ -110,6 +133,9 @@ public class SuperpowersWildcard extends Wildcard {
 
             if (inst != null)
                 playerSuperpowers.computeIfAbsent(p.getUUID(), k -> new HashSet<>()).add(inst);
+			
+			pos++;
+
         }
 
         // Play theme
@@ -124,74 +150,21 @@ public class SuperpowersWildcard extends Wildcard {
             );
         }
     }
-
-    private static Superpowers getRandomPower(ServerPlayer player) {
-
-        // Preassigned takes priority
-        UUID uuid = player.getUUID();
-        if (preAssignedSuperpowers.containsKey(uuid)) {
-            Superpowers s = preAssignedSuperpowers.remove(uuid);
-            return s;
-        }
-
-        // Collect eligible powers
+	
+    public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
         List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+        implemented.remove(Superpowers.NECROMANCY);
 
-        implemented.removeAll(blacklistedPowers);
+        Collections.shuffle(implemented);
+        Superpowers power = implemented.get(0);
 
-        if (CompatibilityManager.voicechatLoaded() &&
-            !VoicechatMain.isConnectedToSVC(player.getUUID())) {
-            implemented.remove(Superpowers.LISTENING);
-        }
+        if (assignedSuperpowers.containsKey(player.getUUID())) {
+            power = assignedSuperpowers.get(player.getUUID());
+            assignedSuperpowers.remove(player.getUUID());
 
-        // Remove already-assigned powers
-        List<Superpowers> available = new ArrayList<>(implemented);
-
-        for (Set<Superpower> set : playerSuperpowers.values()) {
-            for (Superpower sp : set) {
-                available.remove(sp.getSuperpower());
-            }
-        }
-
-        Collections.shuffle(available);
-
-        boolean necroPossible = false;
-
-        if (available.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded()) {
-
-            int alive = livesManager.getAlivePlayers().size();
-            int dead = livesManager.getDeadPlayers().size();
-
-            if (alive + dead >= 6) {
-                necroPossible = true;
-
-                double chance = (double) dead / (double) alive;
-                if (player.getRandom().nextDouble() <= chance) {
-                    return Superpowers.NECROMANCY;
-                }
-            }
-        }
-
-        if (!necroPossible) {
-            available.remove(Superpowers.NECROMANCY);
-        }
-
-        // Queue: unassigned first, assigned powers at end
-        List<Superpowers> queue = new ArrayList<>(available);
-
-        for (Set<Superpower> set : playerSuperpowers.values()) {
-            for (Superpower sp : set) {
-                Superpowers type = sp.getSuperpower();
-                if (implemented.contains(type)) {
-                    queue.remove(type);
-                    queue.add(type);
-                }
-            }
-        }
-
-        return queue.get(0);
-    }
-
+        Superpower instance = power.getInstance(player);
+        if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+		
     public static void setSuperpower(ServerPlayer player, Superpowers sp) {
         Superpower inst = sp.getInstance(player);
 
