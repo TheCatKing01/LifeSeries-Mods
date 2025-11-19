@@ -27,10 +27,6 @@ public class SuperpowersWildcard extends Wildcard {
 
     public static int ZOMBIES_HEALTH = 8;
 
-    // ----------------------------------------------------------
-    // Blacklist
-    // ----------------------------------------------------------
-
     public static void setBlacklist(String blacklist) {
         blacklistedPowers = new ArrayList<>();
 
@@ -42,10 +38,6 @@ public class SuperpowersWildcard extends Wildcard {
             }
         }
     }
-
-    // ----------------------------------------------------------
-    // Wildcard lifecycle
-    // ----------------------------------------------------------
 
     @Override
     public Wildcards getType() {
@@ -64,17 +56,9 @@ public class SuperpowersWildcard extends Wildcard {
         super.deactivate();
     }
 
-    // ----------------------------------------------------------
-    // Tick handling
-    // ----------------------------------------------------------
-
     public static void onTick() {
         playerSuperpowers.values().forEach(set -> set.forEach(Superpower::tick));
     }
-
-    // ----------------------------------------------------------
-    // Reset
-    // ----------------------------------------------------------
 
     public static void resetSuperpower(ServerPlayer player) {
         UUID uuid = player.getUUID();
@@ -94,10 +78,6 @@ public class SuperpowersWildcard extends Wildcard {
         Necromancy.checkRessurectedPlayersReset();
     }
 
-    // ----------------------------------------------------------
-    // Assignment logic
-    // ----------------------------------------------------------
-
     public static void rollRandomSuperpowers() {
         rollRandomSuperpowers(livesManager.getAlivePlayers());
     }
@@ -105,8 +85,6 @@ public class SuperpowersWildcard extends Wildcard {
     public static void rollRandomSuperpowers(List<ServerPlayer> players) {
         players.removeIf(ServerPlayer::ls$isDead);
         players.removeIf(ServerPlayer::ls$isWatcher);
-
-        players.forEach(SuperpowersWildcard::resetSuperpower);
 
         List<ServerPlayer> prioritized = new ArrayList<>();
 
@@ -146,10 +124,6 @@ public class SuperpowersWildcard extends Wildcard {
             );
         }
     }
-
-    // ----------------------------------------------------------
-    // Power selection
-    // ----------------------------------------------------------
 
     private static Superpowers getRandomPower(ServerPlayer player) {
 
@@ -218,10 +192,6 @@ public class SuperpowersWildcard extends Wildcard {
         return queue.get(0);
     }
 
-    // ----------------------------------------------------------
-    // Manual assignment
-    // ----------------------------------------------------------
-
     public static void setSuperpower(ServerPlayer player, Superpowers sp) {
         Superpower inst = sp.getInstance(player);
 
@@ -242,10 +212,6 @@ public class SuperpowersWildcard extends Wildcard {
         Necromancy.checkRessurectedPlayersReset();
     }
 
-    // ----------------------------------------------------------
-    // Key input
-    // ----------------------------------------------------------
-
     public static void pressedSuperpowerKey(ServerPlayer player) {
         UUID id = player.getUUID();
 
@@ -262,10 +228,6 @@ public class SuperpowersWildcard extends Wildcard {
 
         playerSuperpowers.get(id).forEach(Superpower::onKeyPressed);
     }
-
-    // ----------------------------------------------------------
-    // Checks
-    // ----------------------------------------------------------
 
     public static boolean hasPower(ServerPlayer player) {
         Set<Superpower> set = playerSuperpowers.get(player.getUUID());
@@ -299,10 +261,6 @@ public class SuperpowersWildcard extends Wildcard {
         }
         return false;
     }
-
-    // ----------------------------------------------------------
-    // Retrieval
-    // ----------------------------------------------------------
 
     @Nullable
     public static Superpower getSuperpowerInstance(ServerPlayer player) {
