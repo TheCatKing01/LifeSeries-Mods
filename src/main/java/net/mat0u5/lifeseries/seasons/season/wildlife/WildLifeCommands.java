@@ -307,7 +307,7 @@ public class WildLifeCommands extends Command {
         }
 
         for (ServerPlayer player : targets) {
-            SuperpowersWildcard.preAssignedSuperpowers.put(player.getUUID(), superpower);
+            SuperpowersWildcard.assignedSuperpowers.put(player.getUUID(), superpower);
         }
 
         if (targets.size() == 1) {
