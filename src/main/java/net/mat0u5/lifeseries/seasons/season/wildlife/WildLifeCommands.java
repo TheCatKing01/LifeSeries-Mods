@@ -161,7 +161,17 @@ public class WildLifeCommands extends Command {
                 .then(literal("skipCooldown")
                     .executes(context -> skipSuperpowerCooldown(context.getSource()))
                 )
-
+                .then(literal("force")
+                    .then(argument("player", EntityArgument.players())
+                        .then(argument("superpower", StringArgumentType.string())
+                            .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
+                            .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), StringArgumentType.getString(context, "superpower")))
+                        )
+                        .then(literal("reset")
+                                .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
+                        )
+                    )
+                )
         );
                 
         dispatcher.register(

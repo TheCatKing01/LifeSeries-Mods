@@ -83,9 +83,16 @@ public class SuperpowersWildcard extends Wildcard {
     }
 
     public static void rollRandomSuperpowers(List<ServerPlayer> players) {
+        players.removeIf(ServerPlayer::ls$isDead);
         players.removeIf(ServerPlayer::ls$isWatcher);
 
         List<ServerPlayer> prioritized = new ArrayList<>();
+
+        // 1) Preassigned players first
+        for (ServerPlayer p : players) {
+            if (preAssignedSuperpowers.containsKey(p.getUUID()))
+                prioritized.add(p);
+        }
 
         // 2) Others after
         for (ServerPlayer p : players) {
@@ -210,6 +217,14 @@ public class SuperpowersWildcard extends Wildcard {
 
         if (!playerSuperpowers.containsKey(id)) return;
 
+        if (!player.ls$isAlive()) {
+            PlayerUtils.displayMessageToPlayer(
+                    player,
+                    Component.literal("Dead players can't use superpowers!"),
+                    60
+            );
+            return;
+        }
 
         playerSuperpowers.get(id).forEach(Superpower::onKeyPressed);
     }
