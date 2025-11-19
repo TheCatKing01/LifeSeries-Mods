@@ -285,7 +285,7 @@ public class WildLifeCommands extends Command {
 
         if (name == null) {
             for (ServerPlayer player : targets) {
-                SuperpowersWildcard.preAssignedSuperpowers.remove(player.getUUID());
+                SuperpowersWildcard.assignedSuperpowers.remove(player.getUUID());
             }
             if (targets.size() == 1) {
                 OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {}'s superpower assignment", targets.iterator().next()));
