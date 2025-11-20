@@ -78,8 +78,6 @@ public class SuperpowersWildcard extends Wildcard {
         allPlayers.removeIf(ServerPlayer::ls$isDead);
         allPlayers.removeIf(ServerPlayer::ls$isWatcher);
 
-        allPlayers.forEach(SuperpowersWildcard::resetSuperpower);
-
         List<ServerPlayer> prioritizedList = new ArrayList<>();
         for (ServerPlayer player : allPlayers) {
             if (assignedSuperpowers.containsKey(player.getUUID())) prioritizedList.add(player);
