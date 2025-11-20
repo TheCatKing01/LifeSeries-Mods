@@ -8,7 +8,6 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -24,10 +23,6 @@ public class SuperpowersWildcard extends Wildcard {
 
     private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
     public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
-
-    // Queue of remaining powers to assign before reshuffle
-    private static final LinkedList<Superpowers> remainingPowerQueue = new LinkedList<>();
-
     public static int ZOMBIES_HEALTH = 8;
 
     public static void setBlacklist(String blacklist) {
@@ -67,48 +62,122 @@ public class SuperpowersWildcard extends Wildcard {
         playerSuperpowers.get(uuid).forEach(Superpower::turnOff);
         playerSuperpowers.remove(uuid);
         Necromancy.checkRessurectedPlayersReset();
-        DatapackIntegration.deactivateSuperpowers(player);
     }
 
     public static void resetAllSuperpowers() {
         playerSuperpowers.values().forEach(set -> set.forEach(Superpower::turnOff));
         playerSuperpowers.clear();
         Necromancy.checkRessurectedPlayersReset();
-        DatapackIntegration.initSuperpowers();
-        remainingPowerQueue.clear();
     }
 
     public static void rollRandomSuperpowers() {
         rollRandomSuperpowers(livesManager.getAlivePlayers());
     }
 
-    public static void rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
-        allPlayers.removeIf(ServerPlayer::ls$isDead);
-        allPlayers.removeIf(ServerPlayer::ls$isWatcher);
-        allPlayers.forEach(SuperpowersWildcard::resetSuperpower);
+	public static void rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
+		allPlayers.removeIf(ServerPlayer::ls$isDead);
+		allPlayers.removeIf(ServerPlayer::ls$isWatcher);
 
-        // Prioritize pre-assigned powers first
-        List<ServerPlayer> prioritizedList = new ArrayList<>();
-        for (ServerPlayer player : allPlayers) {
-            if (assignedSuperpowers.containsKey(player.getUUID())) prioritizedList.add(player);
-        }
-        for (ServerPlayer player : allPlayers) {
-            if (!prioritizedList.contains(player)) prioritizedList.add(player);
+		// Shuffle players so order is randomized
+		Collections.shuffle(allPlayers);
+
+		// Create a modifiable list of available powers
+		List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+		blacklistedPowers.forEach(implemented::remove);
+
+		// Voicechat restrictions
+		implemented.removeIf(p ->
+				p == Superpowers.LISTENING &&
+				CompatibilityManager.voicechatLoaded() &&
+				!VoicechatMain.isConnectedToSVC(allPlayers.get(0).getUUID())
+		);
+
+		// Necromancy logic
+		boolean necroAllowed = implemented.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded();
+		double necroChance = 0;
+
+		if (necroAllowed) {
+			int alive = livesManager.getAlivePlayers().size();
+			int dead = livesManager.getDeadPlayers().size();
+			if (alive + dead >= 6) {
+				necroChance = (double) dead / alive;
+			} else {
+				implemented.remove(Superpowers.NECROMANCY);
+				necroAllowed = false;
+			}
+		} else {
+			implemented.remove(Superpowers.NECROMANCY);
+		}
+
+		// Shuffle powers so order is random
+		Collections.shuffle(implemented);
+
+		int index = 0;
+
+		for (ServerPlayer player : allPlayers) {
+
+			Superpowers power = null;
+
+			// Assigned superpowers override randomness
+			if (assignedSuperpowers.containsKey(player.getUUID())) {
+				power = assignedSuperpowers.remove(player.getUUID());
+			}
+
+			// Possibly give necromancy
+			if (power == null && necroAllowed && player.getRandom().nextDouble() <= necroChance) {
+				power = Superpowers.NECROMANCY;
+				implemented.remove(Superpowers.NECROMANCY);
+				necroAllowed = false;
+			}
+
+			// Standard random selection
+			if (power == null) {
+				power = implemented.get(index % implemented.size());
+			}
+
+			// Create instance and add to player (STACKING enabled!)
+			Superpower instance = power.getInstance(player);
+			if (instance != null) {
+				playerSuperpowers
+					.computeIfAbsent(player.getUUID(), k -> new HashSet<>())
+					.add(instance);
+			}
+
+			index++;
+		}
+
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayers(
+					allPlayers,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f, 1
+			);
+		}
+	}
+
+
+    public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
+        List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+        implemented.remove(Superpowers.NECROMANCY);
+
+        if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
+            implemented.remove(Superpowers.LISTENING);
         }
 
-        for (ServerPlayer player : prioritizedList) {
-            if (assignedSuperpowers.containsKey(player.getUUID())) {
-                Superpowers pre = assignedSuperpowers.remove(player.getUUID());
-                setSuperpower(player, pre);
-            } else {
-                Superpowers randomPower = getNextRandomPower(player);
-                setSuperpower(player, randomPower);
-            }
+        Collections.shuffle(implemented);
+        Superpowers power = implemented.get(0);
+
+        if (assignedSuperpowers.containsKey(player.getUUID())) {
+            power = assignedSuperpowers.get(player.getUUID());
+            assignedSuperpowers.remove(player.getUUID());
         }
+
+        Superpower instance = power.getInstance(player);
+        if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
 
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayers(
-                    allPlayers,
+            PlayerUtils.playSoundToPlayer(
+                    player,
                     SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
                     0.2f,
                     1
@@ -116,45 +185,10 @@ public class SuperpowersWildcard extends Wildcard {
         }
     }
 
-    private static Superpowers getNextRandomPower(ServerPlayer player) {
-        // Refill the remaining queue if empty
-        if (remainingPowerQueue.isEmpty()) {
-            List<Superpowers> newQueue = new ArrayList<>(Superpowers.getImplemented());
-            blacklistedPowers.forEach(newQueue::remove);
-            Collections.shuffle(newQueue);
-            remainingPowerQueue.addAll(newQueue);
-        }
-
-        // Remove powers incompatible with voicechat
-        Iterator<Superpowers> it = remainingPowerQueue.iterator();
-        while (it.hasNext()) {
-            Superpowers p = it.next();
-            if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())
-                    && p == Superpowers.LISTENING) {
-                it.remove();
-            }
-        }
-
-        // Remove necromancy if chance fails
-        Superpowers selected = remainingPowerQueue.pollFirst();
-        if (selected == Superpowers.NECROMANCY) {
-            if (!Necromancy.shouldBeIncluded()) return getNextRandomPower(player);
-            int alive = livesManager.getAlivePlayers().size();
-            int dead = livesManager.getDeadPlayers().size();
-            if (alive + dead < 6 || player.getRandom().nextDouble() > (double) dead / alive) {
-                return getNextRandomPower(player);
-            }
-        }
-
-        return selected;
-    }
-
     public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
         Superpower instance = superpower.getInstance(player);
-        if (instance != null) {
-            playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
-            DatapackIntegration.activateSuperpower(player, superpower);
-        }
+        if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
             PlayerUtils.playSoundToPlayer(
                     player,
@@ -190,10 +224,6 @@ public class SuperpowersWildcard extends Wildcard {
         return false;
     }
 
-    public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
-        return hasActivePower(player, superpower);
-    }
-
     @Nullable
     public static Superpower getSuperpowerInstance(ServerPlayer player) {
         Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
@@ -212,4 +242,9 @@ public class SuperpowersWildcard extends Wildcard {
         }
         return instance.getSuperpower();
     }
+	
+	public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
+		return hasActivePower(player, superpower);
+}
+
 }
