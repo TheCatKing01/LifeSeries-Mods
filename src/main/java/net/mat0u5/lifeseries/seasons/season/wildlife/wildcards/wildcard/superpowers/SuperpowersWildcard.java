@@ -6,6 +6,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Mimicry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
+import net.mat0u5.lifeseries.seasons.season.wildlife.WildLifeConfig;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
@@ -24,6 +25,11 @@ public class SuperpowersWildcard extends Wildcard {
     private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
     public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
     public static int ZOMBIES_HEALTH = 8;
+	
+	public static boolean POWER_STACKING_ENABLED() {
+    return WildLifeConfig.WILDCARD_CALLBACK_POWER_STACKING.get();
+	
+	}
 
     public static void setBlacklist(String blacklist) {
         blacklistedPowers = new ArrayList<>();
@@ -47,10 +53,12 @@ public class SuperpowersWildcard extends Wildcard {
     }
 
     @Override
-    public void deactivate() {
-        resetAllSuperpowers();
-        super.deactivate();
-    }
+	public void deactivate() {
+		if (!POWER_STACKING_ENABLED()) {
+			resetAllSuperpowers(); // Only clear powers if stacking is OFF
+		}
+		super.deactivate();
+	}
 
     public static void onTick() {
         playerSuperpowers.values().forEach(set -> set.forEach(Superpower::tick));
