@@ -238,4 +238,9 @@ public class SuperpowersWildcard extends Wildcard {
         }
         return instance.getSuperpower();
     }
+	
+	public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
+		return hasActivePower(player, superpower);
+}
+
 }
