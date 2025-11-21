@@ -24,7 +24,7 @@
           ],
           "structure_overrides": [
             "minecraft:strongholds",
-            "minecraft:pillager_outposts",
+            "minecraft:pillager_outpost",
             "minecraft:shipwreck_beached",
             "minecraft:villages"
           ]
