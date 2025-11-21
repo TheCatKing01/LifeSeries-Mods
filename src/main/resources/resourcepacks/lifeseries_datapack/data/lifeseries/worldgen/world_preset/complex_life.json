@@ -22,11 +22,12 @@
               "block": "minecraft:grass_block"
             }
           ],
-          "structure_overrides": [
-            "minecraft:strongholds",
-            "minecraft:pillager_outpost",
-            "minecraft:shipwreck_beached",
-            "minecraft:villages"
+            "structures": {
+                "structures": {
+                    "minecraft:village_plains": {},
+                    "minecraft:stronghold": {},
+                    "minecraft:pillager_outpost": {},
+                    "minecraft:shipwreck_beached": {}
           ]
         }
       }
