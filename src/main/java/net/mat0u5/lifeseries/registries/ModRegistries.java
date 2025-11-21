@@ -13,6 +13,9 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 public class ModRegistries {
 	public static final ResourceKey<WorldPreset> SMALL = ResourceKey.create(
             Registries.WORLD_PRESET,
+            Registries.NOSIE,
+			Registries.NOSIE_SETTINGS,
+			Registries.DENSITY_FUNCTION,
             IdentifierHelper.mod("small")
     );
 	
