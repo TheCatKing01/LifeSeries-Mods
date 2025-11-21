@@ -21,7 +21,6 @@ import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class SuperpowersWildcard extends Wildcard {
 
-```
 // Config references
 public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = WildLifeConfig.WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME.getValue();
 public static int MAX_POWERS_PER_PLAYER = WildLifeConfig.WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.getValue();
@@ -254,6 +253,5 @@ public static Superpowers getSuperpower(ServerPlayer player) {
 public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
     return hasActivePower(player, superpower);
 }
-```
 
 }
