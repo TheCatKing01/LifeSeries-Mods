@@ -18,5 +18,6 @@
   "entity.lifeseries.pathfinder": "Pathfinder",
   "generator.lifeseries.small_biomes": "Small Biomes",
   "generator.lifeseries.simple": "Simple",
-  "generator.lifeseries.simple_life": "Simple Life"
+  "generator.lifeseries.simple_life": "Simple Life",
+  "generator.lifeseries.simple_life": "Complex Life"
 }

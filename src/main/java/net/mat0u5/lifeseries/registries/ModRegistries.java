@@ -26,6 +26,11 @@ public class ModRegistries {
             IdentifierHelper.mod("simple_life")
     );
 	
+	
+    public static final ResourceKey<WorldPreset> COMPLEX_LIFE = ResourceKey.create(
+            Registries.WORLD_PRESET,
+            IdentifierHelper.mod("complex_life")
+    );
 
     public static void registerModStuff() {
         registerCommands();
