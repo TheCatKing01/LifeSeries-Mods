@@ -27,7 +27,7 @@ public class SuperpowersWildcard extends Wildcard {
     public static int ZOMBIES_HEALTH = 8;
 	
 	public static boolean POWER_STACKING_ENABLED() {
-    return Main.WILDLIFE_CONFIG.WILDCARD_CALLBACK_POWER_STACKING.get(Main.WILDLIFE_CONFIG);
+    return WildLifeConfig.WILDCARD_CALLBACK_POWER_STACKING.get();
 	
 	}
 
