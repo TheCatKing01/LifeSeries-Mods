@@ -23,7 +23,6 @@ public class SuperpowersWildcard extends Wildcard {
 public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME;
 public static List<Superpowers> blacklistedPowers;
 
-```
 private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
 public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
 public static int ZOMBIES_HEALTH;
@@ -232,7 +231,5 @@ public static Superpowers getSuperpower(ServerPlayer player) {
 
 public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
     return hasActivePower(player, superpower);
-}
-```
 
 }
