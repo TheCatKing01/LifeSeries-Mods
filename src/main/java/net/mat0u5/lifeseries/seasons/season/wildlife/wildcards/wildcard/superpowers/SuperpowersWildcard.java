@@ -48,8 +48,7 @@ public class SuperpowersWildcard extends Wildcard {
 
     @Override
     public void deactivate() {
-        resetAllSuperpowers();
-        super.deactivate();
+]        super.deactivate();
     }
 
     public static void onTick() {
