@@ -22,32 +22,10 @@
               "block": "minecraft:grass_block"
             }
           ],
-          "structures": {
-            "minecraft:village_plains": {},
-            "minecraft:stronghold": {},
-            "minecraft:pillager_outpost": {},
-            "minecraft:shipwreck": {}
-          }
-        }
-      }
-    },
-    "minecraft:the_end": {
-      "type": "minecraft:the_end",
-      "generator": {
-        "type": "minecraft:flat",
-        "settings": {
-          "biome": "minecraft:the_end",
-          "layers": [
-            {
-              "height": 46,
-              "block": "minecraft:air"
-            },
-            {
-              "height": 4,
-              "block": "minecraft:end_stone"
-            }
-          ],
-          "structure_overrides": []
+          "structure_overrides": [
+            "minecraft:strongholds",
+            "minecraft:villages"
+          ]
         }
       }
     },
@@ -67,6 +45,16 @@
               "block": "minecraft:netherrack"
             }
           ]
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "settings": "minecraft:end",
+        "biome_source": {
+          "type": "minecraft:the_end"
         }
       }
     }
