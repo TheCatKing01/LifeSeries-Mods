@@ -25,8 +25,7 @@
           "structures": {
             "minecraft:village_plains": {},
             "minecraft:stronghold": {},
-            "minecraft:pillager_outpost": {},
-            "minecraft:shipwreck": {}
+            "minecraft:pillager_outpost": {}
           }
         }
       }
