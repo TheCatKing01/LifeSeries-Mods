@@ -44,11 +44,13 @@ public class SuperpowersWildcard extends Wildcard {
         return Wildcards.SUPERPOWERS;
     }
 
-    @Override
-    public void activate() {
-        rollRandomSuperpowers();
-        super.activate();
-    }
+	@Override
+	public void activate() {
+		List<ServerPlayer> allPlayers = new ArrayList<>(/* get all online players */);
+		rollRandomSuperpowers(allPlayers);
+		super.activate();
+	}
+
 
     @Override
     public void deactivate() {
