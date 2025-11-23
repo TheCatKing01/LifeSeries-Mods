@@ -225,6 +225,11 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_callback_nerfed_wildcards", true, "season.callback",
             "Nerfed Wildcards", "Controls whether wildcards are nerfed in callback (recommended)."
     );
+	
+		    public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
+            "wildcard_callback_power_stacking", false, "season.callback",
+            "Power Stacking", "Instead of the superpower wildcard deactivating, the powers stay allowing stacking when the superpower wildcard activates again."
+    );
 
     //Groups
     public static final ConfigFileEntry<Object> GROUP_GENERAL = new ConfigFileEntry<>(
@@ -335,6 +340,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_CALLBACK_WILDCARDS_BLACKLIST
                 ,WILDCARD_CALLBACK_TURN_OFF
                 ,WILDCARD_CALLBACK_NERFED_WILDCARDS
+				,WILDCARD_CALLBACK_POWER_STACKING
         ));
     }
 

@@ -19,6 +19,7 @@ import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class SuperpowersWildcard extends Wildcard {
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
+    public static boolean WILDCARD_CALLBACK_POWER_STACKING = false;	
     public static List<Superpowers> blacklistedPowers = List.of();
 
     private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
@@ -48,6 +49,9 @@ public class SuperpowersWildcard extends Wildcard {
 
     @Override
     public void deactivate() {
+		if (WILDCARD_SUPERPOWERS_POWER_STACKING) {
+			    super.deactivate();
+		}
         super.deactivate();
     }
 
