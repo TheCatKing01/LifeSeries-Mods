@@ -49,7 +49,7 @@ public class SuperpowersWildcard extends Wildcard {
 
     @Override
     public void deactivate() {
-		if (WILDCARD_SUPERPOWERS_POWER_STACKING) {
+		if (WILDCARD_CALLBACK_POWER_STACKING) {
 			    super.deactivate();
 		}
         super.deactivate();
