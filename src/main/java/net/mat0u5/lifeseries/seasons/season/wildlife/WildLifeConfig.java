@@ -226,7 +226,7 @@ public class WildLifeConfig extends ConfigManager {
             "Nerfed Wildcards", "Controls whether wildcards are nerfed in callback (recommended)."
     );
 	
-		    public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
             "wildcard_callback_power_stacking", false, "season.callback[new]",
             "Power Stacking", "Instead of the superpower wildcard deactivating, the powers stay allowing stacking when the superpower wildcard activates again."
     );

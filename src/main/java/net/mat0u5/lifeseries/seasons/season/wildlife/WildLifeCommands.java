@@ -279,7 +279,7 @@ public class WildLifeCommands extends Command {
 
         if (name == null) {
             for (ServerPlayer player : targets) {
-                SuperpowersWildcard.preAssignedSuperpowers.remove(player.getUUID());
+                SuperpowersWildcard.assignedSuperpowers.remove(player.getUUID());
             }
             if (targets.size() == 1) {
                 OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {}'s superpower assignment", targets.iterator().next()));
@@ -301,7 +301,7 @@ public class WildLifeCommands extends Command {
         }
 
         for (ServerPlayer player : targets) {
-            SuperpowersWildcard.preAssignedSuperpowers.put(player.getUUID(), superpower);
+            SuperpowersWildcard.assignedSuperpowers.put(player.getUUID(), superpower);
         }
 
         if (targets.size() == 1) {
@@ -344,19 +344,6 @@ public class WildLifeCommands extends Command {
         }
         else {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {} targets", targets.size()));
-        }
-        return 1;
-    }
-
-
-    public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
-        SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
-        if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Randomized {}'s superpower", targets.iterator().next()));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Randomized the superpower of {} targets", targets.size()));
         }
         return 1;
     }

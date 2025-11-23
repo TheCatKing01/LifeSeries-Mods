@@ -163,57 +163,57 @@ public class SuperpowersWildcard extends Wildcard {
 	}
 
 
-    public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
-        List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
-        implemented.remove(Superpowers.NECROMANCY);
+	public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
+		List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+		implemented.remove(Superpowers.NECROMANCY);
 
-        if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
-            implemented.remove(Superpowers.LISTENING);
-        }
+		if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
+			implemented.remove(Superpowers.LISTENING);
+		}
 
-        Collections.shuffle(implemented);
-        Superpowers power = implemented.get(0);
+		Collections.shuffle(implemented);
+		Superpowers power = implemented.get(0);
 
-        if (assignedSuperpowers.containsKey(player.getUUID())) {
-            power = assignedSuperpowers.get(player.getUUID());
-            assignedSuperpowers.remove(player.getUUID());
-        }
+		if (assignedSuperpowers.containsKey(player.getUUID())) {
+			power = assignedSuperpowers.get(player.getUUID());
+			assignedSuperpowers.remove(player.getUUID());
+		}
 
-        Superpower instance = power.getInstance(player);
+		Superpower instance = power.getInstance(player);
 		if (instance != null) {
-			playerSuperpowers.put(player.getUUID(), instance);
+			// ensure we store a Set<Superpower> and add the instance
+			playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
 			DatapackIntegration.activateSuperpower(player, power);
 		}
-        if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
 
-        if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayer(
-                    player,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
-                    0.2f,
-                    1
-            );
-        }
-    }
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayer(
+					player,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f,
+					1
+			);
+		}
+	}
 
-    public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
-        Superpower instance = superpower.getInstance(player);
+	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
+		Superpower instance = superpower.getInstance(player);
 		if (instance != null) {
-            playerSuperpowers.put(player.getUUID(), instance);
-            DatapackIntegration.activateSuperpower(player, superpower);
-        }
-        if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+			playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+			DatapackIntegration.activateSuperpower(player, superpower);
+		}
 
-        if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayer(
-                    player,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
-                    0.2f,
-                    1
-            );
-        }
-        Necromancy.checkRessurectedPlayersReset();
-    }
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayer(
+					player,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f,
+					1
+			);
+		}
+		Necromancy.checkRessurectedPlayersReset();
+	}
+
 
     public static void pressedSuperpowerKey(ServerPlayer player) {
         if (!playerSuperpowers.containsKey(player.getUUID())) return;
