@@ -65,7 +65,7 @@ public class SuperpowersWildcard extends Wildcard {
         if (!playerSuperpowers.containsKey(uuid)) return;
         playerSuperpowers.get(uuid).forEach(Superpower::turnOff);
         playerSuperpowers.remove(uuid);
-        Necromancy.checkRessurectedPlayersReset
+		Necromancy.checkRessurectedPlayersReset();
 		DatapackIntegration.deactivateSuperpower(player);
 
     }
