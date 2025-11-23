@@ -211,6 +211,14 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_superpowers_animaldisguise_hands", true, "season.superpowers",
             "Animal Disguise: Show Hand Items", "Controls whether hand items are seen on players disguised as mobs."
     );
+    public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER = new ConfigFileEntry<>(
+            "wildcard_superpowers_powers_per_player", 1, "season.superpowers",
+            "Max Powers Per Player", "Controls how many superpowers each player can have activated at once.", Superpowers.getAllStr()
+    );
+	public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_ROLL = new ConfigFileEntry<>(
+            "wildcard_superpowers_powers_per_roll", 1, "season.superpowers",
+            "Powers Per Roll", "Controls how many superpowers each player gets when powers are rolled", Superpowers.getAllStr()
+    );
 
 
     public static final ConfigFileEntry<String> WILDCARD_CALLBACK_WILDCARDS_BLACKLIST = new ConfigFileEntry<>(
@@ -225,7 +233,7 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_callback_nerfed_wildcards", true, "season.callback",
             "Nerfed Wildcards", "Controls whether wildcards are nerfed in callback (recommended)."
     );
-		    public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
             "wildcard_callback_power_stacking", false, "season.callback",
             "Power Stacking", "Instead of the superpower wildcard deactivating, the powers stay allowing stacking when the superpower wildcard activates again."
     );
@@ -327,6 +335,8 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_MOBSWAP_BOSS_CHANCE_MULTIPLIER
 
                 ,WILDCARD_SUPERPOWERS_POWER_BLACKLIST
+                ,WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER
+                ,WILDCARD_SUPERPOWERS_POWERS_PER_ROLL				
                 ,WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME
                 ,WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS
