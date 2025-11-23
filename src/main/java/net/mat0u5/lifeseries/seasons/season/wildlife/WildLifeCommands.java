@@ -328,13 +328,15 @@ public class WildLifeCommands extends Command {
         OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Your superpower cooldown has been skipped"));
         return 1;
     }
+	
+	public int setRandomSuperpowers(CommandSourceStack source) {
+		if (checkBanned(source)) return -1;
+		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
+		SuperpowersWildcard.rollRandomSuperpowers(players);
+		OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
+		return 1;
+	}
 
-    public int setRandomSuperpowers(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
-        SuperpowersWildcard.rollRandomSuperpowers();
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
-        return 1;
-    }
 	
 	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
@@ -380,6 +382,7 @@ public class WildLifeCommands extends Command {
             source.sendFailure(Component.nullToEmpty("That superpower doesn't exist"));
             return -1;
         }
+		
 
         Superpowers superpower = Superpowers.fromString(name);
         if (superpower == Superpowers.NULL) {
