@@ -227,7 +227,7 @@ public class WildLifeConfig extends ConfigManager {
     );
 	
 		    public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
-            "wildcard_callback_power_stacking", false, "season.callback",
+            "wildcard_callback_power_stacking", false, "season.callback[custom]",
             "Power Stacking", "Instead of the superpower wildcard deactivating, the powers stay allowing stacking when the superpower wildcard activates again."
     );
 
