@@ -54,7 +54,6 @@ public abstract class ConfigEntry {
     protected GroupConfigEntry<?> parentGroup;
     protected List<GroupConfigEntry<?>> groupTopology = new ArrayList<>();
     private boolean isNew = false;
-    private boolean isCustom = false;
     public boolean changedForever = false;
 
     public ConfigEntry(String fieldName, String displayName, String description) {
@@ -66,9 +65,6 @@ public abstract class ConfigEntry {
     }
 
     public void setNew() {
-        isNew = true;
-    
-    public void setCustom() {
         isNew = true;
     }
 
@@ -146,9 +142,6 @@ public abstract class ConfigEntry {
             context.drawString(textRenderer, "New", 2, labelY, TextColors.LIGHT_GRAY_A128);
         }
 
-        if (isCustom) {
-            context.drawString(textRenderer, "Custom", 2, labelY, TextColors.LIGHT_GRAY_A128);
-        }
 
         renderEntry(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
     }
