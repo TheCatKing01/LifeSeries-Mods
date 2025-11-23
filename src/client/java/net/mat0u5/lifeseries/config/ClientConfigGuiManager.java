@@ -106,6 +106,7 @@ public class ClientConfigGuiManager {
             targetGroup.addChildEntry(configEntry);
         }
         else {
+            Main.LOGGER.error("Could not find parent group {} for entry {}", groupInfo, configEntry.getFieldName());
             category.addEntry(configEntry);
         }
     }
@@ -171,6 +172,12 @@ public class ClientConfigGuiManager {
                     args.removeFirst();
                     args.removeFirst();
                     return new StringListConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue, args);
+                }
+            }
+            else if (stringObject.configType == ConfigTypes.EVENT_ENTRY) {
+                List<String> args = new ArrayList<>(stringObject.args);
+                if (args.size() >= 4) {
+                    return new EventConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue, args.get(3));
                 }
             }
             return new StringConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue);

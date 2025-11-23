@@ -4,9 +4,11 @@ import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.ConfigPayload;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
@@ -39,7 +41,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SEASON // Group
                 ,GROUP_LIVES
                 ,GROUP_TEAMS
-                //,GROUP_DATAPACK
+                ,GROUP_EVENTS
 
                 , GROUP_GLOBAL_LIVES // Group
                 ,DEFAULT_LIVES
@@ -189,17 +191,27 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, lifeEntry, index);
             index++;
         }
-        for (Map.Entry<Integer, PlayerTeam> entry : livesManager.getLivesTeams().entrySet()) {
-            PlayerTeam team = entry.getValue();
-            String teamName = team.getName();
-            int teamNum = entry.getKey();
-            Integer validKill = livesManager.getTeamCanKill(teamName);
-            Integer gainLife = livesManager.getTeamGainLives(teamName);
-            String validKillStr = validKill != null ? String.valueOf(validKill) : "";
-            String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
-            ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
-                    "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
-                    "", "", List.of(String.valueOf(teamNum), team.getDisplayName().getString(), team.getColor().getName(), validKillStr, gainLifeStr), true
+        if (currentSeason.getSeason() != Seasons.LIMITED_LIFE) {
+            for (Map.Entry<Integer, PlayerTeam> entry : livesManager.getLivesTeams().entrySet()) {
+                PlayerTeam team = entry.getValue();
+                String teamName = team.getName();
+                int teamNum = entry.getKey();
+                Integer validKill = livesManager.getTeamCanKill(teamName);
+                Integer gainLife = livesManager.getTeamGainLives(teamName);
+                String validKillStr = validKill != null ? String.valueOf(validKill) : "";
+                String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
+                ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
+                        "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
+                        "", "", List.of(String.valueOf(teamNum), team.getDisplayName().getString(), team.getColor().getName(), validKillStr, gainLifeStr), true
+                );
+                sendConfigEntry(player, teamEntry, index);
+                index++;
+            }
+        }
+        for (DatapackIntegration.Events event : DatapackIntegration.getAllEvents()) {
+            ConfigFileEntry<String> teamEntry = new ConfigFileEntry<>(
+                    event.getEventName(), event.getCommand(), ConfigTypes.EVENT_ENTRY, "events",
+                    event.getDisplayName(), event.getDescription(), List.of(event.getCanceled()), true
             );
             sendConfigEntry(player, teamEntry, index);
             index++;
@@ -337,6 +349,15 @@ public abstract class ConfigManager extends DefaultConfigValues {
             properties.load(input);
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public void setOrRemoveProperty(String key, String value) {
+        if (value == null || value.isEmpty()) {
+            removeProperty(key);
+        }
+        else {
+            setProperty(key, value);
         }
     }
 

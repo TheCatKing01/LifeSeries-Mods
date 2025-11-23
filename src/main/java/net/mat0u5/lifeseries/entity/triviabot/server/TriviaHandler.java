@@ -17,6 +17,7 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.WeightedRandomizer;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
@@ -38,7 +39,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -52,6 +52,12 @@ import static net.mat0u5.lifeseries.Main.server;
 
 //? if > 1.21.9
 /*import net.minecraft.world.entity.EntityReference;*/
+
+//? if <= 1.21.9 {
+import net.minecraft.world.entity.animal.Bee;
+//?} else {
+/*import net.minecraft.world.entity.animal.bee.Bee;
+*///?}
 
 public class TriviaHandler {
     private TriviaBot bot;
@@ -72,6 +78,11 @@ public class TriviaHandler {
         if (boundPlayer.getUUID() != player.getUUID()) return InteractionResult.PASS;
         if (bot.submittedAnswer()) return InteractionResult.PASS;
         if (bot.interactedWith() && getRemainingTicks() <= 0) return InteractionResult.PASS;
+
+        DatapackIntegration.EVENT_TRIVIA_BOT_OPEN.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+        ));
 
         if (!bot.interactedWith() || question == null) {
             interactedAtAge = bot.tickCount;
@@ -152,6 +163,13 @@ public class TriviaHandler {
     }
 
     public void answeredCorrect() {
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            DatapackIntegration.EVENT_TRIVIA_SUCCEED.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+            ));
+        }
         bot.setAnsweredRight(true);
         TaskScheduler.scheduleTask(145, this::spawnItemForPlayer);
         TaskScheduler.scheduleTask(170, this::spawnItemForPlayer);
@@ -160,6 +178,13 @@ public class TriviaHandler {
     }
 
     public void answeredIncorrect() {
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            DatapackIntegration.EVENT_TRIVIA_FAIL.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+            ));
+        }
         bot.setAnsweredRight(false);
         TaskScheduler.scheduleTask(210, this::cursePlayer);
     }
@@ -167,7 +192,7 @@ public class TriviaHandler {
     public void cursePlayer() {
         ServerPlayer player = bot.serverData.getBoundPlayer();
         if (player == null) return;
-        player.playNotifySound(SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.MASTER, 0.2f, 1f);
+        player.ls$playNotifySound(SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.MASTER, 0.2f, 1f);
         ServerLevel level = (ServerLevel) bot.level();
         Vec3 pos = bot.position();
 

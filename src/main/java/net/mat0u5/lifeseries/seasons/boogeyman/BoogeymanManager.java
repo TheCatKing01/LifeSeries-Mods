@@ -11,6 +11,7 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -122,8 +123,10 @@ public class BoogeymanManager {
         }
         Boogeyman newBoogeyman = new Boogeyman(player);
         boogeymen.add(newBoogeyman);
+        player.addTag("boogeyman");
         boogeymanChosen = true;
         boogeymanListChanged = true;
+        DatapackIntegration.EVENT_BOOGEYMAN_ADDED.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         return newBoogeyman;
     }
 
@@ -139,6 +142,9 @@ public class BoogeymanManager {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
         boogeymen.remove(boogeyman);
+        player.removeTag("boogeyman");
+        player.removeTag("boogeyman_cured");
+        player.removeTag("boogeyman_failed");
         if (boogeymen.isEmpty()) boogeymanChosen = false;
         player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
     }
@@ -149,6 +155,9 @@ public class BoogeymanManager {
             ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
             if (player == null) continue;
             player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
+            player.removeTag("boogeyman");
+            player.removeTag("boogeyman_cured");
+            player.removeTag("boogeyman_failed");
         }
         boogeymen = new ArrayList<>();
         boogeymanChosen = false;
@@ -164,6 +173,8 @@ public class BoogeymanManager {
         }
         boogeyman.failed = false;
         boogeyman.cured = false;
+        player.removeTag("boogeyman_cured");
+        player.removeTag("boogeyman_failed");
         boogeyman.died = false;
         boogeyman.resetKills();
     }
@@ -173,6 +184,8 @@ public class BoogeymanManager {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeymen == null) return;
         boogeyman.failed = false;
+        player.addTag("boogeyman_cured");
+        player.removeTag("boogeyman_failed");
         if (boogeyman.cured) return;
         boogeyman.cured = true;
         PlayerUtils.sendTitle(player,Component.nullToEmpty("§aYou are cured!"), 20, 30, 20);
@@ -188,22 +201,27 @@ public class BoogeymanManager {
                 PlayerUtils.broadcastMessage(TextUtils.format("{}§7 is cured of the Boogeyman curse!", player));
             }
         }
-        if (stealLife) {
+        DatapackIntegration.EVENT_BOOGEYMAN_CURE_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
+        if (!DatapackIntegration.EVENT_BOOGEYMAN_CURE_REWARD.isCanceled() && stealLife) {
             player.ls$addLife();
         }
     }
 
-    public void onBoogeymanKill(ServerPlayer player) {
+    public void onBoogeymanKill(ServerPlayer boogeyPlayer, ServerPlayer victim) {
         if (!BOOGEYMAN_ENABLED) return;
-        Boogeyman boogeyman = getBoogeyman(player);
+        Boogeyman boogeyman = getBoogeyman(boogeyPlayer);
         if (boogeymen == null) return;
         if (boogeyman.cured || boogeyman.failed) return;
+        DatapackIntegration.EVENT_BOOGEYMAN_KILL.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Boogeyman", boogeyPlayer.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+        ));
         boogeyman.onKill();
         if (boogeyman.shouldCure()) {
-            cure(player);
+            cure(boogeyPlayer);
         }
         else {
-            player.sendSystemMessage(TextUtils.formatLoosely("§7You still need {} {} to be cured of the curse.", boogeyman.killsNeeded, TextUtils.pluralize("kill", boogeyman.killsNeeded)));
+            boogeyPlayer.sendSystemMessage(TextUtils.formatLoosely("§7You still need {} {} to be cured of the curse.", boogeyman.killsNeeded, TextUtils.pluralize("kill", boogeyman.killsNeeded)));
         }
     }
 
@@ -400,29 +418,35 @@ public class BoogeymanManager {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeymen == null) return false;
 
+        player.removeTag("boogeyman_cured");
+        player.addTag("boogeyman_failed");
         boogeyman.cured = false;
         if (boogeyman.failed) return false;
         boogeyman.failed = true;
 
         boolean canChangeLives = player.ls$isAlive() && !player.ls$isOnLastLife(true);
 
-        if (BOOGEYMAN_ADVANCED_DEATHS) {
-            PlayerUtils.sendTitle(player,Component.nullToEmpty("§cThe curse consumes you.."), 20, 30, 20);
-            if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
-                PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been consumed by the curse.", player));
+
+        DatapackIntegration.EVENT_BOOGEYMAN_FAIL_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
+        if (!DatapackIntegration.EVENT_BOOGEYMAN_FAIL_REWARD.isCanceled()) {
+            if (BOOGEYMAN_ADVANCED_DEATHS) {
+                PlayerUtils.sendTitle(player,Component.nullToEmpty("§cThe curse consumes you.."), 20, 30, 20);
+                if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
+                    PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been consumed by the curse.", player));
+                }
+                if (canChangeLives) {
+                    AdvancedDeathsManager.setPlayerLives(player, 1);
+                }
             }
-            if (canChangeLives) {
-                AdvancedDeathsManager.setPlayerLives(player, 1);
-            }
-        }
-        else {
-            PlayerUtils.sendTitle(player,Component.nullToEmpty("§cYou have failed."), 20, 30, 20);
-            PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_fail")));
-            if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
-                PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been dropped to their §cLast Life§7.", player));
-            }
-            if (canChangeLives) {
-                player.ls$setLives(1);
+            else {
+                PlayerUtils.sendTitle(player,Component.nullToEmpty("§cYou have failed."), 20, 30, 20);
+                PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_fail")));
+                if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
+                    PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been dropped to their §cLast Life§7.", player));
+                }
+                if (canChangeLives) {
+                    player.ls$setLives(1);
+                }
             }
         }
         return true;
@@ -527,6 +551,12 @@ public class BoogeymanManager {
         if (!currentSession.statusStarted()) return;
         if (!boogeyman.failed && !boogeyman.cured && !boogeyman.died) return;
         boogeymen.remove(boogeyman);
+        ServerPlayer player = boogeyman.getPlayer();
+        if (player != null) {
+            player.removeTag("boogeyman");
+            player.removeTag("boogeyman_cured");
+            player.removeTag("boogeyman_failed");
+        }
         TaskScheduler.scheduleTask(100, this::chooseNewBoogeyman);
     }
 
@@ -556,6 +586,7 @@ public class BoogeymanManager {
             ServerPlayer player = boogeyman.getPlayer();
             if (player != null) {
                 if (!playerFailBoogeyman(player, true)) {
+                    player.addTag("boogeyman_failed");
                     boogeyman.failed = true;
                 }
             }

@@ -13,6 +13,7 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -214,8 +215,12 @@ public class TriviaWildcard extends Wildcard {
             SessionTranscript.newTriviaBot(player);
             bot.serverData.setBoundPlayer(player);
             bots.put(player.getUUID(), bot);
-            player.playNotifySound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 0.5f, 1);
+            player.ls$playNotifySound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 0.5f, 1);
             NetworkHandlerServer.sendNumberPacket(player, PacketNames.FAKE_THUNDER, 7);
+            DatapackIntegration.EVENT_TRIVIA_BOT_SPAWN.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+            ));
         }
     }
 

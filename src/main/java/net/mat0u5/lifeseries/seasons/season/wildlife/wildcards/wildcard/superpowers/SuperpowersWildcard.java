@@ -7,7 +7,8 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Mimicry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.player.PlayerUtils
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -64,13 +65,16 @@ public class SuperpowersWildcard extends Wildcard {
         if (!playerSuperpowers.containsKey(uuid)) return;
         playerSuperpowers.get(uuid).forEach(Superpower::turnOff);
         playerSuperpowers.remove(uuid);
-        Necromancy.checkRessurectedPlayersReset();
+        Necromancy.checkRessurectedPlayersReset
+		DatapackIntegration.deactivateSuperpower(player);
+
     }
 
     public static void resetAllSuperpowers() {
         playerSuperpowers.values().forEach(set -> set.forEach(Superpower::turnOff));
         playerSuperpowers.clear();
         Necromancy.checkRessurectedPlayersReset();
+        DatapackIntegration.initSuperpowers();
     }
 
     public static void rollRandomSuperpowers() {
@@ -176,6 +180,10 @@ public class SuperpowersWildcard extends Wildcard {
         }
 
         Superpower instance = power.getInstance(player);
+		if (instance != null) {
+			playerSuperpowers.put(player.getUUID(), instance);
+			DatapackIntegration.activateSuperpower(player, power);
+		}
         if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
 
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
@@ -190,6 +198,10 @@ public class SuperpowersWildcard extends Wildcard {
 
     public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
         Superpower instance = superpower.getInstance(player);
+		if (instance != null) {
+            playerSuperpowers.put(player.getUUID(), instance);
+            DatapackIntegration.activateSuperpower(player, superpower);
+        }
         if (instance != null) playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
 
         if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {

@@ -128,7 +128,14 @@ public class NetworkHandlerServer {
             List<String> args = payload.args();
             if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received config update from {}: {{}, {}, {}}", player, configType, id, args));
 
-            if (configType.parentString() && !args.isEmpty()) {
+            if (configType == ConfigTypes.EVENT_ENTRY && args.size() >= 2) {
+                String command = args.getFirst().strip();
+                String canceled = args.get(1);
+                seasonConfig.setOrRemoveProperty(id, command);
+                seasonConfig.setOrRemoveProperty(id+"_canceled", canceled);
+                updatedConfigThisTick = true;
+            }
+            else if (configType.parentString() && !args.isEmpty()) {
                 seasonConfig.setProperty(id, args.getFirst());
                 updatedConfigThisTick = true;
             }
@@ -238,13 +245,24 @@ public class NetworkHandlerServer {
 
         if (PermissionManager.isAdmin(player)) {
             if (name == PacketNames.SET_LIVES && value.size() >= 2) {
-                try {
-                    int lives = Integer.parseInt(value.get(1));
-                    livesManager.setScore(value.getFirst(), lives);
-                }catch(Exception e) {
-                    ScoreboardUtils.resetScore(ScoreHolder.forNameOnly(value.getFirst()), LivesManager.SCOREBOARD_NAME);
-
+                ServerPlayer settingPlayer = PlayerUtils.getPlayer(value.getFirst());
+                if (settingPlayer != null) {
+                    try {
+                        int lives = Integer.parseInt(value.get(1));
+                        settingPlayer.ls$setLives(lives);
+                    }catch(Exception e) {
+                        ScoreboardUtils.resetScore(settingPlayer, LivesManager.SCOREBOARD_NAME);
+                    }
                 }
+                else {
+                    try {
+                        int lives = Integer.parseInt(value.get(1));
+                        livesManager.setScore(value.getFirst(), lives);
+                    }catch(Exception e) {
+                        ScoreboardUtils.resetScore(ScoreHolder.forNameOnly(value.getFirst()), LivesManager.SCOREBOARD_NAME);
+                    }
+                }
+
                 Season.reloadPlayerTeams = true;
             }
             if (name == PacketNames.SET_TEAM && value.size() >= 6) {

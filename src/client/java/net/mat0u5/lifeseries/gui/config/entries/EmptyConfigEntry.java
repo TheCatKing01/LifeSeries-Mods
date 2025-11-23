@@ -55,11 +55,6 @@ public abstract class EmptyConfigEntry extends ConfigEntry {
     }
 
     @Override
-    public boolean canReset() {
-        return false;
-    }
-
-    @Override
     public boolean hasResetButton() {
         return false;
     }
@@ -100,6 +95,10 @@ public abstract class EmptyConfigEntry extends ConfigEntry {
 
     @Override
     public boolean isModified() {
+        return false;
+    }
+    @Override
+    public boolean canReset() {
         return false;
     }
 }

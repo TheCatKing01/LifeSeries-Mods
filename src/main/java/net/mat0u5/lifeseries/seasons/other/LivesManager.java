@@ -15,6 +15,7 @@ import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -264,17 +265,17 @@ public class LivesManager {
         setPlayerLives(player, lives);
     }
 
-    public void addToLifeNoUpdate(ServerPlayer player) {
+    public void addToLivesNoUpdate(ServerPlayer player, int amount) {
         if (isWatcher(player)) return;
         Integer currentLives = getPlayerLives(player);
         if (currentLives == null) currentLives = 0;
-        int lives = currentLives + 1;
+        int lives = currentLives + amount;
         if (lives < 0) lives = 0;
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
     }
 
     public void receiveLifeFromOtherPlayer(Component playerName, ServerPlayer target, boolean isRevive) {
-        target.playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
+        target.ls$playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
         if (seasonConfig.GIVELIFE_BROADCAST.get(seasonConfig)) {
             PlayerUtils.broadcastMessageExcept(TextUtils.format("{} received a life from {}", target, playerName), target);
         }
@@ -378,6 +379,7 @@ public class LivesManager {
                     PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), FINAL_DEATH_SOUND);
                 }
                 showDeathTitle(player);
+                DatapackIntegration.EVENT_PLAYER_FINAL_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
             }
         }
         SessionTranscript.onPlayerLostAllLives(player);
