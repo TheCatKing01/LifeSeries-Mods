@@ -46,7 +46,7 @@ public class SuperpowersWildcard extends Wildcard {
 
 	@Override
 	public void activate() {
-		List<ServerPlayer> allPlayers = new ArrayList<>
+		List<ServerPlayer> allPlayers = new ArrayList<>();
 		rollRandomSuperpowers(allPlayers);
 		super.activate();
 	}
