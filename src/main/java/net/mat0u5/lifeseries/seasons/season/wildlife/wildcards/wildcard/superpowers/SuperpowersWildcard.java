@@ -46,7 +46,7 @@ public class SuperpowersWildcard extends Wildcard {
 
 	@Override
 	public void activate() {
-		List<ServerPlayer> allPlayers = new ArrayList<>(/* get all online players */);
+		List<ServerPlayer> allPlayers = new ArrayList<>
 		rollRandomSuperpowers(allPlayers);
 		super.activate();
 	}
@@ -190,11 +190,19 @@ public class SuperpowersWildcard extends Wildcard {
 			);
 		}
 	}
-
+	
 	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
+
+		Set<Superpower> currentPowers =
+				playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+
+		if (currentPowers.size() >= POWERS_PER_PLAYER) {
+			return;
+		}
+
 		Superpower instance = superpower.getInstance(player);
 		if (instance != null) {
-			playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+			currentPowers.add(instance);
 			DatapackIntegration.activateSuperpower(player, superpower);
 		}
 
@@ -206,8 +214,10 @@ public class SuperpowersWildcard extends Wildcard {
 					1
 			);
 		}
+    
 		Necromancy.checkRessurectedPlayersReset();
 	}
+
 
 
     public static void pressedSuperpowerKey(ServerPlayer player) {
