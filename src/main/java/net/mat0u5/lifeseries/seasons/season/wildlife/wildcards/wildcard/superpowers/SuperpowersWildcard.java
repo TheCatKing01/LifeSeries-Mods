@@ -41,6 +41,11 @@ public class SuperpowersWildcard extends Wildcard {
             blacklistedPowers.add(power);
         }
     }
+	
+	public static ChatFormatting getTeamColor(ServerPlayer player) {
+		if (player.getTeam() != null) return player.getTeam().getColor();
+		return ChatFormatting.WHITE;
+	}
 
     @Override
     public Wildcards getType() {
@@ -163,18 +168,28 @@ public class SuperpowersWildcard extends Wildcard {
 		
 
 		if (!maxedPlayers.isEmpty()) {
-			MutableComponent message = Component.literal(maxedPlayers.size() + " player(s) have reached max powers and did not receive additional powers: ")
-												.withStyle(ChatFormatting.RED);
+			if (maxedPlayers.size() == 1) {
+				ServerPlayer player = maxedPlayers.get(0);
+				ChatFormatting teamColor = getTeamColor(player);;
+				MutableComponent message = Component.literal(player.getScoreboardName())
+					.withStyle(teamColor)
+					.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
+					.withStyle(ChatFormatting.RED));
+				PlayerUtils.broadcastMessageToAdmins(message);
+			} else {
+				MutableComponent message = Component.literal(maxedPlayers.size() + " players have reached max superpowers so didn't receive all of the rolled powers: ")
+													.withStyle(ChatFormatting.RED);
 
-			for (int i = 0; i < maxedPlayers.size(); i++) {
-				var player = maxedPlayers.get(i);
-				message.append(Component.literal(player.getScoreboardName()));
-				if (i < maxedPlayers.size() - 1) {
-					message.append(Component.literal(", ").withStyle(ChatFormatting.RED));
+				for (int i = 0; i < maxedPlayers.size(); i++) {
+					var player = maxedPlayers.get(i);
+					ChatFormatting teamColor = getTeamColor(player);
+					message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
+					if (i < maxedPlayers.size() - 1) {
+						message.append(Component.literal(", ").withStyle(ChatFormatting.RED));
+					}
 				}
+				PlayerUtils.broadcastMessageToAdmins(message);
 			}
-
-			PlayerUtils.broadcastMessageToAdmins(message);
 		}
 
 	}
@@ -185,7 +200,7 @@ public class SuperpowersWildcard extends Wildcard {
 		if (currentPowers.size() >= POWERS_PER_PLAYER) {
 			MutableComponent message = Component.literal("").withStyle(ChatFormatting.RED)
 				.append(Component.literal(player.getScoreboardName()))
-				.append(Component.literal(" has reached max powers and did not receive " + superpower.getString())
+				.append(Component.literal(" has reached max superpowers and did not receive " + superpower.getString())
 						.withStyle(ChatFormatting.RED));
 
 			PlayerUtils.broadcastMessageToAdmins(message);
