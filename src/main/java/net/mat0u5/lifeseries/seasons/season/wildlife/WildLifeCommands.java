@@ -165,6 +165,7 @@ public class WildLifeCommands extends Command {
                         .then(literal("reset")
                                 .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
                         )
+					)
                 )
 				.then(literal("count")
 					.then(argument("player", EntityArgument.players())
