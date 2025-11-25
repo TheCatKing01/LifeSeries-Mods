@@ -150,18 +150,29 @@ public class SuperpowersWildcard extends Wildcard {
 			}
 		}
 
-		if (!maxedPlayers.isEmpty()) {
-			PlayerUtils.broadcastMessageToAdmins(
-				Component.literal(maxedPlayers.size() + " player(s) have reached max powers and did not receive additional powers: " +
-					maxedPlayers.stream().map(ServerPlayer::getScoreboardName).toList())
-			);
-		}
-
 		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
 			PlayerUtils.playSoundToPlayers(
 				allPlayers,
 				SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
 				0.2f, 1
+			);
+		}
+		
+		if (!maxedPlayers.isEmpty()) {
+
+			MutableComponent message = Component.literal(maxedPlayers.size() + " player(s) have reached max powers and did not receive additional powers: ")
+				.withStyle(ChatFormatting.RED);
+
+			for (int i = 0; i < maxedPlayers.size(); i++) {
+				ServerPlayer player = maxedPlayers.get(i);
+				message.append(Component.literal(player.getScoreboardName()));
+				if (i < maxedPlayers.size() - 1) {
+					message.append(Component.literal(", ").withStyle(ChatFormatting.RED));
+				}
+			}
+	
+			PlayerUtils.broadcastMessageToAdmins(
+
 			);
 		}
 	}
@@ -171,7 +182,10 @@ public class SuperpowersWildcard extends Wildcard {
 
 		if (currentPowers.size() >= POWERS_PER_PLAYER) {
 			PlayerUtils.broadcastMessageToAdmins(
-				Component.literal(player.getScoreboardName() + " has reached max powers and did not receive " + superpower.getString())
+				Component.literal("").withStyle(ChatFormatting.RED)
+					.append(Component.literal(player.getScoreboardName())) // keep player name color
+					.append(Component.literal(" has reached max powers and did not receive " + superpower.getString())
+						.withStyle(ChatFormatting.RED))
 			);
 			return;
 		}
