@@ -185,7 +185,7 @@ public class SuperpowersWildcard extends Wildcard {
 					ChatFormatting teamColor = getTeamColor(player);
 					message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
 					if (i < maxedPlayers.size() - 1) {
-						message.append(Component.literal(", ").withStyle(ChatFormatting.RED));
+						message.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
 					}
 				}
 				PlayerUtils.broadcastMessageToAdmins(message);

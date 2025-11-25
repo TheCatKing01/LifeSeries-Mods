@@ -379,9 +379,12 @@ public class WildLifeCommands extends Command {
 	public int getSuperpowerCount(CommandSourceStack source, ServerPlayer player) {
 	    if (checkBanned(source))return -1;
 		    int count = SuperpowersWildcard.getSuperpowerCount(player);
-
-			OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower(s)", player, count));
-		
+			if (count == 1) {
+				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower", player, count));
+			}
+			else {
+				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpowers", player, count));			
+			}
 		return 1;
 	}
 
