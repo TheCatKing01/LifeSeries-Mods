@@ -113,28 +113,30 @@ public class SuperpowersWildcard extends Wildcard {
 
 		Collections.shuffle(implemented);
 
+		List<ServerPlayer> maxedPlayers = new ArrayList<>();
+
 		for (ServerPlayer player : allPlayers) {
 			playerSuperpowers.putIfAbsent(player.getUUID(), new HashSet<>());
 			Set<Superpower> currentPowers = playerSuperpowers.get(player.getUUID());
 
 			for (int i = 0; i < POWERS_PER_ROLL; i++) {
-				if (currentPowers.size() >= POWERS_PER_PLAYER) break;
+				if (currentPowers.size() >= POWERS_PER_PLAYER) {
+					if (!maxedPlayers.contains(player)) maxedPlayers.add(player);
+					break;
+				}
 
 				Superpowers power = null;
 
-				// Assigned superpowers override randomness
 				if (assignedSuperpowers.containsKey(player.getUUID())) {
 					power = assignedSuperpowers.remove(player.getUUID());
 				}
 
-				// Possibly give necromancy
 				if (power == null && necroAllowed && player.getRandom().nextDouble() <= necroChance) {
 					power = Superpowers.NECROMANCY;
 					implemented.remove(Superpowers.NECROMANCY);
 					necroAllowed = false;
 				}
 
-				// Standard random selection
 				if (power == null) {
 					if (implemented.isEmpty()) break; // no powers left
 					power = implemented.get(player.getRandom().nextInt(implemented.size()));
@@ -148,6 +150,13 @@ public class SuperpowersWildcard extends Wildcard {
 			}
 		}
 
+		if (!maxedPlayers.isEmpty()) {
+			PlayerUtils.broadcastMessageToAdmins(
+				Component.literal(maxedPlayers.size() + " player(s) have reached max powers and did not receive additional powers: " +
+					maxedPlayers.stream().map(ServerPlayer::getScoreboardName).toList())
+			);
+		}
+
 		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
 			PlayerUtils.playSoundToPlayers(
 				allPlayers,
@@ -155,6 +164,34 @@ public class SuperpowersWildcard extends Wildcard {
 				0.2f, 1
 			);
 		}
+	}
+
+	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
+		Set<Superpower> currentPowers = playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+
+		if (currentPowers.size() >= POWERS_PER_PLAYER) {
+			PlayerUtils.broadcastMessageToAdmins(
+				Component.literal(player.getScoreboardName() + " has reached max powers and did not receive " + superpower.getString())
+			);
+			return;
+		}
+
+		Superpower instance = superpower.getInstance(player);
+		if (instance != null) {
+			currentPowers.add(instance);
+			DatapackIntegration.activateSuperpower(player, superpower);
+		}
+
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayer(
+					player,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f,
+					1
+			);
+		}
+
+		Necromancy.checkRessurectedPlayersReset();
 	}
 
 
@@ -191,35 +228,6 @@ public class SuperpowersWildcard extends Wildcard {
 		}
 	}
 	
-	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
-
-		Set<Superpower> currentPowers =
-				playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
-
-		if (currentPowers.size() >= POWERS_PER_PLAYER) {
-			return;
-		}
-
-		Superpower instance = superpower.getInstance(player);
-		if (instance != null) {
-			currentPowers.add(instance);
-			DatapackIntegration.activateSuperpower(player, superpower);
-		}
-
-		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-			PlayerUtils.playSoundToPlayer(
-					player,
-					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
-					0.2f,
-					1
-			);
-		}
-    
-		Necromancy.checkRessurectedPlayersReset();
-	}
-
-
-
     public static void pressedSuperpowerKey(ServerPlayer player) {
         if (!playerSuperpowers.containsKey(player.getUUID())) return;
         if (!player.ls$isAlive()) {
@@ -265,6 +273,11 @@ public class SuperpowersWildcard extends Wildcard {
 	
 	public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
 		return hasActivePower(player, superpower);
-}
+	}	
+
+	public static int getSuperpowerCount(ServerPlayer player) {
+    Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
+    return powers == null ? 0 : powers.size();
+	}
 
 }

@@ -147,7 +147,7 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("addRandom")
+                .then(literal("randomise")
                     .then(argument("player", EntityArgument.players())
                             .executes(context -> setRandomSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                     )
@@ -165,8 +165,12 @@ public class WildLifeCommands extends Command {
                         .then(literal("reset")
                                 .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
                         )
-                    )
                 )
+				.then(literal("count")
+					.then(argument("player", EntityArgument.players())
+						.executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayer(context, "player")))
+					)
+				)
         );
                 
         dispatcher.register(
@@ -370,6 +374,17 @@ public class WildLifeCommands extends Command {
         }
         return 1;
     }
+	
+	public int getSuperpowerCount(CommandSourceStack source, ServerPlayer player) {
+	    if (checkBanned(source))return -1;
+		    int count = SuperpowersWildcard.getSuperpowerCount(player);
+
+			OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower(s)", player, count));
+		);
+		
+		return 1;
+	}
+
 
     public int resetSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
