@@ -12,6 +12,9 @@ import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -158,35 +161,34 @@ public class SuperpowersWildcard extends Wildcard {
 			);
 		}
 		
-		if (!maxedPlayers.isEmpty()) {
 
+		if (!maxedPlayers.isEmpty()) {
 			MutableComponent message = Component.literal(maxedPlayers.size() + " player(s) have reached max powers and did not receive additional powers: ")
-				.withStyle(ChatFormatting.RED);
+												.withStyle(ChatFormatting.RED);
 
 			for (int i = 0; i < maxedPlayers.size(); i++) {
-				ServerPlayer player = maxedPlayers.get(i);
+				var player = maxedPlayers.get(i);
 				message.append(Component.literal(player.getScoreboardName()));
 				if (i < maxedPlayers.size() - 1) {
 					message.append(Component.literal(", ").withStyle(ChatFormatting.RED));
 				}
 			}
-	
-			PlayerUtils.broadcastMessageToAdmins(
 
-			);
+			PlayerUtils.broadcastMessageToAdmins(message);
 		}
+
 	}
 
 	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
 		Set<Superpower> currentPowers = playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
 
 		if (currentPowers.size() >= POWERS_PER_PLAYER) {
-			PlayerUtils.broadcastMessageToAdmins(
-				Component.literal("").withStyle(ChatFormatting.RED)
-					.append(Component.literal(player.getScoreboardName())) // keep player name color
-					.append(Component.literal(" has reached max powers and did not receive " + superpower.getString())
-						.withStyle(ChatFormatting.RED))
-			);
+			MutableComponent message = Component.literal("").withStyle(ChatFormatting.RED)
+				.append(Component.literal(player.getScoreboardName()))
+				.append(Component.literal(" has reached max powers and did not receive " + superpower.getString())
+						.withStyle(ChatFormatting.RED));
+
+			PlayerUtils.broadcastMessageToAdmins(message);
 			return;
 		}
 
