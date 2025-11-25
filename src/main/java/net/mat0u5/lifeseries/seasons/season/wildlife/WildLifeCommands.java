@@ -380,7 +380,6 @@ public class WildLifeCommands extends Command {
 		    int count = SuperpowersWildcard.getSuperpowerCount(player);
 
 			OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower(s)", player, count));
-		);
 		
 		return 1;
 	}
