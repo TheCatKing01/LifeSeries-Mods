@@ -167,14 +167,11 @@ public class WildLifeCommands extends Command {
                         )
 					)
                 )
-				
-				// removed for now due to bugs >:(
-				
-				// .then(literal("count")
-					// .then(argument("player", EntityArgument.players())
-						// .executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayer(context, "player")))
-					// )
-				// )
+				.then(literal("count")
+					.then(argument("player", EntityArgument.players())
+						.executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayer(context, "player")))
+					)
+				)
         );
                 
         dispatcher.register(
