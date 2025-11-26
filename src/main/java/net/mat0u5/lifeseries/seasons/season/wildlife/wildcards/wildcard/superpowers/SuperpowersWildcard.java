@@ -239,11 +239,11 @@ public class SuperpowersWildcard extends Wildcard {
 
 				message = Component.literal(player.getScoreboardName())
 					.withStyle(teamColor)
-					.append(Component.literal(" has all available powers so didn't receive all of the rolled powers")
+					.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
 					.withStyle(ChatFormatting.RED));
 			} else {
 				message = Component.literal(maxedPlayers.size() +
-					" players have all available powers so didn't receive all of the rolled powers: ")
+					" players have reached max superpowers so didn't receive all of the rolled powers: ")
 					.withStyle(ChatFormatting.RED);
 
 				for (int i = 0; i < maxedPlayers.size(); i++) {
