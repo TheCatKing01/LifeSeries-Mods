@@ -18,6 +18,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.mat0u5.lifeseries.Main.livesManager;
 
