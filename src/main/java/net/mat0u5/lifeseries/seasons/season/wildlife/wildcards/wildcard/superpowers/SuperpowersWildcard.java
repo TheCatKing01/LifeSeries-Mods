@@ -25,7 +25,6 @@ public class SuperpowersWildcard extends Wildcard {
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
     public static boolean WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = true;	
 	public static boolean WILDCARD_CALLBACK_POWER_STACKING = false;	
-	public static boolean WILDCARD_CALLBACK_RESET_AT_MAX = false;
 	public static boolean WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = false;
 	public static boolean WILDCARD_CALLBACK_RESET_AT_MAX = false;	
     public static List<Superpowers> blacklistedPowers = List.of();
@@ -181,28 +180,31 @@ public class SuperpowersWildcard extends Wildcard {
 
 		if (!maxedPlayers.isEmpty()) {
 			if (!WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
+				MutableComponent message;
 				if (maxedPlayers.size() == 1) {
 					ServerPlayer player = maxedPlayers.get(0);
 					ChatFormatting teamColor = getTeamColor(player);;
-					MutableComponent message = Component.literal(player.getScoreboardName())
+					message = Component.literal(player.getScoreboardName())
 						.withStyle(teamColor)
 						.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
 						.withStyle(ChatFormatting.RED));
 					PlayerUtils.broadcastMessageToAdmins(message);
 				} else {
-					MutableComponent message = Component.literal(maxedPlayers.size() + " players have reached max superpowers so didn't receive all of the rolled powers: ")
-														.withStyle(ChatFormatting.RED);
-			}
+					message = Component.literal(maxedPlayers.size() + " players have reached max superpowers so didn't receive all of the rolled powers: ")
+						.withStyle(ChatFormatting.RED);
 
-				for (int i = 0; i < maxedPlayers.size(); i++) {
-					var player = maxedPlayers.get(i);
-					ChatFormatting teamColor = getTeamColor(player);
-					message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
-					if (i < maxedPlayers.size() - 1) {
-						message.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
+					for (int i = 0; i < maxedPlayers.size(); i++) {
+						var player = maxedPlayers.get(i);
+						ChatFormatting teamColor = getTeamColor(player);
+						message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
+						if (i < maxedPlayers.size() - 1) {
+							message.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
+						}
 					}
+					
 				}
-				PlayerUtils.broadcastMessageToAdmins(message);
+				
+			    PlayerUtils.broadcastMessageToAdmins(message);
 			}
 		}
 
