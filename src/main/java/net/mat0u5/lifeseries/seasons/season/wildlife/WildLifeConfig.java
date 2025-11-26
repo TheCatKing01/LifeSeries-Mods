@@ -221,7 +221,7 @@ public class WildLifeConfig extends ConfigManager {
     );
 	public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = new ConfigFileEntry<>(
             "wildcard_superpowers_max_powers_message", true, "season.superpowers",
-            "Max Powers Messages", "Controls whether to show the messages when a player reaches max or has every possible power."
+            "Max Powers Message", "Controls whether to show the messages when a player reaches max superpowers."
     );
 
 

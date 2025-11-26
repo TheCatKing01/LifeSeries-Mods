@@ -281,7 +281,7 @@ public class SuperpowersWildcard extends Wildcard {
 			if (WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
 				MutableComponent message = Component.literal(player.getScoreboardName())
 					.withStyle(getTeamColor(player))
-					.append(Component.literal(" has all available powers so didn't receive " + superpower.getString())
+					.append(Component.literal(" has reached max superpowers so didn't receive " + superpower.getString())
 					.withStyle(ChatFormatting.RED));
 				PlayerUtils.broadcastMessageToAdmins(message);
 			}
