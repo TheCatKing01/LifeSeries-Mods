@@ -168,7 +168,7 @@ public class WildLifeCommands extends Command {
 					)
                 )
 				
-				// removed for now due to bugs >:(
+				// Removed for now due to bugs >:(
 				
 				// .then(literal("count")
 					// .then(argument("player", EntityArgument.players())
