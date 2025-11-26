@@ -190,16 +190,11 @@ public class SuperpowersWildcard extends Wildcard {
 					power = Superpowers.NECROMANCY;
 					necroAllowed = false;
 				}
-
-				if (power == null) {
-					List<Superpowers> remaining = implemented.stream()
-							.filter(p -> currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == p))
-							.toList();
-							
+						
 				if (power == null) {
 					List<Superpowers> remaining = implemented.stream()
 							.filter(p -> {
-								final Superpowers finalPower = p; // capture p, not 'power'
+								final Superpowers finalPower = p; 
 								return currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == finalPower);
 							})
 							.toList();
