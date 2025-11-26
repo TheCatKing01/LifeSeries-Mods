@@ -192,9 +192,16 @@ public class SuperpowersWildcard extends Wildcard {
 				}
 
 				if (power == null) {
-					Superpowers chosenPower = power;
 					List<Superpowers> remaining = implemented.stream()
 							.filter(p -> currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == p))
+							.toList();
+							
+				if (power == null) {
+					List<Superpowers> remaining = implemented.stream()
+							.filter(p -> {
+								final Superpowers finalPower = p; // capture p, not 'power'
+								return currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == finalPower);
+							})
 							.toList();
 
 					if (remaining.isEmpty()) {
@@ -204,12 +211,13 @@ public class SuperpowersWildcard extends Wildcard {
 					}
 
 					power = remaining.get(player.getRandom().nextInt(remaining.size()));
+					final Superpowers chosenPower = power;
+
+					if (currentPowers.stream().anyMatch(p -> p.getSuperpower() == chosenPower)) {
+						continue;
+					}
+
 				}
-
-				boolean alreadyHas = currentPowers.stream()
-						.anyMatch(p -> p.getSuperpower() == power);
-
-				if (alreadyHas) continue;
 
 				Superpower instance = power.getInstance(player);
 				if (instance != null) {
