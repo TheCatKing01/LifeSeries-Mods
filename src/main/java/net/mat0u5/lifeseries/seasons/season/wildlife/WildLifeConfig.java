@@ -217,7 +217,11 @@ public class WildLifeConfig extends ConfigManager {
     );
 	public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_ROLL = new ConfigFileEntry<>(
             "wildcard_superpowers_powers_per_roll", 1, "season.superpowers",
-            "Powers Per Roll", "Controls how many superpowers each player gets when powers are rolled"
+            "Powers Per Roll", "Controls how many superpowers each player gets when powers are rolled."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = new ConfigFileEntry<>(
+            "wildcard_superpowers_max_powers_message", true, "season.superpowers",
+            "Max Powers Reached Message", "Controls whether to show a message when a player reaches max superpowers."
     );
 
 
@@ -240,6 +244,10 @@ public class WildLifeConfig extends ConfigManager {
 	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = new ConfigFileEntry<>(
             "wildcard_callback_override_turn_off", false, "season.callback.stacking",
             "Override Callback Turn-Off", "Controls whether power stacking overrides the callback wildcard turning off."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_RESET_AT_MAX = new ConfigFileEntry<>(
+            "wildcard_callback_reset_at_max", false, "season.callback.stacking",
+            "Reset At Max Powers", "When a player reaches the max number of superpowers, the next roll resets them back to one power."
     );
 
     //Groups
@@ -349,12 +357,14 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SUPERPOWERS_SUPERSPEED_STEP
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_ARMOR
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS
+				,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE
 
                 ,WILDCARD_CALLBACK_WILDCARDS_BLACKLIST
                 ,WILDCARD_CALLBACK_TURN_OFF
                 ,WILDCARD_CALLBACK_NERFED_WILDCARDS
 				,WILDCARD_CALLBACK_POWER_STACKING
 				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
+				,WILDCARD_CALLBACK_RESET_AT_MAX
         ));
     }
 

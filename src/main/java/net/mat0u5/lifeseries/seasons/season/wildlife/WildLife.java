@@ -194,7 +194,9 @@ public class WildLife extends Season {
         SuperpowersWildcard.ZOMBIES_HEALTH = WildLifeConfig.WILDCARD_SUPERPOWERS_ZOMBIES_HEALTH.get(config);
 		SuperpowersWildcard.POWERS_PER_ROLL = WildLifeConfig.WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.get(config);
         SuperpowersWildcard.POWERS_PER_PLAYER = WildLifeConfig.WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.get(config);
+		SuperpowersWildcard.WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = WildLifeConfig.WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.get(config);
 		SuperpowersWildcard.WILDCARD_CALLBACK_POWER_STACKING = WildLifeConfig.WILDCARD_CALLBACK_POWER_STACKING.get(config);
+		SuperpowersWildcard.WILDCARD_CALLBACK_RESET_AT_MAX = WildLifeConfig.WILDCARD_CALLBACK_RESET_AT_MAX.get(config);
         Callback.setBlacklist(WildLifeConfig.WILDCARD_CALLBACK_WILDCARDS_BLACKLIST.get(config));
         Callback.TURN_OFF = WildLifeConfig.WILDCARD_CALLBACK_TURN_OFF.get(config);
         Callback.NERFED_WILDCARDS = WildLifeConfig.WILDCARD_CALLBACK_NERFED_WILDCARDS.get(config);

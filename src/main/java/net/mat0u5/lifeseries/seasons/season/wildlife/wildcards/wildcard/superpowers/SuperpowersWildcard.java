@@ -23,7 +23,11 @@ import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class SuperpowersWildcard extends Wildcard {
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
-    public static boolean WILDCARD_CALLBACK_POWER_STACKING = false;	
+    public static boolean WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = true;	
+	public static boolean WILDCARD_CALLBACK_POWER_STACKING = false;	
+	public static boolean WILDCARD_CALLBACK_RESET_AT_MAX = false;
+	public static boolean WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = false;
+	public static boolean WILDCARD_CALLBACK_RESET_AT_MAX = false;	
     public static List<Superpowers> blacklistedPowers = List.of();
 
     private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
@@ -51,14 +55,13 @@ public class SuperpowersWildcard extends Wildcard {
     public Wildcards getType() {
         return Wildcards.SUPERPOWERS;
     }
-
+	
 	@Override
 	public void activate() {
-		List<ServerPlayer> allPlayers = new ArrayList<>();
+		List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
 		rollRandomSuperpowers(allPlayers);
 		super.activate();
 	}
-
 
     @Override
     public void deactivate() {
@@ -67,6 +70,15 @@ public class SuperpowersWildcard extends Wildcard {
 		}
         super.deactivate();
     }
+	
+	public static void externalResetAllPowers() {
+		Wildcard instance = Wildcards.SUPERPOWERS.getInstance();
+		if (instance instanceof SuperpowersWildcard sp) {
+			if (!WILDCARD_CALLBACK_OVERRIDE_TURN_OFF) {
+				sp.resetAllSuperpowers();
+			}
+		}
+	}
 
     public static void onTick() {
         playerSuperpowers.values().forEach(set -> set.forEach(Superpower::tick));
@@ -168,17 +180,19 @@ public class SuperpowersWildcard extends Wildcard {
 		
 
 		if (!maxedPlayers.isEmpty()) {
-			if (maxedPlayers.size() == 1) {
-				ServerPlayer player = maxedPlayers.get(0);
-				ChatFormatting teamColor = getTeamColor(player);;
-				MutableComponent message = Component.literal(player.getScoreboardName())
-					.withStyle(teamColor)
-					.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
-					.withStyle(ChatFormatting.RED));
-				PlayerUtils.broadcastMessageToAdmins(message);
-			} else {
-				MutableComponent message = Component.literal(maxedPlayers.size() + " players have reached max superpowers so didn't receive all of the rolled powers: ")
-													.withStyle(ChatFormatting.RED);
+			if (!WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
+				if (maxedPlayers.size() == 1) {
+					ServerPlayer player = maxedPlayers.get(0);
+					ChatFormatting teamColor = getTeamColor(player);;
+					MutableComponent message = Component.literal(player.getScoreboardName())
+						.withStyle(teamColor)
+						.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
+						.withStyle(ChatFormatting.RED));
+					PlayerUtils.broadcastMessageToAdmins(message);
+				} else {
+					MutableComponent message = Component.literal(maxedPlayers.size() + " players have reached max superpowers so didn't receive all of the rolled powers: ")
+														.withStyle(ChatFormatting.RED);
+			}
 
 				for (int i = 0; i < maxedPlayers.size(); i++) {
 					var player = maxedPlayers.get(i);
@@ -196,17 +210,19 @@ public class SuperpowersWildcard extends Wildcard {
 
 	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
 		Set<Superpower> currentPowers = playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+		
+		if (!WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {		
+			if (currentPowers.size() >= POWERS_PER_PLAYER) {
+				MutableComponent message = Component.literal("").withStyle(ChatFormatting.RED)
+					.append(Component.literal(player.getScoreboardName()))
+					.append(Component.literal(" has reached max superpowers and did not receive " + superpower.getString())
+							.withStyle(ChatFormatting.RED));
 
-		if (currentPowers.size() >= POWERS_PER_PLAYER) {
-			MutableComponent message = Component.literal("").withStyle(ChatFormatting.RED)
-				.append(Component.literal(player.getScoreboardName()))
-				.append(Component.literal(" has reached max superpowers and did not receive " + superpower.getString())
-						.withStyle(ChatFormatting.RED));
-
-			PlayerUtils.broadcastMessageToAdmins(message);
-			return;
+				PlayerUtils.broadcastMessageToAdmins(message);
+				return;
+			}
 		}
-
+		
 		Superpower instance = superpower.getInstance(player);
 		if (instance != null) {
 			currentPowers.add(instance);

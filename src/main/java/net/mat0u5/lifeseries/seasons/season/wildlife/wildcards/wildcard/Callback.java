@@ -143,6 +143,7 @@ public class Callback extends Wildcard {
     @Override
     public void deactivate() {
         deactivateAllWildcards();
+		SuperpowersWildcard.externalResetAllPowers();
         TaskScheduler.scheduleTask(50, () -> {
             if (currentSession.statusStarted()) {
                 SessionTranscript.endingIsYours();
