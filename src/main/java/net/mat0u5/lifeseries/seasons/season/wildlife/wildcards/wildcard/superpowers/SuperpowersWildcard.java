@@ -192,6 +192,7 @@ public class SuperpowersWildcard extends Wildcard {
 				}
 
 				if (power == null) {
+					Superpowers chosenPower = power;
 					List<Superpowers> remaining = implemented.stream()
 							.filter(p -> currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == p))
 							.toList();
