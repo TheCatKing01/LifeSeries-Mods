@@ -267,13 +267,11 @@ public class SuperpowersWildcard extends Wildcard {
 				.anyMatch(p -> p.getSuperpower() == superpower);
 
 		if (alreadyHas) {
-			if (WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
 				MutableComponent message = Component.literal(player.getScoreboardName())
 					.withStyle(getTeamColor(player))
 					.append(Component.literal(" already has " + superpower.getString() + " and cannot receive it again")
 					.withStyle(ChatFormatting.RED));
 				PlayerUtils.broadcastMessageToAdmins(message);
-			}
 			return;
 		}
 

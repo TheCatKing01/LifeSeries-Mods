@@ -247,7 +247,7 @@ public class WildLifeConfig extends ConfigManager {
     );
 	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_RESET_AT_MAX = new ConfigFileEntry<>(
             "wildcard_callback_reset_at_max", false, "season.callback.stacking",
-            "Reset At Max Powers", "When a player reaches the max number of superpowers, the next roll resets them back to one power (Not though /superpower)."
+            "Reset At Max Powers", "When a player reaches the max number of superpowers, the next roll resets them back to one power (Not through /superpower)."
     );
 
     //Groups
