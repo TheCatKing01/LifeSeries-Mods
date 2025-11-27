@@ -35,3 +35,4 @@ jobs:
           name: Built JARs
           path: |
             ./versions/**/build/libs/*.jar
+          
