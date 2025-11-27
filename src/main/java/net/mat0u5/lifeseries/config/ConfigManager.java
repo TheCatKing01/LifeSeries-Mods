@@ -3,18 +3,22 @@ package net.mat0u5.lifeseries.config;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.ConfigPayload;
+import net.mat0u5.lifeseries.seasons.other.LivesManager;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
+import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.PlayerTeam;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.currentSession;
-import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.Main.*;
 
 public abstract class ConfigManager extends DefaultConfigValues {
 
@@ -35,8 +39,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
         return new ArrayList<>(List.of(
                 GROUP_GLOBAL // Group
                 ,GROUP_SEASON // Group
+                ,GROUP_LIVES
+                ,GROUP_TEAMS
+                ,GROUP_EVENTS
 
-                ,GROUP_LIVES // Group
+                , GROUP_GLOBAL_LIVES // Group
                 ,DEFAULT_LIVES
                 ,ONLY_TAKE_LIVES_IN_SESSION
                 ,TAB_LIST_SHOW_LIVES // Group
@@ -62,6 +69,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,HIDE_UNJUSTIFIED_KILL_MESSAGES
                 ,SHOW_ADVANCEMENTS
                 ,TICK_FREEZE_NOT_IN_SESSION
+                ,BROADCAST_LIFE_GAIN
 
 
                 ,GROUP_BLACKLIST // Group
@@ -135,7 +143,9 @@ public abstract class ConfigManager extends DefaultConfigValues {
     }
 
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
-        return new ArrayList<>(List.of());
+        return new ArrayList<>(List.of(
+                NO_SEASON_SPECIFIC
+        ));
     }
 
     protected List<ConfigFileEntry<?>> getAllConfigEntries() {
@@ -165,6 +175,47 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, entry, index);
             index++;
         }
+        for (PlayerScoreEntry entry : ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME)) {
+            ConfigFileEntry<Integer> lifeEntry = new ConfigFileEntry<>(
+                    "dynamic_lives_"+entry.owner(), entry.value(), ConfigTypes.LIVES_ENTRY, "lives",
+                    entry.owner(), "", true
+            );
+            sendConfigEntry(player, lifeEntry, index);
+            index++;
+        }
+        for (ServerPlayer nonAssignedPlayer : livesManager.getNonAssignedPlayers()) {
+            ConfigFileEntry<Integer> lifeEntry = new ConfigFileEntry<>(
+                    "dynamic_lives_"+nonAssignedPlayer.getScoreboardName(), null, ConfigTypes.LIVES_ENTRY, "lives",
+                    nonAssignedPlayer.getScoreboardName(), "", true
+            );
+            sendConfigEntry(player, lifeEntry, index);
+            index++;
+        }
+        if (currentSeason.getSeason() != Seasons.LIMITED_LIFE) {
+            for (Map.Entry<Integer, PlayerTeam> entry : livesManager.getLivesTeams().entrySet()) {
+                PlayerTeam team = entry.getValue();
+                String teamName = team.getName();
+                int teamNum = entry.getKey();
+                Integer validKill = livesManager.getTeamCanKill(teamName);
+                Integer gainLife = livesManager.getTeamGainLives(teamName);
+                String validKillStr = validKill != null ? String.valueOf(validKill) : "";
+                String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
+                ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
+                        "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
+                        "", "", List.of(String.valueOf(teamNum), team.getDisplayName().getString(), team.getColor().getName(), validKillStr, gainLifeStr), true
+                );
+                sendConfigEntry(player, teamEntry, index);
+                index++;
+            }
+        }
+        for (DatapackIntegration.Events event : DatapackIntegration.getAllEvents()) {
+            ConfigFileEntry<String> teamEntry = new ConfigFileEntry<>(
+                    event.getEventName(), event.getCommand(), ConfigTypes.EVENT_ENTRY, "events",
+                    event.getDisplayName(), event.getDescription(), List.of(event.getCanceled()), true
+            );
+            sendConfigEntry(player, teamEntry, index);
+            index++;
+        }
     }
 
     public void sendConfigEntry(ServerPlayer player, ConfigFileEntry<?> entry, int index) {
@@ -174,11 +225,16 @@ public abstract class ConfigManager extends DefaultConfigValues {
     public ConfigPayload getConfigPayload(ConfigFileEntry<?> entry, int index) {
         String value = "";
         if (!entry.type.parentText()) {
-            value = getPropertyAsString(entry.key, entry.defaultValue);
+            if (!entry.dynamic) {
+                value = getPropertyAsString(entry.key, entry.defaultValue);
+            }
         }
         String defaultValue = "";
         if (entry.defaultValue != null) {
             defaultValue = entry.defaultValue.toString();
+            if (entry.dynamic) {
+                value = entry.defaultValue.toString();
+            }
         }
         List<String> args = new ArrayList<>(List.of(value, defaultValue, entry.groupInfo));
         if (entry.args != null) {
@@ -197,6 +253,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
         } else if (defaultValue instanceof String stringValue) {
             return getOrCreateProperty(key, stringValue);
         }
+        if (defaultValue == null) return "";
         return defaultValue.toString();
     }
 
@@ -292,6 +349,15 @@ public abstract class ConfigManager extends DefaultConfigValues {
             properties.load(input);
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public void setOrRemoveProperty(String key, String value) {
+        if (value == null || value.isEmpty()) {
+            removeProperty(key);
+        }
+        else {
+            setProperty(key, value);
         }
     }
 

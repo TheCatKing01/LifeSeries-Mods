@@ -20,6 +20,7 @@ import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.*;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -27,9 +28,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.ElderGuardian;
@@ -75,6 +78,8 @@ public abstract class Season {
     public static boolean GIVELIFE_CAN_REVIVE = false;
     public boolean SHOW_LOGIN_COMMAND_INFO = true;
     public boolean HIDE_UNJUSTIFIED_KILL_MESSAGES = false;
+    public static boolean reloadPlayerTeams = false;
+    private static boolean BROADCAST_LIFE_GAIN = false;
 
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
@@ -189,6 +194,7 @@ public abstract class Season {
         SHOW_LOGIN_COMMAND_INFO = seasonConfig.SHOW_LOGIN_COMMAND_INFO.get(seasonConfig);
         HIDE_UNJUSTIFIED_KILL_MESSAGES = seasonConfig.HIDE_UNJUSTIFIED_KILL_MESSAGES.get(seasonConfig);
         Session.TICK_FREEZE_NOT_IN_SESSION = seasonConfig.TICK_FREEZE_NOT_IN_SESSION.get(seasonConfig);
+        BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get(seasonConfig);
 
         boogeymanManager.onReload();
         secretSociety.onReload();
@@ -201,6 +207,7 @@ public abstract class Season {
         WatcherManager.reloadWatchers();
         livesManager.reload();
         currentSession.freezeIfNecessary();
+        DatapackIntegration.reload();
     }
 
     public void reloadPlayers() {
@@ -226,6 +233,7 @@ public abstract class Season {
         ScoreboardUtils.createObjective("HP", "§c❤", ObjectiveCriteria.HEALTH);
         WatcherManager.createScoreboards();
         livesManager.createScoreboards();
+        DatapackIntegration.createScoreboards();
     }
 
     public void reloadAllPlayerTeams() {
@@ -301,6 +309,15 @@ public abstract class Season {
                  return true;
              }
         }
+
+        PlayerTeam team = attacker.getTeam();
+        if (team != null) {
+            Integer canKillLives = livesManager.getTeamCanKill(team.getName());
+            if (canKillLives != null && victim.ls$isOnAtLeastLives(canKillLives, false)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -324,7 +341,8 @@ public abstract class Season {
         ticks++;
         boogeymanManager.tick();
         secretSociety.tick();
-        if (ticks % 100 == 0) {
+        if (ticks % 100 == 0 || reloadPlayerTeams) {
+            reloadPlayerTeams = false;
             reloadAllPlayerTeams();
         }
     }
@@ -339,7 +357,7 @@ public abstract class Season {
      */
 
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
-        boolean soulmateKill = source.type().msgId().equalsIgnoreCase("soulmate");
+        boolean soulmateKill = source.is(DoubleLife.SOULMATE_DAMAGE);
         SessionTranscript.onPlayerDeath(player, source);
         boolean killedByPlayer = false;
         if (source.getEntity() instanceof ServerPlayer serverAttacker) {
@@ -357,14 +375,30 @@ public abstract class Season {
             }
         }
         if (!killedByPlayer) {
-            onPlayerDiedNaturally(player);
+            onPlayerDiedNaturally(player, source);
         }
-        if (livesManager.canChangeLivesNaturally(player) && player.ls$hasAssignedLives()) {
+        DatapackIntegration.EVENT_PLAYER_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
+        if (!DatapackIntegration.EVENT_PLAYER_DEATH.isCanceled() && livesManager.canChangeLivesNaturally(player) && player.ls$hasAssignedLives()) {
             player.ls$removeLife();
         }
     }
 
-    public void onPlayerDiedNaturally(ServerPlayer player) {
+    public void onPlayerDiedNaturally(ServerPlayer player, DamageSource source) {
+        if (source.getEntity() instanceof TamableAnimal tamableAnimal) {
+            //? if <= 1.21.4 {
+            ServerPlayer owner = PlayerUtils.getPlayer(tamableAnimal.getOwnerUUID());
+            //?} else {
+            /*ServerPlayer owner = null;
+            if (tamableAnimal.getOwnerReference() != null) owner = PlayerUtils.getPlayer(tamableAnimal.getOwnerReference().getUUID());
+            *///?}
+            if (owner != null) {
+                //? if <= 1.21.2 {
+                owner.awardKillScore(player, 1, source);
+                //?} else {
+                /*owner.awardKillScore(player, source);
+                *///?}
+            }
+        }
         if (server == null) return;
         currentSession.playerNaturalDeathLog.remove(player.getUUID());
         currentSession.playerNaturalDeathLog.put(player.getUUID(), server.getTickCount());
@@ -392,36 +426,82 @@ public abstract class Season {
 
     public void onClaimKill(ServerPlayer killer, ServerPlayer victim) {
         SessionTranscript.claimKill(killer, victim);
-        if (boogeymanManager.isBoogeymanThatCanBeCured(killer, victim)) {
-            boogeymanManager.onBoogeymanKill(killer);
+        boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
+        if (isBoogeyCure) {
+            boogeymanManager.onBoogeymanKill(killer, victim);
         }
 
-        killer.awardStat(Stats.PLAYER_KILLS);
-        //? if <= 1.21 {
-        killer.getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_PLAYERS, killer, ScoreAccess::increment);
+        DatapackIntegration.EVENT_CLAIM_KILL.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+        ));
+        if (!DatapackIntegration.EVENT_CLAIM_KILL.isCanceled() && !isBoogeyCure) {
+            PlayerTeam team = killer.getTeam();
+            if (team != null) {
+                Integer canGainLife = livesManager.getTeamGainLives(team.getName());
+                if (canGainLife != null && victim.ls$isOnAtLeastLives(canGainLife, false)) {
+                    broadcastLifeGain(killer, victim);
+                    killer.ls$addLife();
+                }
+            }
+        }
+
+        //? if <= 1.21.2 {
+        killer.awardKillScore(victim, 1, killer.damageSources().playerAttack(killer));
         //?} else {
-        /*killer.level().getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_PLAYERS, killer, ScoreAccess::increment);
+        /*killer.awardKillScore(victim, killer.damageSources().playerAttack(killer));
         *///?}
     }
 
+    public void broadcastLifeGain(ServerPlayer player, ServerPlayer victim) {
+        if (BROADCAST_LIFE_GAIN) {
+            PlayerUtils.broadcastMessage(TextUtils.format("{}§7 gained a life for killing {}.", player, victim));
+        }
+    }
+
     public void onPlayerDamage(ServerPlayer player, DamageSource source, float amount, CallbackInfo ci) {
+        DatapackIntegration.EVENT_PLAYER_TAKE_DAMAGE.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Amount", String.valueOf(amount))
+        ));
     }
 
     public void onPrePlayerDamage(ServerPlayer player, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (source.is(DamageTypes.OUTSIDE_BORDER)) {
+            cir.setReturnValue(false);
+        }
     }
 
     public void onPlayerHeal(ServerPlayer player, float amount) {
     }
 
     public void onPlayerKilledByPlayer(ServerPlayer victim, ServerPlayer killer) {
+        boolean isAllowedToAttack = isAllowedToAttack(killer, victim, false);
+        boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
+
         if (!isAllowedToAttack(killer, victim) && !HIDE_UNJUSTIFIED_KILL_MESSAGES) {
             PlayerUtils.broadcastMessageToAdmins(TextUtils.format("§c [Unjustified Kill?] {}§7 was killed by {}", victim, killer));
         }
 
-        if (boogeymanManager.isBoogeymanThatCanBeCured(killer, victim)) {
-            boogeymanManager.onBoogeymanKill(killer);
+        if (isBoogeyCure) {
+            boogeymanManager.onBoogeymanKill(killer, victim);
         }
         SessionTranscript.onPlayerKilledByPlayer(victim, killer);
+
+        DatapackIntegration.EVENT_PLAYER_PVP_KILLED.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+        ));
+        if (!DatapackIntegration.EVENT_PLAYER_PVP_KILLED.isCanceled() && !isBoogeyCure && isAllowedToAttack) {
+            PlayerTeam team = killer.getTeam();
+            if (team != null) {
+                Integer canGainLife = livesManager.getTeamGainLives(team.getName());
+                if (canGainLife != null && victim.ls$isOnAtLeastLives(canGainLife, false)) {
+                    broadcastLifeGain(killer, victim);
+                    killer.ls$addLife();
+                }
+            }
+        }
     }
 
     public void onMobDeath(LivingEntity entity, DamageSource damageSource) {

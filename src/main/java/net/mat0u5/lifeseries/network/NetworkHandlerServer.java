@@ -31,13 +31,19 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -101,6 +107,11 @@ public class NetworkHandlerServer {
             MinecraftServer server = context.server();
             server.execute(() -> handleStringPacket(player, payload));
         });
+        ServerPlayNetworking.registerGlobalReceiver(StringListPayload.ID, (payload, context) -> {
+            ServerPlayer player = context.player();
+            MinecraftServer server = context.server();
+            server.execute(() -> handleStringListPacket(player, payload));
+        });
         ServerPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
             ServerPlayer player = context.player();
             MinecraftServer server = context.server();
@@ -117,7 +128,14 @@ public class NetworkHandlerServer {
             List<String> args = payload.args();
             if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received config update from {}: {{}, {}, {}}", player, configType, id, args));
 
-            if (configType.parentString() && !args.isEmpty()) {
+            if (configType == ConfigTypes.EVENT_ENTRY && args.size() >= 2) {
+                String command = args.getFirst().strip();
+                String canceled = args.get(1);
+                seasonConfig.setOrRemoveProperty(id, command);
+                seasonConfig.setOrRemoveProperty(id+"_canceled", canceled);
+                updatedConfigThisTick = true;
+            }
+            else if (configType.parentString() && !args.isEmpty()) {
                 seasonConfig.setProperty(id, args.getFirst());
                 updatedConfigThisTick = true;
             }
@@ -136,11 +154,16 @@ public class NetworkHandlerServer {
                     updatedConfigThisTick = true;
                 }catch(Exception e){}
             }
-            else if (configType.parentInteger() && !args.isEmpty()) {
+            else if ((configType.parentInteger() && !args.isEmpty()) || (configType.parentNullableInteger() && !args.isEmpty())) {
                 try {
                     int value = Integer.parseInt(args.getFirst());
                     seasonConfig.setProperty(id, String.valueOf(value));
                     updatedConfigThisTick = true;
+                }catch(Exception e){}
+            }
+            else if (configType.parentNullableInteger() && args.isEmpty()) {
+                try {
+                    seasonConfig.removeProperty(id);
                 }catch(Exception e){}
             }
 
@@ -211,6 +234,77 @@ public class NetworkHandlerServer {
                 if (power instanceof TripleJump tripleJump) {
                     tripleJump.isInAir = true;
                 }
+            }
+        }
+    }
+
+    public static void handleStringListPacket(ServerPlayer player, StringListPayload payload) {
+        String nameStr = payload.name();
+        PacketNames name = PacketNames.fromName(nameStr);
+        List<String> value = payload.value();
+
+        if (PermissionManager.isAdmin(player)) {
+            if (name == PacketNames.SET_LIVES && value.size() >= 2) {
+                ServerPlayer settingPlayer = PlayerUtils.getPlayer(value.getFirst());
+                if (settingPlayer != null) {
+                    try {
+                        int lives = Integer.parseInt(value.get(1));
+                        settingPlayer.ls$setLives(lives);
+                    }catch(Exception e) {
+                        ScoreboardUtils.resetScore(settingPlayer, LivesManager.SCOREBOARD_NAME);
+                    }
+                }
+                else {
+                    try {
+                        int lives = Integer.parseInt(value.get(1));
+                        livesManager.setScore(value.getFirst(), lives);
+                    }catch(Exception e) {
+                        ScoreboardUtils.resetScore(ScoreHolder.forNameOnly(value.getFirst()), LivesManager.SCOREBOARD_NAME);
+                    }
+                }
+
+                Season.reloadPlayerTeams = true;
+            }
+            if (name == PacketNames.SET_TEAM && value.size() >= 6) {
+                List<String> teamNames = Arrays.asList(value.getFirst().split(";"));
+                String packetTeamName = "lives_" + value.get(1);
+                String packetTeamDisplayName = value.get(2);
+                String packetTeamColor = value.get(3);
+                String packetAllowedKill = value.get(4);
+                String packetGainLifeKill = value.get(5);
+
+                ChatFormatting newTeamColor = ChatFormatting.getByName(packetTeamColor);
+                if (newTeamColor == null) newTeamColor = ChatFormatting.WHITE;
+
+                Integer allowedKill = null;
+                Integer gainLife = null;
+                try {
+                    allowedKill = Integer.parseInt(packetAllowedKill);
+                } catch(Exception e) {}
+                try {
+                    gainLife = Integer.parseInt(packetGainLifeKill);
+                } catch(Exception e) {}
+
+                boolean teamModified = false;
+                for (PlayerTeam livesTeam : new ArrayList<>(livesManager.getLivesTeams().values())) {
+                    String teamName = livesTeam.getName();
+                    if (!teamNames.contains(teamName)) {
+                        livesManager.updateTeamConfig(teamName, null, null);
+                        TeamUtils.deleteTeam(teamName);
+                        continue;
+                    }
+                    if (!teamName.equals(packetTeamName)) continue;
+
+                    livesTeam.setColor(newTeamColor);
+                    livesTeam.setDisplayName(Component.literal(packetTeamDisplayName).withStyle(newTeamColor));
+                    livesManager.updateTeamConfig(teamName, allowedKill, gainLife);
+                    teamModified = true;
+                }
+                if (!teamModified) {
+                    TeamUtils.createTeam(packetTeamName, packetTeamDisplayName, newTeamColor);
+                    livesManager.updateTeamConfig(packetTeamName, allowedKill, gainLife);
+                }
+                Season.reloadPlayerTeams = true;
             }
         }
     }

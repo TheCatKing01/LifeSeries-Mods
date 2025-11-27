@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.seasons.other;
 
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
@@ -14,6 +15,7 @@ import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -53,8 +55,8 @@ public class LivesManager {
         updateTeams();
     }
 
-    public void updateTeams() {
-        MAX_TAB_NUMBER = 4;
+    public Map<Integer, PlayerTeam> getLivesTeams() {
+        Map<Integer, PlayerTeam> result = new TreeMap<>();
         Collection<PlayerTeam> allTeams = TeamUtils.getAllTeams();
         if (allTeams != null) {
             for (PlayerTeam team : allTeams) {
@@ -62,13 +64,61 @@ public class LivesManager {
                 if (name.startsWith("lives_")) {
                     try {
                         int number = Integer.parseInt(name.replace("lives_",""));
-                        MAX_TAB_NUMBER = Math.max(MAX_TAB_NUMBER, number);
+                        result.put(number, team);
                     }catch(Exception e) {}
-                    team.setSeeFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
                 }
             }
         }
+        return result;
+    }
+
+    public void updateTeams() {
+        MAX_TAB_NUMBER = 4;
+        for (Map.Entry<Integer, PlayerTeam> entry : getLivesTeams().entrySet()) {
+            MAX_TAB_NUMBER = Math.max(MAX_TAB_NUMBER, entry.getKey());
+            entry.getValue().setSeeFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
+        }
         NetworkHandlerServer.sendNumberPackets(PacketNames.TAB_LIVES_CUTOFF, MAX_TAB_NUMBER);
+    }
+
+    public Integer getTeamCanKill(String teamName) {
+        Integer teamConfig = seasonConfig.getOrCreateInt("team_cankill-"+teamName, defaultTeamCanKill(teamName));
+        if (teamConfig <= -1) teamConfig = null;
+        return teamConfig;
+    }
+
+    public Integer getTeamGainLives(String teamName) {
+        Integer teamConfig = seasonConfig.getOrCreateInt("team_gainlvies-"+teamName, defaultTeamGainLife(teamName));
+        if (teamConfig <= -1) teamConfig = null;
+        return teamConfig;
+    }
+
+    public int defaultTeamCanKill(String teamName) {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE || currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+            if (teamName.equals("lives_2")) {
+                return 3;
+            }
+        }
+        if (teamName.equals("lives_1")) {
+            return 1;
+        }
+        return -1;
+    }
+
+    public int defaultTeamGainLife(String teamName) {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            if (teamName.equals("lives_2")) {
+                return 4;
+            }
+        }
+        return -1;
+    }
+
+    public void updateTeamConfig(String teamName, Integer canKill, Integer gainLife) {
+        if (canKill == null) canKill = -1;
+        if (gainLife == null) gainLife = -1;
+        seasonConfig.setProperty("team_cankill-"+teamName, String.valueOf(canKill));
+        seasonConfig.setProperty("team_gainlvies-"+teamName, String.valueOf(gainLife));
     }
 
     public void createTeams() {
@@ -215,17 +265,17 @@ public class LivesManager {
         setPlayerLives(player, lives);
     }
 
-    public void addToLifeNoUpdate(ServerPlayer player) {
+    public void addToLivesNoUpdate(ServerPlayer player, int amount) {
         if (isWatcher(player)) return;
         Integer currentLives = getPlayerLives(player);
         if (currentLives == null) currentLives = 0;
-        int lives = currentLives + 1;
+        int lives = currentLives + amount;
         if (lives < 0) lives = 0;
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
     }
 
     public void receiveLifeFromOtherPlayer(Component playerName, ServerPlayer target, boolean isRevive) {
-        target.playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
+        target.ls$playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
         if (seasonConfig.GIVELIFE_BROADCAST.get(seasonConfig)) {
             PlayerUtils.broadcastMessageExcept(TextUtils.format("{} received a life from {}", target, playerName), target);
         }
@@ -329,6 +379,7 @@ public class LivesManager {
                     PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), FINAL_DEATH_SOUND);
                 }
                 showDeathTitle(player);
+                DatapackIntegration.EVENT_PLAYER_FINAL_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
             }
         }
         SessionTranscript.onPlayerLostAllLives(player);
@@ -352,6 +403,12 @@ public class LivesManager {
             return TextUtils.format(message.replace("${player}", "{}"), player);
         }
         return Component.literal(message);
+    }
+
+    public List<ServerPlayer> getNonAssignedPlayers() {
+        List<ServerPlayer> players = PlayerUtils.getAllFunctioningPlayers();
+        players.removeIf(player -> getPlayerLives(player) != null);
+        return players;
     }
 
     public List<ServerPlayer> getNonRedPlayers() {

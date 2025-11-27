@@ -91,7 +91,7 @@ public class BoogeymanCommand extends Command {
                         )
                         .executes(context -> selfFailBoogey(context.getSource(), false))
                 )
-                .then(literal("chooseRandom")
+                .then(literal("randomize")
                     .requires(PermissionManager::isAdmin)
                     .executes(context -> boogeyChooseRandom(
                         context.getSource()
@@ -222,7 +222,7 @@ public class BoogeymanCommand extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("§Resetting Boogeyman cure/failure for {}§7...", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting Boogeyman cure/failure for {}§7...", targets.iterator().next()));
         }
         else {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting Boogeyman cure/failure for {} targets§7...", targets.size()));

@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.gui.config.entries;
 
 import net.mat0u5.lifeseries.gui.config.ConfigScreen;
+import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
@@ -53,6 +54,7 @@ public abstract class ConfigEntry {
     protected GroupConfigEntry<?> parentGroup;
     protected List<GroupConfigEntry<?>> groupTopology = new ArrayList<>();
     private boolean isNew = false;
+    public boolean changedForever = false;
 
     public ConfigEntry(String fieldName, String displayName, String description) {
         this.fieldName = fieldName;
@@ -84,6 +86,13 @@ public abstract class ConfigEntry {
         this.screen = screen;
     }
 
+    public int additionalLabelOffsetY() {
+        return 0;
+    }
+    public int additionalResetButtonOffsetY() {
+        return 0;
+    }
+
     public void render(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         isHovered = hovered;
         updateHighlightAnimation(tickDelta);
@@ -95,19 +104,19 @@ public abstract class ConfigEntry {
 
         int textColor = hasError() ? TextColors.PASTEL_RED : TextColors.WHITE;
         int labelX = x + LABEL_OFFSET_X;
-        int labelY = y + LABEL_OFFSET_Y;
+        int labelY = y + LABEL_OFFSET_Y + additionalLabelOffsetY();
         context.drawString(textRenderer, getDisplayName(), labelX, labelY, textColor);
 
         int resetButtonX = x + width - RESET_BUTTON_WIDTH + RESET_BUTTON_OFFSET_X;
         if (hasResetButton()) {
             resetButton.setX(resetButtonX);
-            resetButton.setY(y + RESET_BUTTON_OFFSET_Y);
+            resetButton.setY(y + RESET_BUTTON_OFFSET_Y + additionalResetButtonOffsetY());
             resetButton.active = canReset();
             resetButton.render(context, mouseX, mouseY, tickDelta);
         }
 
         if (hasError()) {
-            RenderUtils.drawTextRight(context, textRenderer, TextColors.PASTEL_RED, Component.nullToEmpty("⚠"), x + width + ERROR_LABEL_OFFSET_X, y + ERROR_LABEL_OFFSET_Y);
+            RenderUtils.text("⚠", x + width + ERROR_LABEL_OFFSET_X, y + ERROR_LABEL_OFFSET_Y).anchorRight().colored(TextColors.PASTEL_RED).render(context, textRenderer);
             if (isHovered) {
                 Component errorText = TextUtils.format("§cERROR:\n{}",getErrorMessage());
                 //? if <= 1.21.5 {
@@ -225,7 +234,7 @@ public abstract class ConfigEntry {
     public abstract ConfigTypes getValueType();
     public abstract void setValue(Object value);
 
-    public boolean modified() {
+    public boolean isModified() {
         return !Objects.equals(getValue(), getStartingValue());
     }
 
@@ -274,7 +283,27 @@ public abstract class ConfigEntry {
         }
     }
 
+    public void markChangedForever() {
+        changedForever = true;
+    }
+
     public boolean hasResetButton() {
         return true;
+    }
+
+    public boolean sendToServer() {
+        return true;
+    }
+
+    public boolean isSearchable() {
+        return true;
+    }
+
+    public void onSave() {
+        NetworkHandlerClient.sendConfigUpdate(
+                getValueType().toString(),
+                getFieldName(),
+                List.of(getValueAsString())
+        );
     }
 }

@@ -10,17 +10,26 @@ public class VersionControl {
         return MOD_VERSION.contains("dev") || MOD_VERSION.contains("pre") || Main.DEBUG;
     }
 
+    public static String strippedVersionName() {
+        return strippedVersionName(MOD_VERSION);
+    }
+
+    public static String strippedVersionName(String string) {
+        if (string.contains("-pre")) {
+            string = string.split("-pre")[0];
+        }
+        string = string.replaceAll("[^\\d.]", ""); //Remove all non-digit and non-dot characters.
+        string = string.replaceAll("^\\.+|\\.+$", ""); //Remove all leading or trailing dots.
+        while (string.contains("..")) string = string.replace("..",".");
+
+        return string;
+    }
 
     public static int getModVersionInt(String string) {
         try {
 
             String originalVersion = string;
-            if (string.contains("-pre")) {
-                string = string.split("-pre")[0];
-            }
-            string = string.replaceAll("[^\\d.]", ""); //Remove all non-digit and non-dot characters.
-            string = string.replaceAll("^\\.+|\\.+$", ""); //Remove all leading or trailing dots.
-            while (string.contains("..")) string = string.replace("..",".");
+            string = strippedVersionName(string);
 
             String[] parts = string.split("\\.");
 
@@ -97,18 +106,21 @@ public class VersionControl {
         *   1.4.1.17
         *   1.4.2       -   1.4.2.12
         *   1.4.3
-        *   1.4.3.1     -   *
+        *   1.4.3.1     -   1.4.3.8
+        *   1.4.3.9     -   1.4.3.22
+        *   1.4.3.23    -   1.4.4-pre1
+        *   1.4.4       -   *
      */
 
     public static String clientCompatibilityMin() {
         // This is the version that the SERVER needs to have for the current client.
         if (Main.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.4.3.1";
+        return "1.4.4";
     }
 
     public static String serverCompatibilityMin() {
         // This is the version that the CLIENT needs to have for the current server.
         if (Main.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.4.3.1";
+        return "1.4.4";
     }
 }

@@ -11,6 +11,7 @@ import net.mat0u5.lifeseries.utils.other.WeightedRandomizer;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,16 +75,12 @@ public class TestingCommands extends Command {
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("Test Command 1"));
-
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test0: {}", AdvancedDeathsManager.getRandomDeaths(player, 0)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test1: {}", AdvancedDeathsManager.getRandomDeaths(player, 1)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test2: {}", AdvancedDeathsManager.getRandomDeaths(player, 2)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test3: {}", AdvancedDeathsManager.getRandomDeaths(player, 3)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test4: {}", AdvancedDeathsManager.getRandomDeaths(player, 4)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test5: {}", AdvancedDeathsManager.getRandomDeaths(player, 5)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test6: {}", AdvancedDeathsManager.getRandomDeaths(player, 6)));
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Test7: {}", AdvancedDeathsManager.getRandomDeaths(player, 7)));
+        DatapackIntegration.EVENT_PLAYER_LEAVE.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("PosX", String.valueOf(player.blockPosition().getX())),
+                new DatapackIntegration.Events.MacroEntry("PosY", String.valueOf(player.blockPosition().getY())),
+                new DatapackIntegration.Events.MacroEntry("PosZ", String.valueOf(player.blockPosition().getZ()))
+        ));
 
         return 1;
     }
