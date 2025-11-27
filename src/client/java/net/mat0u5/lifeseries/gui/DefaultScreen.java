@@ -145,11 +145,8 @@ public abstract class DefaultScreen extends Screen {
     }
 
     public void renderClose(GuiGraphics context, int mouseX, int mouseY) {
-        String text = "✖";
-        if (isInCloseRegion(mouseX, mouseY)) {
-            text = "§l✖";
-        }
-        RenderUtils.text(text, endX - 1, startY + 1).anchorRight().render(context, font);
+        if (isInCloseRegion(mouseX, mouseY)) RenderUtils.drawTextRight(context, font, Component.nullToEmpty("§l✖"), endX - 1, startY + 1);
+        else RenderUtils.drawTextRight(context, font, Component.nullToEmpty("✖"), endX - 1, startY + 1);
     }
 
     @Override
