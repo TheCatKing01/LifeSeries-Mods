@@ -5,7 +5,7 @@ name: build
 on:
   push:
     branches:
-      - world-types
+      - life-series+
 
 jobs:
   build:
