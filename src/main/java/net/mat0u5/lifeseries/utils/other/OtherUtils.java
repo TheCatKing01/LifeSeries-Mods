@@ -288,4 +288,16 @@ public class OtherUtils {
             PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7The game is no longer frozen."));
         }
     }
+
+    public static boolean isNumber(String text) {
+        try {
+            int num = Integer.parseInt(text);
+            return true;
+        } catch (Exception e) {}
+        try {
+            double num = Double.parseDouble(text);
+            return true;
+        } catch (Exception e) {}
+        return false;
+    }
 }

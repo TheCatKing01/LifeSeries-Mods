@@ -11,6 +11,7 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.minecraft.ChatFormatting;
@@ -46,6 +47,7 @@ public class TaskManager {
     public static boolean BROADCAST_SECRET_KEEPER = false;
     public static boolean CONSTANT_TASKS = false;
     public static boolean PUBLIC_TASKS_ON_SUBMIT = false;
+    public static boolean TASKS_NEED_CONFIRMATION = false;
 
     public static BlockPos successButtonPos;
     public static BlockPos rerollButtonPos;
@@ -65,6 +67,7 @@ public class TaskManager {
     public static List<String> hardTasks;
     public static List<String> redTasks;
     public static final Random rnd = new Random();
+    public static List<UUID> pendingConfirmationTasks = new ArrayList<>();
 
     public static SessionAction getActionChooseTasks() {
         return new SessionAction(
@@ -198,6 +201,7 @@ public class TaskManager {
             ItemStackUtils.spawnItemForPlayer(player.ls$getServerLevel(), player.position(), book, player);
         }
         assignedTasks.put(player.getUUID(), task);
+        DatapackIntegration.setPlayerTask(player, type);
     }
 
     public static void assignRandomTasks(List<ServerPlayer> allowedPlayers, TaskTypes type) {
@@ -269,6 +273,7 @@ public class TaskManager {
                 success = true;
             }
         }
+        DatapackIntegration.setPlayerTask(player, null);
         return success;
     }
 
@@ -375,7 +380,7 @@ public class TaskManager {
         return false;
     }
 
-    public static void sendPublicTaskMessage(ServerPlayer player) {
+    public static Component getShowTaskMessage(ServerPlayer player) {
         String rawTask = "";
 
         Task task = null;
@@ -387,7 +392,7 @@ public class TaskManager {
             task = preAssignedTasks.get(player.getUUID());
         }
 
-        if (task == null) return;
+        if (task == null) return Component.empty();
 
         if (!task.formattedTask.isEmpty()) {
             rawTask = task.formattedTask;
@@ -396,7 +401,7 @@ public class TaskManager {
             rawTask = task.rawTask;
         }
 
-        PlayerUtils.broadcastMessage(TextUtils.format("§7Click {}§7 to see what {}§7's task was.", TextUtils.selfMessageText(rawTask), player));
+        return TextUtils.format("§7Click {}§7 to see what {}§7's task was.", TextUtils.selfMessageText(rawTask), player);
     }
 
     public static void succeedTask(ServerPlayer player, boolean fromCommand) {
@@ -407,11 +412,24 @@ public class TaskManager {
         }
         TaskTypes type = getPlayersTaskType(player);
         if (!hasTaskBookCheck(player, !fromCommand)) return;
+        if (!fromCommand) {
+            if (TASKS_NEED_CONFIRMATION) {
+                if (!pendingConfirmationTasks.contains(player.getUUID())) {
+                    pendingConfirmationTasks.add(player.getUUID());
+                    PlayerUtils.broadcastMessageToAdmins(TextUtils.format("{} wants to succeed their task.", player));
+                    PlayerUtils.broadcastMessageToAdmins(getShowTaskMessage(player));
+                    PlayerUtils.broadcastMessageToAdmins(TextUtils.format("§7Click {}§7 to confirm this action.", TextUtils.runCommandText("/task succeed "+player.getScoreboardName())));
+                }
+                player.sendSystemMessage(Component.nullToEmpty("§cYour task confirmation needs to be approved by an admin."));
+                return;
+            }
+        }
+        pendingConfirmationTasks.remove(player.getUUID());
         if (BROADCAST_SECRET_KEEPER) {
             PlayerUtils.broadcastMessage(TextUtils.format("{}§a succeeded their task.", player));
         }
         if (PUBLIC_TASKS_ON_SUBMIT) {
-            sendPublicTaskMessage(player);
+            PlayerUtils.broadcastMessage(getShowTaskMessage(player));
         }
         SessionTranscript.successTask(player);
         removePlayersTaskBook(player);
@@ -437,6 +455,7 @@ public class TaskManager {
                 addHealthThenItems(player, RED_SUCCESS, type);
             }
         });
+        DatapackIntegration.EVENT_TASK_SUCCEED.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         chooseNewTaskForPlayerIfNecessary(player);
     }
 
@@ -457,7 +476,7 @@ public class TaskManager {
                 PlayerUtils.broadcastMessage(TextUtils.format("{}§7 re-rolled their easy task.", player));
             }
             if (PUBLIC_TASKS_ON_SUBMIT) {
-                sendPublicTaskMessage(player);
+                PlayerUtils.broadcastMessage(getShowTaskMessage(player));
             }
             SessionTranscript.rerollTask(player);
             secretKeeperBeingUsed = true;
@@ -487,6 +506,7 @@ public class TaskManager {
                 assignRandomTaskToPlayer(player, newType);
                 secretKeeperBeingUsed = false;
             });
+            DatapackIntegration.EVENT_TASK_REROLL.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
             return;
         }
         if (type == TaskTypes.HARD) {
@@ -512,7 +532,7 @@ public class TaskManager {
             PlayerUtils.broadcastMessage(TextUtils.format("{}§c failed their task.", player));
         }
         if (PUBLIC_TASKS_ON_SUBMIT) {
-            sendPublicTaskMessage(player);
+            PlayerUtils.broadcastMessage(getShowTaskMessage(player));
         }
         SessionTranscript.failTask(player);
         removePlayersTaskBook(player);
@@ -541,6 +561,7 @@ public class TaskManager {
                 secretKeeperBeingUsed = false;
             }
         });
+        DatapackIntegration.EVENT_TASK_FAIL.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         chooseNewTaskForPlayerIfNecessary(player);
     }
 

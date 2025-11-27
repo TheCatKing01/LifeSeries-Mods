@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.seasons.season.wildlife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -26,6 +27,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -86,6 +88,7 @@ public class WildLifeCommands extends Command {
                         )
                 )
         );
+		
         dispatcher.register(
             literal("snail")
                 .then(literal("names")
@@ -130,8 +133,8 @@ public class WildLifeCommands extends Command {
         );
         dispatcher.register(
             literal("superpower")
-                .requires(PermissionManager::isAdmin)
-                .then(literal("set")
+			    .requires(PermissionManager::isAdmin)
+                .then(literal("add")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
                             .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
@@ -144,13 +147,11 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("setRandom")
-                    .executes(context -> setRandomSuperpowers(context.getSource()))
-                )
-                .then(literal("get")
-                    .then(argument("player", EntityArgument.player())
-                        .executes(context -> getSuperpower(context.getSource(), EntityArgument.getPlayer(context, "player")))
+                .then(literal("randomise")
+                    .then(argument("player", EntityArgument.players())
+                            .executes(context -> setRandomSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                     )
+					.executes(context -> setRandomSuperpowers(context.getSource()))
                 )
                 .then(literal("skipCooldown")
                     .executes(context -> skipSuperpowerCooldown(context.getSource()))
@@ -164,9 +165,18 @@ public class WildLifeCommands extends Command {
                         .then(literal("reset")
                                 .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
                         )
-                    )
+					)
                 )
+				
+				// Removed for now due to bugs >:(
+				
+				// .then(literal("count")
+					// .then(argument("player", EntityArgument.players())
+						// .executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayer(context, "player")))
+					// )
+				// )
         );
+                
         dispatcher.register(
             literal("hunger")
                 .requires(PermissionManager::isAdmin)
@@ -304,10 +314,10 @@ public class WildLifeCommands extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced {}'s superpower to be {} when the next superpower randomization happens", targets.iterator().next(), name));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced one of {}'s superpowers to be {} when the next superpower randomization happens", targets.iterator().next(), name));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced the superpower of {} targets to be {} when the next superpower randomization happens", targets.size(), name));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced one of the superpowers of {} targets to be {} when the next superpower randomization happens", targets.size(), name));
         }
         return 1;
     }
@@ -327,13 +337,60 @@ public class WildLifeCommands extends Command {
         OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Your superpower cooldown has been skipped"));
         return 1;
     }
+	
+	public int setRandomSuperpowers(CommandSourceStack source) {
+		if (checkBanned(source)) return -1;
+		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
+		SuperpowersWildcard.rollRandomSuperpowers(players);
+		int count = SuperpowersWildcard.POWERS_PER_ROLL;
+		if (count == 1) {
+			OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
+		}
+		else {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to all players", count));
 
-    public int setRandomSuperpowers(CommandSourceStack source) {
+		}
+
+		return 1;
+	}
+
+	
+	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
-        SuperpowersWildcard.rollRandomSuperpowers();
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Randomized everyone's superpowers"));
+        SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
+		int count = SuperpowersWildcard.POWERS_PER_ROLL;
+        if (targets.size() == 1) {
+			if (count == 1) {
+				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {}", targets.iterator().next()));
+			}
+			else {
+				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to {}", count, targets.iterator().next()));
+			}
+        }
+        else {
+			if (count == 1) {
+				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {} targets", targets.size()));
+			}
+			else {
+				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to {} targets", count, targets.size()));
+
+			}
+        }
         return 1;
     }
+	
+	public int getSuperpowerCount(CommandSourceStack source, ServerPlayer player) {
+	    if (checkBanned(source))return -1;
+		    int count = SuperpowersWildcard.getSuperpowerCount(player);
+			if (count == 1) {
+				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower", player, count));
+			}
+			else {
+				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpowers", player, count));			
+			}
+		return 1;
+	}
+
 
     public int resetSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
@@ -344,10 +401,10 @@ public class WildLifeCommands extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated {}'s superpower", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all of {}'s superpowers", targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated the superpower of {} targets", targets.size()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all superpowers from {} targets", targets.size()));
         }
         return 1;
     }
@@ -355,7 +412,7 @@ public class WildLifeCommands extends Command {
     public int getSuperpower(CommandSourceStack source, ServerPlayer player) {
         if (checkBanned(source)) return -1;
         Superpowers superpower = SuperpowersWildcard.getSuperpower(player);
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s superpower is: {}", player,  superpower.getString()));
+        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s most recent superpower is: {}", player,  superpower.getString()));
         return 1;
     }
 
@@ -367,6 +424,7 @@ public class WildLifeCommands extends Command {
             source.sendFailure(Component.nullToEmpty("That superpower doesn't exist"));
             return -1;
         }
+		
 
         Superpowers superpower = Superpowers.fromString(name);
         if (superpower == Superpowers.NULL) {
@@ -378,10 +436,10 @@ public class WildLifeCommands extends Command {
             SuperpowersWildcard.setSuperpower(player, superpower);
         }
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {}'s superpower to {}", targets.iterator().next(), name));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {}", name, targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Set the superpower to {} for {} targets", name, targets.size()));
+            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {} targets", name, targets.size()));
         }
         return 1;
     }

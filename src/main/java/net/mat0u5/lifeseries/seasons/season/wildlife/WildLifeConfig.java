@@ -211,6 +211,18 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_superpowers_animaldisguise_hands", true, "season.superpowers",
             "Animal Disguise: Show Hand Items", "Controls whether hand items are seen on players disguised as mobs."
     );
+    public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER = new ConfigFileEntry<>(
+            "wildcard_superpowers_powers_per_player", 1, "season.superpowers",
+            "Max Powers Per Player", "Controls how many superpowers each player can have activated at once."
+    );
+	public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_ROLL = new ConfigFileEntry<>(
+            "wildcard_superpowers_powers_per_roll", 1, "season.superpowers",
+            "Powers Per Roll", "Controls how many superpowers each player gets when powers are rolled."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = new ConfigFileEntry<>(
+            "wildcard_superpowers_max_powers_message", true, "season.superpowers",
+            "Max Powers Message", "Controls whether to show the messages when a player reaches max superpowers."
+    );
 
 
     public static final ConfigFileEntry<String> WILDCARD_CALLBACK_WILDCARDS_BLACKLIST = new ConfigFileEntry<>(
@@ -224,6 +236,18 @@ public class WildLifeConfig extends ConfigManager {
     public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_NERFED_WILDCARDS = new ConfigFileEntry<>(
             "wildcard_callback_nerfed_wildcards", true, "season.callback",
             "Nerfed Wildcards", "Controls whether wildcards are nerfed in callback (recommended)."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_POWER_STACKING = new ConfigFileEntry<>(
+            "wildcard_callback_power_stacking", false, "{season.callback.stacking}",
+            "Power Stacking", "Instead of the superpower wildcard deactivating, the powers stay allowing stacking when the superpower wildcard activates again."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = new ConfigFileEntry<>(
+            "wildcard_callback_override_turn_off", false, "season.callback.stacking",
+            "Override Callback Turn-Off", "Controls whether power stacking overrides the callback wildcard turning off."
+    );
+	public static final ConfigFileEntry<Boolean> WILDCARD_CALLBACK_RESET_AT_MAX = new ConfigFileEntry<>(
+            "wildcard_callback_reset_at_max", false, "season.callback.stacking",
+            "Reset At Max Powers", "When a player reaches the max number of superpowers, the next roll resets them back to one power (Not through /superpower)."
     );
 
     //Groups
@@ -268,14 +292,6 @@ public class WildLifeConfig extends ConfigManager {
             "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "season.general",
             "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
     );
-    public static final ConfigFileEntry<Boolean> KILLING_DARK_GREENS_GAINS_LIVES = new ConfigFileEntry<>(
-            "killing_dark_greens_gains_lives", true, "{season.general.darkgreen}",
-            "Killing Dark Greens Gains Lives", "Controls whether killing dark green players (4+ lives) gives the killer a life."
-    );
-    public static final ConfigFileEntry<Boolean> BROADCAST_LIFE_GAIN = new ConfigFileEntry<>(
-            "broadcast_life_gain", false, "season.general.darkgreen",
-            "Broadcast Life Gain", "Shows a message in chat when a player gains a life by killing a dark green player."
-    );
 
     public WildLifeConfig() {
         super("./config/"+ Main.MOD_ID,"wildlife.properties");
@@ -285,7 +301,6 @@ public class WildLifeConfig extends ConfigManager {
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         return new ArrayList<>(List.of(
                 GROUP_GENERAL //Group
-                    ,KILLING_DARK_GREENS_GAINS_LIVES//Group
                 ,GROUP_SIZESHIFTING //Group
                 ,GROUP_HUNGER //Group
                 ,GROUP_SNAILS //Group
@@ -296,7 +311,6 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_CALLBACK //Group
 
                 //Group stuff
-                ,BROADCAST_LIFE_GAIN
                 ,ACTIVATE_WILDCARD_MINUTE
 
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
@@ -333,6 +347,8 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_MOBSWAP_BOSS_CHANCE_MULTIPLIER
 
                 ,WILDCARD_SUPERPOWERS_POWER_BLACKLIST
+                ,WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER
+                ,WILDCARD_SUPERPOWERS_POWERS_PER_ROLL				
                 ,WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME
                 ,WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS
@@ -341,10 +357,14 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SUPERPOWERS_SUPERSPEED_STEP
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_ARMOR
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS
+				,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE
 
                 ,WILDCARD_CALLBACK_WILDCARDS_BLACKLIST
                 ,WILDCARD_CALLBACK_TURN_OFF
                 ,WILDCARD_CALLBACK_NERFED_WILDCARDS
+				,WILDCARD_CALLBACK_POWER_STACKING
+				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
+				,WILDCARD_CALLBACK_RESET_AT_MAX
         ));
     }
 

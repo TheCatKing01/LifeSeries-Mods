@@ -435,6 +435,7 @@ public class DoubleLife extends Season {
 
     @Override
     public void onPrePlayerDamage(ServerPlayer player, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        super.onPrePlayerDamage(player, source, amount, cir);
         if (SOULMATES_PVP_ALLOWED) return;
 
         ServerPlayer soulmate = getSoulmate(player);
@@ -449,7 +450,8 @@ public class DoubleLife extends Season {
 
     @Override
     public void onPlayerDamage(ServerPlayer player, DamageSource source, float amount, CallbackInfo ci) {
-        if (source.type().msgId().equalsIgnoreCase("soulmate")) return;
+        super.onPlayerDamage(player, source, amount, ci);
+        if (source.is(DoubleLife.SOULMATE_DAMAGE)) return;
         if (amount == 0) return;
         if (player == null) return;
         if (!hasSoulmate(player)) return;

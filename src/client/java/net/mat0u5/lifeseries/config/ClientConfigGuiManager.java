@@ -106,6 +106,7 @@ public class ClientConfigGuiManager {
             targetGroup.addChildEntry(configEntry);
         }
         else {
+            Main.LOGGER.error("Could not find parent group {} for entry {}", groupInfo, configEntry.getFieldName());
             category.addEntry(configEntry);
         }
     }
@@ -173,6 +174,12 @@ public class ClientConfigGuiManager {
                     return new StringListConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue, args);
                 }
             }
+            else if (stringObject.configType == ConfigTypes.EVENT_ENTRY) {
+                List<String> args = new ArrayList<>(stringObject.args);
+                if (args.size() >= 4) {
+                    return new EventConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue, args.get(3));
+                }
+            }
             return new StringConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue);
         }
         else if (object instanceof IntegerObject intObject) {
@@ -184,6 +191,12 @@ public class ClientConfigGuiManager {
             }
             return new IntegerConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
         }
+        else if (object instanceof NullableIntegerObject intObject) {
+            if (intObject.configType == ConfigTypes.LIVES_ENTRY) {
+                return new LivesConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
+            }
+            return new NullableIntegerConfigEntry(intObject.id, intObject.name, intObject.description, intObject.integerValue, intObject.defaultValue);
+        }
         else if (object instanceof DoubleObject doubleObject) {
             if (doubleObject.configType == ConfigTypes.PERCENTAGE) {
                 return new PercentageConfigEntry(doubleObject.id, doubleObject.name, doubleObject.description, doubleObject.doubleValue, doubleObject.defaultValue);
@@ -194,6 +207,9 @@ public class ClientConfigGuiManager {
             return new DoubleConfigEntry(doubleObject.id, doubleObject.name, doubleObject.description, doubleObject.doubleValue, doubleObject.defaultValue);
         }
         else if (object instanceof TextObject textObject) {
+            if (textObject.configType == ConfigTypes.TEAM_ENTRY) {
+                return new TeamConfigEntry(textObject.id, textObject.args);
+            }
             return new TextConfigEntry(textObject.id, textObject.name, textObject.description, textObject.clickable);
         }
         return null;

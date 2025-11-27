@@ -13,8 +13,12 @@
               "height": 160,
               "block": "minecraft:air"
             },
+			{
+              "height": 1,
+              "block": "minecraft:stone"
+            },
             {
-              "height": 3,
+              "height": 2,
               "block": "minecraft:dirt"
             },
             {

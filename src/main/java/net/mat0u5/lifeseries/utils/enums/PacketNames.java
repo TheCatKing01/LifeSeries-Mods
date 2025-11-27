@@ -50,6 +50,8 @@ public enum PacketNames {
     ,SIDETITLE
     ,TRIVIA_TIMER
     ,HUNGER_NON_EDIBLE
+    ,SET_LIVES
+    ,SET_TEAM
     ;
 
     public static PacketNames fromName(String name) {
