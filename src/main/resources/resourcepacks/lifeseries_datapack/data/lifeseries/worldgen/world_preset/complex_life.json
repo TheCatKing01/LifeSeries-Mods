@@ -27,9 +27,9 @@
             }
           ],
           "structure_overrides": {
-            "minecraft:village_plains": {},
-            "minecraft:stronghold": {},
-            "minecraft:pillager_outpost": {}
+            "minecraft:villages": {},
+            "minecraft:strongholds": {},
+            "minecraft:pillager_outposts": {}
           }
         }
       }
