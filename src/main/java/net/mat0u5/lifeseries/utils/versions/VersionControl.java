@@ -8,28 +8,33 @@ import static net.mat0u5.lifeseries.Main.MOD_VERSION;
 public class VersionControl {
     public static boolean isDevVersion() {
         return MOD_VERSION.contains("dev") || MOD_VERSION.contains("pre") || Main.DEBUG;
+
+    }
+	
+	public static String strippedVersionName() {
+    // Return a "clean" version name without pre/dev/suffixes
+    String v = MOD_VERSION;
+
+    if (v.contains("-")) {
+        v = v.split("-")[0]; // remove -pre, -dev, etc.
     }
 
-    public static String strippedVersionName() {
-        return strippedVersionName(MOD_VERSION);
-    }
+    return v.replaceAll("[^0-9.]", ""); // Remove everything except digits and dots.
+	
+	}
 
-    public static String strippedVersionName(String string) {
-        if (string.contains("-pre")) {
-            string = string.split("-pre")[0];
-        }
-        string = string.replaceAll("[^\\d.]", ""); //Remove all non-digit and non-dot characters.
-        string = string.replaceAll("^\\.+|\\.+$", ""); //Remove all leading or trailing dots.
-        while (string.contains("..")) string = string.replace("..",".");
-
-        return string;
-    }
 
     public static int getModVersionInt(String string) {
         try {
 
             String originalVersion = string;
-            string = strippedVersionName(string);
+            if (string.contains("-pre")) {
+                string = string.split("-pre")[0];
+            }
+			
+            string = string.replaceAll("[^\\d.]", ""); //Remove all non-digit and non-dot characters.
+            string = string.replaceAll("^\\.+|\\.+$", ""); //Remove all leading or trailing dots.
+            while (string.contains("..")) string = string.replace("..",".");
 
             String[] parts = string.split("\\.");
 

@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -143,6 +144,7 @@ public class Callback extends Wildcard {
     @Override
     public void deactivate() {
         deactivateAllWildcards();
+		SuperpowersWildcard.externalResetAllPowers();
         TaskScheduler.scheduleTask(50, () -> {
             if (currentSession.statusStarted()) {
                 SessionTranscript.endingIsYours();

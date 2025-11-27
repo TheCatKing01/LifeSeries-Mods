@@ -12,216 +12,385 @@ import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.mat0u5.lifeseries.Main.livesManager;
 
 public class SuperpowersWildcard extends Wildcard {
     public static boolean WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = false;
+    public static boolean WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = true;	
+	public static boolean WILDCARD_CALLBACK_POWER_STACKING = false;	
+	public static boolean WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = false;
+	public static boolean WILDCARD_CALLBACK_RESET_AT_MAX = false;	
     public static List<Superpowers> blacklistedPowers = List.of();
-    private static final Map<UUID, Superpower> playerSuperpowers = new LinkedHashMap<>();
-    public static final Map<UUID, Superpowers> preAssignedSuperpowers = new HashMap<>();
+
+    private static final Map<UUID, Set<Superpower>> playerSuperpowers = new HashMap<>();
+    public static final Map<UUID, Superpowers> assignedSuperpowers = new HashMap<>();
     public static int ZOMBIES_HEALTH = 8;
+	public static int POWERS_PER_PLAYER = 1;
+    public static int POWERS_PER_ROLL = 1;
 
     public static void setBlacklist(String blacklist) {
         blacklistedPowers = new ArrayList<>();
-        String[] powers = blacklist.replace("[","").replace("]","").split(",");
+        String[] powers = blacklist.replace("[", "").replace("]", "").split(",");
         for (String powerName : powers) {
             Superpowers power = Superpowers.fromString(powerName.trim());
             if (power == null || power == Superpowers.NULL) continue;
             blacklistedPowers.add(power);
         }
     }
+	
+	public static ChatFormatting getTeamColor(ServerPlayer player) {
+		if (player.getTeam() != null) return player.getTeam().getColor();
+		return ChatFormatting.WHITE;
+	}
 
     @Override
     public Wildcards getType() {
         return Wildcards.SUPERPOWERS;
     }
-
-    @Override
-    public void activate() {
-        rollRandomSuperpowers();
-        super.activate();
-    }
+	
+	@Override
+	public void activate() {
+		List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
+		rollRandomSuperpowers(allPlayers);
+		super.activate();
+	}
 
     @Override
     public void deactivate() {
-        resetAllSuperpowers();
+		if (!WILDCARD_CALLBACK_POWER_STACKING) {
+			resetAllSuperpowers();
+		}
         super.deactivate();
     }
+	
+	public static void externalResetAllPowers() {
+		Wildcard instance = Wildcards.SUPERPOWERS.getInstance();
+		if (instance instanceof SuperpowersWildcard sp) {
+			if (!WILDCARD_CALLBACK_OVERRIDE_TURN_OFF) {
+				sp.resetAllSuperpowers();
+			}
+		}
+	}
 
     public static void onTick() {
-        playerSuperpowers.values().forEach(Superpower::tick);
+        playerSuperpowers.values().forEach(set -> set.forEach(Superpower::tick));
     }
 
     public static void resetSuperpower(ServerPlayer player) {
         UUID uuid = player.getUUID();
-        if (!playerSuperpowers.containsKey(uuid)) {
-            return;
-        }
-        playerSuperpowers.get(uuid).turnOff();
+        if (!playerSuperpowers.containsKey(uuid)) return;
+        playerSuperpowers.get(uuid).forEach(Superpower::turnOff);
         playerSuperpowers.remove(uuid);
-        Necromancy.checkRessurectedPlayersReset();
-        DatapackIntegration.deactivateSuperpower(player);
+		Necromancy.checkRessurectedPlayersReset();
+		DatapackIntegration.deactivateSuperpower(player);
+
     }
 
     public static void resetAllSuperpowers() {
-        playerSuperpowers.values().forEach(Superpower::turnOff);
+        playerSuperpowers.values().forEach(set -> set.forEach(Superpower::turnOff));
         playerSuperpowers.clear();
         Necromancy.checkRessurectedPlayersReset();
         DatapackIntegration.initSuperpowers();
     }
 
-    public static void rollRandomSuperpowers() {
-        rollRandomSuperpowers(livesManager.getAlivePlayers());
-    }
+	private static final Set<UUID> pendingReset = new HashSet<>();
 
-    public static void rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
-        allPlayers.removeIf(ServerPlayer::ls$isDead);
-        allPlayers.removeIf(ServerPlayer::ls$isWatcher);
-        allPlayers.forEach(SuperpowersWildcard::resetSuperpower);
+	public static void rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
+		allPlayers.removeIf(ServerPlayer::ls$isDead);
+		allPlayers.removeIf(ServerPlayer::ls$isWatcher);
 
-        List<ServerPlayer> prioritizedList = new ArrayList<>();
-        //Put all the players with assigned superpowers first - to prevent duplicating powers.
-        for (ServerPlayer player : allPlayers) {
-            if (preAssignedSuperpowers.containsKey(player.getUUID())) prioritizedList.add(player);
-        }
-        for (ServerPlayer player : allPlayers) {
-            if (!prioritizedList.contains(player)) prioritizedList.add(player);
-        }
+		Collections.shuffle(allPlayers);
 
-        for (ServerPlayer player : prioritizedList) {
-            if (hasPower(player)) continue;
-            Superpowers power = getRandomPower(player);
-            Superpower instance = power.getInstance(player);
-            if (instance != null) {
-                playerSuperpowers.put(player.getUUID(), instance);
-                DatapackIntegration.activateSuperpower(player, power);
-            }
-        }
-        if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayers(allPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")), 0.2f, 1);
-        }
-    }
+		List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+		blacklistedPowers.forEach(implemented::remove);
 
-    private static Superpowers getRandomPower(ServerPlayer player) {
-        if (preAssignedSuperpowers.containsKey(player.getUUID())) {
-            Superpowers power = preAssignedSuperpowers.get(player.getUUID());
-            preAssignedSuperpowers.remove(player.getUUID());
-            return power;
-        }
+		implemented.removeIf(p ->
+			p == Superpowers.LISTENING &&
+			CompatibilityManager.voicechatLoaded() &&
+			!VoicechatMain.isConnectedToSVC(allPlayers.get(0).getUUID())
+		);
 
-        List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
-        blacklistedPowers.forEach(implemented::remove);
-        if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
-            implemented.remove(Superpowers.LISTENING);
-        }
+		boolean necroAllowed = implemented.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded();
+		double necroChance = 0;
+		if (necroAllowed) {
+			int alive = livesManager.getAlivePlayers().size();
+			int dead = livesManager.getDeadPlayers().size();
+			if (alive + dead >= 6) {
+				necroChance = (double) dead / alive;
+			} else {
+				implemented.remove(Superpowers.NECROMANCY);
+				necroAllowed = false;
+			}
+		} else {
+			implemented.remove(Superpowers.NECROMANCY);
+		}
 
-        List<Superpowers> nonAssigned = new ArrayList<>(implemented);
-        for (Superpower assignedPower : playerSuperpowers.values()) {
-            Superpowers power = assignedPower.getSuperpower();
-            nonAssigned.remove(power);
-        }
-        Collections.shuffle(nonAssigned);
+		Collections.shuffle(implemented);
 
-        boolean canHaveNecromancy = false;
-        if (nonAssigned.contains(Superpowers.NECROMANCY) && Necromancy.shouldBeIncluded()) {
-            int alivePlayersNum = livesManager.getAlivePlayers().size();
-            int deadPlayersNum = livesManager.getDeadPlayers().size();
-            int totalPlayersNum = alivePlayersNum + deadPlayersNum;
-            if (totalPlayersNum >= 6) {
-                canHaveNecromancy = true;
-                if (player.getRandom().nextDouble() <= (double)deadPlayersNum / (double)alivePlayersNum) {
-                    return Superpowers.NECROMANCY;
-                }
-            }
-        }
-        if (!canHaveNecromancy) {
-            implemented.remove(Superpowers.NECROMANCY);
-            nonAssigned.remove(Superpowers.NECROMANCY);
-        }
+		List<ServerPlayer> maxedPlayers = new ArrayList<>();
 
-        //A shuffled queue with assigned superpowers at the very end - we can just choose the first power in the list.
-        List<Superpowers> queue = new ArrayList<>(nonAssigned);
-        for (Superpower assignedPower : playerSuperpowers.values()) {
-            //This puts all the assigned powers at the end of the queue.
-            Superpowers power = assignedPower.getSuperpower();
-            if (!implemented.contains(power)) continue;
-            queue.remove(power);
-            queue.add(power);
-        }
+		for (ServerPlayer player : allPlayers) {
+			playerSuperpowers.putIfAbsent(player.getUUID(), new HashSet<>());
+			Set<Superpower> currentPowers = playerSuperpowers.get(player.getUUID());
 
-        return queue.getFirst();
-    }
+			if (WILDCARD_CALLBACK_RESET_AT_MAX && pendingReset.contains(player.getUUID())) {
+				pendingReset.remove(player.getUUID());
+				currentPowers.forEach(Superpower::turnOff);
+				currentPowers.clear();
+				DatapackIntegration.initSuperpowers();
 
-    public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
-        if (playerSuperpowers.containsKey(player.getUUID())) {
-            playerSuperpowers.get(player.getUUID()).turnOff();
-        }
-        Superpower instance = superpower.getInstance(player);
-        if (instance != null) {
-            playerSuperpowers.put(player.getUUID(), instance);
-            DatapackIntegration.activateSuperpower(player, superpower);
-        }
-        if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
-            PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")), 0.2f, 1);
-        }
-        Necromancy.checkRessurectedPlayersReset();
-    }
+				for (int r = 0; r < POWERS_PER_ROLL; r++) {
+					if (implemented.isEmpty()) break;
+					Superpowers power = implemented.get(player.getRandom().nextInt(implemented.size()));
+					Superpower instance = power.getInstance(player);
+					if (instance != null) {
+						currentPowers.add(instance);
+						DatapackIntegration.activateSuperpower(player, power);
+					}
+				}
+				continue;
+			}
 
+			Set<Superpowers> ownedPowers = currentPowers.stream()
+					.map(Superpower::getSuperpower)
+					.collect(Collectors.toSet());
+
+			List<Superpowers> availablePowers = implemented.stream()
+					.filter(p -> !ownedPowers.contains(p))
+					.toList();
+
+			if (availablePowers.isEmpty()) {
+				maxedPlayers.add(player);
+				if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+				continue;
+			}
+
+			for (int i = 0; i < POWERS_PER_ROLL; i++) {
+				if (currentPowers.size() >= POWERS_PER_PLAYER) {
+					maxedPlayers.add(player);
+					if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+					break;
+				}
+
+				Superpowers power = null;
+
+				if (assignedSuperpowers.containsKey(player.getUUID())) {
+					power = assignedSuperpowers.remove(player.getUUID());
+				}
+
+				if (power == null && necroAllowed && player.getRandom().nextDouble() <= necroChance) {
+					power = Superpowers.NECROMANCY;
+					necroAllowed = false;
+				}
+						
+				if (power == null) {
+					List<Superpowers> remaining = implemented.stream()
+							.filter(p -> {
+								final Superpowers finalPower = p; 
+								return currentPowers.stream().noneMatch(sp -> sp.getSuperpower() == finalPower);
+							})
+							.toList();
+
+					if (remaining.isEmpty()) {
+						maxedPlayers.add(player);
+						if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+						break;
+					}
+
+					power = remaining.get(player.getRandom().nextInt(remaining.size()));
+					final Superpowers chosenPower = power;
+
+					if (currentPowers.stream().anyMatch(p -> p.getSuperpower() == chosenPower)) {
+						continue;
+					}
+
+				}
+
+				Superpower instance = power.getInstance(player);
+				if (instance != null) {
+					currentPowers.add(instance);
+					DatapackIntegration.activateSuperpower(player, power);
+				}
+			}
+		}
+
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayers(
+					allPlayers,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f, 1
+			);
+		}
+
+		if (!maxedPlayers.isEmpty() && WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
+			MutableComponent message;
+
+			if (maxedPlayers.size() == 1) {
+				ServerPlayer player = maxedPlayers.get(0);
+				ChatFormatting teamColor = getTeamColor(player);
+
+				message = Component.literal(player.getScoreboardName())
+					.withStyle(teamColor)
+					.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
+					.withStyle(ChatFormatting.RED));
+			} else {
+				message = Component.literal(maxedPlayers.size() +
+					" players have reached max superpowers so didn't receive all of the rolled powers: ")
+					.withStyle(ChatFormatting.RED);
+
+				for (int i = 0; i < maxedPlayers.size(); i++) {
+					var player = maxedPlayers.get(i);
+					ChatFormatting teamColor = getTeamColor(player);
+					message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
+					if (i < maxedPlayers.size() - 1) {
+						message.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
+					}
+				}
+			}
+
+			PlayerUtils.broadcastMessageToAdmins(message);
+		}
+	}
+
+	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
+		Set<Superpower> currentPowers = playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+
+		boolean alreadyHas = currentPowers.stream()
+				.anyMatch(p -> p.getSuperpower() == superpower);
+
+		if (alreadyHas) {
+				MutableComponent message = Component.literal(player.getScoreboardName())
+					.withStyle(getTeamColor(player))
+					.append(Component.literal(" already has " + superpower.getString() + " and cannot receive it again")
+					.withStyle(ChatFormatting.RED));
+				PlayerUtils.broadcastMessageToAdmins(message);
+			return;
+		}
+
+		if (currentPowers.size() >= POWERS_PER_PLAYER) {
+			if (WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
+				MutableComponent message = Component.literal(player.getScoreboardName())
+					.withStyle(getTeamColor(player))
+					.append(Component.literal(" has reached max superpowers so didn't receive " + superpower.getString())
+					.withStyle(ChatFormatting.RED));
+				PlayerUtils.broadcastMessageToAdmins(message);
+			}
+
+			if (WILDCARD_CALLBACK_RESET_AT_MAX) {
+				pendingReset.add(player.getUUID());
+			}
+
+			return;
+		}
+
+		Superpower instance = superpower.getInstance(player);
+		if (instance != null) {
+			currentPowers.add(instance);
+			DatapackIntegration.activateSuperpower(player, superpower);
+		}
+
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayer(
+				player,
+				SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+				0.2f,
+				1
+			);
+		}
+
+		Necromancy.checkRessurectedPlayersReset();
+	}
+
+	public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
+		List<Superpowers> implemented = new ArrayList<>(Superpowers.getImplemented());
+		implemented.remove(Superpowers.NECROMANCY);
+
+		if (CompatibilityManager.voicechatLoaded() && !VoicechatMain.isConnectedToSVC(player.getUUID())) {
+			implemented.remove(Superpowers.LISTENING);
+		}
+
+		Collections.shuffle(implemented);
+		Superpowers power = implemented.get(0);
+
+		if (assignedSuperpowers.containsKey(player.getUUID())) {
+			power = assignedSuperpowers.get(player.getUUID());
+			assignedSuperpowers.remove(player.getUUID());
+		}
+
+		Superpower instance = power.getInstance(player);
+		if (instance != null) {
+			playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>()).add(instance);
+			DatapackIntegration.activateSuperpower(player, power);
+		}
+
+		if (!WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME) {
+			PlayerUtils.playSoundToPlayer(
+					player,
+					SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_superpowers")),
+					0.2f,
+					1
+			);
+		}
+	}
+	
     public static void pressedSuperpowerKey(ServerPlayer player) {
-        if (playerSuperpowers.containsKey(player.getUUID())) {
-            if (player.ls$isAlive()) {
-                playerSuperpowers.get(player.getUUID()).onKeyPressed();
-            }
-            else {
-                PlayerUtils.displayMessageToPlayer(player, Component.literal("Dead players can't use superpowers!"), 60);
-            }
+        if (!playerSuperpowers.containsKey(player.getUUID())) return;
+        if (!player.ls$isAlive()) {
+            PlayerUtils.displayMessageToPlayer(player, Component.literal("Dead players can't use superpowers!"), 60);
+            return;
         }
+        playerSuperpowers.get(player.getUUID()).forEach(Superpower::onKeyPressed);
     }
 
     public static boolean hasPower(ServerPlayer player) {
-        return playerSuperpowers.containsKey(player.getUUID());
+        return playerSuperpowers.containsKey(player.getUUID()) &&
+                !playerSuperpowers.get(player.getUUID()).isEmpty();
     }
 
     public static boolean hasActivePower(ServerPlayer player, Superpowers superpower) {
         if (!playerSuperpowers.containsKey(player.getUUID())) return false;
-        Superpower power = playerSuperpowers.get(player.getUUID());
-        if (power instanceof Mimicry mimicry && superpower != Superpowers.MIMICRY) {
-            return mimicry.getMimickedPower().getSuperpower() == superpower;
+        for (Superpower power : playerSuperpowers.get(player.getUUID())) {
+            if (power instanceof Mimicry mimicry && superpower != Superpowers.MIMICRY) {
+                if (mimicry.getMimickedPower().active) return true;
+            } else if (power.active && power.getSuperpower() == superpower) return true;
         }
-        return power.getSuperpower() == superpower;
-    }
-
-    public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
-        if (!hasActivePower(player, superpower)) return false;
-        Superpower power = playerSuperpowers.get(player.getUUID());
-        if (power instanceof Mimicry mimicry && superpower != Superpowers.MIMICRY) {
-            return mimicry.getMimickedPower().active;
-        }
-        return power.active;
-    }
-
-    public static Superpowers getSuperpower(ServerPlayer player) {
-        if (playerSuperpowers.containsKey(player.getUUID())) {
-            Superpower power = playerSuperpowers.get(player.getUUID());
-            if (power instanceof Mimicry mimicry) {
-                return mimicry.getMimickedPower().getSuperpower();
-            }
-            return power.getSuperpower();
-        }
-        return Superpowers.NULL;
+        return false;
     }
 
     @Nullable
     public static Superpower getSuperpowerInstance(ServerPlayer player) {
-        if (!playerSuperpowers.containsKey(player.getUUID())) return null;
-        Superpower power = playerSuperpowers.get(player.getUUID());
-        if (power instanceof Mimicry mimicry) {
-            return mimicry.getMimickedPower();
+        Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
+        if (powers == null || powers.isEmpty()) return null;
+        for (Superpower power : powers) {
+            if (power.active) return power;
         }
-        return power;
+        return powers.iterator().next();
     }
+
+    public static Superpowers getSuperpower(ServerPlayer player) {
+        Superpower instance = getSuperpowerInstance(player);
+        if (instance == null) return Superpowers.NULL;
+        if (instance instanceof Mimicry mimicry) {
+            return mimicry.getMimickedPower().getSuperpower();
+        }
+        return instance.getSuperpower();
+    }
+	
+	public static boolean hasActivatedPower(ServerPlayer player, Superpowers superpower) {
+		return hasActivePower(player, superpower);
+	}	
+
+	public static int getSuperpowerCount(ServerPlayer player) {
+    Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
+    return powers == null ? 0 : powers.size();
+	}
+
 }
