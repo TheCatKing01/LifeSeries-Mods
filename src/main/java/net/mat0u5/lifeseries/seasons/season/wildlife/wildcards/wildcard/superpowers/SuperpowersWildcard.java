@@ -67,6 +67,13 @@ public class SuperpowersWildcard extends Wildcard {
     public void deactivate() {
 		if (!WILDCARD_CALLBACK_POWER_STACKING) {
 			resetAllSuperpowers();
+			DatapackIntegration.initSuperpowers();
+			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+				resetSuperpower(player); // per-player cleanup
+			}
+
+			playerSuperpowers.clear();
+			DatapackIntegration.initSuperpowers();
 		}
         super.deactivate();
     }
