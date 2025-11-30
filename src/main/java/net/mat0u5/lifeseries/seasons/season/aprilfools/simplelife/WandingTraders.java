@@ -20,8 +20,20 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 
+//? if <= 1.20.3 {
+/*import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.NaturalSpawner;
+*///?} else {
+import net.minecraft.world.item.trading.ItemCost;
+//?}
+
+//? if <= 1.21.9 {
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.npc.WanderingTrader;
+//?} else {
+/*import net.minecraft.world.entity.animal.equine.TraderLlama;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+*///?}
 
 public class WandingTraders {
 
