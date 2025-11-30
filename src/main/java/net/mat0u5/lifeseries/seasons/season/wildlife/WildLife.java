@@ -66,6 +66,8 @@ public class WildLife extends Season {
         return COMMANDS_TEXT;
     }
 
+    private final WandingTraders traders = new WandingTraders();
+
     @Override
     public void initialize() {
         super.initialize();
@@ -122,6 +124,7 @@ public class WildLife extends Season {
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
         WildcardManager.tickSessionOn();
+        traders.tickSessionOn(server);
     }
 
     @Override
@@ -346,4 +349,5 @@ public class WildLife extends Season {
         super.onUpdatedInventory(player);
         Hunger.updateInventory(player);
     }
+
 }
