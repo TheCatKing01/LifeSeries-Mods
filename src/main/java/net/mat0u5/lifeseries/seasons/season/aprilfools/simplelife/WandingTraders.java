@@ -47,7 +47,7 @@ public class WandingTraders {
 
         SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
         TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get(seasonConfig);
-        COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_TRADES.get(seasonConfig);
+        COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_LIFE_TRADES.get(seasonConfig);
     }
 
 
