@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.seasons.season.aprilfools.wandingtraders;
+package net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife;
 
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.core.BlockPos;

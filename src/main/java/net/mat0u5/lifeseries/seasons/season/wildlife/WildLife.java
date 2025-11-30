@@ -36,6 +36,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.scores.ScoreHolder;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
 //? if >= 1.21.2 {
 /*import net.minecraft.server.level.ServerLevel;
