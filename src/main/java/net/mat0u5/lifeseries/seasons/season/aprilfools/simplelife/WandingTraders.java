@@ -45,10 +45,11 @@ public class WandingTraders {
 
     public void onReload() {
 
-        SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get();
-        TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get();
-        COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_LIFE_TRADES.get();
+        SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
+        TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get(seasonConfig);
+        COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_LIFE_TRADES.get(seasonConfig);
     }
+
 
     private final Random rnd = new Random();
     private int checkCooldown = 0;
