@@ -15,6 +15,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.mat0u5.lifeseries.config.SeasonConfig;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -37,9 +38,16 @@ import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 
 public class WandingTraders {
 
+    private final SeasonConfig seasonConfig;
+
     private boolean SIMPLE_LIFE;
     private int TRADERS_MAX_AMOUNT;
     private boolean COMPLEX_LIFE_TRADES_ENABLED;
+
+    public WandingTraders(SeasonConfig seasonConfig) {
+        this.seasonConfig = seasonConfig;
+        onReload();
+    }
 
     public void onReload() {
         SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
