@@ -39,6 +39,10 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 
 public class WandingTraders {
 
+    public boolean SIMPLE_LIFE = false;
+    public int TRADERS_MAX_AMOUNT = 3;
+    public boolean COMPLEX_LIFE_TRADES = false;
+
     public void onReload() {
 
         SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
