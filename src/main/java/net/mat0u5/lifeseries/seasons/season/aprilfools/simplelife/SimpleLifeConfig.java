@@ -7,4 +7,9 @@ public class SimpleLifeConfig extends ThirdLifeConfig {
     public SimpleLifeConfig() {
         super("./config/"+ Main.MOD_ID+"/aprilfools","simplelife.properties");
     }
+
+    @Override
+    public void instantiateProperties() {
+        SIMPLE_LIFE.defaultValue = true;
+    }
 }

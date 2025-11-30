@@ -299,7 +299,18 @@ public class DefaultConfigValues {
             "Broadcast Kill Life Gain", "Shows a message in chat when a player gains a life by killing a player."
     );
 
-
+    public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
+            "simple_life", false, "{global.simplelife}",
+            "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
+    );
+    public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
+            "traders_max_amount", 3, "global.simplelife",
+            "Max Trader Amount", "The maximum amount of Traders that can be spawned in at one time."
+    );
+    public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
+            "complex_life_trades", false, "global.simplelife",
+            "Complex Life Trades", "Changes the Simple Life trades to be custom Complex Life ones."
+    );
 
     /*
      * Group Entries
