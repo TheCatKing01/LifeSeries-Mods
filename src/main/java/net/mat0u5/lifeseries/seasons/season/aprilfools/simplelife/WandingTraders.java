@@ -35,11 +35,21 @@ import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 *///?}
 
+import static net.mat0u5.lifeseries.Main.seasonConfig;
+
 public class WandingTraders {
 
-    private boolean SIMPLE_LIFE = false;
-    private int TRADERS_MAX_AMOUNT = 3;
-    private boolean COMPLEX_LIFE_TRADES_ENABLED = false;
+    public boolean SIMPLE_LIFE = false;
+    public int TRADERS_MAX_AMOUNT = 3;
+    public boolean COMPLEX_LIFE_TRADES = false;
+
+    public void onReload() {
+
+        SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
+        TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get(seasonConfig);
+        COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_TRADES.get(seasonConfig);
+    }
+
 
     private final Random rnd = new Random();
     private int checkCooldown = 0;
