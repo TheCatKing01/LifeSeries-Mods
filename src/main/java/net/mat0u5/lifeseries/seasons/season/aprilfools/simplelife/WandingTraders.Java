@@ -157,5 +157,4 @@ public class WandingTraders {
         }
         return true;
     }
-
 }
