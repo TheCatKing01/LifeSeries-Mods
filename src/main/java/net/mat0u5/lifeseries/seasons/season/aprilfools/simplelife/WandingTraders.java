@@ -16,6 +16,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.Heightmap;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 
@@ -42,30 +43,26 @@ public class WandingTraders {
     public int TRADERS_MAX_AMOUNT = 3;
     public boolean COMPLEX_LIFE_TRADES = false;
 
-    private final Random rnd = new Random();
-    private int checkCooldown = 0;
-
     public void onReload() {
+
         SIMPLE_LIFE = seasonConfig.SIMPLE_LIFE.get(seasonConfig);
         TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get(seasonConfig);
         COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_LIFE_TRADES.get(seasonConfig);
     }
 
-    public void tickSessionOn(MinecraftServer server) {
+    private final Random rnd = new Random();
+    private int checkCooldown = 0;
 
-        if (server == null || server.isStopped() || server.isStopping()) return;
+    public void tickSessionOn(MinecraftServer server) {
 
         if (!SIMPLE_LIFE) return;
 
         checkCooldown--;
+
         if (checkCooldown > 0) return;
 
         ServerLevel level = server.overworld();
-
-        if (level == null || level.getServer().isStopping()) {
-            checkCooldown = 40;
-            return;
-        }
+        if (level == null) return;
 
         int traderCount = 0;
         for (Entity e : level.getAllEntities()) {
@@ -75,7 +72,7 @@ public class WandingTraders {
         if (traderCount == 0)       checkCooldown = 1200;
         else if (traderCount == 1) checkCooldown = 3600;
         else if (traderCount == 2) checkCooldown = 200;
-        else return; // >=3
+        else return; // traderCount >= 3
 
         for (int i = 0; i < 5; i++) {
             if (trySpawnTrader(level)) break;
@@ -84,8 +81,6 @@ public class WandingTraders {
 
     public boolean trySpawnTrader(ServerLevel level) {
 
-        if (level == null || level.getServer().isStopping()) return false;
-
         Player player = level.getRandomPlayer();
         if (player == null) return true;
 
@@ -93,7 +88,7 @@ public class WandingTraders {
         PoiManager poi = level.getPoiManager();
 
         Optional<BlockPos> nearest = poi.find(
-                t -> t.is(PoiTypes.MEETING),
+                type -> type.is(PoiTypes.MEETING),
                 p -> true,
                 pos, 64,
                 PoiManager.Occupancy.ANY
@@ -110,24 +105,45 @@ public class WandingTraders {
 
         if (trader == null) return false;
 
-        for (int i = 0; i < 2; i++) spawnLlama(level, trader, 4);
+        // spawn llamas
+        for (int i = 0; i < 2; i++) {
+            spawnLlama(level, trader, 4);
+        }
 
         trader.setDespawnDelay(12000);
 
-        MerchantOffers offers = new MerchantOffers();
+        // custom trades
+        MerchantOffers offers = trader.getOffers();
+        offers.clear();
 
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5),Optional.empty(), Items.IRON_INGOT.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(), Items.SAND.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(), Items.GRAVEL.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5),Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(),0, 999999, 0, 0, 0));
-        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(), Items.REDSTONE.getDefaultInstance(),0, 999999, 0, 0, 0));
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(),
+                Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-        if (rnd.nextBoolean()) {
-            offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32),Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(),
+                Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(),
+                Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(),
+                Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(),
+                Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(),
+                Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(),
+                Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+        int rand = rnd.nextInt(2);
+        if (rand == 0) {
+            offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(),
+                    Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
         } else {
-            offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32),Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+            offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(),
+                    Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
         }
 
         trader.overrideOffers(offers);
@@ -151,6 +167,7 @@ public class WandingTraders {
             int y = world.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
 
             BlockPos tryPos = new BlockPos(x, y, z);
+            // NOTE: update if using new SpawnPlacements API
             if (SpawnPlacements.getPlacementType(EntityType.WANDERING_TRADER)
                     .isSpawnPositionOk(world, tryPos, EntityType.WANDERING_TRADER)) {
                 return tryPos;
