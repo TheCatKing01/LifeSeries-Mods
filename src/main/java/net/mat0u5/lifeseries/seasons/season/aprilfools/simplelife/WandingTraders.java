@@ -35,7 +35,7 @@ import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 *///?}
 
-import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.Main.*;
 
 public class WandingTraders {
 
@@ -49,7 +49,6 @@ public class WandingTraders {
         TRADERS_MAX_AMOUNT = seasonConfig.TRADERS_MAX_AMOUNT.get(seasonConfig);
         COMPLEX_LIFE_TRADES = seasonConfig.COMPLEX_LIFE_TRADES.get(seasonConfig);
     }
-
 
     private final Random rnd = new Random();
     private int checkCooldown = 0;
