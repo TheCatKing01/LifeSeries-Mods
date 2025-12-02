@@ -103,6 +103,11 @@ public class LimitedLifeConfig extends ConfigManager {
             "Time Rewards / Punishments", ""
     );
 
+    public static final ConfigFileEntry<Integer> TICKS_PER_SECOND = new ConfigFileEntry<>(
+            "ticks_per_second", 20, ConfigTypes.SECONDS, "season",
+            "Ticks per second", "How many minecraft ticks it takes to do one second."
+    );
+
     public LimitedLifeConfig() {
         super("./config/"+ Main.MOD_ID,"limitedlife.properties");
     }
@@ -123,6 +128,7 @@ public class LimitedLifeConfig extends ConfigManager {
                 TICK_OFFLINE_PLAYERS
                 ,BROADCAST_COLOR_CHANGES
                 ,SHOW_TIME_BELOW_NAME
+                ,TICKS_PER_SECOND
 
                 ,GROUP_TIME //Group
 

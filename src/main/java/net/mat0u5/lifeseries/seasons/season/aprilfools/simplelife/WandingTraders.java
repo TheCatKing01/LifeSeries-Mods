@@ -39,9 +39,9 @@ import static net.mat0u5.lifeseries.Main.*;
 
 public class WandingTraders {
 
-    public boolean SIMPLE_LIFE = true;
-    public int TRADERS_MAX_AMOUNT = 5;
-    public boolean COMPLEX_LIFE_TRADES = true;
+    public boolean SIMPLE_LIFE = false;
+    public int TRADERS_MAX_AMOUNT = 3;
+    public boolean COMPLEX_LIFE_TRADES = false;
 
     public void onReload() {
 
@@ -135,28 +135,32 @@ public class WandingTraders {
 		
 		else{
 		
-				offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-				offers.add(new MerchantOffer(new ItemCost(Items.SAND, 10), Optional.empty(), Items.SUGAR_CANE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.SAND, 10), Optional.empty(), Items.SUGAR_CANE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-				offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 2), Optional.empty(), Items.COBBLESTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 32), Optional.empty(), Items.COW_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 2), Optional.empty(), Items.COBBLESTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.OAK_PLANKS, 32), Optional.empty(), Items.COW_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-				offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 10), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 10), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-				offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 10), Optional.empty(), Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
-				offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 10), Optional.empty(), Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-				offers.add(new MerchantOffer(new ItemCost(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			offers.add(new MerchantOffer(new ItemCost(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
+				
+			int rand = rnd.nextInt(2);
+				if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+				if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
 
 		}
 		

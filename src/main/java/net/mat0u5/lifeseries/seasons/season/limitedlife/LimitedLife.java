@@ -40,6 +40,7 @@ public class LimitedLife extends Season {
     private int KILL_BOOGEYMAN = 3600;
     public static boolean TICK_OFFLINE_PLAYERS = false;
     public static boolean SHOW_TIME_BELOW_NAME = false;
+    private int  TICKS_PER_SECOND = 20;
 
     @Override
     public Seasons getSeason() {
@@ -141,7 +142,7 @@ public class LimitedLife extends Season {
 
         secondCounter--;
         if (secondCounter <= 0) {
-            secondCounter = 20;
+            secondCounter = TICKS_PER_SECOND;
             livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
 
             if (TICK_OFFLINE_PLAYERS) {
@@ -296,6 +297,7 @@ public class LimitedLife extends Season {
         KILL_NORMAL = LimitedLifeConfig.TIME_KILL.get(seasonConfig);
         KILL_BOOGEYMAN = LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get(seasonConfig);
         TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get(seasonConfig);
+        TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get(seasonConfig);
         LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get(seasonConfig);
     }
 
