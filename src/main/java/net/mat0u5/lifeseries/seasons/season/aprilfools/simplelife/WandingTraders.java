@@ -40,8 +40,8 @@ import static net.mat0u5.lifeseries.Main.*;
 public class WandingTraders {
 
     public boolean SIMPLE_LIFE = true;
-    public int TRADERS_MAX_AMOUNT = 3;
-    public boolean COMPLEX_LIFE_TRADES = false;
+    public int TRADERS_MAX_AMOUNT = 5;
+    public boolean COMPLEX_LIFE_TRADES = true;
 
     public void onReload() {
 
