@@ -15,6 +15,8 @@ import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders
 public class PastLife extends Season {
     public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /boogeyman, /society, /pastlife";
     public static final String COMMANDS_TEXT = "/claimkill, /lives, /society, /initiate";
+	private final WandingTraders traders = new WandingTraders();
+	
     @Override
     public Seasons getSeason() {
         return Seasons.PAST_LIFE;
@@ -38,6 +40,12 @@ public class PastLife extends Season {
     @Override
     public String getNonAdminCommands() {
         return COMMANDS_TEXT;
+    }
+	
+	@Override
+    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
+        super.tickSessionOn(server);
+        traders.tickSessionOn(server);
     }
 
     @Override

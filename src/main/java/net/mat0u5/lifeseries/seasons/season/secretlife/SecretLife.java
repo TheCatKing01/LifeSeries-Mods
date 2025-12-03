@@ -96,6 +96,13 @@ public class SecretLife extends Season {
     }
 
     @Override
+    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
+        super.tickSessionOn(server);
+        traders.tickSessionOn(server);
+
+    }
+
+    @Override
     public void reload() {
         super.reload();
         MAX_HEALTH = seasonConfig.MAX_PLAYER_HEALTH.get(seasonConfig);
