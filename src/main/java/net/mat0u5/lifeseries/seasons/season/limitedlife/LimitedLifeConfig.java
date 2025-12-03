@@ -104,8 +104,8 @@ public class LimitedLifeConfig extends ConfigManager {
     );
 
     public static final ConfigFileEntry<Integer> TICKS_PER_SECOND = new ConfigFileEntry<>(
-            "ticks_per_second", 20, "season",
-            "Ticks Per Second", "How many minecraft ticks it takes to do one second."
+            "ticks_per_second", 20, ConfigTypes.SECONDS, "season",
+            "Ticks per second", "How many minecraft ticks it takes to do one second."
     );
 
     public LimitedLifeConfig() {
