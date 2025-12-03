@@ -134,30 +134,27 @@ public class LimitedLife extends Season {
         }
     }
 
-	@Override
-	public void tickSessionOn(MinecraftServer server) {
-		super.tickSessionOn(server);
-		if (!currentSession.statusStarted()) return;
+    private int secondCounter = 0;
+    @Override
+    public void tickSessionOn(MinecraftServer server) {
+        super.tickSessionOn(server);
+        if (!currentSession.statusStarted()) return;
 
-		displayTimers(server);
+        secondCounter--;
+        if (secondCounter <= 0) {
+            secondCounter = TICKS_PER_SECOND;
+            livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
 
-		secondCounter--;
-		if (secondCounter <= 0) {
-			secondCounter = TICKS_PER_SECOND;
-			livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
-
-			if (TICK_OFFLINE_PLAYERS) {
-				Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-				for (PlayerScoreEntry entry : entries) {
-					if (entry.value() <= 0) continue;
-					if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
-					ScoreboardUtils.setScore(ScoreHolder.forNameOnly(entry.owner()),
-							LivesManager.SCOREBOARD_NAME, entry.value() - 1);
-				}
-			}
-		}
-	}
-
+            if (TICK_OFFLINE_PLAYERS) {
+                Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+                for (PlayerScoreEntry entry : entries) {
+                    if (entry.value() <= 0) continue;
+                    if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
+                    ScoreboardUtils.setScore(ScoreHolder.forNameOnly(entry.owner()), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
+                }
+            }
+        }
+    }
 
     @Override
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
