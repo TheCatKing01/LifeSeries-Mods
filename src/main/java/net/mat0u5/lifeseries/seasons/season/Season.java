@@ -175,9 +175,7 @@ public abstract class Season {
             }
         }
 
-        if (getSeason() != Seasons.SIMPLE_LIFE) {
-            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
-        }
+        OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
     }
 
     public void reload() {
