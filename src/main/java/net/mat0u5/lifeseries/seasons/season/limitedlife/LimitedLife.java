@@ -76,30 +76,6 @@ public class LimitedLife extends Season {
     public String getNonAdminCommands() {
         return COMMANDS_TEXT;
     }
-	
-	public void displayTimerForPlayer(ServerPlayer player) {
-		String message;
-
-		if (currentSession.statusNotStarted()) message = "Session has not started";
-		else if (currentSession.statusPaused()) message = "Session has been paused";
-		else if (currentSession.statusFinished()) message = "Session has ended";
-		else message = currentSession.getRemainingTimeStr();
-
-		MutableComponent fullMessage = Component.empty();
-
-		if (currentSession.displayTimer.contains(player.getUUID())) {
-			fullMessage.append(Component.literal(message).withStyle(ChatFormatting.GRAY));
-		}
-
-		if (player.ls$hasAssignedLives()) {
-			if (!fullMessage.getString().isEmpty()) {
-				fullMessage.append(Component.literal("  |  "));
-			}
-			fullMessage.append(livesManager.getFormattedLives(player));
-		}
-
-		player.displayClientMessage(fullMessage, true);
-	}
 
     public void displayTimers(MinecraftServer server) {
         String message = "";
@@ -167,10 +143,7 @@ public class LimitedLife extends Season {
         secondCounter--;
         if (secondCounter <= 0) {
             secondCounter = TICKS_PER_SECOND;
-			livesManager.getAlivePlayers().forEach(player -> {
-				player.ls$removeLife();
-				displayTimerForPlayer(player);
-			});
+            livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
 
             if (TICK_OFFLINE_PLAYERS) {
                 Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
