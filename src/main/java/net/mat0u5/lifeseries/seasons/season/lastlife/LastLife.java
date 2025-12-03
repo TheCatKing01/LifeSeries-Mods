@@ -5,6 +5,7 @@ import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.minecraft.server.level.ServerPlayer;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import static net.mat0u5.lifeseries.Main.currentSession;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
@@ -14,6 +15,7 @@ public class LastLife extends Season {
     public static final String COMMANDS_TEXT = "/claimkill, /lives, /givelife";
     public static int ROLL_MAX_LIVES = 6;
     public static int ROLL_MIN_LIVES = 2;
+    private final WandingTraders traders = new WandingTraders();
 
     @Override
     public Seasons getSeason() {
@@ -56,6 +58,13 @@ public class LastLife extends Season {
         int maxLivesConfig = config.RANDOM_LIVES_MAX.get(config);
         ROLL_MIN_LIVES = Math.min(minLivesConfig, maxLivesConfig);
         ROLL_MAX_LIVES = Math.max(minLivesConfig, maxLivesConfig);
+    }
+
+    @Override
+    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
+        super.tickSessionOn(server);
+        traders.tickSessionOn(server);
+
     }
 
     @Override

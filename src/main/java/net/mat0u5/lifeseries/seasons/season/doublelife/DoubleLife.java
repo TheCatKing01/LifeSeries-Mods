@@ -32,6 +32,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import java.util.*;
 
@@ -56,6 +57,7 @@ public class DoubleLife extends Season {
     public boolean DISABLE_START_TELEPORT = false;
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
+    private final WandingTraders traders = new WandingTraders();
 
     public SessionAction actionChooseSoulmates = new SessionAction(
             OtherUtils.minutesToTicks(1), "§7Assign soulmates if necessary §f[00:01:00]", "Assign Soulmates if necessary"
@@ -81,6 +83,13 @@ public class DoubleLife extends Season {
     public void initialize() {
         super.initialize();
         soulmateConfig = getSoulmateConfig();
+    }
+
+    @Override
+    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
+        super.tickSessionOn(server);
+        traders.tickSessionOn(server);
+
     }
 
     public StringListConfig getSoulmateConfig() {

@@ -23,6 +23,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.ScoreHolder;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import java.util.Collection;
 
@@ -41,6 +42,7 @@ public class LimitedLife extends Season {
     public static boolean TICK_OFFLINE_PLAYERS = false;
     public static boolean SHOW_TIME_BELOW_NAME = false;
     private int  TICKS_PER_SECOND = 20;
+    private final WandingTraders traders = new WandingTraders();
 
     @Override
     public Seasons getSeason() {
@@ -138,6 +140,7 @@ public class LimitedLife extends Season {
     @Override
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
+        traders.tickSessionOn(server);
         if (!currentSession.statusStarted()) return;
 
         secondCounter--;

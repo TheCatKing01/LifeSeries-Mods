@@ -10,6 +10,7 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 public class PastLife extends Season {
     public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /boogeyman, /society, /pastlife";
