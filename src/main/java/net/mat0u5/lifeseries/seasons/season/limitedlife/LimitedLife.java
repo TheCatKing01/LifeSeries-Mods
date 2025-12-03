@@ -125,44 +125,43 @@ public class LimitedLife extends Season {
         }
     }
 
-   @Override
-	public void tickSessionOn(MinecraftServer server) {
-		super.tickSessionOn(server);
-		if (!currentSession.statusStarted()) return;
+    @Override
+    public void tickSessionOn(MinecraftServer server) {
+        super.tickSessionOn(server);
+        if (!currentSession.statusStarted()) return;
 
-		double decrementPerTick = 1.0 / TICKS_PER_SECOND;
+        double decrementPerTick = 1.0 / TICKS_PER_SECOND;
 
-		for (ServerPlayer player : livesManager.getAlivePlayers()) {
-			double progress = playerLifeProgress.getOrDefault(player, 0.0);
-			progress += decrementPerTick;
+        for (ServerPlayer player : livesManager.getAlivePlayers()) {
+            double progress = playerLifeProgress.getOrDefault(player, 0.0);
+            progress += decrementPerTick;
 
-			if (progress >= 1.0) {
-				progress -= 1.0;
-				player.ls$removeLife();
-			}
+            if (progress >= 1.0) {
+                int livesToRemove = (int) progress;
+                progress -= livesToRemove;
+                player.ls$removeLife(livesToRemove);
+            }
 
-			playerLifeProgress.put(player, progress);
-		}
+            playerLifeProgress.put(player, progress);
+        }
 
-		if (TICK_OFFLINE_PLAYERS) {
-			Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-			for (PlayerScoreEntry entry : entries) {
-				if (entry.value() <= 0) continue;
-				ServerPlayer onlinePlayer = PlayerUtils.getPlayer(entry.owner());
-				if (onlinePlayer != null) continue;
-
-				double offlineProgress = playerLifeProgress.getOrDefault(null, 0.0); // track offline players
-				offlineProgress += decrementPerTick;
-
-				if (offlineProgress >= 1.0) {
-					offlineProgress -= 1.0;
-					ScoreboardUtils.setScore(ScoreHolder.forNameOnly(entry.owner()), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
-				}
-
-				playerLifeProgress.put(null, offlineProgress);
-			}
-		}
-	}
+        if (TICK_OFFLINE_PLAYERS) {
+            Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+            for (PlayerScoreEntry entry : entries) {
+                if (entry.value() <= 0) continue;
+                ServerPlayer onlinePlayer = PlayerUtils.getPlayer(entry.owner());
+                if (onlinePlayer != null) continue;
+                double offlineProgress = playerLifeProgress.getOrDefault(null, 0.0); // using null for offline tracking
+                offlineProgress += decrementPerTick;
+                if (offlineProgress >= 1.0) {
+                    int remove = (int) offlineProgress;
+                    offlineProgress -= remove;
+                    ScoreboardUtils.setScore(ScoreHolder.forNameOnly(entry.owner()), LivesManager.SCOREBOARD_NAME, entry.value() - remove);
+                }
+                playerLifeProgress.put(null, offlineProgress);
+            }
+        }
+    }
 
     @Override
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
