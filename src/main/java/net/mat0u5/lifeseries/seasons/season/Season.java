@@ -176,6 +176,7 @@ public abstract class Season {
         }
 
         OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
+		
     }
 
     public void reload() {
