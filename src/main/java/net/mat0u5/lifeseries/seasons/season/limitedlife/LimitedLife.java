@@ -134,8 +134,6 @@ public class LimitedLife extends Season {
         }
     }
 
-    private int secondCounter = 0;
-
 	@Override
 	public void tickSessionOn(MinecraftServer server) {
 		super.tickSessionOn(server);
