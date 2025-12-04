@@ -145,9 +145,11 @@ public class WandingTraders {
 
             offers.add(new MerchantOffer(new ItemCost(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-            int rand = rnd.nextInt(2);
-            if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-            if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			int rand = rnd.nextInt(2);
+			if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 10), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+            offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+            offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
         }
 
         trader.overrideOffers(offers);
