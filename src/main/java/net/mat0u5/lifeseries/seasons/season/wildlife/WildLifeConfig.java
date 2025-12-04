@@ -213,7 +213,7 @@ public class WildLifeConfig extends ConfigManager {
     );
     public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER = new ConfigFileEntry<>(
             "wildcard_superpowers_powers_per_player", 1, "season.superpowers",
-            "Max Powers Per Player", "Controls how many superpowers each player can have activated at once."
+            "Max Player Powers", "Controls how many superpowers each player can have activated at once."
     );
 	public static final ConfigFileEntry<Integer> WILDCARD_SUPERPOWERS_POWERS_PER_ROLL = new ConfigFileEntry<>(
             "wildcard_superpowers_powers_per_roll", 1, "season.superpowers",
