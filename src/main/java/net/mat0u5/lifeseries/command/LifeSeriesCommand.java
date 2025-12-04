@@ -140,6 +140,7 @@ public class LifeSeriesCommand extends Command {
         if (Main.changeSeasonTo(setTo)) {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Changing the season to {}§7...", setTo));
             PlayerUtils.broadcastMessage(TextUtils.format("Successfully changed the season to {}",setTo).withStyle(ChatFormatting.GREEN));
+            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
         }
     }
 

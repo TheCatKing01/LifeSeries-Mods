@@ -174,8 +174,6 @@ public abstract class Season {
                 ScoreboardUtils.setObjectiveInSlot(DisplaySlot.BELOW_NAME, null);
             }
         }
-
-        OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
 		
     }
 
