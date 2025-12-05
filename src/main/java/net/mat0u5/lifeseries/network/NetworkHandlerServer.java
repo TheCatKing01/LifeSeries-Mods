@@ -225,6 +225,8 @@ public class NetworkHandlerServer {
                 if (newSeason == Seasons.UNASSIGNED) return;
                 if (Main.changeSeasonTo(newSeason.getId())) {
                     PlayerUtils.broadcastMessage(TextUtils.formatLoosely("§aSuccessfully changed the season to {}.", value));
+                    OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
+                    OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=ComplexLifeTrader]");
                 }
             }
         }

@@ -124,6 +124,9 @@ public class WandingTraders {
             } else {
                 offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
             }
+			
+			trader.addTag("SimpleLifeTrader");
+			
         } else {
             offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
             offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.BONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
@@ -150,11 +153,11 @@ public class WandingTraders {
 			if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 10), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
             offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
             offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+			
+			trader.addTag("ComplexLifeTrader");
         }
 
         trader.overrideOffers(offers);
-        trader.addTag("SimpleLifeTrader");
-
         return true;
     }
 
