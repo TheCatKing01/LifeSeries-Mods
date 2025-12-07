@@ -14,18 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public class TextHud {
-	
-	public static int limitedLifeTPS = 20;
-	
-	limitedLifeTPS = receivedValue;
-	
-	ServerPlayNetworking.registerGlobalReceiver(PacketNames.LIMITED_LIFE_TPS, (client, handler, buf, responseSender) -> {
-		int tps = buf.readInt();
-		client.execute(() -> {
-			TextHud.limitedLifeTPS = tps;
-		});
-	});
-	
     public static void renderText(GuiGraphics context) {
         Minecraft client = Minecraft.getInstance();
         if (client.options.hideGui) return;
@@ -152,7 +140,7 @@ public class TextHud {
         if (sessionSeconds != -1 && remainingTime > 60000) {
             long sessionMillis = sessionSeconds * 1000L;
             long diff = sessionMillis - remainingTime;
-            if (Math.abs(diff) <= 5000) {
+            if (Math.abs(diff) <= 5000) { // small difference adjustment
                 remainingTime += diff;
             }
         }
@@ -162,13 +150,10 @@ public class TextHud {
         } else {
             timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + OtherUtils.formatTimeMillis(remainingTime)));
         }
-		
-		if (remainingTime > 0) {
-			if (limitedLifeTPS > 0) {
-			long msPerTick = 1000L / limitedLifeTPS;
-			limitedLifeTimeMillis -= msPerTick;
-			}
-		}
+
+        if (remainingTime > 0) {
+            limitedLifeTimeMillis -= 50;
+        }
 
         return drawHudText(client, context, timerText, y);
     }
