@@ -123,28 +123,36 @@ public class TextHud {
         return drawHudText(client, context, timerText, y);
     }
 
-    private static long limitedLifeTime = -1;
+    private static long limitedLifeTimeMillis = -1;
+
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
         if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
-        if (System.currentTimeMillis()-MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
+        if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
         MutableComponent timerText = Component.empty();
-        if (sessionSecondChanged || MainClient.sessionTime <= 0 || Math.abs(limitedLifeTime - MainClient.limitedLifeLives) > 10) {
-            limitedLifeTime = MainClient.limitedLifeLives;
-        }
-        if (limitedLifeTime == -1) timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
-        else {
-            long currentSeconds = limitedLifeTime;
-            if (sessionSeconds != -1 && currentSeconds > 60) {
-                long secondsDifference = (sessionSeconds % 60) - (currentSeconds % 60);
-                if (Math.abs(secondsDifference) <= 5) {
-                    currentSeconds += secondsDifference;
-                }
-            }
-            long remainingTime = currentSeconds * 1000;
 
-            if (remainingTime < 0) timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
-            else timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor+ OtherUtils.formatTimeMillis(remainingTime)));
+        if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
+            limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
+        }
+
+        long remainingTime = limitedLifeTimeMillis;
+
+        if (sessionSeconds != -1 && remainingTime > 60000) {
+            long sessionMillis = sessionSeconds * 1000L;
+            long diff = sessionMillis - remainingTime;
+            if (Math.abs(diff) <= 5000) { // small difference adjustment
+                remainingTime += diff;
+            }
+        }
+
+        if (remainingTime < 0) {
+            timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
+        } else {
+            timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + OtherUtils.formatTimeMillis(remainingTime)));
+        }
+
+        if (remainingTime > 0) {
+            limitedLifeTimeMillis -= 50;
         }
 
         return drawHudText(client, context, timerText, y);
