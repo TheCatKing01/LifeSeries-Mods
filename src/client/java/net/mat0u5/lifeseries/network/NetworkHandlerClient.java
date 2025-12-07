@@ -43,7 +43,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.util.Identifier;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,18 +54,18 @@ import java.util.concurrent.CompletableFuture;
 public class NetworkHandlerClient {
 	
 	public record LimitedLifeTpsPayload(int tps) {
-		public static final Identifier ID = new Identifier("lifeseries", "limited_life_tps");
+		public static final ResourceLocation ID = new ResourceLocation("lifeseries", "limited_life_tps");
 
-		public static void send(int tps) {
-			ClientPlayNetworking.send(ID, buf -> buf.writeInt(tps));
-		}
-
-		public static LimitedLifeTpsPayload decode(PacketByteBuf buf) {
+		public static LimitedLifeTpsPayload decode(FriendlyByteBuf buf) {
 			return new LimitedLifeTpsPayload(buf.readInt());
 		}
 
-		public void encode(PacketByteBuf buf) {
+		public void encode(FriendlyByteBuf buf) {
 			buf.writeInt(tps);
+		}
+
+		public static void send(int tps) {
+			ClientPlayNetworking.send(ID, buf -> buf.writeInt(tps));
 		}
 	}
 	
@@ -77,8 +78,8 @@ public class NetworkHandlerClient {
                 }
         );
 
-		ClientPlayNetworking.registerGlobalReceiver(LimitedLifeTpsPayload.ID, (payload, context) -> {
-			Minecraft client = context.client();
+		ClientPlayNetworking.registerGlobalReceiver(LimitedLifeTpsPayload.ID, (client, handler, buf, responseSender) -> {
+			LimitedLifeTpsPayload payload = LimitedLifeTpsPayload.decode(buf);
 			client.execute(() -> TextHud.limitedLifeTPS = payload.tps());
 		});
         ClientPlayNetworking.registerGlobalReceiver(NumberPayload.ID, (payload, context) -> {
