@@ -1,15 +1,16 @@
 {
 	"schemaVersion": 1,
 	"id": "lifeseries",
-	"version": "${version}+${minecraftVersion}",
-	"name": "Life Series",
-	"description": "A one-to-one recreation of Grian's Life Series in fabric.",
+	"version": "1.0.0+${minecraftVersion}",
+	"name": "Life Series+",
+	"description": "A fork of Mat0u5’s Life Series mod adding extra features like allowing players to have multiple superpowers or allowing Simple Life traders to spawn in all series.",
 	"authors": [
-		"Mat0u5"
+		"Mat0u5",
+                "TheCatKing01"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/Mat0u5/LifeSeries"
+		"sources": "https://github.com/TheCatKing01/LifeSeriesPlus"
 	},
 	"license": "MIT",
 	"icon": "assets/icon.png",
