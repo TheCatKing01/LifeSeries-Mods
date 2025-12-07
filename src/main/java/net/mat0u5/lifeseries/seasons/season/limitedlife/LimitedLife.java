@@ -113,12 +113,8 @@ public class LimitedLife extends Season {
                     long playerLives;
                     if (player.ls$isAlive()) {
                         Integer playerLivesInt = player.ls$getLives();
-						if (playerLivesInt == null) {
-							playerLives = -1;
-						} else {
-							long now = System.currentTimeMillis();
-							playerLives = now + (playerLivesInt * 1000L);
-						}                    }
+                        playerLives = playerLivesInt == null ? -1 : playerLivesInt;
+                    }
                     else {
                         playerLives = -1;
                     }
