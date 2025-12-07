@@ -126,6 +126,29 @@ public class LimitedLife extends Season {
                     NetworkHandlerServer.sendLongPacket(player, PacketNames.fromName(PacketNames.LIMITED_LIFE_TIMER.getName()+livesColor), playerLives);
                 }
             }
+			
+				if (player.ls$hasAssignedLives() && player.ls$getLives() != null) {
+					long playerLives;
+					if (player.ls$isAlive()) {
+						Integer playerLivesInt = player.ls$getLives();  // life in seconds
+						if (playerLivesInt == null) {
+						playerLives = -1;
+					} else {
+						long now = System.currentTimeMillis();
+						playerLives = now + (playerLivesInt * 1000L);  // convert seconds -> ms
+					}
+				} else {
+					playerLives = -1;
+				}
+
+				String livesColor = livesManager.getColorForLives(player).toString();
+				NetworkHandlerServer.sendLongPacket(
+					player,
+					PacketNames.fromName(PacketNames.LIMITED_LIFE_TIMER.getName() + livesColor),
+					playerLives
+				);
+			}
+
             else {
                 MutableComponent fullMessage = Component.empty();
                 if (currentSession.displayTimer.contains(player.getUUID())) {
