@@ -42,6 +42,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.util.Identifier;
+import net.minecraft.network.PacketByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
