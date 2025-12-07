@@ -58,11 +58,26 @@ public class NetworkHandlerClient {
                 }
         );
 
-        ClientPlayNetworking.registerGlobalReceiver(PacketNames.LIMITED_LIFE_TPS, (client, handler, buf, responseSender) -> {
-            int tps = buf.readInt();
-            client.execute(() -> TextHud.limitedLifeTPS = tps);
-        });
+public record LimitedLifeTpsPayload(int tps) {
+    public static final Identifier ID = new Identifier("lifeseries", "limited_life_tps");
 
+    public static void send(int tps) {
+        ClientPlayNetworking.send(ID, buf -> buf.writeInt(tps));
+    }
+
+    public static LimitedLifeTpsPayload decode(PacketByteBuf buf) {
+        return new LimitedLifeTpsPayload(buf.readInt());
+    }
+
+    public void encode(PacketByteBuf buf) {
+        buf.writeInt(tps);
+    }
+}
+
+		ClientPlayNetworking.registerGlobalReceiver(LimitedLifeTpsPayload.ID, (payload, context) -> {
+			Minecraft client = context.client();
+			client.execute(() -> TextHud.limitedLifeTPS = payload.tps());
+		});
         ClientPlayNetworking.registerGlobalReceiver(NumberPayload.ID, (payload, context) -> {
             Minecraft client = context.client();
             client.execute(() -> handleNumberPacket(payload));
