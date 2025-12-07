@@ -7,6 +7,7 @@ public enum PacketNames {
 
     ,CURSE_SLIDING
     ,LIMITED_LIFE_TIMER("limited_life_timer__")
+    ,LIMITED_LIFE_TPS("limited_life_tps__")   // ← ADD THIS
     ,SESSION_TIMER
 
     ,MIMICRY_COOLDOWN
