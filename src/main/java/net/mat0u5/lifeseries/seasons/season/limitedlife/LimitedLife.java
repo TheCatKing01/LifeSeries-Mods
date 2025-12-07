@@ -107,7 +107,7 @@ public class LimitedLife extends Season {
                 }
                 if (timestamp != SessionTimerStates.OFF.getValue()) {
                     NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, timestamp);
-					NetworkHandlerServer.sendLongPacket(player, PacketNames.LIMITED_LIFE_TPS, (long) TICKS_PER_SECOND);
+					NetworkHandlerServer.sendIntPacket(player, PacketNames.LIMITED_LIFE_TPS, TICKS_PER_SECOND);
                 }
 
                 if (player.ls$hasAssignedLives() && player.ls$getLives() != null) {
