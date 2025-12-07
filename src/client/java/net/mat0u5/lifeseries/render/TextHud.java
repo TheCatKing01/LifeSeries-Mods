@@ -18,15 +18,6 @@ public class TextHud {
 	
 	public static int limitedLifeTPS = 20;
 	
-	limitedLifeTPS = receivedValue;
-	
-	ServerPlayNetworking.registerGlobalReceiver(PacketNames.LIMITED_LIFE_TPS, (client, handler, buf, responseSender) -> {
-		int tps = buf.readInt();
-		client.execute(() -> {
-			TextHud.limitedLifeTPS = tps;
-		});
-	});
-	
     public static void renderText(GuiGraphics context) {
         Minecraft client = Minecraft.getInstance();
         if (client.options.hideGui) return;

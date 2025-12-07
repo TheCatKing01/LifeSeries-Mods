@@ -58,6 +58,11 @@ public class NetworkHandlerClient {
                 }
         );
 
+        ServerPlayNetworking.registerGlobalReceiver(PacketNames.LIMITED_LIFE_TPS, (client, handler, buf, responseSender) -> {
+            int tps = buf.readInt();
+            client.execute(() -> TextHud.limitedLifeTPS = tps);
+        });
+
         ClientPlayNetworking.registerGlobalReceiver(NumberPayload.ID, (payload, context) -> {
             Minecraft client = context.client();
             client.execute(() -> handleNumberPacket(payload));
