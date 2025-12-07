@@ -49,6 +49,23 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class NetworkHandlerClient {
+	
+	public record LimitedLifeTpsPayload(int tps) {
+		public static final Identifier ID = new Identifier("lifeseries", "limited_life_tps");
+
+		public static void send(int tps) {
+			ClientPlayNetworking.send(ID, buf -> buf.writeInt(tps));
+		}
+
+		public static LimitedLifeTpsPayload decode(PacketByteBuf buf) {
+			return new LimitedLifeTpsPayload(buf.readInt());
+		}
+
+		public void encode(PacketByteBuf buf) {
+			buf.writeInt(tps);
+		}
+	}
+	
     public static void registerClientReceiver() {
         ClientLoginNetworking.registerGlobalReceiver(IdentifierHelper.mod("preloginpacket"),
                 (client, handler, buf, listenerAdder) -> {
@@ -57,22 +74,6 @@ public class NetworkHandlerClient {
                     );
                 }
         );
-
-public record LimitedLifeTpsPayload(int tps) {
-    public static final Identifier ID = new Identifier("lifeseries", "limited_life_tps");
-
-    public static void send(int tps) {
-        ClientPlayNetworking.send(ID, buf -> buf.writeInt(tps));
-    }
-
-    public static LimitedLifeTpsPayload decode(PacketByteBuf buf) {
-        return new LimitedLifeTpsPayload(buf.readInt());
-    }
-
-    public void encode(PacketByteBuf buf) {
-        buf.writeInt(tps);
-    }
-}
 
 		ClientPlayNetworking.registerGlobalReceiver(LimitedLifeTpsPayload.ID, (payload, context) -> {
 			Minecraft client = context.client();
