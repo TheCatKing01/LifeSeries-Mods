@@ -147,7 +147,6 @@ public class LimitedLife extends Season {
         if (secondCounter <= 0) {
             secondCounter = TICKS_PER_SECOND;
             livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
-            displayTimers(server);
 
             if (TICK_OFFLINE_PLAYERS) {
                 Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
