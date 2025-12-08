@@ -14,6 +14,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public class TextHud {
+    private static long lastTickTime = System.currentTimeMillis();
+
     public static void renderText(GuiGraphics context) {
         Minecraft client = Minecraft.getInstance();
         if (client.options.hideGui) return;
@@ -33,13 +35,19 @@ public class TextHud {
         if (sideTitleRemainTicks > 0) {
             sideTitleRemainTicks--;
         }
-		
-		if (limitedLifeTimeMillis > 0) {
-			limitedLifeTimeMillis -= (1000.0 / MainClient.TICKS_PER_SECOND);
-		}
+
+        long now = System.currentTimeMillis();
+        long delta = now - lastTickTime;
+        lastTickTime = now;
+
+        if (limitedLifeTimeMillis > 0) {
+            limitedLifeTimeMillis -= delta;
+            if (limitedLifeTimeMillis < 0) limitedLifeTimeMillis = 0;
+        }
     }
 
     public static int sideTitleRemainTicks = 0;
+
     public static int renderSidetitle(Minecraft client, GuiGraphics context, int y) {
         if (MainClient.sideTitle == null) return 0;
         if (MainClient.sideTitle.getString().isEmpty()) return 0;
@@ -56,8 +64,8 @@ public class TextHud {
         if (guiScale <= 3 && guiScale != 0) {
 
             String textString = "Don't worry, the game is not broken ";
-            if (currentMillis % 1500 <= 750) textString = "§7§n"+textString;
-            else textString = "§7"+textString;
+            if (currentMillis % 1500 <= 750) textString = "§7§n" + textString;
+            else textString = "§7" + textString;
 
             if (currentMillis % 500 <= 250) textString += "/o/";
             else textString += "\\o\\";
@@ -65,18 +73,16 @@ public class TextHud {
             Component text = Component.literal(textString);
 
             return drawHudText(client, context, text, y) - 5;
-        }
-        else {
+        } else {
             String textString0 = "Don't worry,";
             String textString1 = "the game isn't broken ";
 
             if (currentMillis % 1500 <= 750) {
-                textString0 = "§7§n"+textString0;
-                textString1 = "§7§n"+textString1;
-            }
-            else {
-                textString0 = "§7"+textString0;
-                textString1 = "§7"+textString1;
+                textString0 = "§7§n" + textString0;
+                textString1 = "§7§n" + textString1;
+            } else {
+                textString0 = "§7" + textString0;
+                textString1 = "§7" + textString1;
             }
 
             if (currentMillis % 500 <= 250) textString1 += "/o/";
@@ -85,12 +91,11 @@ public class TextHud {
             Component text0 = Component.literal(textString0);
             Component text1 = Component.literal(textString1);
 
-
             int screenWidth = client.getWindow().getGuiScaledWidth();
             int x = screenWidth - 5;
 
             int draw1 = drawHudText(client, context, text1, y);
-            int draw2 = drawHudText(client, context, text0, x - ((client.font.width(text1)-client.font.width(text0))/2), y - (client.font.lineHeight+1));
+            int draw2 = drawHudText(client, context, text0, x - ((client.font.width(text1) - client.font.width(text0)) / 2), y - (client.font.lineHeight + 1));
 
             return draw1 + draw2 - 5;
         }
@@ -99,29 +104,33 @@ public class TextHud {
     public static long lastSessionSeconds = 0;
     public static long sessionSeconds = -1;
     public static boolean sessionSecondChanged = true;
+
     public static int renderSessionTimer(Minecraft client, GuiGraphics context, int y) {
         sessionSecondChanged = true;
         sessionSeconds = -1;
         if (!MainClient.SESSION_TIMER) return 0;
-        if (System.currentTimeMillis()-MainClient.sessionTimeLastUpdated > 15000) return 0;
+        if (System.currentTimeMillis() - MainClient.sessionTimeLastUpdated > 15000) return 0;
         if (MainClient.sessionTime == SessionTimerStates.OFF.getValue()) return 0;
 
         MutableComponent timerText = Component.empty();
-        if (MainClient.sessionTime == SessionTimerStates.ENDED.getValue()) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
-        else if (MainClient.sessionTime == SessionTimerStates.PAUSED.getValue()) timerText = timerText.append(Component.nullToEmpty("§7Session has been paused"));
-        else if (MainClient.sessionTime == SessionTimerStates.NOT_STARTED.getValue()) timerText = timerText.append(Component.nullToEmpty("§7Session has not started"));
+        if (MainClient.sessionTime == SessionTimerStates.ENDED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
+        else if (MainClient.sessionTime == SessionTimerStates.PAUSED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has been paused"));
+        else if (MainClient.sessionTime == SessionTimerStates.NOT_STARTED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has not started"));
         else {
             long remainingTime = roundTime(MainClient.sessionTime) - System.currentTimeMillis();
             sessionSeconds = (int) Math.ceil(remainingTime / 1000.0);
             if (lastSessionSeconds != sessionSeconds) {
                 lastSessionSeconds = sessionSeconds;
-            }
-            else {
+            } else {
                 sessionSecondChanged = false;
             }
 
             if (remainingTime < 0) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
-            else timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", OtherUtils.formatTimeMillis(remainingTime)));
+            else
+                timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", OtherUtils.formatTimeMillis(remainingTime)));
         }
 
         return drawHudText(client, context, timerText, y);
@@ -130,28 +139,29 @@ public class TextHud {
     private static long limitedLifeTimeMillis = -1;
 
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
-		if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
-		if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
+        if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
+        if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
-		MutableComponent timerText = Component.empty();
+        MutableComponent timerText = Component.empty();
 
-		if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
-			limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
-		}
+        if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
+            limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
+        }
 
-		long remainingTime = limitedLifeTimeMillis;
+        long remainingTime = limitedLifeTimeMillis;
 
-		if (remainingTime < 0) {
-			timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
-		} else {
-			timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + 
-					OtherUtils.formatTimeMillis(remainingTime)));
-		}
+        if (remainingTime < 0) {
+            timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
+        } else {
+            timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor +
+                    OtherUtils.formatTimeMillis(remainingTime)));
+        }
 
-		return drawHudText(client, context, timerText, y);
-	}
+        return drawHudText(client, context, timerText, y);
+    }
 
     private static int triviaTimer = -1;
+
     public static int renderTriviaTimer(Minecraft client, GuiGraphics context, int y) {
         if (!Trivia.isDoingTrivia()) return 0;
 
@@ -175,8 +185,10 @@ public class TextHud {
     }
 
     private static long lastPressed = 0;
+
     public static int renderSuperpowerCooldown(Minecraft client, GuiGraphics context, int y) {
-        if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown()) lastPressed = System.currentTimeMillis();
+        if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown())
+            lastPressed = System.currentTimeMillis();
 
         if (MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP == 0) return 0;
         long currentMillis = System.currentTimeMillis();
@@ -188,7 +200,7 @@ public class TextHud {
         boolean keyPressed = pressedAgo < 500;
         if (pressedAgo > 6000) return 0;
 
-        Component timerText = TextUtils.formatLoosely("{}Superpower cooldown:§f {}", (keyPressed?"§c§n":"§7") , OtherUtils.formatTimeMillis(millisLeft));
+        Component timerText = TextUtils.formatLoosely("{}Superpower cooldown:§f {}", (keyPressed ? "§c§n" : "§7"), OtherUtils.formatTimeMillis(millisLeft));
 
         return drawHudText(client, context, timerText, y);
     }
@@ -221,7 +233,7 @@ public class TextHud {
             return -((int) Math.ceil((client.font.lineHeight) * MainClient.TEXT_HUD_SCALE) + 5);
         }
         RenderUtils.drawTextRight(context, client.font, color, text, x, y, true);
-        return -client.font.lineHeight -5;
+        return -client.font.lineHeight - 5;
     }
 
     public static long roundTime(long time) {
