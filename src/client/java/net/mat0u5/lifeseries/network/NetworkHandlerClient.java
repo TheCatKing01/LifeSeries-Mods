@@ -256,8 +256,14 @@ public class NetworkHandlerClient {
         int intNumber = (int) number;
         if (name == PacketNames.PLAYER_MIN_MSPT) {
             if (VersionControl.isDevVersion()) Main.LOGGER.info("[PACKET_CLIENT] Updated min. player MSPT to {}", number);
-            TimeDilation.MIN_PLAYER_MSPT = (float) number;
+            TimeDilation.MIN_PLAYER_MSPT = (float) number
+		}
+			
+		if (name == PacketNames.TICKS_PER_SECOND) {
+			MainClient.TICKS_PER_SECOND = (int) number;
+			return;	
         }
+		
         if (name == PacketNames.SNAIL_AIR) {
             MainClient.snailAir = intNumber;
             MainClient.snailAirTimestamp = System.currentTimeMillis();

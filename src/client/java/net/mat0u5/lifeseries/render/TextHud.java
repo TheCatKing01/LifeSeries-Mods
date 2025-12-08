@@ -33,6 +33,10 @@ public class TextHud {
         if (sideTitleRemainTicks > 0) {
             sideTitleRemainTicks--;
         }
+		
+		if (limitedLifeTimeMillis > 0) {
+			limitedLifeTimeMillis -= (1000.0 / MainClient.TICKS_PER_SECOND);
+		}
     }
 
     public static int sideTitleRemainTicks = 0;
@@ -126,37 +130,26 @@ public class TextHud {
     private static long limitedLifeTimeMillis = -1;
 
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
-        if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
-        if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
+		if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
+		if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
-        MutableComponent timerText = Component.empty();
+		MutableComponent timerText = Component.empty();
 
-        if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
-            limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
-        }
+		if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
+			limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
+		}
 
-        long remainingTime = limitedLifeTimeMillis;
+		long remainingTime = limitedLifeTimeMillis;
 
-        if (sessionSeconds != -1 && remainingTime > 60000) {
-            long sessionMillis = sessionSeconds * 1000L;
-            long diff = sessionMillis - remainingTime;
-            if (Math.abs(diff) <= 5000) { // small difference adjustment
-                remainingTime += diff;
-            }
-        }
+		if (remainingTime < 0) {
+			timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
+		} else {
+			timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + 
+					OtherUtils.formatTimeMillis(remainingTime)));
+		}
 
-        if (remainingTime < 0) {
-            timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
-        } else {
-            timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + OtherUtils.formatTimeMillis(remainingTime)));
-        }
-
-        if (remainingTime > 0) {
-            limitedLifeTimeMillis -= 50;
-        }
-
-        return drawHudText(client, context, timerText, y);
-    }
+		return drawHudText(client, context, timerText, y);
+	}
 
     private static int triviaTimer = -1;
     public static int renderTriviaTimer(Minecraft client, GuiGraphics context, int y) {
