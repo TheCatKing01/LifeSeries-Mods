@@ -13,7 +13,7 @@
 		"sources": "https://github.com/TheCatKing01/LifeSeriesPlus"
 	},
 	"license": "MIT",
-	"icon": "assets/icon.png",
+	"icon": "icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
