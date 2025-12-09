@@ -1,14 +1,11 @@
+package net.mat0u5.lifeseries.registries;
+
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.core.registries.BuiltinRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeatureKeys;
-import net.mat0u5.lifeseries.Main;
+import net.minecraft.world.level.levelgen.structure.StructureSets;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public class ShipwreckRegister {
 
@@ -16,11 +13,14 @@ public class ShipwreckRegister {
         ServerWorldEvents.LOAD.register((server, world) -> {
             if (!world.dimension().equals(Level.OVERWORLD)) return;
 
-            ResourceKey<StructureFeature<?>> shipwreckKey = StructureFeatureKeys.SHIPWRECK;
+            WorldGenSettings generatorSettings = world.getChunkSource().getGenerator().getSettings();
+            if (!"generator.lifeseries.complex_life".equals(generatorSettings.toString())) {
+                return;
+            }
 
             BiomeModifications.addStructure(
-                    BiomeSelectors.includeByKey(BiomeKeys.PLAINS),
-                    BuiltinRegistries.STRUCTURE_FEATURE.get(shipwreckKey.location())
+                    BiomeSelectors.all(),
+                    StructureSets.SHIPWRECK
             );
         });
     }
