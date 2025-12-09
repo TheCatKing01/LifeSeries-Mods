@@ -29,22 +29,7 @@
           "structure_overrides": {
             "minecraft:villages": {},
             "minecraft:strongholds": {},
-            "minecraft:pillager_outposts": {},
-            "minecraft:shipwrecks": {}
-          },
-          "biome_provider": {
-            "type": "minecraft:multi_noise",
-            "preset": "minecraft:overworld",
-            "biomes": [
-              {
-                "biome": "minecraft:plains",
-                "parameters": {}
-              },
-              {
-                "biome": "minecraft:ocean",
-                "parameters": {}
-              }
-            ]
+            "minecraft:pillager_outposts": {}
           }
         }
       }
@@ -72,7 +57,7 @@
     "minecraft:the_nether": {
       "type": "minecraft:the_nether",
       "generator": {
-        "type": "flat",
+        "type": "minecraft:flat",
         "settings": {
           "biome": "minecraft:nether_wastes",
           "layers": [
