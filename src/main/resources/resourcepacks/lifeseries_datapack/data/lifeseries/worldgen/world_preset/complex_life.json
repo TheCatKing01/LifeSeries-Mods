@@ -26,11 +26,11 @@
               "block": "minecraft:grass_block"
             }
           ],
-          "structure_overrides": {
-            "minecraft:villages": {},
-            "minecraft:strongholds": {},
-            "minecraft:pillager_outposts": {}
-          }
+          "structure_overrides": [
+            "minecraft:strongholds",
+            "minecraft:villages",
+            "minecraft:pillager_outposts"
+          ]
         }
       }
     },

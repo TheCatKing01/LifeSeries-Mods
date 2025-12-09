@@ -33,7 +33,6 @@ public class ModRegistries {
         registerEvents();
         TextUtils.setEmotes();
         MobRegistry.registerMobs();
-        ShipwreckRegister.registerShipwrecks();
     }
 
     private static void registerCommands() {
