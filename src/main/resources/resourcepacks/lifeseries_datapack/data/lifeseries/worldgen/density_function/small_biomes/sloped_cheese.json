@@ -13,7 +13,12 @@
             "type": "minecraft:noise",
             "noise": {
               "type": "minecraft:noise",
-              "noise": "lifeseries:small_biomes/depth",
+              "noise": {
+                "type": "minecraft:noise",
+                "noise": "lifeseries:small_biomes/depth",
+                "xz_scale": 1.0,
+                "y_scale": 1.0
+              },
               "xz_scale": 1.0,
               "y_scale": 1.0
             },
@@ -26,7 +31,12 @@
               "type": "minecraft:noise",
               "noise": {
                 "type": "minecraft:noise",
-                "noise": "lifeseries:small_biomes/jaggedness",
+                "noise": {
+                  "type": "minecraft:noise",
+                  "noise": "lifeseries:small_biomes/jaggedness",
+                  "xz_scale": 1.0,
+                  "y_scale": 1.0
+                },
                 "xz_scale": 1.0,
                 "y_scale": 1.0
               },
@@ -48,7 +58,12 @@
           "type": "minecraft:noise",
           "noise": {
             "type": "minecraft:noise",
-            "noise": "lifeseries:small_biomes/factor",
+            "noise": {
+              "type": "minecraft:noise",
+              "noise": "lifeseries:small_biomes/factor",
+              "xz_scale": 1.0,
+              "y_scale": 1.0
+            },
             "xz_scale": 1.0,
             "y_scale": 1.0
           },

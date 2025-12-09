@@ -11,11 +11,12 @@
     "type": "minecraft:noise",
     "noise": {
       "type": "minecraft:noise",
-      "noise": "lifeseries:small_biomes/offset",
-      "xz_scale": 1.0,
-      "y_scale": 1.0
+      "noise": {
+        "type": "minecraft:noise",
+        "noise": "lifeseries:small_biomes/offset",
+        "xz_scale": 1.0,
+        "y_scale": 1.0
+      },
     },
-    "xz_scale": 1.0,
-    "y_scale": 1.0
   }
 }

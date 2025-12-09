@@ -20,7 +20,12 @@
                 "type": "minecraft:noise",
                 "noise": {
                   "type": "minecraft:noise",
-                  "noise": "lifeseries:small_biomes/continents",
+                  "noise": {
+                    "type": "minecraft:noise",
+                    "noise": "lifeseries:small_biomes/continents",
+                    "xz_scale": 1.0,
+                    "y_scale": 1.0
+                  },
                   "xz_scale": 1.0,
                   "y_scale": 1.0
                 },
@@ -41,7 +46,12 @@
                       "type": "minecraft:noise",
                       "noise": {
                         "type": "minecraft:noise",
-                        "noise": "lifeseries:small_biomes/erosion",
+                        "noise": {
+                          "type": "minecraft:noise",
+                          "noise": "lifeseries:small_biomes/erosion",
+                          "xz_scale": 1.0,
+                          "y_scale": 1.0
+                        },
                         "xz_scale": 1.0,
                         "y_scale": 1.0
                       },
@@ -179,7 +189,12 @@
                       "type": "minecraft:noise",
                       "noise": {
                         "type": "minecraft:noise",
-                        "noise": "lifeseries:small_biomes/erosion",
+                        "noise": {
+                          "type": "minecraft:noise",
+                          "noise": "lifeseries:small_biomes/erosion",
+                          "xz_scale": 1.0,
+                          "y_scale": 1.0
+                        },
                         "xz_scale": 1.0,
                         "y_scale": 1.0
                       },

@@ -30,7 +30,12 @@
         "type": "minecraft:noise",
         "noise": {
           "type": "minecraft:noise",
-          "noise": "lifeseries:small_biomes/continents",
+          "noise": {
+            "type": "minecraft:noise",
+            "noise": "lifeseries:small_biomes/continents",
+            "xz_scale": 1.0,
+            "y_scale": 1.0
+          },
           "xz_scale": 1.0,
           "y_scale": 1.0
         },
@@ -46,7 +51,12 @@
         "type": "minecraft:noise",
         "noise": {
           "type": "minecraft:noise",
-          "noise": "lifeseries:small_biomes/depth",
+          "noise": {
+            "type": "minecraft:noise",
+            "noise": "lifeseries:small_biomes/depth",
+            "xz_scale": 1.0,
+            "y_scale": 1.0
+          },
           "xz_scale": 1.0,
           "y_scale": 1.0
         },
@@ -62,7 +72,12 @@
         "type": "minecraft:noise",
         "noise": {
           "type": "minecraft:noise",
-          "noise": "lifeseries:small_biomes/erosion",
+          "noise": {
+            "type": "minecraft:noise",
+            "noise": "lifeseries:small_biomes/erosion",
+            "xz_scale": 1.0,
+            "y_scale": 1.0
+          },
           "xz_scale": 1.0,
           "y_scale": 1.0
         },
@@ -121,7 +136,12 @@
                                 "type": "minecraft:noise",
                                 "noise": {
                                   "type": "minecraft:noise",
-                                  "noise": "lifeseries:small_biomes/sloped_cheese",
+                                  "noise": {
+                                    "type": "minecraft:noise",
+                                    "noise": "lifeseries:small_biomes/sloped_cheese",
+                                    "xz_scale": 1.0,
+                                    "y_scale": 1.0
+                                  },
                                   "xz_scale": 1.0,
                                   "y_scale": 1.0
                                 },
@@ -141,7 +161,12 @@
                                   "type": "minecraft:noise",
                                   "noise": {
                                     "type": "minecraft:noise",
-                                    "noise": "lifeseries:small_biomes/sloped_cheese",
+                                    "noise": {
+                                      "type": "minecraft:noise",
+                                      "noise": "lifeseries:small_biomes/sloped_cheese",
+                                      "xz_scale": 1.0,
+                                      "y_scale": 1.0
+                                    },
                                     "xz_scale": 1.0,
                                     "y_scale": 1.0
                                   },
@@ -209,7 +234,12 @@
                                                 "type": "minecraft:noise",
                                                 "noise": {
                                                   "type": "minecraft:noise",
-                                                  "noise": "lifeseries:small_biomes/sloped_cheese",
+                                                  "noise": {
+                                                    "type": "minecraft:noise",
+                                                    "noise": "lifeseries:small_biomes/sloped_cheese",
+                                                    "xz_scale": 1.0,
+                                                    "y_scale": 1.0
+                                                  },
                                                   "xz_scale": 1.0,
                                                   "y_scale": 1.0
                                                 },
@@ -316,7 +346,12 @@
                               "type": "minecraft:noise",
                               "noise": {
                                 "type": "minecraft:noise",
-                                "noise": "lifeseries:small_biomes/depth",
+                                "noise": {
+                                  "type": "minecraft:noise",
+                                  "noise": "lifeseries:small_biomes/depth",
+                                  "xz_scale": 1.0,
+                                  "y_scale": 1.0
+                                },
                                 "xz_scale": 1.0,
                                 "y_scale": 1.0
                               },
@@ -334,7 +369,12 @@
                                 "type": "minecraft:noise",
                                 "noise": {
                                   "type": "minecraft:noise",
-                                  "noise": "lifeseries:small_biomes/factor",
+                                  "noise": {
+                                    "type": "minecraft:noise",
+                                    "noise": "lifeseries:small_biomes/factor",
+                                    "xz_scale": 1.0,
+                                    "y_scale": 1.0
+                                  },
                                   "xz_scale": 1.0,
                                   "y_scale": 1.0
                                 },
@@ -373,7 +413,12 @@
           "type": "minecraft:noise",
           "noise": {
             "type": "minecraft:noise",
-            "noise": "lifeseries:small_biomes/temperature",
+            "noise": {
+              "type": "minecraft:noise",
+              "noise": "lifeseries:small_biomes/temperature",
+              "xz_scale": 1.0,
+              "y_scale": 1.0
+            },
             "xz_scale": 1.0,
             "y_scale": 1.0
           },
@@ -397,7 +442,12 @@
           "type": "minecraft:noise",
           "noise": {
             "type": "minecraft:noise",
-            "noise": "lifeseries:small_biomes/vegetation",
+            "noise": {
+              "type": "minecraft:noise",
+              "noise": "lifeseries:small_biomes/vegetation",
+              "xz_scale": 1.0,
+              "y_scale": 1.0
+            },
             "xz_scale": 1.0,
             "y_scale": 1.0
           },
