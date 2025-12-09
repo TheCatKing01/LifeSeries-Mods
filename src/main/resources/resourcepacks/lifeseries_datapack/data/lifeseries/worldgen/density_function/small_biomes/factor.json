@@ -16,7 +16,17 @@
           "argument2": {
             "type": "minecraft:spline",
             "spline": {
-              "coordinate": "lifeseries:small_biomes/continents",
+              "coordinate": {
+                "type": "minecraft:noise",
+                "noise": {
+                  "type": "minecraft:noise",
+                  "noise": "lifeseries:small_biomes/continents",
+                  "xz_scale": 1.0,
+                  "y_scale": 1.0
+                },
+                "xz_scale": 1.0,
+                "y_scale": 1.0
+              },
               "points": [
                 {
                   "derivative": 0.0,
@@ -27,7 +37,17 @@
                   "derivative": 0.0,
                   "location": -0.15,
                   "value": {
-                    "coordinate": "lifeseries:small_biomes/erosion",
+                    "coordinate": {
+                      "type": "minecraft:noise",
+                      "noise": {
+                        "type": "minecraft:noise",
+                        "noise": "lifeseries:small_biomes/erosion",
+                        "xz_scale": 1.0,
+                        "y_scale": 1.0
+                      },
+                      "xz_scale": 1.0,
+                      "y_scale": 1.0
+                    },
                     "points": [
                       {
                         "derivative": 0.0,
@@ -226,7 +246,17 @@
                   "derivative": 0.0,
                   "location": -0.1,
                   "value": {
-                    "coordinate": "lifeseries:small_biomes/erosion",
+                    "coordinate": {
+                      "type": "minecraft:noise",
+                      "noise": {
+                        "type": "minecraft:noise",
+                        "noise": "lifeseries:small_biomes/erosion",
+                        "xz_scale": 1.0,
+                        "y_scale": 1.0
+                      },
+                      "xz_scale": 1.0,
+                      "y_scale": 1.0
+                    },
                     "points": [
                       {
                         "derivative": 0.0,
@@ -425,7 +455,17 @@
                   "derivative": 0.0,
                   "location": 0.03,
                   "value": {
-                    "coordinate": "lifeseries:small_biomes/erosion",
+                    "coordinate": {
+                      "type": "minecraft:noise",
+                      "noise": {
+                        "type": "minecraft:noise",
+                        "noise": "lifeseries:small_biomes/erosion",
+                        "xz_scale": 1.0,
+                        "y_scale": 1.0
+                      },
+                      "xz_scale": 1.0,
+                      "y_scale": 1.0
+                    },
                     "points": [
                       {
                         "derivative": 0.0,
@@ -624,7 +664,17 @@
                   "derivative": 0.0,
                   "location": 0.06,
                   "value": {
-                    "coordinate": "lifeseries:small_biomes/erosion",
+                    "coordinate": {
+                      "type": "minecraft:noise",
+                      "noise": {
+                        "type": "minecraft:noise",
+                        "noise": "lifeseries:small_biomes/erosion",
+                        "xz_scale": 1.0,
+                        "y_scale": 1.0
+                      },
+                      "xz_scale": 1.0,
+                      "y_scale": 1.0
+                    },
                     "points": [
                       {
                         "derivative": 0.0,

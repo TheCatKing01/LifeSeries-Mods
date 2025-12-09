@@ -7,5 +7,15 @@
     "to_value": -1.5,
     "to_y": 320
   },
-  "argument2": "lifeseries:small_biomes/offset"
+  "argument2": {
+    "type": "minecraft:noise",
+    "noise": {
+      "type": "minecraft:noise",
+      "noise": "lifeseries:small_biomes/offset",
+      "xz_scale": 1.0,
+      "y_scale": 1.0
+    },
+    "xz_scale": 1.0,
+    "y_scale": 1.0
+  }
 }
