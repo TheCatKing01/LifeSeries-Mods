@@ -13,7 +13,7 @@
               "height": 160,
               "block": "minecraft:air"
             },
-			{
+            {
               "height": 1,
               "block": "minecraft:stone"
             },
@@ -29,7 +29,22 @@
           "structure_overrides": {
             "minecraft:villages": {},
             "minecraft:strongholds": {},
-            "minecraft:pillager_outposts": {}
+            "minecraft:pillager_outposts": {},
+            "minecraft:shipwrecks": {}
+          },
+          "biome_provider": {
+            "type": "minecraft:multi_noise",
+            "preset": "minecraft:overworld",
+            "biomes": [
+              {
+                "biome": "minecraft:plains",
+                "parameters": {}
+              },
+              {
+                "biome": "minecraft:ocean",
+                "parameters": {}
+              }
+            ]
           }
         }
       }
@@ -57,7 +72,7 @@
     "minecraft:the_nether": {
       "type": "minecraft:the_nether",
       "generator": {
-        "type": "minecraft:flat",
+        "type": "flat",
         "settings": {
           "biome": "minecraft:nether_wastes",
           "layers": [
