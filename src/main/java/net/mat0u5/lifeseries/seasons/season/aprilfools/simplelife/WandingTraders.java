@@ -242,7 +242,7 @@ public class WandingTraders {
             BlockPos tryPos = new BlockPos(x, y, z);
 			
 			//? if <= 1.20.3 {
-            /*if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, world, blockPos2, EntityType.WANDERING_TRADER)) {
+            /*if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, world, tryPos, EntityType.WANDERING_TRADER)) {
             *///?} else {
             if (SpawnPlacements.getPlacementType(EntityType.WANDERING_TRADER)
                     .isSpawnPositionOk(world, tryPos, EntityType.WANDERING_TRADER)) {
