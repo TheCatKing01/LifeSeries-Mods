@@ -147,24 +147,25 @@ public class LimitedLife extends Season {
             secondCounter = TICKS_PER_SECOND;
             livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
             displayTimers(server);
-
-            if (TICK_OFFLINE_PLAYERS) {
-                //? if <= 1.20.2
-                Collection<Score> entriesOld = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-                for (Score entry : entriesOld) {
-                    if (entry.getScore() <= 0) continue;
-                    if (PlayerUtils.getPlayer(entry.getOwner()) != null) continue;
-                    ScoreboardUtils.setScore(entry.getOwner(), LivesManager.SCOREBOARD_NAME, entry.getScore() - 1);
-                }
-                //? else
-                Collection<PlayerScoreEntry> entriesNew = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-                for (PlayerScoreEntry entry : entriesNew) {
-                    if (entry.value() <= 0) continue;
-                    if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
-                    ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
-                }
-                //?}
-            }
+			
+			if (TICK_OFFLINE_PLAYERS) {
+				//? if <= 1.20.2
+				Collection<Score> entriesOld = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+				for (Score entry : entriesOld) {
+					if (entry.getScore() <= 0) continue;
+					if (PlayerUtils.getPlayer(entry.getOwner()) != null) continue;
+					ScoreboardUtils.setScore(entry.getOwner(), LivesManager.SCOREBOARD_NAME, entry.getScore() - 1);
+				}
+				//? else
+				Collection<PlayerScoreEntry> entriesNew = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+				for (PlayerScoreEntry entry : entriesNew) {
+					if (entry.value() <= 0) continue;
+					if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
+					ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
+				}
+				//? 
+			}
+			
         }
     }
 
