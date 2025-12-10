@@ -30,7 +30,7 @@ import java.util.Collection;
 /*import net.minecraft.world.scores.Score;*/
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
-=import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.Team;
 
 import static net.mat0u5.lifeseries.Main.*;
 
