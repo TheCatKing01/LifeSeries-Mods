@@ -186,7 +186,7 @@ public class LimitedLife extends Season {
 					if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
 					ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
 				}
-}
+				//?}
 
             }
         }
