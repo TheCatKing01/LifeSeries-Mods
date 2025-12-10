@@ -212,13 +212,18 @@ public class WandingTraders {
 
                 trader.addTag("ComplexLifeTrader");
             }
+			
+		//?}
+		
 
         trader.overrideOffers(offers);
         return true;
     }
+	
 
     private void spawnLlama(ServerLevel level, WanderingTrader trader, int range) {
         BlockPos pos = getNearbySpawnPos(level, trader.blockPosition(), range);
+		
         if (pos != null) {
             TraderLlama llama = LevelUtils.spawnEntity(EntityType.TRADER_LLAMA, level, pos);
             if (llama != null) llama.setLeashedTo(trader, true);
@@ -226,15 +231,24 @@ public class WandingTraders {
     }
 
     private BlockPos getNearbySpawnPos(LevelReader world, BlockPos pos, int range) {
+			
+		//? if > 1.20.3 {
+		SpawnPlacementType spawnLocation = SpawnPlacements.getPlacementType(EntityType.WANDERING_TRADER);
+        //?}
+		
         for (int i = 0; i < 10; i++) {
             int x = pos.getX() + rnd.nextInt(range * 2) - range;
             int z = pos.getZ() + rnd.nextInt(range * 2) - range;
             int y = world.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-
             BlockPos tryPos = new BlockPos(x, y, z);
+			
+			//? if <= 1.20.3 {
+            /*if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, world, blockPos2, EntityType.WANDERING_TRADER)) {
+            *///?} else {
             if (SpawnPlacements.getPlacementType(EntityType.WANDERING_TRADER)
                     .isSpawnPositionOk(world, tryPos, EntityType.WANDERING_TRADER)) {
-                return tryPos;
+                return tryPos;           
+			//?}
             }
         }
         return null;
