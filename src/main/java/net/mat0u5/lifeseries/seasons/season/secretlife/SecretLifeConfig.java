@@ -12,6 +12,7 @@ import java.util.List;
 public class SecretLifeConfig extends ConfigManager {
     public static final List<String> BLACKLISTED_ITEMS = List.of(
             "lectern",
+            //? if >= 1.21
             "mace",
             "end_crystal",
             "leather_helmet",
@@ -35,16 +36,22 @@ public class SecretLifeConfig extends ConfigManager {
             "bane_of_arthropods",
             "fire_aspect",
             "knockback",
+            //? if <= 1.20.3 {
+            /*"sweeping",
+            *///?} else {
             "sweeping_edge",
+            //?}
 
             "power",
             "punch",
 
             "thorns",
 
+            //? if >= 1.21 {
             "breach",
             "density",
             "wind_burst",
+            //?}
 
             "multishot",
             "piercing",
@@ -101,7 +108,7 @@ public class SecretLifeConfig extends ConfigManager {
             "Constant Tasks", "Automatically gives players a new task when they have completed one."
     );
     public static final ConfigFileEntry<Boolean> TASKS_NEED_CONFIRMATION = new ConfigFileEntry<>(
-            "tasks_need_confirmation", false, "season[new]",
+            "tasks_need_confirmation", false, "season",
             "Tasks Need Confirmation", "Requires an admin to confirm when someone is succeeding a task."
     );
 

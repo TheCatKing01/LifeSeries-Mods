@@ -33,7 +33,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.scores.ScoreHolder;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
@@ -109,7 +108,7 @@ public class WildLife extends Season {
                     if (currentLives == null) currentLives = 0;
                     int lives = currentLives + 1;
                     if (lives <= 0) {
-                        ScoreboardUtils.setScore(ScoreHolder.forNameOnly(killer.getScoreboardName()), LivesManager.SCOREBOARD_NAME, lives);
+                        ScoreboardUtils.setScore(killer.getScoreboardName(), LivesManager.SCOREBOARD_NAME, lives);
                     }
                     else {
                         broadcastLifeGain(killer, victim);
@@ -218,8 +217,8 @@ public class WildLife extends Season {
     }
 
     @Override
-    public void modifyEntityDrops(LivingEntity entity, DamageSource damageSource) {
-        super.modifyEntityDrops(entity, damageSource);
+    public void modifyEntityDrops(LivingEntity entity, DamageSource damageSource, CallbackInfo ci) {
+        super.modifyEntityDrops(entity, damageSource, ci);
         if (damageSource.getDirectEntity() instanceof Player) {
             if (entity instanceof Warden || entity instanceof WitherBoss || entity instanceof EnderDragon) {
                 //? if <= 1.21 {

@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -28,7 +29,16 @@ public class UnassignedSeason extends Season {
     public ConfigManager createConfig() {
         return new ConfigManager(null, null) {
             @Override
-            public void instantiateProperties() {}
+            public void instantiateProperties() {
+                WORLDBORDER_SIZE.defaultValue = 30_000_000;
+                //? if >= 1.21.11 {
+                /*WORLDBORDER_NETHER_SIZE.defaultValue = 30_000_000;
+                WORLDBORDER_END_SIZE.defaultValue = 30_000_000;
+                *///?}
+                KEEP_INVENTORY.defaultValue = false;
+                SHOW_ADVANCEMENTS.defaultValue = true;
+                LOCATOR_BAR.defaultValue = true;
+            }
 
             @Override
             protected List<ConfigFileEntry<?>> getDefaultConfigEntries() { return new ArrayList<>(List.of()); }
@@ -37,7 +47,7 @@ public class UnassignedSeason extends Season {
 
     @Override
     public void onPlayerJoin(ServerPlayer player) {
-        TaskScheduler.scheduleTask(100, this::broadcastNotice);
+        TaskScheduler.scheduleTask(Time.seconds(5), this::broadcastNotice);
     }
     @Override
     public void onPlayerFinishJoining(ServerPlayer player) {

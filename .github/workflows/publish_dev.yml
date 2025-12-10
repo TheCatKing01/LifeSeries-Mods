@@ -1,4 +1,4 @@
-name: dev_build
+name: publish_dev
 
 on:
   workflow_dispatch:
@@ -96,7 +96,7 @@ jobs:
         run: |
           INPUT="${{ github.event.inputs.versions_to_publish }}"
           if [ "$INPUT" = "all" ]; then
-            VERSIONS=("1.21" "1.21.2" "1.21.4" "1.21.5" "1.21.6" "1.21.9" "1.21.11")
+            VERSIONS=("1.20" "1.20.2" "1.20.3" "1.20.5" "1.21" "1.21.2" "1.21.4" "1.21.5" "1.21.6" "1.21.9" "1.21.11")
           else
             IFS=',' read -ra VERSIONS <<< "$INPUT"
             # Trim whitespace from each version
@@ -131,6 +131,8 @@ jobs:
           CHANGELOG: ${{ env.COMMIT_MESSAGE_BR }}
           VERSION_TYPE: ${{ github.event.inputs.version_type }}
           DEV_BUILD: true
+          PUBLISH_MODRINTH: true
+          PUBLISH_CURSEFORGE: false
 
       - name: capture build artifacts
         uses: actions/upload-artifact@v4

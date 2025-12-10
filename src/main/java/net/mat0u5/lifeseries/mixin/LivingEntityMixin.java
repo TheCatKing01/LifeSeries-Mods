@@ -18,9 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -82,6 +80,7 @@ public abstract class LivingEntityMixin {
         }
         *///?}
 
+        //? if >= 1.21 {
         ItemStack weapon = source.getWeaponItem();
         if (amount <= WindCharge.MAX_MACE_DAMAGE) return;
         if (weapon == null) return;
@@ -90,8 +89,9 @@ public abstract class LivingEntityMixin {
         if (!ItemStackUtils.hasCustomComponentEntry(weapon, "WindChargeSuperpower")) return;
         //? if <= 1.21 {
         cir.setReturnValue(entity.hurt(source, WindCharge.MAX_MACE_DAMAGE));
-         //?} else
+        //?} else
         /*cir.setReturnValue(entity.hurtServer(level, source, WindCharge.MAX_MACE_DAMAGE));*/
+        //?}
     }
 
     //? if = 1.21.2 {
@@ -104,6 +104,20 @@ public abstract class LivingEntityMixin {
         }
     }
     *///?}
+
+    @ModifyVariable(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    public MobEffectInstance clampStatusEffect(MobEffectInstance value) {
+        if (!Main.isLogicalSide() || Main.modDisabled()) return value;
+
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (entity instanceof ServerPlayer) {
+            if (blacklist.getClampedEffects().contains(value.getEffect()) && value instanceof MobEffectInstanceAccessor accessor) {
+                accessor.ls$setAmplifier(0);
+            }
+        }
+
+        return value;
+    }
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
     public void addStatusEffect(MobEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
@@ -160,9 +174,13 @@ public abstract class LivingEntityMixin {
     }
 
     @Inject(method = "dropAllDeathLoot", at = @At("HEAD"))
+    //? if <= 1.20.5 {
+    /*private void onDrop(DamageSource damageSource, CallbackInfo ci) {
+    *///?} else {
     private void onDrop(ServerLevel level, DamageSource damageSource, CallbackInfo ci) {
+    //?}
         if (!Main.isLogicalSide() || Main.modDisabled()) return;
-        Events.onEntityDropItems((LivingEntity) (Object) this, damageSource);
+        Events.onEntityDropItems((LivingEntity) (Object) this, damageSource, ci);
     }
 
     //? if <= 1.21 {

@@ -36,6 +36,12 @@ repositories {
  }
  maven { url "https://maven.shedaniel.me/" }
  maven { url = 'https://maven.maxhenkel.de/repository/public' }
+ maven {
+  url = "https://www.cursemaven.com"
+  content {
+   includeGroup "curse.maven"
+  }
+ }
 }
 
 fabricApi {
@@ -54,7 +60,7 @@ dependencies {
  // Runtime only QOL mods
  if (isValidVersion(project.carpet_bot_relog_version)) modRuntimeOnly "maven.modrinth:carpet-bot-relog:${project.carpet_bot_relog_version}"
  if (isValidVersion(project.voicechat_mod_version)) modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}"
- if (isValidVersion(project.carpet_mod_version)) modRuntimeOnly "maven.modrinth:carpet:${project.carpet_mod_version}"
+ if (isValidVersion(project.carpet_mod_version)) modRuntimeOnly "curse.maven:carpet-349239:${project.carpet_mod_version}"
 
  //Runtime and compile
  if (isValidVersion(project.voicechat_api_version)) implementation "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
@@ -65,23 +71,34 @@ loom {
   runDir "../../run" // Use a shared run folder and create separate worlds
  }
 }
+def java21 = stonecutter.eval(stonecutter.current.version, ">=1.20.5")
 
 processResources {
  filesMatching("fabric.mod.json") {
   expand "version": project.property('mod_version'),
           "targetVersion": project.property('target_version'),
           "fabricApiVersion": project.property('fabric_api_target_version'),
-          "minecraftVersion": project.property('minecraft_version')
+          "minecraftVersion": project.property('minecraft_version'),
+          "javaVersion": project.property('java_version')
+ }
+ filesMatching("lifeseries.mixins.json") {
+  expand "javaVersion": java21 ? "JAVA_21":"JAVA_17"
+ }
+}
+processClientResources {
+ filesMatching("lifeseries.client.mixins.json") {
+  expand "javaVersion": java21 ? "JAVA_21":"JAVA_17"
  }
 }
 
 tasks.withType(JavaCompile).configureEach {
- it.options.release = 21
+ it.options.release = java21 ? 21 : 17
 }
 
 java {
- sourceCompatibility = JavaVersion.VERSION_21
- targetCompatibility = JavaVersion.VERSION_21
+ def javaVersion = java21 ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+ targetCompatibility = javaVersion
+ sourceCompatibility = javaVersion
 }
 
 jar {
@@ -98,26 +115,30 @@ publishMods {
 
  modLoaders.add("fabric")
 
- def isDevBuild = providers.environmentVariable("DEV_BUILD").getOrElse("true") == "true"
+ def publishModrinth = providers.environmentVariable("PUBLISH_MODRINTH").getOrElse("false") == "true"
+ def isDevBuild = providers.environmentVariable("DEV_BUILD").getOrElse("false") == "true"
+ def publishCF = providers.environmentVariable("PUBLISH_CURSEFORGE").getOrElse("false") == "true"
+
  def shouldIncludeSnapshots =
-         project.property('min_version').toString().contains("w") || project.property('max_version').toString().contains("w") ||
-         project.property('min_version').toString().contains("pre") || project.property('max_version').toString().contains("pre") ||
-         project.property('min_version').toString().contains("rc") || project.property('max_version').toString().contains("rc")
+         project.property('min_version').toString().matches(/.*(w|pre|rc|snapshot).*/) ||
+         project.property('max_version').toString().matches(/.*(w|pre|rc|snapshot).*/)
 
- modrinth {
-  projectId = isDevBuild ? "RLDqKhd4" : "aLasQi8P"
-  accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-  minecraftVersionRange {
-   start = project.property('min_version')
-   end = project.property('max_version')
-   includeSnapshots = shouldIncludeSnapshots
+ if (publishModrinth) {
+  modrinth {
+   projectId = isDevBuild ? "RLDqKhd4" : "aLasQi8P"
+   accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+   minecraftVersionRange {
+    start = project.property('min_version')
+    end = project.property('max_version')
+    includeSnapshots = shouldIncludeSnapshots
+   }
+
+   requires("fabric-api")
+   optional("simple-voice-chat")
   }
-
-  requires("fabric-api")
-  optional("simple-voice-chat")
  }
 
- if (!isDevBuild) {
+ if (publishCF) {
   curseforge {
    projectId = "1151647"
    accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")

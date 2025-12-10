@@ -2,12 +2,14 @@ package net.mat0u5.lifeseries.seasons.session;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.events.Events;
+import net.mat0u5.lifeseries.mixin.MobEffectInstanceAccessor;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.ChatFormatting;
@@ -28,28 +30,31 @@ public class Session {
     private List<SessionAction> activeActions = new ArrayList<>();
     public List<UUID> displayTimer = new ArrayList<>();
     public static final int NATURAL_DEATH_LOG_MAX = 2400;
-    public static final int DISPLAY_TIMER_INTERVAL = 5;
-    public static final int TAB_LIST_INTERVAL = 20;
+    public static final Time DISPLAY_TIMER_INTERVAL = Time.ticks(5);
+    public static final Time TAB_LIST_INTERVAL = Time.ticks(20);
     public static boolean TICK_FREEZE_NOT_IN_SESSION = false;
-    public long currentTimer = 0;
 
-    public Integer sessionLength = null;
-    public double passedTime = 0;
+    private Time timer = Time.zero();
+    private Time sessionLength = Time.nullTime();
+    private Time passedTime = Time.zero();
+    private Time fullPassedTime = Time.zero();
+    public List<Time[]> sessionPauses = new ArrayList<>();
+
     private SessionStatus status = SessionStatus.NOT_STARTED;
 
-    SessionAction endWarning1 = new SessionAction(OtherUtils.minutesToTicks(-5)) {
+    SessionAction endWarning1 = new SessionAction(Time.minutes(-5)) {
         @Override
         public void trigger() {
             PlayerUtils.broadcastMessage(Component.literal("Session ends in 5 minutes!").withStyle(ChatFormatting.GOLD));
         }
     };
-    SessionAction endWarning2 = new SessionAction(OtherUtils.minutesToTicks(-30)) {
+    SessionAction endWarning2 = new SessionAction(Time.minutes(-30)) {
         @Override
         public void trigger() {
             PlayerUtils.broadcastMessage(Component.literal("Session ends in 30 minutes!").withStyle(ChatFormatting.GOLD));
         }
     };
-    SessionAction actionInfoAction = new SessionAction(OtherUtils.secondsToTicks(7)) {
+    SessionAction actionInfoAction = new SessionAction(Time.seconds(7)) {
         @Override
         public void trigger() {
             showActionInfo();
@@ -61,9 +66,10 @@ public class Session {
         clearSessionActions();
         if (!currentSeason.sessionStart()) return false;
         changeStatus(SessionStatus.STARTED);
-        passedTime = 0;
+        passedTime = Time.zero();
+        fullPassedTime = Time.zero();
         DatapackIntegration.setSessionTimePassed(getPassedTime());
-        Component line1 = TextUtils.formatLoosely("§6Session started! §7[{}]", OtherUtils.formatTime(sessionLength));
+        Component line1 = TextUtils.formatLoosely("§6Session started! §7[{}]", sessionLength.formatLong());
         Component line2 = Component.literal("§f/session timer showDisplay§7 - toggles a session timer on your screen.");
         PlayerUtils.broadcastMessage(line1);
         PlayerUtils.broadcastMessage(line2);
@@ -101,15 +107,20 @@ public class Session {
             PlayerUtils.broadcastMessage(Component.literal("The session has ended!").withStyle(ChatFormatting.GOLD));
         }
         changeStatus(SessionStatus.FINISHED);
-        passedTime = 0;
+        passedTime = Time.zero();
+        fullPassedTime = Time.zero();
         DatapackIntegration.setSessionTimePassed(getPassedTime());
         currentSeason.sessionEnd();
+        discardQueuedPauses();
     }
 
     public void sessionPause() {
         if (statusPaused()) {
             PlayerUtils.broadcastMessage(Component.literal("Session unpaused!").withStyle(ChatFormatting.GOLD));
             changeStatus(SessionStatus.STARTED);
+            if (isInQueuedPause()) {
+                discardCurrentQueuedPause();
+            }
         }
         else {
             PlayerUtils.broadcastMessage(Component.literal("Session paused!").withStyle(ChatFormatting.GOLD));
@@ -123,46 +134,56 @@ public class Session {
         return !statusPaused();
     }
 
-    public void setSessionLength(int lengthTicks) {
-        sessionLength = lengthTicks;
-        Main.getMainConfig().setProperty("session_length", String.valueOf(sessionLength));
-        DatapackIntegration.setSessionLength(lengthTicks);
+    public void passTime(Time time) {
+        passedTime.add(time);
+        fullPassedTime.add(time);
     }
 
-    public void addSessionLength(int lengthTicks) {
-        if (sessionLength == null) sessionLength = 0;
-        setSessionLength(sessionLength + lengthTicks);
+    public void setSessionLength(Time time) {
+        sessionLength = time;
+        Main.getMainConfig().setProperty("session_length", String.valueOf(sessionLength.getTicks()));
+        DatapackIntegration.setSessionLength(time);
     }
 
-    public void removeSessionLength(int lengthTicks) {
-        if (sessionLength == null) sessionLength = 0;
-        setSessionLength(sessionLength - lengthTicks);
+    public void addSessionLength(Time time) {
+        sessionLength.add(time);
+        Main.getMainConfig().setProperty("session_length", String.valueOf(sessionLength.getTicks()));
+        DatapackIntegration.setSessionLength(time);
     }
 
-    public String getSessionLength() {
-        if (sessionLength == null) return "";
-        return OtherUtils.formatTime(sessionLength);
-    }
-
-    public String getPassedTimeStr() {
-        return OtherUtils.formatTime(getPassedTime());
+    public void removeSessionLength(Time time) {
+        addSessionLength(time.multiply(-1));
     }
 
     public String getRemainingTimeStr() {
-        if (sessionLength == null) return "";
-        return OtherUtils.formatTime(getRemainingTime());
+        if (!sessionLength.isPresent()) return "";
+        return getRemainingTime().formatLong();
     }
 
-    public int getPassedTime() {
-        return (int) passedTime;
+    public Time getPassedTime() {
+        return passedTime.copy();
     }
 
-    public int getRemainingTime() {
-        return sessionLength - getPassedTime();
+    public Time getSessionLength() {
+        return sessionLength.copy();
+    }
+
+    public Time getRemainingTime() {
+        return sessionLength.diff(passedTime);
+    }
+
+    public double progress() {
+        if (!validTime()) return 0;
+        return (double) passedTime.getMillis() / (double) sessionLength.getMillis();
+    }
+
+    public double progress(Time offset) {
+        if (!validTime()) return 0;
+        return ((double) passedTime.getMillis() - offset.getMillis()) / ((double) sessionLength.getMillis() - offset.getMillis());
     }
 
     public boolean validTime() {
-        return sessionLength != null;
+        return sessionLength.isPresent();
     }
 
     public boolean isInDisplayTimer(ServerPlayer player) {
@@ -178,14 +199,83 @@ public class Session {
         displayTimer.remove(player.getUUID());
     }
 
+    public void queuePause(Time pauseAt, Time pauseLength) {
+        Time[] pauseEntry = new Time[2];
+        pauseEntry[0] = pauseAt;
+        pauseEntry[1] = pauseLength;
+        sessionPauses.add(pauseEntry);
+    }
+
+    public boolean isInQueuedPause() {
+        for (int i = 0; i < sessionPauses.size(); i++) {
+            Time[] pauseEntry = sessionPauses.get(i);
+            Time startPause = pauseEntry[0];
+            Time pauseLength = pauseEntry[1];
+            Time endPause = startPause.copy().add(pauseLength);
+            if (fullPassedTime.isLarger(startPause) && fullPassedTime.isSmaller(endPause)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void discardCurrentQueuedPause() {
+        sessionPauses.removeIf(pauseEntry -> {
+            Time startPause = pauseEntry[0];
+            Time pauseLength = pauseEntry[1];
+            Time endPause = startPause.copy().add(pauseLength);
+            return fullPassedTime.isLarger(startPause) && fullPassedTime.isSmaller(endPause);
+        });
+    }
+
+    public void discardQueuedPauses() {
+        sessionPauses.removeIf(pauseEntry -> {
+            Time startPause = pauseEntry[0];
+            Time pauseLength = pauseEntry[1];
+            Time endPause = startPause.copy().add(pauseLength);
+            return fullPassedTime.isLarger(endPause);
+        });
+    }
+
+    public void discardAllQueuedPauses() {
+        if (isInQueuedPause()) {
+            sessionPause();
+        }
+        sessionPauses.clear();
+    }
+
     public void tick(MinecraftServer server) {
-        currentTimer++;
-        if (currentTimer % DISPLAY_TIMER_INTERVAL == 0) {
+        if (statusPaused()) {
+            //? if < 1.20.3 {
+            /*float tickRate = 20;
+             *///?} else {
+            float tickRate = server.tickRateManager().tickrate();
+            //?}
+            if (tickRate == 20) {
+                fullPassedTime.tick();
+            }
+            else {
+                fullPassedTime.add((long)((20.0/tickRate)*Time.CONVERT_TICKS));
+            }
+        }
+        discardQueuedPauses();
+        boolean inQueuedPause = isInQueuedPause();
+        if ((statusStarted() && inQueuedPause) || (statusPaused() && !inQueuedPause)) {
+            sessionPause();
+        }
+
+
+        timer.tick();
+        if (timer.isMultipleOf(DISPLAY_TIMER_INTERVAL)) {
             displayTimers(server);
             for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
                 NetworkHandlerServer.sendStringPacket(player, PacketNames.SESSION_STATUS, status.getName());
             }
+            //? if <= 1.20.3 {
+            /*for (MobEffect effect : blacklist.getBannedEffects()) {
+             *///?} else {
             for (Holder<MobEffect> effect : blacklist.getBannedEffects()) {
+                //?}
                 for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
                     if (player.hasEffect(effect)) {
                         MobEffectInstance actualEffect = player.getEffect(effect);
@@ -196,8 +286,24 @@ public class Session {
                     }
                 }
             }
+            //? if <= 1.20.3 {
+            /*for (MobEffect effect : blacklist.getClampedEffects()) {
+             *///?} else {
+            for (Holder<MobEffect> effect : blacklist.getClampedEffects()) {
+                //?}
+                for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+                    if (player.hasEffect(effect)) {
+                        MobEffectInstance actualEffect = player.getEffect(effect);
+                        if (actualEffect != null && actualEffect.getAmplifier() > 0 && actualEffect instanceof MobEffectInstanceAccessor accessor) {
+                            player.removeEffect(effect);
+                            accessor.ls$setAmplifier(1);
+                            player.addEffect(actualEffect);
+                        }
+                    }
+                }
+            }
         }
-        if (currentTimer % TAB_LIST_INTERVAL == 0) {
+        if (timer.isMultipleOf(TAB_LIST_INTERVAL)) {
             Events.updatePlayerListsNextTick = true;
         }
 
@@ -219,7 +325,9 @@ public class Session {
             checkPlayerPosition(player);
         }
 
+        //? if >= 1.20.3 {
         if (server.tickRateManager().isFrozen()) return;
+        //?}
         if (!validTime()) return;
         if (!statusStarted()) return;
         tickSessionOn(server);
@@ -227,16 +335,21 @@ public class Session {
     }
 
     public void tickSessionOn(MinecraftServer server) {
+        //? if < 1.20.3 {
+        /*float tickRate = 20;
+        *///?} else {
         float tickRate = server.tickRateManager().tickrate();
+        //?}
         if (tickRate == 20) {
-            passedTime++;
+            passedTime.tick();
         }
         else {
-            passedTime += (20/tickRate);
+            passedTime.add((long)((20.0/tickRate)*Time.CONVERT_TICKS));
         }
+        fullPassedTime = passedTime.copy();
         DatapackIntegration.setSessionTimePassed(getPassedTime());
 
-        if (passedTime >= sessionLength) {
+        if (passedTime.isLarger(sessionLength)) {
             sessionEnd();
         }
 
@@ -277,8 +390,8 @@ public class Session {
             }
 
             // Clamp player position inside the border
-            double clampedX = Math.clamp(playerX, minX, maxX);
-            double clampedZ = Math.clamp(playerZ, minZ, maxZ);
+            double clampedX = OtherUtils.clamp(playerX, minX, maxX);
+            double clampedZ = OtherUtils.clamp(playerZ, minZ, maxZ);
 
             // Teleport player inside the world border
             PlayerUtils.teleport(player, clampedX, player.getY(), clampedZ);
@@ -329,9 +442,9 @@ public class Session {
                 if (statusNotStarted()) timestamp = SessionTimerStates.NOT_STARTED.getValue();
                 else if (statusPaused()) timestamp = SessionTimerStates.PAUSED.getValue();
                 else if (statusFinished()) timestamp = SessionTimerStates.ENDED.getValue();
-                else if (sessionLength != null) {
-                    long remainingMillis = (sessionLength - (int) passedTime) * 50;
-                    timestamp = System.currentTimeMillis() + remainingMillis;
+                else if (sessionLength.isPresent()) {
+                    Time remainingTime = getRemainingTime();
+                    timestamp = Time.now().add(remainingTime).getMillis();
                 }
                 if (timestamp != SessionTimerStates.OFF.getValue()) {
                     NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, timestamp);
@@ -343,7 +456,7 @@ public class Session {
     public void showActionInfo() {
         if (getSessionActions().isEmpty()) return;
         List<SessionAction> actions = new ArrayList<>(getSessionActions());
-        actions.sort(Comparator.comparingInt(SessionAction::getTriggerTime));
+        actions.sort(Comparator.comparingInt(action -> action.getTriggerTime().getTicks()));
         List<Component> messages = new ArrayList<>();
         for (SessionAction action : actions) {
             String actionMessage = action.sessionMessage;
@@ -352,7 +465,12 @@ public class Session {
             if (messages.isEmpty()) {
                 messages.add(Component.nullToEmpty("§7Queued session actions:"));
             }
-            messages.add(Component.nullToEmpty("§7- "+actionMessage));
+            if (action.showTime) {
+                messages.add(TextUtils.formatLoosely("§7- {} §f[{}]", actionMessage, action.getTriggerTime().formatLong()));
+            }
+            else {
+                messages.add(TextUtils.formatLoosely("§7- {}", actionMessage));
+            }
         }
 
         messages.forEach(PlayerUtils::broadcastMessageToAdmins);

@@ -18,6 +18,7 @@ import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.ChatFormatting;
@@ -38,7 +39,7 @@ public class WildcardManager {
 
     public static void addSessionActions() {
         currentSession.addSessionActionIfTime(
-                new SessionAction(OtherUtils.minutesToTicks(ACTIVATE_WILDCARD_MINUTE-2)) {
+                new SessionAction(Time.minutes(ACTIVATE_WILDCARD_MINUTE-2)) {
                     @Override
                     public void trigger() {
                         if (activeWildcards.isEmpty()) {
@@ -48,7 +49,7 @@ public class WildcardManager {
                 }
         );
         currentSession.addSessionAction(
-            new SessionAction(OtherUtils.minutesToTicks(ACTIVATE_WILDCARD_MINUTE),TextUtils.formatString("§7Activate Wildcard §f[{}]", OtherUtils.formatTime(OtherUtils.minutesToTicks(ACTIVATE_WILDCARD_MINUTE))), "Activate Wildcard") {
+            new SessionAction(Time.minutes(ACTIVATE_WILDCARD_MINUTE), "Activate Wildcard") {
                 @Override
                 public void trigger() {
                     if (activeWildcards.isEmpty()) {
@@ -77,21 +78,17 @@ public class WildcardManager {
             activeWildcards.put(chosenWildcard, chosenWildcard.getInstance());
             return;
         }
-        int index = rnd.nextInt(7);
-        if (index == 0) activeWildcards.put(Wildcards.SIZE_SHIFTING, new SizeShifting());
-        if (index == 1) activeWildcards.put(Wildcards.HUNGER, new Hunger());
-        if (index == 2) activeWildcards.put(Wildcards.TIME_DILATION, new TimeDilation());
-        if (index == 3) activeWildcards.put(Wildcards.SNAILS, new Snails());
-        if (index == 4) activeWildcards.put(Wildcards.MOB_SWAP, new MobSwap());
-        if (index == 5) activeWildcards.put(Wildcards.TRIVIA, new TriviaWildcard());
-        if (index == 6) activeWildcards.put(Wildcards.SUPERPOWERS, new SuperpowersWildcard());
+        Wildcards wildcard = Wildcards.getWildcards().get(rnd.nextInt(Wildcards.getWildcards().size()));
+        activeWildcards.put(wildcard, wildcard.getInstance());
     }
 
     public static void onPlayerJoin(ServerPlayer player) {
         if (!isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
+            //? if > 1.20.3 {
             if (SizeShifting.getPlayerSize(player) != 1 && !TriviaHandler.cursedGigantificationPlayers.contains(player.getUUID())) {
                 SizeShifting.setPlayerSize(player, 1);
             }
+            //?}
         }
         if (!isActiveWildcard(Wildcards.HUNGER)) {
             player.removeEffect(MobEffects.HUNGER);
@@ -212,7 +209,9 @@ public class WildcardManager {
             if (!wildcard.active) continue;
             wildcard.tick();
         }
+        //? if > 1.20.3 {
         SizeShifting.resetSizesTick(isActiveWildcard(Wildcards.SIZE_SHIFTING));
+        //?}
         if (server != null && server.getTickCount() % 200 == 0) {
             if (!isActiveWildcard(Wildcards.MOB_SWAP)) {
                 MobSwap.killMobSwapMobs();

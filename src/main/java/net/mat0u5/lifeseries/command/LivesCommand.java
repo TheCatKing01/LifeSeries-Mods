@@ -10,6 +10,7 @@ import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.lastlife.LastLifeLivesManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
@@ -20,7 +21,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.Score;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,9 @@ import java.util.List;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 import static net.mat0u5.lifeseries.Main.livesManager;
+
+//? if > 1.20.2
+import net.minecraft.world.scores.PlayerScoreEntry;
 
 public class LivesCommand extends Command {
 
@@ -211,7 +215,11 @@ public class LivesCommand extends Command {
             return -1;
         }
 
+        //? if <= 1.20.2 {
+        /*Collection<Score> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+        *///?} else {
         Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+        //?}
         if (entries.isEmpty()) {
             source.sendFailure(TextUtils.format("Nobody has been assigned {} yet", timeOrLives));
             return -1;
@@ -219,10 +227,16 @@ public class LivesCommand extends Command {
         String timeOrLives2 = normalLife ? "Lives" : "Times";
 
         MutableComponent text = TextUtils.format("Assigned {}: \n", timeOrLives2);
+        //? if <= 1.20.2 {
+        /*for (Score entry : entries) {
+            String name = entry.getOwner();
+            int lives = entry.getScore();
+        *///?} else {
         for (PlayerScoreEntry entry : entries) {
             String name = entry.owner();
-            if (name.startsWith("`")) continue;
             int lives = entry.value();
+        //?}
+            if (name.startsWith("`")) continue;
             ChatFormatting color = livesManager.getColorForLives(lives);
             if (normalLife) {
                 text.append(TextUtils.format("{} has {} {}\n", Component.literal(name).withStyle(color), livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives)));
@@ -268,14 +282,14 @@ public class LivesCommand extends Command {
 
     public int lifeManager(CommandSourceStack source, Collection<ServerPlayer> targets, String timeArgument, boolean setNotGive, boolean reverse) {
 
-        Integer amount = OtherUtils.parseTimeSecondsFromArgument(timeArgument);
-        if (amount == null) {
+        Time amount = OtherUtils.parseTimeFromArgument(timeArgument);
+        if (amount == null || !amount.isPresent()) {
             source.sendFailure(Component.literal(SessionCommand.INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        if (reverse) amount *= -1;
+        if (reverse) amount.multiply(-1);
 
-        return lifeManager(source, targets, amount, setNotGive);
+        return lifeManager(source, targets, amount.getSeconds(), setNotGive);
     }
 
     public int lifeManager(CommandSourceStack source, Collection<ServerPlayer> targets, int amount, boolean setNotGive) {
@@ -302,7 +316,7 @@ public class LivesCommand extends Command {
             String addOrRemove = amount >= 0 ? "Added" : "Removed";
             String timeOrLives2 = Math.abs(amount)==1?"life":"lives";
             if (!normalLife) {
-                timeOrLives2 = OtherUtils.formatTime(Math.abs(amount)*20);
+                timeOrLives2 = Time.seconds(Math.abs(amount)).formatLong();
             }
             String toOrFrom = amount >= 0 ? "to" : "from";
 

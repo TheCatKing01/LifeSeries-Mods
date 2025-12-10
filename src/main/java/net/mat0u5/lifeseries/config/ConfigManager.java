@@ -10,8 +10,8 @@ import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Score;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,6 +19,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
+//? if > 1.20.2
+import net.minecraft.world.scores.PlayerScoreEntry;
 
 public abstract class ConfigManager extends DefaultConfigValues {
 
@@ -68,8 +70,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,SHOW_LOGIN_COMMAND_INFO
                 ,HIDE_UNJUSTIFIED_KILL_MESSAGES
                 ,SHOW_ADVANCEMENTS
+                //? if >= 1.20.3 {
                 ,TICK_FREEZE_NOT_IN_SESSION
+                //?}
                 ,BROADCAST_LIFE_GAIN
+                ,ADDITIONAL_WITHER_SKULL_RATE
 
 
                 ,GROUP_BLACKLIST // Group
@@ -93,6 +98,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,BLACKLIST_CLAMPED_ENCHANTS
                 ,BLACKLIST_BANNED_ENCHANTS
                 ,BLACKLIST_BANNED_POTION_EFFECTS
+                ,BLACKLIST_CLAMPED_POTION_EFFECTS
                 ,CREATIVE_IGNORE_BLACKLIST
 
                 ,BOOGEYMAN_MIN_AMOUNT
@@ -179,6 +185,16 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, entry, index);
             index++;
         }
+        //? if <= 1.20.2 {
+        /*for (Score entry : ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME)) {
+            ConfigFileEntry<Integer> lifeEntry = new ConfigFileEntry<>(
+                    "dynamic_lives_"+entry.getOwner(), entry.getScore(), ConfigTypes.LIVES_ENTRY, "lives",
+                    entry.getOwner(), "", true
+            );
+            sendConfigEntry(player, lifeEntry, index);
+            index++;
+        }
+        *///?} else {
         for (PlayerScoreEntry entry : ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME)) {
             ConfigFileEntry<Integer> lifeEntry = new ConfigFileEntry<>(
                     "dynamic_lives_"+entry.owner(), entry.value(), ConfigTypes.LIVES_ENTRY, "lives",
@@ -187,6 +203,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, lifeEntry, index);
             index++;
         }
+        //?}
         for (ServerPlayer nonAssignedPlayer : livesManager.getNonAssignedPlayers()) {
             ConfigFileEntry<Integer> lifeEntry = new ConfigFileEntry<>(
                     "dynamic_lives_"+nonAssignedPlayer.getScoreboardName(), null, ConfigTypes.LIVES_ENTRY, "lives",
@@ -195,22 +212,20 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, lifeEntry, index);
             index++;
         }
-        if (currentSeason.getSeason() != Seasons.LIMITED_LIFE) {
-            for (Map.Entry<Integer, PlayerTeam> entry : livesManager.getLivesTeams().entrySet()) {
-                PlayerTeam team = entry.getValue();
-                String teamName = team.getName();
-                int teamNum = entry.getKey();
-                Integer validKill = livesManager.getTeamCanKill(teamName);
-                Integer gainLife = livesManager.getTeamGainLives(teamName);
-                String validKillStr = validKill != null ? String.valueOf(validKill) : "";
-                String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
-                ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
-                        "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
-                        "", "", List.of(String.valueOf(teamNum), team.getDisplayName().getString(), team.getColor().getName(), validKillStr, gainLifeStr), true
-                );
-                sendConfigEntry(player, teamEntry, index);
-                index++;
-            }
+        for (Map.Entry<Integer, PlayerTeam> entry : livesManager.getLivesTeams().entrySet()) {
+            PlayerTeam team = entry.getValue();
+            String teamName = team.getName();
+            int teamNum = entry.getKey();
+            Integer validKill = livesManager.getTeamCanKill(teamName);
+            Integer gainLife = livesManager.getTeamGainLives(teamName);
+            String validKillStr = validKill != null ? String.valueOf(validKill) : "";
+            String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
+            ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
+                    "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
+                    "", "", List.of(String.valueOf(teamNum), team.getDisplayName().getString(), team.getColor().getName(), validKillStr, gainLifeStr), true
+            );
+            sendConfigEntry(player, teamEntry, index);
+            index++;
         }
         for (DatapackIntegration.Events event : DatapackIntegration.getAllEvents()) {
             ConfigFileEntry<String> teamEntry = new ConfigFileEntry<>(

@@ -9,12 +9,12 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -24,9 +24,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
@@ -34,6 +32,18 @@ import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
+
+//? if <= 1.20.5 {
+/*import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+*///?}
+//? if <= 1.20.3 {
+/*import net.minecraft.world.item.alchemy.PotionUtils;
+*///?} else {
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
+//?}
 
 //? if >= 1.21.9 {
 /*import net.minecraft.world.entity.EntityType;
@@ -54,13 +64,13 @@ public class SecretLife extends Season {
     private final WandingTraders traders = new WandingTraders();
 
     public ItemSpawner itemSpawner;
-    SessionAction taskWarningAction = new SessionAction(OtherUtils.minutesToTicks(-5)+1) {
+    SessionAction taskWarningAction = new SessionAction(Time.minutes(-5).add(Time.seconds(1))) {
         @Override
         public void trigger() {
             PlayerUtils.broadcastMessage(Component.literal("Go submit / fail your secret tasks if you haven't!").withStyle(ChatFormatting.GRAY));
         }
     };
-    SessionAction taskWarningAction2 = new SessionAction(OtherUtils.minutesToTicks(-30)+1) {
+    SessionAction taskWarningAction2 = new SessionAction(Time.minutes(-30).add(Time.seconds(1))) {
         @Override
         public void trigger() {
             PlayerUtils.broadcastMessage(Component.literal("You better start finishing your secret tasks if you haven't already!").withStyle(ChatFormatting.GRAY));
@@ -154,7 +164,9 @@ public class SecretLife extends Season {
         itemSpawner.addItem(new ItemStack(Items.TNT, 4), 10);
         itemSpawner.addItem(new ItemStack(Items.OBSIDIAN, 8), 10);
         itemSpawner.addItem(new ItemStack(Items.ARROW, 32), 10);
+        //? if >= 1.20.5 {
         itemSpawner.addItem(new ItemStack(Items.WOLF_ARMOR), 10);
+        //?}
         itemSpawner.addItem(new ItemStack(Items.BUNDLE), 10);
         itemSpawner.addItem(new ItemStack(Items.ENDER_PEARL, 2), 10);
         itemSpawner.addItem(new ItemStack(Items.BOOKSHELF, 4), 10);
@@ -164,20 +176,42 @@ public class SecretLife extends Season {
         ItemStack pot = new ItemStack(Items.POTION);
         ItemStack pot2 = new ItemStack(Items.POTION);
         ItemStack pot3 = new ItemStack(Items.POTION);
+        //? if <= 1.20.3 {
+        /*PotionUtils.setCustomEffects(pot, Potions.INVISIBILITY.getEffects());
+        PotionUtils.setCustomEffects(pot2, Potions.SLOW_FALLING.getEffects());
+        PotionUtils.setCustomEffects(pot3, Potions.FIRE_RESISTANCE.getEffects());
+        *///?} else {
         pot.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.INVISIBILITY));
         pot2.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.SLOW_FALLING));
         pot3.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.FIRE_RESISTANCE));
+        //?}
         itemSpawner.addItem(pot, 10);
         itemSpawner.addItem(pot2, 10);
         itemSpawner.addItem(pot3, 10);
 
         //Enchanted Books
+        //? if <= 1.20.3 {
+        /*itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.ALL_DAMAGE_PROTECTION, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.FALL_PROTECTION, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.SILK_TOUCH, 1))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.BLOCK_FORTUNE, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.MOB_LOOTING, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.BLOCK_EFFICIENCY, 4))), 10);
+        *///?} else if <= 1.20.5 {
+        /*itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.PROTECTION, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.FEATHER_FALLING, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.SILK_TOUCH, 1))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.FORTUNE, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.LOOTING, 3))), 10);
+        itemSpawner.addItem(Objects.requireNonNull(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Enchantments.EFFICIENCY, 4))), 10);
+        *///?} else {
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.PROTECTION, 3)), 10);
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.FEATHER_FALLING, 3)), 10);
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.SILK_TOUCH, 1)), 10);
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.FORTUNE, 3)), 10);
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.LOOTING, 3)), 10);
         itemSpawner.addItem(Objects.requireNonNull(ItemStackUtils.createEnchantedBook(Enchantments.EFFICIENCY, 4)), 10);
+        //?}
 
 
         //Spawn Eggs
@@ -219,15 +253,21 @@ public class SecretLife extends Season {
         *///?}
 
 
+        //? if < 1.20.5 {
+        /*zombieHorse.setTag(nbtCompZombie);
+        skeletonHorse.setTag(nbtCompSkeleton);
+        camel.setTag(nbtCompCamel);
+        *///?} else {
         CustomData nbtSkeleton = CustomData.of(nbtCompSkeleton);
         CustomData nbtZombie = CustomData.of(nbtCompZombie);
         CustomData nbtCamel= CustomData.of(nbtCompCamel);
+        //?}
 
-        //? if <= 1.21.6 {
+        //? if >=1.20.5 && <= 1.21.6 {
         zombieHorse.set(DataComponents.ENTITY_DATA, nbtZombie);
         skeletonHorse.set(DataComponents.ENTITY_DATA, nbtSkeleton);
         camel.set(DataComponents.ENTITY_DATA, nbtCamel);
-        //?} else {
+        //?} else if > 1.21.6 {
         /*zombieHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.ZOMBIE, nbtZombie.copyTag()));
         skeletonHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.SKELETON, nbtSkeleton.copyTag()));
         camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.CAMEL, nbtCamel.copyTag()));
@@ -241,18 +281,22 @@ public class SecretLife extends Season {
         ItemStackUtils.setCustomComponentBoolean(endCrystal, "IgnoreBlacklist", true);
         itemSpawner.addItem(endCrystal, 10);
 
+        //? if >= 1.21 {
         ItemStack mace = new ItemStack(Items.MACE);
         ItemStackUtils.setCustomComponentBoolean(mace, "IgnoreBlacklist", true);
         ItemStackUtils.setCustomComponentBoolean(mace, "NoModifications", true);
         mace.setDamageValue(mace.getMaxDamage()-1);
         itemSpawner.addItem(mace, 3);
+        //?}
 
+        //? if >= 1.20.5 {
         ItemStack patat = new ItemStack(Items.POISONOUS_POTATO);
         patat.set(DataComponents.CUSTOM_NAME,Component.nullToEmpty("§6§l§nThe Sacred Patat"));
         ItemStackUtils.addLoreToItemStack(patat,
                 List.of(Component.nullToEmpty("§5§oEating this might help you. Or maybe not..."))
         );
         itemSpawner.addItem(patat, 1);
+        //?}
     }
 
     @Override
@@ -275,7 +319,7 @@ public class SecretLife extends Season {
         super.onPlayerJoin(player);
 
         if (TaskManager.tasksChosen && !TaskManager.tasksChosenFor.contains(player.getUUID())) {
-            TaskScheduler.scheduleTask(100, () -> TaskManager.chooseTasks(List.of(player), null));
+            TaskScheduler.scheduleTask(Time.seconds(5), () -> TaskManager.chooseTasks(List.of(player), null));
         }
     }
 
@@ -352,21 +396,21 @@ public class SecretLife extends Season {
         }
     }
 
-    private long ticks = 0;
+    private Time timer = Time.zero();
     @Override
     public void tick(MinecraftServer server) {
         super.tick(server);
         TaskManager.tick();
-        ticks++;
-        if (ticks % 20 == 0) {
+        timer.tick();
+        if (timer.isMultipleOf(Time.seconds(1))) {
             checkNaturalRegeneration();
         }
     }
 
     private Map<UUID, ItemStack> giveBookOnRespawn = new HashMap<>();
     @Override
-    public void modifyEntityDrops(LivingEntity entity, DamageSource damageSource) {
-        super.modifyEntityDrops(entity, damageSource);
+    public void modifyEntityDrops(LivingEntity entity, DamageSource damageSource, CallbackInfo ci) {
+        super.modifyEntityDrops(entity, damageSource, ci);
         if (entity instanceof ServerPlayer player) {
             boolean dropBook = SecretLifeConfig.PLAYERS_DROP_TASK_ON_DEATH.get(seasonConfig);
             if (dropBook || server == null) return;

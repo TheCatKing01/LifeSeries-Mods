@@ -8,6 +8,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -53,6 +54,22 @@ public class SessionCommand extends Command {
                     .executes(context -> pauseSession(
                         context.getSource()
                     ))
+                    .then(literal("queue")
+                        .then(literal("reset")
+                            .executes(context -> pauseQueueReset(
+                                    context.getSource()
+                            ))
+                        )
+                        .then(argument("time", StringArgumentType.string())
+                                .suggests((context, builder) -> SharedSuggestionProvider.suggest(List.of("1h","1h30m","2h"), builder))
+                                .then(argument("duration", StringArgumentType.greedyString())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(List.of("5m", "10m"), builder))
+                                        .executes(context -> pauseQueue(
+                                                context.getSource(), StringArgumentType.getString(context, "time"), StringArgumentType.getString(context, "duration")
+                                        ))
+                                )
+                        )
+                    )
                 )
                 .then(literal("timer")
                     .then(literal("set")
@@ -104,6 +121,32 @@ public class SessionCommand extends Command {
                 )
 
         );
+    }
+    public int pauseQueue(CommandSourceStack source, String timeArgument1, String timeArgument2) {
+        if (checkBanned(source)) return -1;
+
+        Time pauseAt = OtherUtils.parseTimeFromArgument(timeArgument1);
+        if (pauseAt == null || !pauseAt.isPresent()) {
+            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            return -1;
+        }
+        Time pauseFor = OtherUtils.parseTimeFromArgument(timeArgument2);
+        if (pauseFor == null || !pauseFor.isPresent()) {
+            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            return -1;
+        }
+
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("The session will pause at {} for {}", pauseAt.formatLong(), pauseFor.formatLong()));
+        currentSession.queuePause(pauseAt, pauseFor);
+        return 1;
+    }
+
+    public int pauseQueueReset(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Reset all queued pauses"));
+
+        currentSession.discardAllQueuedPauses();
+        return 1;
     }
 
     public int getTime(CommandSourceStack source) {
@@ -181,11 +224,12 @@ public class SessionCommand extends Command {
 
         if (currentSession.statusPaused()) {
             OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Unpausing session..."));
+            currentSession.sessionPause();
         }
         else {
             OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Pausing session..."));
+            currentSession.queuePause(currentSession.getPassedTime(), Time.hours(10_000));
         }
-        currentSession.sessionPause();
 
         return 1;
     }
@@ -193,55 +237,55 @@ public class SessionCommand extends Command {
     public int skipTime(CommandSourceStack source, String timeArgument) {
         if (checkBanned(source)) return -1;
 
-        Integer totalTicks = OtherUtils.parseTimeFromArgument(timeArgument);
-        if (totalTicks == null) {
+        Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
+        if (timeTotal == null || !timeTotal.isPresent()) {
             source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Skipped {} in the session length", OtherUtils.formatTime(totalTicks)));
-        currentSession.passedTime+=totalTicks;
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Skipped {} in the session length", timeTotal.formatLong()));
+        currentSession.passTime(timeTotal);
         return 1;
     }
 
     public int setTime(CommandSourceStack source, String timeArgument) {
         if (checkBanned(source)) return -1;
 
-        Integer totalTicks = OtherUtils.parseTimeFromArgument(timeArgument);
-        if (totalTicks == null) {
+        Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
+        if (timeTotal == null || !timeTotal.isPresent()) {
             source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        currentSession.setSessionLength(totalTicks);
+        currentSession.setSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("The session length has been set to {}", OtherUtils.formatTime(totalTicks)));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("The session length has been set to {}", timeTotal.formatLong()));
         return 1;
     }
 
     public int addTime(CommandSourceStack source, String timeArgument) {
         if (checkBanned(source)) return -1;
 
-        Integer totalTicks = OtherUtils.parseTimeFromArgument(timeArgument);
-        if (totalTicks == null) {
+        Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
+        if (timeTotal == null || !timeTotal.isPresent()) {
             source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        currentSession.addSessionLength(totalTicks);
+        currentSession.addSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} to the session length", OtherUtils.formatTime(totalTicks)));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} to the session length", timeTotal.formatLong()));
         return 1;
     }
 
     public int removeTime(CommandSourceStack source, String timeArgument) {
         if (checkBanned(source)) return -1;
 
-        Integer totalTicks = OtherUtils.parseTimeFromArgument(timeArgument);
-        if (totalTicks == null) {
+        Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
+        if (timeTotal == null || !timeTotal.isPresent()) {
             source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        currentSession.removeSessionLength(totalTicks);
+        currentSession.removeSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {} from the session length", OtherUtils.formatTime(totalTicks)));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {} from the session length", timeTotal.formatLong()));
         return 1;
     }
 }

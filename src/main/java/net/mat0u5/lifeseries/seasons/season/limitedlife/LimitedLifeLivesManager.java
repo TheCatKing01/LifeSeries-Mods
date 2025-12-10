@@ -5,6 +5,7 @@ import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
@@ -13,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.scores.ScoreHolder;
 
 import java.util.Locale;
 
@@ -42,7 +42,7 @@ public class LimitedLifeLivesManager extends LivesManager {
     public Component getFormattedLives(Integer lives) {
         if (lives == null) return Component.empty();
         ChatFormatting color = getColorForLives(lives);
-        return Component.literal(OtherUtils.formatTime(lives*20)).withStyle(color);
+        return Component.literal(Time.seconds(lives).formatLong()).withStyle(color);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class LimitedLifeLivesManager extends LivesManager {
         if (player.getTeam() != null) {
             colorBefore = player.getTeam().getColor();
         }
-        ScoreboardUtils.setScore(ScoreHolder.forNameOnly(player.getScoreboardName()), LivesManager.SCOREBOARD_NAME, lives);
+        ScoreboardUtils.setScore(player.getScoreboardName(), LivesManager.SCOREBOARD_NAME, lives);
         if (lives <= 0) {
             playerLostAllLives(player, livesBefore);
         }
@@ -101,7 +101,7 @@ public class LimitedLifeLivesManager extends LivesManager {
     @Override
     public void receiveLifeFromOtherPlayer(Component playerName, ServerPlayer target, boolean isRevive) {
         target.ls$playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
-        Component amount = Component.literal(OtherUtils.formatTime(-LimitedLife.DEATH_NORMAL*20));
+        Component amount = Component.literal(LimitedLife.NEW_DEATH_NORMAL.copy().multiply(-1).formatLong());
 
         if (seasonConfig.GIVELIFE_BROADCAST.get(seasonConfig)) {
             PlayerUtils.broadcastMessageExcept(TextUtils.format("{} received {} from {}", target, amount, playerName), target);
@@ -114,5 +114,21 @@ public class LimitedLifeLivesManager extends LivesManager {
         if (isRevive && isAlive(target)) {
             PlayerUtils.safelyPutIntoSurvival(target);
         }
+    }
+
+    @Override
+    public void addToPlayerLives(ServerPlayer player, int amount) {
+        if (Math.abs(amount) >= 2) {
+            sendTimeTitle(player, Time.seconds(amount), amount < 0 ? ChatFormatting.RED : ChatFormatting.GREEN);
+        }
+        super.addToPlayerLives(player, amount);
+    }
+
+    public void sendTimeTitle(ServerPlayer player, Time time, ChatFormatting style) {
+        sendTimeTitle(player, Component.literal(time.formatReadable()).withStyle(style));
+    }
+
+    public void sendTimeTitle(ServerPlayer player, Component text) {
+        PlayerUtils.sendTitle(player, text, 20, 80, 20);
     }
 }

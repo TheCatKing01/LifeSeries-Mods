@@ -85,7 +85,7 @@ jobs:
       - name: Publish to Modrinth and Curseforge (Sequential)
         if: ${{ inputs.publish }}
         run: |
-          VERSIONS=("1.21" "1.21.2" "1.21.4" "1.21.5" "1.21.6" "1.21.9")
+          VERSIONS=("1.20" "1.20.2" "1.20.3" "1.20.5" "1.21" "1.21.2" "1.21.4" "1.21.5" "1.21.6" "1.21.9")
 
           for version in "${VERSIONS[@]}"; do
             if [ -d "./versions/$version" ]; then
@@ -103,6 +103,8 @@ jobs:
           CHANGELOG: ${{ env.COMMIT_MESSAGE_BR }}
           VERSION_TYPE: ${{ github.event.inputs.version_type }}
           DEV_BUILD: false
+          PUBLISH_MODRINTH: true
+          PUBLISH_CURSEFORGE: true
 
       - name: capture build artifacts
         uses: actions/upload-artifact@v4

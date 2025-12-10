@@ -10,10 +10,7 @@ import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
-import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
-import net.mat0u5.lifeseries.utils.other.OtherUtils;
-import net.mat0u5.lifeseries.utils.other.TaskScheduler;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
@@ -59,15 +56,13 @@ public class DoubleLife extends Season {
     public boolean SOULMATES_PVP_ALLOWED = true;
     private final WandingTraders traders = new WandingTraders();
 
-    public SessionAction actionChooseSoulmates = new SessionAction(
-            OtherUtils.minutesToTicks(1), "§7Assign soulmates if necessary §f[00:01:00]", "Assign Soulmates if necessary"
-    ) {
+    public SessionAction actionChooseSoulmates = new SessionAction(Time.minutes(1), "Assign Soulmates if necessary") {
         @Override
         public void trigger() {
             rollSoulmates();
         }
     };
-    public SessionAction actionRandomTP = new SessionAction(5, "§7Random teleport distribution §f[00:00:01]", "Random teleport distribution") {
+    public SessionAction actionRandomTP = new SessionAction(Time.ticks(5), "Random teleport distribution") {
         @Override
         public void trigger() {
             distributePlayers();
@@ -403,9 +398,9 @@ public class DoubleLife extends Season {
 
         while(!playersToRoll.isEmpty()) {
             Collections.shuffle(playersToRoll);
-            ServerPlayer player1 = playersToRoll.getFirst();
+            ServerPlayer player1 = playersToRoll.get(0);
             ServerPlayer player2 = null;
-            playersToRoll.removeFirst();
+            playersToRoll.remove(0);
             for (ServerPlayer player : playersToRoll) {
                 if (Objects.equals(soulmatesPrevent.get(player1.getUUID()), player.getUUID())) continue;
                 if (Objects.equals(soulmatesPrevent.get(player.getUUID()), player1.getUUID())) continue;
@@ -421,7 +416,7 @@ public class DoubleLife extends Season {
         saveSoulmates();
 
         for (ServerPlayer remaining : getNonAssignedPlayers()) {
-            PlayerUtils.broadcastMessageToAdmins(Component.literal("[Double Life] ").append(remaining.getFeedbackDisplayName()).append(" was not paired with anyone."));
+            PlayerUtils.broadcastMessageToAdmins(Component.literal("[Double Life] ").append(remaining.getDisplayName()).append(" was not paired with anyone."));
         }
         soulmatesForce.clear();
         soulmatesPrevent.clear();
@@ -743,13 +738,13 @@ public class DoubleLife extends Season {
                 if (getSoulmate(player1) == player2) {
                     resetSoulmate(player1);
                     List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
-                    TaskScheduler.scheduleTask(200, () -> {
+                    TaskScheduler.scheduleTask(Time.seconds(10), () -> {
                         PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§aYour fate is your own..."), 20, 40, 20);
                     });
-                    TaskScheduler.scheduleTask(300, () -> {
+                    TaskScheduler.scheduleTask(Time.seconds(15), () -> {
                         PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§cThere can only be one winner."), 20, 40, 20);
                     });
-                    TaskScheduler.scheduleTask(380, () -> {
+                    TaskScheduler.scheduleTask(Time.seconds(19), () -> {
                         LevelUtils.summonHarmlessLightning(player1);
                         LevelUtils.summonHarmlessLightning(player2);
                         player1.ls$hurt(player1.damageSources().lightningBolt(), 0.0000001F);

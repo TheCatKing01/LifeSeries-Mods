@@ -6,6 +6,7 @@ import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
@@ -105,7 +106,7 @@ public class LifeSeriesCommand extends Command {
         if (checkBanned(source)) return -1;
         if (source.getPlayer() == null) return -1;
         if (!NetworkHandlerServer.wasHandshakeSuccessful(source.getPlayer())) {
-            source.sendFailure(Component.nullToEmpty("You must have the Life Series mod installed §nclient-side§r to open the season selection GUI."));
+            source.sendFailure(Component.nullToEmpty("You must have the Life Series mod installed §nclient-side§c to open the season selection GUI."));
             source.sendFailure(Component.nullToEmpty("Use the '/lifeseries setSeries <season>' command instead."));
             return -1;
         }
@@ -137,11 +138,18 @@ public class LifeSeriesCommand extends Command {
     }
 
     public void setSeasonFinal(CommandSourceStack source, String setTo) {
+        boolean prevTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
         if (Main.changeSeasonTo(setTo)) {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Changing the season to {}§7...", setTo));
             PlayerUtils.broadcastMessage(TextUtils.format("Successfully changed the season to {}",setTo).withStyle(ChatFormatting.GREEN));
+			
             OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
             OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=ComplexLifeTrader]");
+			
+            boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
+            if (prevTickFreeze != currentTickFreeze) {
+                OtherUtils.setFreezeGame(currentTickFreeze);
+            }
         }
     }
 
@@ -152,19 +160,18 @@ public class LifeSeriesCommand extends Command {
             return -1;
         }
         if (!NetworkHandlerServer.wasHandshakeSuccessful(self)) {
-            source.sendFailure(Component.nullToEmpty("You must have the Life Series mod installed §nclient-side§r to open the config GUI."));
+            source.sendFailure(Component.nullToEmpty("You must have the Life Series mod installed §nclient-side§c to open the config GUI."));
             source.sendFailure(Component.nullToEmpty("Either install the mod on the client on modify the config folder."));
             return -1;
         }
-        if (currentSeason.getSeason() == Seasons.UNASSIGNED) {
-            source.sendFailure(Component.nullToEmpty("You need to select a season first to use the config."));
-            return -1;
-        }
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Opening the config GUI..."));
         NetworkHandlerServer.sendStringPacket(self, PacketNames.CLEAR_CONFIG,"");
-        if (PermissionManager.isAdmin(self)) {
+        if (PermissionManager.isAdmin(self) && currentSeason.getSeason() != Seasons.UNASSIGNED) {
             Main.seasonConfig.sendConfigTo(self);
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Opening the config GUI..."));
+        }
+        else {
+            OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7Opening the config GUI..."));
         }
         NetworkHandlerServer.sendStringPacket(self, PacketNames.OPEN_CONFIG,"");
         return 1;

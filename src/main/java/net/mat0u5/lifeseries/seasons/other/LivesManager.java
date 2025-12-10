@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
+import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLifeLivesManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
@@ -25,15 +26,17 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.Score;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
+
+//? if > 1.20.2
+import net.minecraft.world.scores.PlayerScoreEntry;
 
 public class LivesManager {
     public static final String SCOREBOARD_NAME = "Lives";
@@ -83,20 +86,33 @@ public class LivesManager {
 
     public Integer getTeamCanKill(String teamName) {
         Integer teamConfig = seasonConfig.getOrCreateInt("team_cankill-"+teamName, defaultTeamCanKill(teamName));
+        if (teamConfig <= -1) {
+            teamConfig = defaultTeamCanKill(teamName);
+            seasonConfig.setProperty("team_cankill-"+teamName, String.valueOf(teamConfig));
+        }
         if (teamConfig <= -1) teamConfig = null;
         return teamConfig;
     }
 
     public Integer getTeamGainLives(String teamName) {
         Integer teamConfig = seasonConfig.getOrCreateInt("team_gainlvies-"+teamName, defaultTeamGainLife(teamName));
+        if (teamConfig <= -1) {
+            teamConfig = defaultTeamGainLife(teamName);
+            seasonConfig.setProperty("team_gainlvies-"+teamName, String.valueOf(teamConfig));
+        }
         if (teamConfig <= -1) teamConfig = null;
         return teamConfig;
     }
 
     public int defaultTeamCanKill(String teamName) {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE || currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
             if (teamName.equals("lives_2")) {
                 return 3;
+            }
+        }
+        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+            if (teamName.equals("lives_2")) {
+                return LimitedLifeLivesManager.YELLOW_TIME;
             }
         }
         if (teamName.equals("lives_1")) {
@@ -107,8 +123,16 @@ public class LivesManager {
 
     public int defaultTeamGainLife(String teamName) {
         if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-            if (teamName.equals("lives_2")) {
+            if (teamName.equals("lives_1") || teamName.equals("lives_2")) {
                 return 4;
+            }
+        }
+        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+            if (teamName.equals("lives_1")) {
+                return 1;
+            }
+            if (teamName.equals("lives_2")) {
+                return LimitedLifeLivesManager.YELLOW_TIME;
             }
         }
         return -1;
@@ -189,8 +213,8 @@ public class LivesManager {
         if (!livesTeams.isEmpty()) {
             Collections.sort(livesTeams);
 
-            if (lives <= livesTeams.getFirst()) {
-                return prefix + livesTeams.getFirst();
+            if (lives <= livesTeams.get(0)) {
+                return prefix + livesTeams.get(0);
             }
             Collections.reverse(livesTeams);
             for (int i : livesTeams) {
@@ -240,9 +264,15 @@ public class LivesManager {
 
     public void resetAllPlayerLivesInner() {
         createScoreboards();
-        for (PlayerScoreEntry entry : ScoreboardUtils.getScores(SCOREBOARD_NAME)) {
-            ScoreboardUtils.resetScore(ScoreHolder.forNameOnly(entry.owner()), SCOREBOARD_NAME);
+        //? if <= 1.20.2 {
+        /*for (Score entry : ScoreboardUtils.getScores(SCOREBOARD_NAME)) {
+            ScoreboardUtils.resetScore(entry.getOwner(), SCOREBOARD_NAME);
         }
+        *///?} else {
+        for (PlayerScoreEntry entry : ScoreboardUtils.getScores(SCOREBOARD_NAME)) {
+            ScoreboardUtils.resetScore(entry.owner(), SCOREBOARD_NAME);
+        }
+        //?}
 
         currentSeason.reloadAllPlayerTeams();
     }
@@ -311,13 +341,13 @@ public class LivesManager {
     }
 
     public void setScore(String playerName, int lives) {
-        ScoreboardUtils.setScore(ScoreHolder.forNameOnly(playerName), SCOREBOARD_NAME, lives);
+        ScoreboardUtils.setScore(playerName, SCOREBOARD_NAME, lives);
         currentSeason.reloadAllPlayerTeams();
     }
 
     @Nullable
     public Integer getScoreLives(String playerName) {
-        return ScoreboardUtils.getScore(ScoreHolder.forNameOnly(playerName), SCOREBOARD_NAME);
+        return ScoreboardUtils.getScore(playerName, SCOREBOARD_NAME);
     }
 
     @Nullable
@@ -389,7 +419,7 @@ public class LivesManager {
     public void showDeathTitle(ServerPlayer player) {
         if (SHOW_DEATH_TITLE) {
             String subtitle = seasonConfig.FINAL_DEATH_TITLE_SUBTITLE.get(seasonConfig);
-            PlayerUtils.sendTitleWithSubtitleToPlayers(PlayerUtils.getAllPlayers(), player.getFeedbackDisplayName(), Component.literal(subtitle), 20, 80, 20);
+            PlayerUtils.sendTitleWithSubtitleToPlayers(PlayerUtils.getAllPlayers(), player.getDisplayName(), Component.literal(subtitle), 20, 80, 20);
         }
         Component deathMessage = getDeathMessage(player);
         if (!deathMessage.getString().isEmpty()) {

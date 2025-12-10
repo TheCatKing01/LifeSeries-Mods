@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "net.mat0u5.lifeseries.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "${javaVersion}",
   "mixins": [
     "AnvilMenuMixin",
     "CommandSourceStackMixin",
@@ -18,7 +18,9 @@
     "ItemStackMixin",
     "LivingEntityMixin",
     "MannequinAccessor",
+    "MinecraftServerMixin",
     "MobCategoryMixin",
+    "MobEffectInstanceAccessor",
     "MobEffectMixin",
     "MobMixin",
     "NaturalSpawnerMixin",
@@ -37,6 +39,7 @@
     "ServerPlayerGameModeMixin",
     "ServerPlayerMixin",
     "SimpleExplosionDamageCalculatorMixin",
+    "SkullBlockEntityAccessor",
     "SleepStatusMixin",
     "SpawnEggItemMixin",
     "ThrownEnderpearlMixin",
