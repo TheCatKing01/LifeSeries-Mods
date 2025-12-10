@@ -20,9 +20,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.PlayerScoreEntry;
-import net.minecraft.world.scores.ScoreHolder;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import java.util.Collection;
@@ -31,6 +28,8 @@ import java.util.Collection;
 /*import net.minecraft.world.scores.Score;*/
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
 
 import static net.mat0u5.lifeseries.Main.*;
