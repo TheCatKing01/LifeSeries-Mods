@@ -20,8 +20,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.scores.ScoreHolder;
-import net.minecraft.world.scores.DisplaySlot;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import java.util.Collection;
@@ -30,6 +28,8 @@ import java.util.Collection;
 /*import net.minecraft.world.scores.Score;*/
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Team;
 
 import static net.mat0u5.lifeseries.Main.*;
@@ -170,10 +170,28 @@ public class LimitedLife extends Season {
                     ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
                 }
                 //?}
+				
+			if (TICK_OFFLINE_PLAYERS) {
+				//? if <= 1.20.2
+				Collection<Score> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+				for (Score entry : entries) {
+					if (entry.getScore() <= 0) continue;
+					if (PlayerUtils.getPlayer(entry.getOwner()) != null) continue;
+					ScoreboardUtils.setScore(entry.getOwner(), LivesManager.SCOREBOARD_NAME, entry.getScore() - 1);
+				}
+				//? else
+				Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+				for (PlayerScoreEntry entry : entries) {
+					if (entry.value() <= 0) continue;
+					if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
+					ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
+				}
+}
+
             }
         }
     }
-
+	
     @Override
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
         SessionTranscript.onPlayerDeath(player, source);
