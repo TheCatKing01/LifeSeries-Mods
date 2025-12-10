@@ -153,7 +153,6 @@ public class SuperpowersWildcard extends Wildcard {
 				currentPowers.forEach(Superpower::turnOff);
 				currentPowers.clear();
 				DatapackIntegration.initSuperpowers();
-        return queue.get(0);
     }
 
 				for (int r = 0; r < POWERS_PER_ROLL; r++) {
