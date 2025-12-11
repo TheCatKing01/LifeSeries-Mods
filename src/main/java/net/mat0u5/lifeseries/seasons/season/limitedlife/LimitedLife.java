@@ -24,7 +24,7 @@ import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders
 import java.util.Collection;
 import net.minecraft.world.scores.Team;
 
-//? if < 1.20.6 {
+//? if < 1.20.2 {
 import net.minecraft.world.scores.Score;
 //? } else {
 import net.minecraft.world.scores.PlayerScoreEntry;
@@ -152,7 +152,7 @@ public class LimitedLife extends Season {
 						
 
 			if (TICK_OFFLINE_PLAYERS) {
-				//? if <= 1.20.6 {
+				//? if < 1.20.2 {
 					/*Collection<Score> entriesOld = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
 					for (Score entry : entriesOld) {
 						if (entry.getScore() <= 0) continue;
