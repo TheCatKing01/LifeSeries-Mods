@@ -22,16 +22,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
-//? if <= 1.20.2
+//? if <= 1.20.2 {
 /*import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreHolder;
 *///?} else {
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Team;
-//?}
-
-
+//? }
 
 import static net.mat0u5.lifeseries.Main.*;
 
