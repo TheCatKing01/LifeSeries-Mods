@@ -214,7 +214,6 @@ public class WandingTraders {
 			
 		//?}
 		
-
         trader.overrideOffers(offers);
         return true;
     }
