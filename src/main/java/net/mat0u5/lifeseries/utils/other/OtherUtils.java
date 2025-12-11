@@ -32,6 +32,22 @@ import net.minecraft.world.level.GameRules;
 public class OtherUtils {
     private static final Random rnd = new Random();
 
+    package net.mat0u5.lifeseries.utils.other;
+
+    public static String formatTimeMillis(long millis) {
+        long totalSeconds = millis / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%02d:%02d", minutes, seconds);
+        }
+    }
+
+
     public static void log(Component message) {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             player.displayClientMessage(message, false);
