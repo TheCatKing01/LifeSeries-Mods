@@ -32,8 +32,6 @@ import net.minecraft.world.level.GameRules;
 public class OtherUtils {
     private static final Random rnd = new Random();
 
-    package net.mat0u5.lifeseries.utils.other;
-
     public static String formatTimeMillis(long millis) {
         long totalSeconds = millis / 1000;
         long hours = totalSeconds / 3600;
