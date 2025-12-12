@@ -70,6 +70,8 @@ public class Main implements ModInitializer {
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries"), container, Component.nullToEmpty("Main Life Series Resourcepack"), ResourcePackActivationType.ALWAYS_ENABLED);
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("minimal_armor"), container, Component.nullToEmpty("Minimal Armor Resourcepack"), ResourcePackActivationType.NORMAL);
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack"), container, ResourcePackActivationType.ALWAYS_ENABLED);
+                        ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("more_biome_sizes"), container, Component.nullToEmpty("More Biome Sizes Datapack"),ResourcePackActivationType.ALWAYS_ENABLED);
+
 		});
 
 		ConfigManager.moveOldMainFileIfExists();
