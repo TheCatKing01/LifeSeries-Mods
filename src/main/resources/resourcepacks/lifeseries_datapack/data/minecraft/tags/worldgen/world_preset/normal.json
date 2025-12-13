@@ -1,20 +1,8 @@
-//? if < 1.21.9 {
 {
   "replace": false,
   "values": [
-    "lifeseries:small_biomes",
-    "lifeseries:simple",
+	"lifeseries:simple",
     "lifeseries:simple_life",
     "lifeseries:complex_life"
   ]
 }
-//? } else {
-{
-  "replace": false,
-  "values": [
-    "lifeseries:simple",
-    "lifeseries:simple_life",
-    "lifeseries:complex_life"
-  ]
-}
-//? }
