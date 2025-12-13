@@ -12,6 +12,13 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 public class ModRegistries {
 	
+    //? if < 1.21.9 {
+    public static final ResourceKey<WorldPreset> SMALL_BIOMES = ResourceKey.create(
+            Registries.WORLD_PRESET,
+            IdentifierHelper.mod("small_biomes")
+    );
+    //? }
+	
 	public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("simple")
