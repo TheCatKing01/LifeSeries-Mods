@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "lifeseries:small_biomes",
+    "biome_preset:small",
     "lifeseries:simple",
     "lifeseries:simple_life",
     "lifeseries:complex_life"

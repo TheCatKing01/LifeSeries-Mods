@@ -8,18 +8,17 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 public class ModRegistries {
-	
-    //? if < 1.21.9 {
-    public static final ResourceKey<WorldPreset> SMALL_BIOMES = ResourceKey.create(
+
+    public static final ResourceKey<WorldPreset> SMALL = ResourceKey.create(
             Registries.WORLD_PRESET,
-            IdentifierHelper.mod("small_biomes")
+            new ResourceLocation("minecraft", "small")
     );
-    //? }
-	
-	public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
+
+    public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("simple")
     );
@@ -28,8 +27,7 @@ public class ModRegistries {
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("simple_life")
     );
-	
-	
+
     public static final ResourceKey<WorldPreset> COMPLEX_LIFE = ResourceKey.create(
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("complex_life")
