@@ -13,11 +13,11 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 public class ModRegistries {
 
-    public static final ResourceKey<WorldPreset> SMALL= ResourceKey.create(
+    public static final ResourceKey<WorldPreset> SMALL = ResourceKey.create(
             Registries.WORLD_PRESET,
-            IdentifierHelper.mod("small")
+            new ResourceLocation("minecraft", "small")
     );
-	
+
     public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
             Registries.WORLD_PRESET,
             IdentifierHelper.mod("simple")
