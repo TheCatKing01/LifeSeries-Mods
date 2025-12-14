@@ -182,13 +182,6 @@ public class NetworkHandlerClient {
         PacketNames name = PacketNames.fromName(nameStr);
         List<String> value = payload.value();
 
-        if (name == PacketNames.SEASON_INFO) {
-            Seasons season = Seasons.getSeasonFromStringName(value.get(0));
-            String adminCommands = value.get(1);
-            String nonAdminCommands = value.get(2);
-            if (season != Seasons.UNASSIGNED) Minecraft.getInstance().setScreen(new SeasonInfoScreen(season, adminCommands, nonAdminCommands));
-        }
-
         if (name == PacketNames.MORPH) {
             try {
                 String morphUUIDStr = value.get(0);
@@ -286,6 +279,10 @@ public class NetworkHandlerClient {
         if (name == PacketNames.SELECT_SEASON) {
             Minecraft.getInstance().setScreen(new ChooseSeasonScreen(!value.isEmpty()));
         }
+        if (name == PacketNames.SEASON_INFO) {
+            Seasons season = Seasons.getSeasonFromStringName(value);
+            if (season != Seasons.UNASSIGNED) Minecraft.getInstance().setScreen(new SeasonInfoScreen(season));
+        }
 
         if (name == PacketNames.PREVENT_GLIDING) {
             MainClient.preventGliding = value.equalsIgnoreCase("true");
@@ -317,13 +314,6 @@ public class NetworkHandlerClient {
         }
         if (name == PacketNames.ANIMAL_DISGUISE_HANDS) {
             Morph.showHandItems = value.equalsIgnoreCase("true");
-        }
-        if (name == PacketNames.SNOWY_NETHER) {
-            boolean newValue = value.equalsIgnoreCase("true");
-            if (MainClient.NICELIFE_SNOWY_NETHER != newValue) {
-                MainClient.NICELIFE_SNOWY_NETHER = newValue;
-                ClientResourcePacks.checkClientPacks();
-            }
         }
     }
 

@@ -39,14 +39,6 @@ public class SecretLifeCommands extends Command {
         return Component.nullToEmpty("This command is only available when playing Secret Life.");
     }
 
-    public List<String> getAdminCommands() {
-        return List.of("health", "task", "gift");
-    }
-
-    public List<String> getNonAdminCommands() {
-        return List.of("health", "gift");
-    }
-
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
@@ -185,11 +177,6 @@ public class SecretLifeCommands extends Command {
                     .executes(context -> gift(
                         context.getSource(), EntityArgument.getPlayer(context, "player"))
                     )
-                )
-                .then(literal("reset")
-                        .then(argument("player", EntityArgument.players())
-                            .executes(context -> resetGift(context.getSource(), EntityArgument.getPlayers(context, "player")))
-                        )
                 )
         );
     }
@@ -389,22 +376,6 @@ public class SecretLifeCommands extends Command {
     }
 
     public static final List<UUID> playersGiven = new ArrayList<>();
-    public int resetGift(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
-
-        for (ServerPlayer player : targets) {
-            playersGiven.remove(player.getUUID());
-        }
-
-        if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {}'s gifted hearts", targets.iterator().next()));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset the gifted hearts of {} targets", targets.size()));
-        }
-
-        return 1;
-    }
     public int gift(CommandSourceStack source, ServerPlayer target) {
         if (checkBanned(source)) return -1;
         final ServerPlayer self = source.getPlayer();

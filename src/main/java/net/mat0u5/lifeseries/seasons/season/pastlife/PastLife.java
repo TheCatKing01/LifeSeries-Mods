@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 public class PastLife extends Season {
-
     public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /boogeyman, /society, /pastlife";
     public static final String COMMANDS_TEXT = "/claimkill, /lives, /society, /initiate";
 	private final WandingTraders traders = new WandingTraders();

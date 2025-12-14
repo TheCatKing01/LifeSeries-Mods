@@ -1,10 +1,9 @@
-package net.mat0u5.lifeseries.entity.triviabot.server.trivia;
+package net.mat0u5.lifeseries.entity.triviabot.server;
 
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
-import net.mat0u5.lifeseries.entity.triviabot.server.TriviaBotPathfinding;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
@@ -15,6 +14,7 @@ import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
@@ -61,68 +61,22 @@ import net.minecraft.core.component.DataComponents;
 
 //? if <= 1.21.9 {
 import net.minecraft.world.entity.animal.Bee;
-import org.apache.http.util.EntityUtils;
 import org.joml.Vector3f;
 //?} else {
 /*import net.minecraft.world.entity.animal.bee.Bee;
 *///?}
 
-public class WildLifeTriviaHandler extends TriviaHandler {
-    public WildLifeTriviaHandler(TriviaBot bot) {
-        super(bot);
+public class TriviaHandler {
+    private TriviaBot bot;
+    public TriviaHandler(TriviaBot bot) {
+        this.bot = bot;
     }
 
     public static ItemSpawner itemSpawner;
-    public int snailTransformation = 0;
-    public static int EASY_TIME = 180;
-    public static int NORMAL_TIME = 240;
-    public static int HARD_TIME = 300;
-
-    public void tick() {
-        if (bot.ranOutOfTime()) {
-            snailTransformation++;
-        }
-
-        if (bot.tickCount % 2 == 0 && bot.submittedAnswer()) {
-            bot.setAnalyzingTime(bot.getAnalyzingTime()-1);
-        }
-
-        if (bot.submittedAnswer()) {
-            if (bot.answeredRight()) {
-                if (bot.getAnalyzingTime() < -80) {
-                    if (bot.isPassenger()) bot.removeVehicle();
-                    bot.noPhysics = true;
-                    float velocity = Math.min(0.5f, 0.25f * Math.abs((bot.getAnalyzingTime()+80) / (20.0f)));
-                    bot.setDeltaMovement(0,velocity,0);
-                    if (bot.getAnalyzingTime() < -200) bot.serverData.despawn();
-                }
-            }
-            else {
-                if (bot.getAnalyzingTime() < -100) {
-                    if (bot.isPassenger()) bot.removeVehicle();
-                    bot.noPhysics = true;
-                    float velocity = Math.min(0.5f, 0.25f * Math.abs((bot.getAnalyzingTime()+100) / (20.0f)));
-                    bot.setDeltaMovement(0,velocity,0);
-                    if (bot.getAnalyzingTime() < -200) bot.serverData.despawn();
-                }
-            }
-        }
-        else {
-            bot.serverData.handleHighVelocity();
-            if (bot.interactedWith() && getRemainingTicks() <= 0) {
-                if (!bot.ranOutOfTime()) {
-                    ServerPlayer boundPlayer = bot.serverData.getBoundPlayer();
-                    if (boundPlayer != null) {
-                        NetworkHandlerServer.sendStringPacket(boundPlayer, PacketNames.RESET_TRIVIA, "true");
-                    }
-                }
-                bot.setRanOutOfTime(true);
-            }
-            if (snailTransformation > 66) {
-                transformIntoSnail();
-            }
-        }
-    }
+    public int difficulty = 0;
+    public int interactedAtAge = 0;
+    public int timeToComplete = 0;
+    public TriviaQuestion question;
 
     public InteractionResult interactMob(Player player, InteractionHand hand) {
         if (bot.level().isClientSide()) return InteractionResult.SUCCESS;
@@ -132,19 +86,25 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         if (bot.submittedAnswer()) return InteractionResult.PASS;
         if (bot.interactedWith() && getRemainingTicks() <= 0) return InteractionResult.PASS;
 
-        startTrivia(boundPlayer);
+        DatapackIntegration.EVENT_TRIVIA_BOT_OPEN.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+        ));
+
+        if (!bot.interactedWith() || question == null) {
+            interactedAtAge = bot.tickCount;
+            difficulty = 1+bot.getRandom().nextInt(3);
+            timeToComplete = difficulty * 60 + 120;
+            if (difficulty == 1) timeToComplete = TriviaBot.EASY_TIME;
+            if (difficulty == 2) timeToComplete = TriviaBot.NORMAL_TIME;
+            if (difficulty == 3) timeToComplete = TriviaBot.HARD_TIME;
+            question = TriviaWildcard.getTriviaQuestion(difficulty);
+        }
+        sendTimeUpdatePacket();
+        NetworkHandlerServer.sendTriviaPacket(boundPlayer, question.getQuestion(), difficulty, System.currentTimeMillis(), timeToComplete, question.getAnswers());
+        bot.setInteractedWith(true);
 
         return InteractionResult.SUCCESS;
-    }
-    public Tuple<Integer, TriviaQuestion> generateTrivia(ServerPlayer boundPlayer) {
-        return TriviaWildcard.getTriviaQuestion(boundPlayer);
-    }
-
-    public void setTimeBasedOnDifficulty(int difficulty) {
-        timeToComplete = difficulty * 60 + 120;
-        if (difficulty == 1) timeToComplete = EASY_TIME;
-        if (difficulty == 2) timeToComplete = NORMAL_TIME;
-        if (difficulty == 3) timeToComplete = HARD_TIME;
     }
 
     public void transformIntoSnail() {
@@ -170,10 +130,24 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         }
         bot.serverData.despawn();
     }
+    
+    public void sendTimeUpdatePacket() {
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            int ticksSinceStart = bot.tickCount - interactedAtAge;
+            NetworkHandlerServer.sendNumberPacket(player, PacketNames.TRIVIA_TIMER, ticksSinceStart);
+        }
+    }
+
+    public int getRemainingTicks() {
+        int ticksSinceStart = bot.tickCount - interactedAtAge;
+        return (timeToComplete*20) - ticksSinceStart;
+    }
 
     public void handleAnswer(int answer) {
         if (bot.level().isClientSide()) return;
-        super.handleAnswer(answer);
+        if (bot.submittedAnswer()) return;
+        bot.setSubmittedAnswer(true);
         bot.setAnalyzingTime(42);
         PlayerUtils.playSoundWithSourceToPlayers(
                 PlayerUtils.getAllPlayers(), bot,
@@ -181,35 +155,49 @@ public class WildLifeTriviaHandler extends TriviaHandler {
                 SoundSource.NEUTRAL, 1f, 1);
         if (answer == question.getCorrectAnswerIndex()) {
             answeredCorrect();
+            TaskScheduler.scheduleTask(72, () -> {
+                PlayerUtils.playSoundWithSourceToPlayers(
+                        PlayerUtils.getAllPlayers(), bot,
+                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_correct")),
+                        SoundSource.NEUTRAL, 1f, 1);
+            });
         }
         else {
             answeredIncorrect();
+            TaskScheduler.scheduleTask(72, () -> {
+                PlayerUtils.playSoundWithSourceToPlayers(
+                        PlayerUtils.getAllPlayers(), bot,
+                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_incorrect")),
+                        SoundSource.NEUTRAL, 1f, 1);
+            });
         }
     }
 
     public void answeredCorrect() {
-        super.answeredCorrect();
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            DatapackIntegration.EVENT_TRIVIA_SUCCEED.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+            ));
+        }
+        bot.setAnsweredRight(true);
         TaskScheduler.scheduleTask(145, this::spawnItemForPlayer);
         TaskScheduler.scheduleTask(170, this::spawnItemForPlayer);
         TaskScheduler.scheduleTask(198, this::spawnItemForPlayer);
         TaskScheduler.scheduleTask(213, this::blessPlayer);
-        TaskScheduler.scheduleTask(72, () -> {
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_correct")),
-                    SoundSource.NEUTRAL, 1f, 1);
-        });
     }
 
     public void answeredIncorrect() {
-        super.answeredIncorrect();
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            DatapackIntegration.EVENT_TRIVIA_FAIL.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
+            ));
+        }
+        bot.setAnsweredRight(false);
         TaskScheduler.scheduleTask(210, this::cursePlayer);
-        TaskScheduler.scheduleTask(72, () -> {
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_incorrect")),
-                    SoundSource.NEUTRAL, 1f, 1);
-        });
     }
 
     public void cursePlayer() {
@@ -275,7 +263,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
                 curseHunger(player);
                 break;
             case 3:
-                curseBeeswarm(player, bot.blockPosition());
+                curseBeeswarm(player);
                 break;
             //? if > 1.20.3 {
             case 4:
@@ -292,7 +280,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
                 curseBindingArmor(player);
                 break;
             case 8:
-                curseRavager(player, bot.blockPosition());
+                curseRavager(player);
                 break;
             case 9:
                 curseHearts(player);
@@ -461,18 +449,18 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         Curses
      */
 
-    public static void curseHunger(ServerPlayer player) {
+    public void curseHunger(ServerPlayer player) {
         MobEffectInstance statusEffectInstance = new MobEffectInstance(MobEffects.HUNGER, 18000, 2);
         player.addEffect(statusEffectInstance);
     }
 
-    public static void curseRavager(ServerPlayer player, BlockPos pos) {
-        BlockPos spawnPos = TriviaBotPathfinding.getBlockPosNearPlayer(player, pos, 5);
+    public void curseRavager(ServerPlayer player) {
+        BlockPos spawnPos = TriviaBotPathfinding.getBlockPosNearPlayer(player, bot.blockPosition(), 5);
         LevelUtils.spawnEntity(EntityType.RAVAGER, player.ls$getServerLevel(), spawnPos);
     }
 
     //? if >= 1.21 {
-    public static void curseInfestation(ServerPlayer player) {
+    public void curseInfestation(ServerPlayer player) {
         MobEffectInstance statusEffectInstance = new MobEffectInstance(MobEffects.INFESTED, 18000, 0);
         player.addEffect(statusEffectInstance);
     }
@@ -480,18 +468,18 @@ public class WildLifeTriviaHandler extends TriviaHandler {
 
     public static final List<UUID> cursedGigantificationPlayers = new ArrayList<>();
     //? if > 1.20.3 {
-    public static void curseGigantification(ServerPlayer player) {
+    public void curseGigantification(ServerPlayer player) {
         cursedGigantificationPlayers.add(player.getUUID());
         SizeShifting.setPlayerSizeUnchecked(player, 4);
     }
     //?}
 
     public static final List<UUID> cursedSliding = new ArrayList<>();
-    public static void curseSlipperyGround(ServerPlayer player) {
+    public void curseSlipperyGround(ServerPlayer player) {
         cursedSliding.add(player.getUUID());
     }
 
-    public static void curseBindingArmor(ServerPlayer player) {
+    public void curseBindingArmor(ServerPlayer player) {
         for (ItemStack item : PlayerUtils.getArmorItems(player)) {
             ItemStackUtils.spawnItemForPlayer(player.ls$getServerLevel(), player.position(), item.copy(), player);
         }
@@ -522,14 +510,14 @@ public class WildLifeTriviaHandler extends TriviaHandler {
     }
 
     public static final List<UUID> cursedHeartPlayers = new ArrayList<>();
-    public static void curseHearts(ServerPlayer player) {
+    public void curseHearts(ServerPlayer player) {
         cursedHeartPlayers.add(player.getUUID());
         double newHealth = Math.max(player.getMaxHealth()-7, 1);
         AttributeUtils.setMaxPlayerHealth(player, newHealth);
     }
 
     public static final List<UUID> cursedMoonJumpPlayers = new ArrayList<>();
-    public static void curseMoonjump(ServerPlayer player) {
+    public void curseMoonjump(ServerPlayer player) {
         cursedMoonJumpPlayers.add(player.getUUID());
         //? if >= 1.21.5 {
         /*AttributeUtils.setJumpStrength(player, 0.85);
@@ -538,13 +526,13 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         //?}
     }
 
-    public static void curseBeeswarm(ServerPlayer player, BlockPos pos) {
-        BlockPos spawnPos = TriviaBotPathfinding.getBlockPosNearPlayer(player, pos, 1);
-        Bee bee1 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
-        Bee bee2 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
-        Bee bee3 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
-        Bee bee4 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
-        Bee bee5 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
+    public void curseBeeswarm(ServerPlayer player) {
+        BlockPos spawnPos = TriviaBotPathfinding.getBlockPosNearPlayer(player, bot.blockPosition(), 1);
+        Bee bee1 = LevelUtils.spawnEntity(EntityType.BEE, (ServerLevel) bot.level(), spawnPos);
+        Bee bee2 = LevelUtils.spawnEntity(EntityType.BEE, (ServerLevel) bot.level(), spawnPos);
+        Bee bee3 = LevelUtils.spawnEntity(EntityType.BEE, (ServerLevel) bot.level(), spawnPos);
+        Bee bee4 = LevelUtils.spawnEntity(EntityType.BEE, (ServerLevel) bot.level(), spawnPos);
+        Bee bee5 = LevelUtils.spawnEntity(EntityType.BEE, (ServerLevel) bot.level(), spawnPos);
         //? if <= 1.21.9 {
         if (bee1 != null) bee1.setPersistentAngerTarget(player.getUUID());
         if (bee2 != null) bee2.setPersistentAngerTarget(player.getUUID());
@@ -571,7 +559,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
     }
 
     public static final List<UUID> cursedRoboticVoicePlayers = new ArrayList<>();
-    public static void curseRoboticVoice(ServerPlayer player) {
+    public void curseRoboticVoice(ServerPlayer player) {
         cursedRoboticVoicePlayers.add(player.getUUID());
     }
 }

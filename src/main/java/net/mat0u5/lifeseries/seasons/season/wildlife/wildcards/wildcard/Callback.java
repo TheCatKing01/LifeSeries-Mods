@@ -152,14 +152,14 @@ public class Callback extends Wildcard {
 		SuperpowersWildcard.externalResetAllPowers();
         TaskScheduler.scheduleTask(50, () -> {
             if (currentSession.statusStarted()) {
+                SessionTranscript.endingIsYours();
                 showEndingTitles();
             }
         });
         super.deactivate();
     }
 
-    public static void showEndingTitles() {
-        SessionTranscript.endingIsYours();
+    public void showEndingTitles() {
         List<ServerPlayer> players = PlayerUtils.getAllPlayers();
         PlayerUtils.sendTitleToPlayers(players, Component.nullToEmpty("§7The ending is §cyours§7..."), 0, 90, 0);
         TaskScheduler.scheduleTask(80, () -> {

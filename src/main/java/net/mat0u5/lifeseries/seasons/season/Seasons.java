@@ -5,7 +5,6 @@ import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.SimpleLife;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.lastlife.LastLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
-import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
 import net.mat0u5.lifeseries.seasons.season.pastlife.PastLife;
 import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLife;
 import net.mat0u5.lifeseries.seasons.season.thirdlife.ThirdLife;
@@ -32,7 +31,6 @@ public enum Seasons {
     SECRET_LIFE("Secret Life", "secretlife"),
     WILD_LIFE("Wild Life", "wildlife"),
     PAST_LIFE("Past Life", "pastlife"),
-    NICE_LIFE("Nice Life", "nicelife"),
 
     REAL_LIFE("Real Life", "reallife"),
     SIMPLE_LIFE("Simple Life", "simplelife");
@@ -61,7 +59,6 @@ public enum Seasons {
         if (this == SECRET_LIFE) return new SecretLife();
         if (this == WILD_LIFE) return new WildLife();
         if (this == PAST_LIFE) return new PastLife();
-        if (this == NICE_LIFE) return new NiceLife();
 
         if (this == REAL_LIFE) return new RealLife();
         if (this == SIMPLE_LIFE) return new SimpleLife();
@@ -74,12 +71,6 @@ public enum Seasons {
     /*public Identifier getLogo() {
     *///?}
         return IdentifierHelper.mod("textures/gui/" + this.getId() + ".png");
-    }
-
-    public boolean requiresClient() {
-        if (this == WILD_LIFE) return true;
-        if (this == NICE_LIFE) return true;
-        return false;
     }
 
     public static Seasons getSeasonFromStringName(String name) {

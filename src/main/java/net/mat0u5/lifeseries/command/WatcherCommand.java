@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
-import java.util.List;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
@@ -27,10 +26,6 @@ public class WatcherCommand extends Command {
     @Override
     public Component getBannedText() {
         return Component.nullToEmpty("This command is only available when you have selected a series.");
-    }
-
-    public List<String> getAdminCommands() {
-        return List.of("watcher");
     }
 
     @Override

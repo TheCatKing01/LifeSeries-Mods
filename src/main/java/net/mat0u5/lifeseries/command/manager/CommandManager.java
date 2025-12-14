@@ -16,34 +16,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandManager {
-    public static List<Command> commands = new ArrayList<>();
+    private static List<Command> commands = new ArrayList<>();
     private static void loadCommands() {
-        commands.add(new LifeSeriesCommand());
-        commands.add(new SessionCommand());
-        commands.add(new LivesCommand());
-        commands.add(new ClaimKillCommand());
-
-        commands.add(new BoogeymanCommand());
-        commands.add(new GivelifeCommand());
-        commands.add(new WatcherCommand());
-        commands.add(new SocietyCommands());
-        commands.add(new SubInCommands());
-        commands.add(new TriviaCommand());
-
         commands.add(new DoubleLifeCommands());
         commands.add(new SecretLifeCommands());
         commands.add(new WildLifeCommands());
         commands.add(new PastLifeCommands());
 
+        commands.add(new LivesCommand());
+        commands.add(new SessionCommand());
+        commands.add(new BoogeymanCommand());
+        commands.add(new ClaimKillCommand());
+        commands.add(new LifeSeriesCommand());
+        commands.add(new GivelifeCommand());
         commands.add(new SelfMessageCommand());
-        commands.add(new SideTitleCommand());
+        commands.add(new WatcherCommand());
+        commands.add(new SocietyCommands());
         commands.add(new TestingCommands());
+        commands.add(new SubInCommands());
+        commands.add(new SideTitleCommand());
     }
 
     public static void registerAllCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandRegistryAccess, net.minecraft.commands.Commands.CommandSelection registrationEnvironment) {
-        if (commands.isEmpty()) {
-            loadCommands();
-        }
+        loadCommands();
         for (Command command : commands) {
             command.register(dispatcher, commandRegistryAccess);
         }

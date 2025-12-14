@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,14 +34,6 @@ public class GivelifeCommand extends Command {
     @Override
     public Component getBannedText() {
         return Component.nullToEmpty("This command is only available when the givelife command has been enabled in the Life Series config.");
-    }
-
-    public List<String> getAdminCommands() {
-        return List.of("givelife");
-    }
-
-    public List<String> getNonAdminCommands() {
-        return List.of("givelife");
     }
 
     @Override

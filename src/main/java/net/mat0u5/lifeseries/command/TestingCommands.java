@@ -16,8 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
-import static net.mat0u5.lifeseries.Main.server;
-
 public class TestingCommands extends Command {
 
     @Override
@@ -63,8 +61,6 @@ public class TestingCommands extends Command {
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
-        OtherUtils.log(String.valueOf(server.overworld().getDayTime()));
-        OtherUtils.log(String.valueOf(server.overworld().getDayTime() % 24000L));
 
         return 1;
     }
