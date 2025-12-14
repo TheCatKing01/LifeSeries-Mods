@@ -40,6 +40,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
     protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
         return new ArrayList<>(List.of(
                 GROUP_GLOBAL // Group
+                ,GROUP_LIFESERIES_PLUS, // Group
                 ,GROUP_SEASON // Group
                 ,GROUP_LIVES
                 ,GROUP_TEAMS
@@ -80,7 +81,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_BLACKLIST // Group
                 ,BOOGEYMAN // Group
                 ,SECRET_SOCIETY //Group
-                ,SIMPLE_LIFE //Group
                 ,GIVELIFE_COMMAND_ENABLED // Group
                 ,GROUP_FINAL_DEATH // Group
                 ,CUSTOM_ENCHANTER_ALGORITHM
@@ -89,6 +89,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SPAWN_EGG // Group
                 ,GROUP_WATCHERS // Group
 
+                ,SIMPLE_LIFE //Group
 
                 //Group stuff
                 ,SHOW_HEALTH_BELOW_NAME
@@ -126,9 +127,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,SECRET_SOCIETY_KILLS_REQUIRED
                 ,SECRET_SOCIETY_SOUND_ONLY_MEMBERS
 
-                ,TRADERS_MAX_AMOUNT
-                ,COMPLEX_LIFE_TRADES
-
                 ,PLAYERS_DROP_ITEMS_ON_FINAL_DEATH
                 ,FINAL_DEATH_TITLE_SHOW
                 ,FINAL_DEATH_TITLE_SUBTITLE
@@ -149,6 +147,9 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,WATCHERS_IN_TAB
                 ,WATCHERS_MUTED
+
+                ,TRADERS_MAX_AMOUNT
+                ,COMPLEX_LIFE_TRADES
         ));
     }
 

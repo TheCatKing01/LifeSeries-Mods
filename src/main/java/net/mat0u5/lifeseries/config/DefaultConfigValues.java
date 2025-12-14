@@ -308,15 +308,15 @@ public class DefaultConfigValues {
     );
 
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
-            "simple_life", false, "{global.simplelife}",
+            "simple_life", false, "{lifeseries_plus.simplelife}",
             "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
     );
     public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
-            "traders_max_amount", 3, "global.simplelife",
+            "traders_max_amount", 3, "lifeseries_plus.simplelife",
             "Max Trader Amount", "The maximum amount of Traders that can be spawned in at one time."
     );
     public final ConfigFileEntry<Boolean> COMPLEX_LIFE_TRADES = new ConfigFileEntry<>(
-            "complex_life_trades", false, "global.simplelife",
+            "complex_life_trades", false, "lifeseries_plus.simplelife",
             "Complex Life Trades", "Changes the Simple Life trades to be custom Complex Life ones."
     );
 
@@ -326,6 +326,10 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Object> GROUP_GLOBAL = new ConfigFileEntry<>(
             "group_global", null, ConfigTypes.TEXT, "{global}[no_sidebar]",
             "General Settings", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_LIFESERIES_PLUS = new ConfigFileEntry<>(
+            "group_lifeseries_plus", null, ConfigTypes.TEXT, "{lifeseries_plus}[no_sidebar]",
+            "Life Series+", ""
     );
     public final ConfigFileEntry<Object> GROUP_SEASON = new ConfigFileEntry<>(
             "group_season", null, ConfigTypes.TEXT, "{season}[no_sidebar]",
