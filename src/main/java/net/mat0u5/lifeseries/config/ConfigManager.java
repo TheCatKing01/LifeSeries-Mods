@@ -40,7 +40,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
     protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
         return new ArrayList<>(List.of(
                 GROUP_GLOBAL // Group
-                ,GROUP_LIFESERIES_PLUS, // Group
+                ,GROUP_LIFESERIES_PLUS // Group
                 ,GROUP_SEASON // Group
                 ,GROUP_LIVES
                 ,GROUP_TEAMS
