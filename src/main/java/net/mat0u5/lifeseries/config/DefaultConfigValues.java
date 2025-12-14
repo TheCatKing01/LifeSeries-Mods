@@ -329,7 +329,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Object> GROUP_LIFESERIES_PLUS = new ConfigFileEntry<>(
             "group_lifeseries_plus", null, ConfigTypes.TEXT, "{lifeseries_plus}[no_sidebar]",
-            "Life Series+", ""
+            "Life Series+ Settings", ""
     );
     public final ConfigFileEntry<Object> GROUP_SEASON = new ConfigFileEntry<>(
             "group_season", null, ConfigTypes.TEXT, "{season}[no_sidebar]",
