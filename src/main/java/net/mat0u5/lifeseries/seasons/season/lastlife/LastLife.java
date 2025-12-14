@@ -11,8 +11,6 @@ import static net.mat0u5.lifeseries.Main.currentSession;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
 
 public class LastLife extends Season {
-    public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /givelife, /boogeyman";
-    public static final String COMMANDS_TEXT = "/claimkill, /lives, /givelife";
     public static int ROLL_MAX_LIVES = 6;
     public static int ROLL_MIN_LIVES = 2;
     private final WandingTraders traders = new WandingTraders();
@@ -30,16 +28,6 @@ public class LastLife extends Season {
     @Override
     public LivesManager createLivesManager() {
         return new LastLifeLivesManager();
-    }
-
-    @Override
-    public String getAdminCommands() {
-        return COMMANDS_ADMIN_TEXT;
-    }
-
-    @Override
-    public String getNonAdminCommands() {
-        return COMMANDS_TEXT;
     }
 
     @Override

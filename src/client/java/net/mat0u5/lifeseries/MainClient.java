@@ -26,6 +26,7 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static long SUPERPOWER_COOLDOWN_TIMESTAMP = 0;
     public static long MIMICRY_COOLDOWN_TIMESTAMP = 0;
     public static long CURSE_SLIDING = 0;
+    public static boolean NICELIFE_SNOWY_NETHER = true;
 
     public static Map<String, String> playerDisguiseNames = new HashMap<>();
     public static Map<UUID, UUID> playerDisguiseUUIDs = new HashMap<>();
@@ -57,7 +58,7 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static float SIZESHIFTING_CHANGE = 0;
     public static double TEXT_HUD_SCALE = 1.0;
     public static int TICKS_PER_SECOND = 20;
-
+    public static boolean NICE_LIFE_LESS_SNOW = true;
 
     public static boolean isReplay = false;
     public static HandshakeStatus serverHandshake = HandshakeStatus.WAITING;
@@ -124,6 +125,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         COLORED_HEARTS_HARDCORE_ALL_LIVES = ClientConfig.COLORED_HEARTS_HARDCORE_ALL_LIVES.get(clientConfig);
 
         TEXT_HUD_SCALE = ClientConfig.TEXT_HUD_SCALE.get(clientConfig);
+
+        NICE_LIFE_LESS_SNOW = ClientConfig.NICE_LIFE_LESS_SNOW.get(clientConfig);
     }
 
     public static void resetClientData() {
