@@ -41,8 +41,6 @@ import net.minecraft.world.level.GameRules;
 /*import net.minecraft.world.level.gamerules.GameRules;*/
 
 public class DoubleLife extends Season {
-    public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /soulmate";
-    public static final String COMMANDS_TEXT = "/claimkill, /lives";
     public static final ResourceKey<DamageType> SOULMATE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,  IdentifierHelper.mod("soulmate"));
     StringListConfig soulmateConfig;
     public boolean ANNOUNCE_SOULMATES = false;
@@ -105,16 +103,6 @@ public class DoubleLife extends Season {
     @Override
     public BoogeymanManager createBoogeymanManager() {
         return new DoubleLifeBoogeymanManager();
-    }
-
-    @Override
-    public String getAdminCommands() {
-        return COMMANDS_ADMIN_TEXT;
-    }
-
-    @Override
-    public String getNonAdminCommands() {
-        return COMMANDS_TEXT;
     }
 
     @Override
