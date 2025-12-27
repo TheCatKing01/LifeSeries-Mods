@@ -374,7 +374,7 @@ public class TriviaBotAnimations {
                 ))
                 .build();
 
-        public static final AnimationDefinition analyzing = AnimationDefinition.Builder.withLength(4.0F)
+        public static final AnimationDefinition santa_analyzing = AnimationDefinition.Builder.withLength(4.0F)
                 .addAnimation("main", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                         new Keyframe(0.0F, KeyframeAnimations.degreeVec(2.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                         new Keyframe(2.0F, KeyframeAnimations.degreeVec(7.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
@@ -1249,7 +1249,7 @@ public class TriviaBotAnimations {
                 ))
                 .build();
 
-        public static final AnimationDefinition santa_analyzing = AnimationDefinition.Builder.withLength(8.5F)
+        public static final AnimationDefinition analyzing = AnimationDefinition.Builder.withLength(8.5F)
                 .addAnimation("main", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                         new Keyframe(0.0F, KeyframeAnimations.degreeVec(2.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                         new Keyframe(0.375F, KeyframeAnimations.degreeVec(2.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),

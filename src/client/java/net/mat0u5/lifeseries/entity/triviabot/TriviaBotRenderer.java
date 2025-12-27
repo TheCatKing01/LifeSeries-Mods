@@ -22,9 +22,9 @@ public class TriviaBotRenderer extends MobRenderer<TriviaBot, TriviaBotModel<Tri
     @Override
     public ResourceLocation getTextureLocation(TriviaBot entity) {
         if (entity.santaBot()) {
-            return TriviaBot.SANTABOT_TEXTURE;
+            return TriviaBot.DEFAULT_TEXTURE;
         }
-        return TriviaBot.DEFAULT_TEXTURE;
+        return TriviaBot.SANTABOT_TEXTURE;
     }
 
     @Override
@@ -52,9 +52,9 @@ public class TriviaBotRenderer extends AgeableMobRenderer<TriviaBot, TriviaBotRe
     /^public Identifier getTextureLocation(TriviaBotRenderState state) {
     ^///?}
         if (state.santaBot) {
-            return TriviaBot.SANTABOT_TEXTURE;
+            return TriviaBot.DEFAULT_TEXTURE;
         }
-        return TriviaBot.DEFAULT_TEXTURE;
+        return TriviaBot.SANTABOT_TEXTURE;
     }
 
     @Override
