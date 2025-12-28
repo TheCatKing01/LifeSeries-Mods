@@ -175,6 +175,8 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
 
         PartDefinition mouth = expressions.addOrReplaceChild("mouth", CubeListBuilder.create().texOffs(28, 67).addBox(-3.0F, 1.53F, -2.61F, 6.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 3.005F));
 
+        PartDefinition mouth_santa = expressions.addOrReplaceChild("mouth_santa", CubeListBuilder.create().texOffs(28, 67).addBox(-3.0F, 1.53F, -2.61F, 6.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 3.005F));
+
         PartDefinition dots = expressions.addOrReplaceChild("dots", CubeListBuilder.create(), PartPose.offset(0.0F, -0.5F, 0.0F));
 
         PartDefinition green = dots.addOrReplaceChild("green", CubeListBuilder.create().texOffs(56, 71).addBox(-4.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
@@ -185,11 +187,11 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
 
         PartDefinition dots_santa = expressions.addOrReplaceChild("dots_santa", CubeListBuilder.create(), PartPose.offset(0.0F, -0.5F, 0.0F));
 
-        PartDefinition green2 = dots.addOrReplaceChild("green2", CubeListBuilder.create().texOffs(56, 71).addBox(-4.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition green2 = dots_santa.addOrReplaceChild("green2", CubeListBuilder.create().texOffs(56, 71).addBox(-4.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition yellow2 = dots.addOrReplaceChild("yellow2", CubeListBuilder.create().texOffs(78, 78).addBox(-1.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition yellow2 = dots_santa.addOrReplaceChild("yellow2", CubeListBuilder.create().texOffs(78, 78).addBox(-1.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition red2 = dots.addOrReplaceChild("red2", CubeListBuilder.create().texOffs(44, 79).addBox(2.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition red2 = dots_santa.addOrReplaceChild("red2", CubeListBuilder.create().texOffs(44, 79).addBox(2.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition clock = expressions.addOrReplaceChild("clock", CubeListBuilder.create().texOffs(48, 79).addBox(-1.2228F, -1.4755F, 1.7083F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.2228F, -0.0245F, -0.0033F));
 
@@ -212,8 +214,6 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
         PartDefinition snail = expressions.addOrReplaceChild("snail", CubeListBuilder.create().texOffs(56, 60).addBox(-5.0F, -4.5F, -1.3F, 10.0F, 9.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 3.005F));
 
         PartDefinition beard = main.addOrReplaceChild("beard", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
-
-        PartDefinition beard_santa = main.addOrReplaceChild("beard_santa", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition hat = main.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(60, 84).addBox(-4.3F, -1.5F, -3.5F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.3F, -6.1F, 3.3F, -0.3927F, 0.0F, 0.0F));
 
