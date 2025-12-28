@@ -14,8 +14,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.ScoreboardTeam;
 
 import java.util.*;
+import java.util.Random;
 
 import static net.mat0u5.lifeseries.Main.*;
 
@@ -41,7 +44,7 @@ public class BoogeymanManager {
     public List<UUID> rolledPlayers = new ArrayList<>();
     public boolean boogeymanChosen = false;
     public boolean boogeymanListChanged = false;
-
+	
     public void addSessionActions() {
         if (!BOOGEYMAN_ENABLED) return;
         currentSession.addSessionActionIfTime(
@@ -50,7 +53,7 @@ public class BoogeymanManager {
                 public void trigger() {
                     if (!BOOGEYMAN_ENABLED) return;
                     if (boogeymanChosen) return;
-                    PlayerUtils.broadcastMessage(Component.literal("The Boogeyman is being chosen in 5 minutes.").withStyle(ChatFormatting.RED));
+                    PlayerUtils.broadcastMessage(Component.literal("The naughty/nice list is being rolled in 5 minutes.").withStyle(ChatFormatting.RED));
                     PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
                 }
             }
@@ -61,13 +64,13 @@ public class BoogeymanManager {
                 public void trigger() {
                     if (!BOOGEYMAN_ENABLED) return;
                     if (boogeymanChosen) return;
-                    PlayerUtils.broadcastMessage(Component.literal("The Boogeyman is being chosen in 1 minute.").withStyle(ChatFormatting.RED));
+                    PlayerUtils.broadcastMessage(Component.literal("The naughty/nice list is being rolled in 1 minute.").withStyle(ChatFormatting.RED));
                     PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
                 }
             }
         );
         currentSession.addSessionAction(
-                new SessionAction(Time.minutes(BOOGEYMAN_CHOOSE_MINUTE), "Choose Boogeymen") {
+                new SessionAction(Time.minutes(BOOGEYMAN_CHOOSE_MINUTE), "Roll naughty/N=nice list") {
                     @Override
                     public void trigger() {
                         if (!BOOGEYMAN_ENABLED) return;
@@ -140,7 +143,7 @@ public class BoogeymanManager {
         player.removeTag("boogeyman_cured");
         player.removeTag("boogeyman_failed");
         if (boogeymen.isEmpty()) boogeymanChosen = false;
-        player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
+        player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer on the naughty/nice list!"));
     }
 
     public void resetBoogeymen() {
@@ -148,7 +151,7 @@ public class BoogeymanManager {
         for (Boogeyman boogeyman : boogeymen) {
             ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
             if (player == null) continue;
-            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
+            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer on the naughty/nice list!"));
             player.removeTag("boogeyman");
             player.removeTag("boogeyman_cured");
             player.removeTag("boogeyman_failed");
@@ -163,7 +166,7 @@ public class BoogeymanManager {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeymen == null) return;
         if (boogeyman.failed || boogeyman.cured) {
-            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] Your Boogeyman  fail/cure status has been reset"));
+            player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] Your naughty/nice list fail/cure status has been reset"));
         }
         boogeyman.failed = false;
         boogeyman.cured = false;
@@ -258,7 +261,7 @@ public class BoogeymanManager {
         });
         TaskScheduler.scheduleTask(90, () -> {
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_wait")));
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("You are...").withStyle(ChatFormatting.YELLOW),10,50,20);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("You are on...").withStyle(ChatFormatting.YELLOW),10,50,20);
         });
     }
     public void chooseBoogeymen(List<ServerPlayer> allowedPlayers, BoogeymanRollType rollType) {
@@ -363,17 +366,50 @@ public class BoogeymanManager {
         return result;
     }
 
-    public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
-        PlayerUtils.playSoundToPlayers(normalPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
-        PlayerUtils.playSoundToPlayers(boogeyPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_yes")));
-        PlayerUtils.sendTitleToPlayers(normalPlayers, Component.literal("NOT the Boogeyman.").withStyle(ChatFormatting.GREEN),10,50,20);
-        PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Boogeyman.").withStyle(ChatFormatting.RED),10,50,20);
-        for (ServerPlayer boogey : boogeyPlayers) {
-            Boogeyman boogeyman = addBoogeyman(boogey);
-            messageBoogeyman(boogeyman, boogey);
-        }
-        SessionTranscript.boogeymenChosen(boogeyPlayers);
-    }
+	public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
+		PlayerUtils.playSoundToPlayers(normalPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
+		PlayerUtils.sendTitleToPlayers(normalPlayers, Component.literal("NO lists.").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
+
+		Scoreboard scoreboard = server.getScoreboard();
+		ScoreboardTeam naughtyTeam = scoreboard.getPlayerTeam("naughty_list");
+		if (naughtyTeam == null) {
+			naughtyTeam = scoreboard.addPlayerTeam("naughty_list");
+			naughtyTeam.setColor(ChatFormatting.DARK_RED);
+		}
+		ScoreboardTeam niceTeam = scoreboard.getPlayerTeam("nice_list");
+		if (niceTeam == null) {
+			niceTeam = scoreboard.addPlayerTeam("nice_list");
+			niceTeam.setColor(ChatFormatting.GREEN);
+		}
+
+		boolean naughtyList = true;
+		if (BOOGEYMAN_NAUGHTY_ONLY) {
+			naughtyList = true;
+		} else if (BOOGEYMAN_NICE_ONLY) {
+			naughtyList = false;
+		} else {
+			naughtyList = rnd.nextBoolean();
+		}
+
+		if (naughtyList) {
+			PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Naughty List.").withStyle(ChatFormatting.RED), 10, 50, 20);
+			for (ServerPlayer player : boogeyPlayers) {
+				scoreboard.addPlayerToTeam(player.getScoreboardName(), naughtyTeam);
+			}
+		} else {
+			PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Nice List.").withStyle(ChatFormatting.GREEN), 10, 50, 20);
+			for (ServerPlayer player : boogeyPlayers) {
+				scoreboard.addPlayerToTeam(player.getScoreboardName(), niceTeam);
+			}
+		}
+
+		// Add boogeymen as usual
+		for (ServerPlayer boogey : boogeyPlayers) {
+			Boogeyman boogeyman = addBoogeyman(boogey);
+			messageBoogeyman(boogeyman, boogey);
+		}
+		SessionTranscript.boogeymenChosen(boogeyPlayers);
+	}
 
     public void messageBoogeyman(Boogeyman boogeyman, ServerPlayer boogey) {
         boogey.sendSystemMessage(Component.nullToEmpty(BOOGEYMAN_MESSAGE));
@@ -452,19 +488,6 @@ public class BoogeymanManager {
         boogeyman.died = true;
     }
 
-    public void onPlayerFinishJoining(ServerPlayer player) {
-        if (!BOOGEYMAN_ENABLED) return;
-        if (!boogeymanChosen) return;
-        if (rolledPlayers.contains(player.getUUID())) return;
-        if (player.ls$isDead()) return;
-        if (boogeymen.size() >= BOOGEYMAN_AMOUNT_MAX) return;
-        if (currentSession.statusNotStarted() || currentSession.statusFinished()) return;
-        TaskScheduler.scheduleTask(Time.seconds(2), () -> {
-            player.sendSystemMessage(Component.nullToEmpty("§cSince you were not present when the Boogeyman was being chosen, your chance to become the Boogeyman is now. Good luck!"));
-            chooseBoogeymen(new ArrayList<>(List.of(player)), BoogeymanRollType.LATE_JOIN);
-        });
-    }
-
     public void onReload() {
         BOOGEYMAN_ENABLED = seasonConfig.BOOGEYMAN.get(seasonConfig);
         if (!BOOGEYMAN_ENABLED) {
@@ -533,7 +556,7 @@ public class BoogeymanManager {
             }
 
             if (!boogeymenList.isEmpty()) {
-                player.sendSystemMessage(TextUtils.format("Current Boogeymen: {}", boogeymenList));
+                player.sendSystemMessage(TextUtils.format("Current naughty/nice list players: {}", boogeymenList));
 
             }
         }
