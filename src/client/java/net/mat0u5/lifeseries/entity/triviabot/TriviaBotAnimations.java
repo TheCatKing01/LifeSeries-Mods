@@ -1348,7 +1348,7 @@ public class TriviaBotAnimations {
                 .addAnimation("dots", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -1.4F), AnimationChannel.Interpolations.LINEAR)
                 ))
-                .addAnimation("dots_santa, new AnimationChannel(AnimationChannel.Targets.POSITION,
+                .addAnimation("dots_santa", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -1.4F), AnimationChannel.Interpolations.LINEAR)
                 ))
                 .addAnimation("bag", new AnimationChannel(AnimationChannel.Targets.SCALE,
