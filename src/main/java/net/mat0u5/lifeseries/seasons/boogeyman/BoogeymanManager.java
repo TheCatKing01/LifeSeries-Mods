@@ -39,6 +39,9 @@ public class BoogeymanManager {
     public boolean BOOGEYMAN_TEAM_NOTICE = false;
     public int BOOGEYMAN_KILLS_NEEDED = 1;
     public boolean BOOGEYMAN_STEAL_LIFE = false;
+	private boolean BOOGEYMAN_NAUGHTY_ONLY = false;
+	private boolean BOOGEYMAN_NICE_ONLY = false;
+	private final Random rnd = new Random();
 
     public List<Boogeyman> boogeymen = new ArrayList<>();
     public List<UUID> rolledPlayers = new ArrayList<>();
