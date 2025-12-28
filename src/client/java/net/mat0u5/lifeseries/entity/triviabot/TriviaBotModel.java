@@ -213,7 +213,7 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
 
         PartDefinition beard = main.addOrReplaceChild("beard", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition beard_santa = main.addOrReplaceChild("beard_santa", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));z
+        PartDefinition beard_santa = main.addOrReplaceChild("beard_santa", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition hat = main.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(60, 84).addBox(-4.3F, -1.5F, -3.5F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.3F, -6.1F, 3.3F, -0.3927F, 0.0F, 0.0F));
 
