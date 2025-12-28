@@ -20,7 +20,7 @@ public class TriviaBotSounds {
 
         if (introSoundCooldown == 0 && !bot.interactedWith()) {
             if (!bot.santaBot()) {
-                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_santabot_intro"));
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_intro"));
                 PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 1, 1);
                 introSoundCooldown = 830;
             }
