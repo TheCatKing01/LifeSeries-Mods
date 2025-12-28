@@ -652,4 +652,17 @@ public class BoogeymanManager {
         LATE_JOIN,
         INFINITE;
     }
+	
+	    public void onPlayerFinishJoining(ServerPlayer player) {
+        if (!BOOGEYMAN_ENABLED) return;
+        if (!boogeymanChosen) return;
+        if (rolledPlayers.contains(player.getUUID())) return;
+        if (player.ls$isDead()) return;
+        if (boogeymen.size() >= BOOGEYMAN_AMOUNT_MAX) return;
+        if (currentSession.statusNotStarted() || currentSession.statusFinished()) return;
+        TaskScheduler.scheduleTask(Time.seconds(2), () -> {
+            player.sendSystemMessage(Component.nullToEmpty("§cSince you were not present when the Boogeyman was being chosen, your chance to become the Boogeyman is now. Good luck!"));
+            chooseBoogeymen(new ArrayList<>(List.of(player)), BoogeymanRollType.LATE_JOIN);
+        });
+    }
 }
