@@ -178,7 +178,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
             bot.setAnalyzingTime(42);
             PlayerUtils.playSoundWithSourceToPlayers(
                     PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_analyzing")),
+                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_santabot_analyzing")),
                     SoundSource.NEUTRAL, 1f, 1);
             return true;
         }
@@ -194,7 +194,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         TaskScheduler.scheduleTask(72, () -> {
             PlayerUtils.playSoundWithSourceToPlayers(
                     PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_correct")),
+                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_santabot_correct")),
                     SoundSource.NEUTRAL, 1f, 1);
         });
     }
@@ -205,7 +205,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         TaskScheduler.scheduleTask(72, () -> {
             PlayerUtils.playSoundWithSourceToPlayers(
                     PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_incorrect")),
+                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_santabot_incorrect")),
                     SoundSource.NEUTRAL, 1f, 1);
         });
     }

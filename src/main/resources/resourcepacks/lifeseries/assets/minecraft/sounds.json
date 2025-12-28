@@ -345,7 +345,7 @@
         "sounds": [
             {
                 "attenuation_distance": 32,
-                "name": "wildlife/trivia/santabot_intro",
+                "name": "wildlife/trivia/triviabot_intro",
                 "stream": true
             }
         ]
@@ -354,7 +354,7 @@
         "sounds": [
             {
                 "attenuation_distance": 32,
-                "name": "wildlife/trivia/santabot_suspense",
+                "name": "wildlife/trivia/triviabot_suspense",
                 "stream": true
             }
         ]
@@ -363,7 +363,7 @@
         "sounds": [
             {
                 "attenuation_distance": 32,
-                "name": "wildlife/trivia/santabot_suspense_end",
+                "name": "wildlife/trivia/triviabot_suspense_end",
                 "stream": true
             }
         ]
@@ -372,7 +372,7 @@
         "sounds": [
             {
                 "attenuation_distance": 32,
-                "name": "wildlife/trivia/santabot_analyzing"
+                "name": "wildlife/trivia/triviabot_analyzing"
             }
         ]
     },
@@ -380,11 +380,63 @@
         "sounds": [
             {
                 "attenuation_distance": 32,
-                "name": "wildlife/trivia/santabot_correct"
+                "name": "wildlife/trivia/triviabot_correct"
             }
         ]
     },
     "wildlife_trivia_incorrect": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_incorrect"
+            }
+        ]
+    },
+
+    "wildlife_santabot_intro": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/santabot_intro",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_santabot_suspense": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/santabot_suspense",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_santabot_suspense_end": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/santabot_suspense_end",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_santabot_analyzing": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/santabot_analyzing"
+            }
+        ]
+    },
+    "wildlife_santabot_correct": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/santabot_correct"
+            }
+        ]
+    },
+    "wildlife_santabot_incorrect": {
         "sounds": [
             {
                 "attenuation_distance": 32,
