@@ -98,9 +98,9 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
         this.yellow = this.dots.getChild("yellow");
         this.red = this.dots.getChild("red");
         this.dots_santa = this.expressions.getChild("dots_santa");
-        this.green2 = this.dots.getChild("green2");
-        this.yellow2 = this.dots.getChild("yellow2");
-        this.red2 = this.dots.getChild("red2");
+        this.green2 = this.dots_santa.getChild("green2");
+        this.yellow2 = this.dots_santa.getChild("yellow2");
+        this.red2 = this.dots_santa.getChild("red2");
         this.clock = this.expressions.getChild("clock");
         this.clockhand = this.clock.getChild("clockhand");
         this.processing = this.expressions.getChild("processing");
