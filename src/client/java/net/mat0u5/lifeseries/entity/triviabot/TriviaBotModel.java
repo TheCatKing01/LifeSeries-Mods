@@ -47,10 +47,15 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
     private final ModelPart shell;
     private final ModelPart expressions;
     private final ModelPart mouth;
+    private final ModelPart mouth_santa;
     private final ModelPart dots;
     private final ModelPart green;
     private final ModelPart yellow;
     private final ModelPart red;
+    private final ModelPart dots_santa;
+    private final ModelPart green2;
+    private final ModelPart yellow2;
+    private final ModelPart red2;
     private final ModelPart clock;
     private final ModelPart clockhand;
     private final ModelPart processing;
@@ -87,10 +92,15 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
         this.shell = this.main.getChild("shell");
         this.expressions = this.main.getChild("expressions");
         this.mouth = this.expressions.getChild("mouth");
+        this.mouth_santa = this.expressions.getChild("mouth_santa");
         this.dots = this.expressions.getChild("dots");
         this.green = this.dots.getChild("green");
         this.yellow = this.dots.getChild("yellow");
         this.red = this.dots.getChild("red");
+        this.dots_santa = this.expressions.getChild("dots_santa");
+        this.green2 = this.dots.getChild("green2");
+        this.yellow2 = this.dots.getChild("yellow2");
+        this.red2 = this.dots.getChild("red2");
         this.clock = this.expressions.getChild("clock");
         this.clockhand = this.clock.getChild("clockhand");
         this.processing = this.expressions.getChild("processing");
@@ -173,6 +183,14 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
 
         PartDefinition red = dots.addOrReplaceChild("red", CubeListBuilder.create().texOffs(44, 79).addBox(2.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
+        PartDefinition dots_santa = expressions.addOrReplaceChild("dots_santa", CubeListBuilder.create(), PartPose.offset(0.0F, -0.5F, 0.0F));
+
+        PartDefinition green2 = dots.addOrReplaceChild("green2", CubeListBuilder.create().texOffs(56, 71).addBox(-4.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition yellow2 = dots.addOrReplaceChild("yellow2", CubeListBuilder.create().texOffs(78, 78).addBox(-1.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition red2 = dots.addOrReplaceChild("red2", CubeListBuilder.create().texOffs(44, 79).addBox(2.0F, -1.0F, 1.705F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
         PartDefinition clock = expressions.addOrReplaceChild("clock", CubeListBuilder.create().texOffs(48, 79).addBox(-1.2228F, -1.4755F, 1.7083F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.2228F, -0.0245F, -0.0033F));
 
         PartDefinition green_r1 = clock.addOrReplaceChild("green_r1", CubeListBuilder.create().texOffs(38, 60).addBox(0.0F, -3.5F, 0.69F, 1.0F, 3.5F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.6228F, -0.5755F, 1.0083F, 0.0F, 0.0F, 0.3927F));
@@ -194,6 +212,8 @@ public class TriviaBotModel extends EntityModel<TriviaBotRenderState> {
         PartDefinition snail = expressions.addOrReplaceChild("snail", CubeListBuilder.create().texOffs(56, 60).addBox(-5.0F, -4.5F, -1.3F, 10.0F, 9.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 3.005F));
 
         PartDefinition beard = main.addOrReplaceChild("beard", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition beard_santa = main.addOrReplaceChild("beard_santa", CubeListBuilder.create().texOffs(52, 82).addBox(-3.0F, 0.5F, -4.62F, 6.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));z
 
         PartDefinition hat = main.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(60, 84).addBox(-4.3F, -1.5F, -3.5F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.3F, -6.1F, 3.3F, -0.3927F, 0.0F, 0.0F));
 
