@@ -16,10 +16,16 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.*;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
+import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
+import net.mat0u5.lifeseries.utils.other.OtherUtils;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.other.Time;
+import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -35,11 +41,17 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.Main.server;
 //? if >= 1.21.2 {
 /*import net.minecraft.server.level.ServerLevel;
 *///?}
 
 public class WildLife extends Season {
+
+    private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
+    private static final String MIDNIGHT_SPAWN_BOTS_COMMAND = "/trivia bot spawnFor @a";
+    private boolean playedMidnightChimes = false;
+
     @Override
     public Seasons getSeason() {
         return Seasons.WILD_LIFE;
@@ -107,6 +119,16 @@ public class WildLife extends Season {
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
         WildcardManager.tickSessionOn();
+
+        resetMidnightFlag();
+        if (!playedMidnightChimes && isMidnight()) {
+            playedMidnightChimes = true;
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
+                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_midnight_chimes")),
+                    1f, 1);
+            TaskScheduler.scheduleTask(MIDNIGHT_SOUND_DURATION,
+                    () -> OtherUtils.executeCommand(MIDNIGHT_SPAWN_BOTS_COMMAND));
+        }
     }
 
     @Override
@@ -323,5 +345,19 @@ public class WildLife extends Season {
     public void onUpdatedInventory(ServerPlayer player) {
         super.onUpdatedInventory(player);
         Hunger.updateInventory(player);
+    }
+
+    private boolean isMidnight() {
+        if (server == null) return false;
+        long dayTime = server.overworld().getDayTime() % 24000L;
+        return dayTime >= 18000 && dayTime <= 20000;
+    }
+
+    private void resetMidnightFlag() {
+        if (server == null) return;
+        long dayTime = server.overworld().getDayTime() % 24000L;
+        if (dayTime < 18000) {
+            playedMidnightChimes = false;
+        }
     }
 }

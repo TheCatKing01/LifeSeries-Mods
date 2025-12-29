@@ -426,27 +426,6 @@ public class TriviaBotAnimations {
                 .addAnimation("clock", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -1.4F), AnimationChannel.Interpolations.LINEAR)
                 ))
-                .addAnimation("green2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.6657F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.999F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
-                .addAnimation("yellow2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.3323F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.3333F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.3323F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.3333F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
-                .addAnimation("red2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(0.999F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.6657F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
                 .addAnimation("mouth", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR)
                 ))
@@ -1235,11 +1214,9 @@ public class TriviaBotAnimations {
                         new Keyframe(1.0F, KeyframeAnimations.posVec(0.0F, -0.9F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                         new Keyframe(2.0F, KeyframeAnimations.posVec(0.0F, 0.3F, 1.0F), AnimationChannel.Interpolations.CATMULLROM)
                 ))
-                .addAnimation("umbrella", new AnimationChannel(AnimationChannel.Targets.ROTATION,
-                        new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
-                        new Keyframe(1.0F, KeyframeAnimations.degreeVec(-5.0F, -8.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
-                        new Keyframe(2.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM)
-                ))
+				.addAnimation("umbrella", new AnimationChannel(AnimationChannel.Targets.SCALE,
+                        new Keyframe(0.0F, KeyframeAnimations.scaleVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+                )
                 .addAnimation("dots", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -1.4F), AnimationChannel.Interpolations.LINEAR)
                 ))
@@ -1324,32 +1301,8 @@ public class TriviaBotAnimations {
                         new Keyframe(2.6657F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
                         new Keyframe(2.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
                 ))
-                .addAnimation("green2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.6657F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.999F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
-                .addAnimation("yellow2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.3323F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.3333F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.3323F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.3333F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
-                .addAnimation("red2", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(0.999F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(1.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.6657F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.4F), AnimationChannel.Interpolations.LINEAR),
-                        new Keyframe(2.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-                ))
                 .addAnimation("dots", new AnimationChannel(AnimationChannel.Targets.POSITION,
                         new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -1.4F), AnimationChannel.Interpolations.LINEAR)
-                ))
-                .addAnimation("dots_santa", new AnimationChannel(AnimationChannel.Targets.POSITION,
-                        new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
                 ))
                 .addAnimation("bag", new AnimationChannel(AnimationChannel.Targets.SCALE,
                         new Keyframe(0.0F, KeyframeAnimations.scaleVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
