@@ -153,6 +153,7 @@ public class BoogeymanManager {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
+        clearListType(boogeyman, player);
         if (boogeyman.failed || boogeyman.cured) {
             player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] Your Boogeyman  fail/cure status has been reset"));
         }
@@ -272,6 +273,7 @@ public class BoogeymanManager {
         if (!BOOGEYMAN_ENABLED) return;
         if (BOOGEYMAN_AMOUNT_MAX <= 0) return;
         if (BOOGEYMAN_AMOUNT_MAX < BOOGEYMAN_AMOUNT_MIN) return;
+		clearBoogeymanListTypes();
         allowedPlayers.removeIf(this::isBoogeyman);
         if (allowedPlayers.isEmpty()) return;
 
@@ -388,6 +390,13 @@ public class BoogeymanManager {
 
         removePlayerFromListTeams(player);
         boogeyman.listType = null;
+    }
+	
+	private void clearBoogeymanListTypes() {
+        for (Boogeyman boogeyman : boogeymen) {
+            ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
+            clearListType(boogeyman, player);
+        }
     }
 
     public void handlePlayerDeath(ServerPlayer player) {
@@ -562,6 +571,7 @@ public class BoogeymanManager {
         boogeymen.remove(boogeyman);
         ServerPlayer player = boogeyman.getPlayer();
         if (player != null) {
+			clearListType(boogeyman, player);
         }
         TaskScheduler.scheduleTask(Time.seconds(5), this::chooseNewBoogeyman);
     }
