@@ -372,7 +372,7 @@ public class BoogeymanManager {
 
     private void sendListTitle(ServerPlayer player, Boogeyman.BoogeyListType listType) {
         if (listType == Boogeyman.BoogeyListType.NICE) {
-            PlayerUtils.sendTitle(player, Component.literal(The Nice List").withStyle(ChatFormatting.GREEN),10,50,20);
+            PlayerUtils.sendTitle(player, Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10,50,20);
         }
         else {
             PlayerUtils.sendTitle(player, Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10,50,20);
