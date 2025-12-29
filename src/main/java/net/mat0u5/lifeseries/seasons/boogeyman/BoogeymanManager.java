@@ -113,7 +113,6 @@ public class BoogeymanManager {
         }
         Boogeyman newBoogeyman = new Boogeyman(player);
         boogeymen.add(newBoogeyman);
-        player.addTag("boogeyman");
         boogeymanChosen = true;
         boogeymanListChanged = true;
         DatapackIntegration.EVENT_BOOGEYMAN_ADDED.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
@@ -132,9 +131,6 @@ public class BoogeymanManager {
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
         boogeymen.remove(boogeyman);
-        player.removeTag("boogeyman");
-        player.removeTag("boogeyman_cured");
-        player.removeTag("boogeyman_failed");
         if (boogeymen.isEmpty()) boogeymanChosen = false;
         player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
     }
@@ -146,9 +142,6 @@ public class BoogeymanManager {
             ServerPlayer player = PlayerUtils.getPlayer(boogeyman.uuid);
             if (player == null) continue;
             player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
-            player.removeTag("boogeyman");
-            player.removeTag("boogeyman_cured");
-            player.removeTag("boogeyman_failed");
         }
         boogeymen = new ArrayList<>();
         boogeymanChosen = false;
@@ -158,14 +151,12 @@ public class BoogeymanManager {
     public void reset(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
-        if (boogeymen == null) return;
+        if (boogeyman == null) return;
         if (boogeyman.failed || boogeyman.cured) {
             player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] Your Boogeyman  fail/cure status has been reset"));
         }
         boogeyman.failed = false;
         boogeyman.cured = false;
-        player.removeTag("boogeyman_cured");
-        player.removeTag("boogeyman_failed");
         boogeyman.died = false;
         boogeyman.resetKills();
     }
@@ -173,10 +164,8 @@ public class BoogeymanManager {
     public void cure(ServerPlayer player) {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
-        if (boogeymen == null) return;
+        if (boogeyman == null) return;
         boogeyman.failed = false;
-        player.addTag("boogeyman_cured");
-        player.removeTag("boogeyman_failed");
         if (boogeyman.cured) return;
         boogeyman.cured = true;
         PlayerUtils.sendTitle(player,Component.nullToEmpty("§aYou are cured!"), 20, 30, 20);
@@ -432,9 +421,7 @@ public class BoogeymanManager {
         if (!BOOGEYMAN_ENABLED) return false;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return false;
-
-        player.removeTag("boogeyman_cured");
-        player.addTag("boogeyman_failed");
+		
         boogeyman.cured = false;
         if (boogeyman.failed) return false;
         boogeyman.failed = true;
@@ -566,9 +553,6 @@ public class BoogeymanManager {
         boogeymen.remove(boogeyman);
         ServerPlayer player = boogeyman.getPlayer();
         if (player != null) {
-            player.removeTag("boogeyman");
-            player.removeTag("boogeyman_cured");
-            player.removeTag("boogeyman_failed");
         }
         TaskScheduler.scheduleTask(Time.seconds(5), this::chooseNewBoogeyman);
     }
@@ -599,7 +583,6 @@ public class BoogeymanManager {
             ServerPlayer player = boogeyman.getPlayer();
             if (player != null) {
                 if (!playerFailBoogeyman(player, true)) {
-                    player.addTag("boogeyman_failed");
                     boogeyman.failed = true;
                 }
             }
