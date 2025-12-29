@@ -130,6 +130,7 @@ public class BoogeymanManager {
         if (!BOOGEYMAN_ENABLED) return;
         Boogeyman boogeyman = getBoogeyman(player);
         if (boogeyman == null) return;
+		clearListType(boogeyman, player);
         boogeymen.remove(boogeyman);
         if (boogeymen.isEmpty()) boogeymanChosen = false;
         player.sendSystemMessage(Component.nullToEmpty("§c [NOTICE] You are no longer a Boogeyman!"));
@@ -367,7 +368,7 @@ public class BoogeymanManager {
             PlayerUtils.sendTitle(player, Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10,50,20);
         }
     }
-
+	
     private void setBoogeyListType(Boogeyman boogeyman, ServerPlayer player, Boogeyman.BoogeyListType listType) {
         if (boogeyman == null) return;
         boogeyman.listType = listType;
@@ -379,6 +380,14 @@ public class BoogeymanManager {
             TeamUtils.createTeam(NAUGHTY_LIST_TEAM, "Naughty List", ChatFormatting.DARK_PURPLE);
             TeamUtils.addEntityToTeam(NAUGHTY_LIST_TEAM, player);
         }
+    }
+
+    private void clearListType(Boogeyman boogeyman, ServerPlayer player) {
+        if (boogeyman == null || player == null) return;
+        if (boogeyman.listType == null) return;
+
+        removePlayerFromListTeams(player);
+        boogeyman.listType = null;
     }
 
     public void handlePlayerDeath(ServerPlayer player) {
