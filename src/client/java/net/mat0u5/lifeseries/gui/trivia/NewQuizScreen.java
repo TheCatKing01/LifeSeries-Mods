@@ -104,9 +104,10 @@ public class NewQuizScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        timerSeconds = Trivia.getRemainingSeconds();
+        timerSeconds = (Trivia.getRemainingTicks()-1)/20;
         if (timerSeconds <= 0) {
             this.onClose();
+            Minecraft.getInstance().setScreen(new EmptySleepScreen(false));
         }
     }
 

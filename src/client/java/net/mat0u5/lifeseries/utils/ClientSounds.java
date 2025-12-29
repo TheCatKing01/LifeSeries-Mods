@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.mixin.client.AbstractSoundInstanceAccessor;
 import net.mat0u5.lifeseries.mixin.client.EntityBoundSoundInstanceAccessor;
 import net.mat0u5.lifeseries.mixin.client.SoundManagerAccessor;
 import net.mat0u5.lifeseries.mixin.client.SoundEngineAccessor;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -27,7 +28,13 @@ public class ClientSounds {
             "nicelife_santabot_intro",
             "nicelife_santabot_suspense",
             "nicelife_santabot_suspense_end",
-            "nicelife_santabot_analyzing"
+            "nicelife_santabot_analyzing",
+            "nicelife_santabot_incorrect1",
+            "nicelife_santabot_incorrect2",
+            "nicelife_santabot_incorrect3",
+            "nicelife_santabot_incorrect4",
+            "nicelife_santabot_incorrect5",
+            "nicelife_santabot_incorrect6"
     );
 
     public static void onSoundPlay(SoundInstance sound) {
@@ -58,7 +65,9 @@ public class ClientSounds {
 
         for (SoundInstance stopSound : onlyPlayLatest) {
             if (stopSound != null) {
-                Minecraft.getInstance().getSoundManager().stop(stopSound);
+                ClientTaskScheduler.schedulePriorityTask(5, () -> {
+                    Minecraft.getInstance().getSoundManager().stop(stopSound);
+                });
             }
         }
         onlyPlayLatest.clear();
