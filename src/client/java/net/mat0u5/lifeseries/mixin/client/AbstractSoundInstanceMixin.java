@@ -24,6 +24,14 @@ public class AbstractSoundInstanceMixin {
             /*if (entityTrackingSound.getIdentifier().getPath().equalsIgnoreCase("wildlife_trivia_suspense")) {
                 cir.setReturnValue(true);
             }
+            //? if <= 1.21.9 {
+            if (entityTrackingSound.getLocation().getPath().equalsIgnoreCase("wildlife_santabot_suspense")) {
+                cir.setReturnValue(true);
+            }
+            //?} else {
+            /*if (entityTrackingSound.getIdentifier().getPath().equalsIgnoreCase("wildlife_santabot_suspense")) {
+                cir.setReturnValue(true);
+            }
             *///?}
         }
         //? if <= 1.21.9 {
