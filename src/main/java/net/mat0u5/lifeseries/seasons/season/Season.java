@@ -413,7 +413,6 @@ public abstract class Season {
         boolean soulmateKill = source.is(DoubleLife.SOULMATE_DAMAGE);
         SessionTranscript.onPlayerDeath(player, source);
         boolean killedByPlayer = false;
-        boogeymanManager.handlePlayerDeath(player);
         if (source.getEntity() instanceof ServerPlayer serverAttacker) {
             if (player != source.getEntity() && !soulmateKill) {
                 onPlayerKilledByPlayer(player, serverAttacker);

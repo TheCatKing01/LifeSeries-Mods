@@ -16,7 +16,6 @@ public class Boogeyman {
     public boolean died = false;
     public Time timeBoogeyman = Time.zero();
     public int killsNeeded;
-    public BoogeyListType listType = null;
 
     public Boogeyman(ServerPlayer player) {
         uuid = player.getUUID();
@@ -40,10 +39,5 @@ public class Boogeyman {
     }
     public boolean shouldCure() {
         return killsNeeded <= 0;
-    }
-
-    public enum BoogeyListType {
-        NICE,
-        NAUGHTY
     }
 }
