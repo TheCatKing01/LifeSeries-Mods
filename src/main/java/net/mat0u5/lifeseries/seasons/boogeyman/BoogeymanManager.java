@@ -529,8 +529,16 @@ public class BoogeymanManager {
     public void tick() {
         if (!BOOGEYMAN_ENABLED) return;
         for (Boogeyman boogeyman : boogeymen) {
+        Iterator<Boogeyman> iterator = boogeymen.iterator();
+        while (iterator.hasNext()) {
+            Boogeyman boogeyman = iterator.next();
             boogeyman.tick();
             infiniteBoogeymenTick(boogeyman);
+            autoFailTick(boogeyman);
+            failedMessagesTick(boogeyman);
+            if (infiniteBoogeymenTick(boogeyman)) {
+                iterator.remove();
+            }
         }
         if (boogeymanListChanged) {
             boogeymanListChanged = false;
@@ -564,16 +572,16 @@ public class BoogeymanManager {
         }
     }
 
-    public void infiniteBoogeymenTick(Boogeyman boogeyman) {
-        if (!BOOGEYMAN_INFINITE) return;
-        if (!currentSession.statusStarted()) return;
-        if (!boogeyman.failed && !boogeyman.cured && !boogeyman.died) return;
-        boogeymen.remove(boogeyman);
+    public boolean infiniteBoogeymenTick(Boogeyman boogeyman) {
+        if (!BOOGEYMAN_INFINITE) return false;
+        if (!currentSession.statusStarted()) return false;
+        if (!boogeyman.failed && !boogeyman.cured && !boogeyman.died) return false;
         ServerPlayer player = boogeyman.getPlayer();
         if (player != null) {
 			clearListType(boogeyman, player);
         }
         TaskScheduler.scheduleTask(Time.seconds(5), this::chooseNewBoogeyman);
+		return true;
     }
 
     public void autoFailTick(Boogeyman boogeyman) {
