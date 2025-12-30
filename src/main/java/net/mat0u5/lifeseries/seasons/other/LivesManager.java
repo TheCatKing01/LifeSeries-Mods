@@ -79,12 +79,16 @@ public class LivesManager {
 	public static void joinTeam(ServerPlayer player, String teamName) {
 		if (player == null) return;
 
-		Scoreboard scoreboard = player.getServer().getScoreboard();
-		PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+		//? if <= 1.20.2 {
+		/*var server = player.getServer();
+		*///?} else {
+		var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
+		//?}
 
-		if (team == null) {
-			return;
-		}
+		Scoreboard scoreboard = server.getScoreboard();
+
+		PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+		if (team == null) return;
 
 		String name = player.getScoreboardName();
 
