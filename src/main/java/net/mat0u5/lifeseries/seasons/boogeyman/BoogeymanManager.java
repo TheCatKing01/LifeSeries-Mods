@@ -347,28 +347,36 @@ public class BoogeymanManager {
         result.removeIf(this::isBoogeyman);
         return result;
     }
-
-    public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
-        PlayerUtils.playSoundToPlayers(normalPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
-        PlayerUtils.playSoundToPlayers(boogeyPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_yes")));
-        PlayerUtils.sendTitleToPlayers(normalPlayers, Component.literal("NO Lists.").withStyle(ChatFormatting.YELLOW),10,50,20);
+	
+	public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
+		PlayerUtils.playSoundToPlayers(normalPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
+		PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_yes")));
+		PlayerUtils.sendTitleToPlayers(normalPlayers,Component.literal("NO Lists.").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
 		
-		int rand = rnd.nextInt(2);
-		if (rand == 0) {
-			PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Nice List.").withStyle(ChatFormatting.GREEN),10,50,20);
-			player.addTag("nice");
-		}
-		else {
-			PlayerUtils.sendTitleToPlayers(boogeyPlayers, Component.literal("The Naughty List.").withStyle(ChatFormatting.RED),10,50,20);
-			player.addTag("naughty");
-		}
-        for (ServerPlayer boogey : boogeyPlayers) {
-            Boogeyman boogeyman = addBoogeyman(boogey);
-            messageBoogeyman(boogeyman, boogey);
-        }
-        SessionTranscript.boogeymenChosen(boogeyPlayers);
-    }
+		Collections.shuffle(boogeyPlayers, rnd);
 
+		for (int i = 0; i < boogeyPlayers.size(); i++) {
+			ServerPlayer boogey = boogeyPlayers.get(i);
+
+			boogey.removeTag("nice");
+			boogey.removeTag("naughty");
+
+			if (i % 2 == 0) {
+				boogey.addTag("nice");
+				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Nice List.").withStyle(ChatFormatting.GREEN),10, 50, 20);
+			} else {
+				boogey.addTag("naughty");
+				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Naughty List.").withStyle(ChatFormatting.RED),10, 50, 20);
+			}
+
+			Boogeyman boogeyman = addBoogeyman(boogey);
+			messageBoogeyman(boogeyman, boogey);
+		}
+
+		SessionTranscript.boogeymenChosen(boogeyPlayers);
+
+	}
+	
     public void messageBoogeyman(Boogeyman boogeyman, ServerPlayer boogey) {
         if (boogeyman != null && boogeyman.killsNeeded != 1) {
             boogey.sendSystemMessage(TextUtils.formatLoosely("§7You need {} {} to be cured of the curse.", boogeyman.killsNeeded, TextUtils.pluralize("kill", boogeyman.killsNeeded)));
