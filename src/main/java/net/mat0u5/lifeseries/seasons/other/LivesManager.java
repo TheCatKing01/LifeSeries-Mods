@@ -228,6 +228,14 @@ public class LivesManager {
         return Component.literal(String.valueOf(lives)).withStyle(color);
     }
     public String getTeamForPlayer(ServerPlayer player) {
+        if (player.getTags().contains("nice")) {
+            return "nice";
+        }
+
+        if (player.getTags().contains("naughty")) {
+            return "naughty";
+        }
+
         Integer lives = getPlayerLives(player);
         return getTeamForLives(lives);
     }

@@ -363,11 +363,11 @@ public class BoogeymanManager {
 			if (i % 2 == 0) {
 				boogey.addTag("nice");
 				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20);
-				PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start")));
+				PlayerUtils.playSoundToPlayers(List.of(boogey),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start")));
 			} else {
 				boogey.addTag("naughty");
 				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
-				PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
+                PlayerUtils.playSoundToPlayers(List.of(boogey),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
 			}
 
 			Boogeyman boogeyman = addBoogeyman(boogey);
