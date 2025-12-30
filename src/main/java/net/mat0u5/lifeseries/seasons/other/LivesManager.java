@@ -79,8 +79,10 @@ public class LivesManager {
 		if (player == null || isWatcher(player)) return;
 
 		//? if <= 1.20.2 {
-		var server = player.getServer();
-		//?} else {
+		/*var server = player.getServer();
+		*///?} else if >= 1.21.11 {
+		/*var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
+		*///?} else {
 		var server = player.serverLevel().getServer();
 		//?}
 
@@ -180,7 +182,6 @@ public class LivesManager {
         TeamUtils.createTeam("lives_2", "Yellow", ChatFormatting.YELLOW);
         TeamUtils.createTeam("lives_3", "Green", ChatFormatting.GREEN);
         TeamUtils.createTeam("lives_4", "Dark Green", ChatFormatting.DARK_GREEN);
-		TeamUtils.createTeam("nice", "Nice", ChatFormatting.LIGHT_PURPLE);
 		TeamUtils.createTeam("nice", "Nice", ChatFormatting.LIGHT_PURPLE);
 		TeamUtils.createTeam("naughty", "Naughty", ChatFormatting.DARK_PURPLE);
     }
