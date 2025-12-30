@@ -177,8 +177,7 @@ public class BoogeymanManager {
         boogeyman.failed = false;
         if (boogeyman.cured) return;
         boogeyman.cured = true;
-        PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_cure")));
-
+		
         boolean stealLife = BOOGEYMAN_STEAL_LIFE && livesManager.canChangeLivesNaturally();
         DatapackIntegration.EVENT_BOOGEYMAN_CURE_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         if (!DatapackIntegration.EVENT_BOOGEYMAN_CURE_REWARD.isCanceled() && stealLife) {
