@@ -80,10 +80,8 @@ public class LivesManager {
 
 		//? if <= 1.20.2 {
 		/*var server = player.getServer();
-		*///?} else if >= 1.21.11 {
-		/*var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
 		*///?} else {
-		var server = player.serverLevel().getServer();
+		var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
 		//?}
 
 		if (player.getTags().contains("nice")) {
