@@ -74,12 +74,18 @@ public class LivesManager {
         }
         return result;
     }
-
+	
 	public void applyCorrectTeam(ServerPlayer player) {
 		if (player == null || isWatcher(player)) return;
 
+		//? if <= 1.20.2 {
+		var server = player.getServer();
+		//?} else {
+		var server = player.serverLevel().getServer();
+		//?}
+
 		if (player.getTags().contains("nice")) {
-			player.getServer().getCommands().performPrefixedCommand(
+			server.getCommands().performPrefixedCommand(
 				player.createCommandSourceStack(),
 				"team join nice " + player.getScoreboardName()
 			);
@@ -87,7 +93,7 @@ public class LivesManager {
 		}
 
 		if (player.getTags().contains("naughty")) {
-			player.getServer().getCommands().performPrefixedCommand(
+			server.getCommands().performPrefixedCommand(
 				player.createCommandSourceStack(),
 				"team join naughty " + player.getScoreboardName()
 			);
