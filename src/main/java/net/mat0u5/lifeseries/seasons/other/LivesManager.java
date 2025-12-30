@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.scores.Scoreboard;
 
 import java.util.*;
 
@@ -74,29 +75,37 @@ public class LivesManager {
         }
         return result;
     }
+
+	public static void joinTeam(ServerPlayer player, String teamName) {
+		if (player == null) return;
+
+		Scoreboard scoreboard = player.getServer().getScoreboard();
+		PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+
+		if (team == null) {
+			return;
+		}
+
+		String name = player.getScoreboardName();
+
+		PlayerTeam current = scoreboard.getPlayersTeam(name);
+		if (current != null && current != team) {
+			scoreboard.removePlayerFromTeam(name, current);
+		}
+
+		scoreboard.addPlayerToTeam(name, team);
+	}
 	
 	public void applyCorrectTeam(ServerPlayer player) {
 		if (player == null || isWatcher(player)) return;
 
-		//? if <= 1.20.2 {
-		/*var server = player.getServer();
-		*///?} else {
-		var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
-		//?}
-
 		if (player.getTags().contains("nice")) {
-			server.getCommands().performPrefixedCommand(
-				player.createCommandSourceStack(),
-				"team join nice " + player.getScoreboardName()
-			);
+			joinTeam(player, "nice");
 			return;
 		}
 
 		if (player.getTags().contains("naughty")) {
-			server.getCommands().performPrefixedCommand(
-				player.createCommandSourceStack(),
-				"team join naughty " + player.getScoreboardName()
-			);
+			joinTeam(player, "naughty");
 			return;
 		}
 

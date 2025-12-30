@@ -350,8 +350,7 @@ public class BoogeymanManager {
 	
 	public void handleBoogeymanLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> boogeyPlayers) {
 		PlayerUtils.playSoundToPlayers(normalPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no")));
-		PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_yes")));
-		PlayerUtils.sendTitleToPlayers(normalPlayers,Component.literal("NO Lists.").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
+		PlayerUtils.sendTitleToPlayers(normalPlayers,Component.literal("No Lists").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
 		
 		Collections.shuffle(boogeyPlayers, rnd);
 
@@ -363,10 +362,12 @@ public class BoogeymanManager {
 
 			if (i % 2 == 0) {
 				boogey.addTag("nice");
-				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Nice List.").withStyle(ChatFormatting.GREEN),10, 50, 20);
+				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20);
+				PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start")));
 			} else {
 				boogey.addTag("naughty");
-				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Naughty List.").withStyle(ChatFormatting.RED),10, 50, 20);
+				PlayerUtils.sendTitleToPlayers(List.of(boogey),Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
+				PlayerUtils.playSoundToPlayers(boogeyPlayers,SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
 			}
 
 			Boogeyman boogeyman = addBoogeyman(boogey);
