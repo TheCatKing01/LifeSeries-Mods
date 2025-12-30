@@ -51,9 +51,6 @@ public class WildLife extends Season {
     private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
     private static final String MIDNIGHT_SPAWN_BOTS_COMMAND = "/trivia bot spawnFor @a";
     private boolean playedMidnightChimes = false;
-	private boolean boogeymanRandomizedToday = false;
-    private boolean boogeymanClearedTonight = false;
-    private long lastDayTime = -1;
 
     @Override
     public Seasons getSeason() {
@@ -123,29 +120,14 @@ public class WildLife extends Season {
         super.tickSessionOn(server);
         WildcardManager.tickSessionOn();
 
-        long dayTime = getCurrentDayTime();
-        if (dayTime == -1) return;
-
-        updateDayCycleState(dayTime);
-        resetMidnightFlag(dayTime);
-
-        if (!playedMidnightChimes && isMidnight(dayTime)) {
+        resetMidnightFlag();
+        if (!playedMidnightChimes && isMidnight()) {
             playedMidnightChimes = true;
             PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
                     SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_midnight_chimes")),
                     1f, 1);
             TaskScheduler.scheduleTask(MIDNIGHT_SOUND_DURATION,
                     () -> OtherUtils.executeCommand(MIDNIGHT_SPAWN_BOTS_COMMAND));
-        }
-
-        if (shouldRandomizeBoogeyman(dayTime)) {
-            OtherUtils.executeCommand("/boogeyman randomize");
-            boogeymanRandomizedToday = true;
-        }
-
-        if (shouldClearBoogeyman(dayTime)) {
-            OtherUtils.executeCommand("/boogeyman clear");
-            boogeymanClearedTonight = true;
         }
     }
 
@@ -365,38 +347,17 @@ public class WildLife extends Season {
         Hunger.updateInventory(player);
     }
 
-    private long getCurrentDayTime() {
-        if (server == null) return -1;
-        return server.overworld().getDayTime() % 24000L;
-    }
-
-    private boolean isMidnight(long dayTime) {
+    private boolean isMidnight() {
+        if (server == null) return false;
+        long dayTime = server.overworld().getDayTime() % 24000L;
         return dayTime >= 18000 && dayTime <= 20000;
     }
 
-    private boolean shouldRandomizeBoogeyman(long dayTime) {
-        if (!boogeymanManager.BOOGEYMAN_ENABLED) return false;
-        return !boogeymanRandomizedToday && dayTime <= 2000;
-    }
-
-    private boolean shouldClearBoogeyman(long dayTime) {
-        if (!boogeymanManager.BOOGEYMAN_ENABLED) return false;
-        return !boogeymanClearedTonight && dayTime >= 12000 && dayTime <= 14000;
-    }
-
-    private void resetMidnightFlag(long dayTime) {
+    private void resetMidnightFlag() {
         if (server == null) return;
         long dayTime = server.overworld().getDayTime() % 24000L;
         if (dayTime < 18000) {
             playedMidnightChimes = false;
         }
-    }
-	
-	private void updateDayCycleState(long dayTime) {
-        if (lastDayTime != -1 && dayTime < lastDayTime) {
-            boogeymanRandomizedToday = false;
-            boogeymanClearedTonight = false;
-        }
-        lastDayTime = dayTime;
     }
 }
