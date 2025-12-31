@@ -193,7 +193,7 @@ public class PlayerUtils {
                 id,
                 link,
                 sha1,
-                true,
+                false,
                 //? if <= 1.20.3 {
                 /*Component.translatable(message)
                 *///?} else {
