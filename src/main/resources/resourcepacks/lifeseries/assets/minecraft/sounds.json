@@ -510,12 +510,6 @@
         ]
     },
 
-    "nicelife_naughtylist": {
-        "sounds": [
-            "nicelife/naughtylist"
-        ]
-    },
-
     "nicelife_santabot_analyzing": {
         "sounds": [
             "nicelife/santabot_analyzing"
