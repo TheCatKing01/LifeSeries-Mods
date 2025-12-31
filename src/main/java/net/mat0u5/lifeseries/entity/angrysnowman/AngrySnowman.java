@@ -62,25 +62,21 @@ public class AngrySnowman extends SnowGolem {
                 .add(Attributes.ATTACK_DAMAGE, 1);
     }
 
-	public static boolean canSpawnAboveGroundAtNight(EntityType<? extends AngrySnowman> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-		if (!(level instanceof ServerLevelAccessor serverLevel)) {
-			return false;
-		}
+    public static boolean canSpawnAboveGroundAtNight(EntityType<? extends AngrySnowman> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+        if (level.getDifficulty() == Difficulty.PEACEFUL) {
+            return false;
+        }
 
-		if (serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
-			return false;
-		}
+        if (!level.canSeeSky(pos)) {
+            return false;
+        }
 
-		if (!serverLevel.canSeeSky(pos)) {
-			return false;
-		}
+        if (!Monster.isDarkEnoughToSpawn(level, pos, random)) {
+            return false;
+        }
 
-		if (!Monster.isDarkEnoughToSpawn(serverLevel, pos, random)) {
-			return false;
-		}
-
-		return Mob.checkMobSpawnRules(entityType, serverLevel, spawnType, pos, random);
-	}
+        return Mob.checkMobSpawnRules(entityType, level, spawnType, pos, random);
+    }
 
     private long ticks = 0;
     public void tick() {
