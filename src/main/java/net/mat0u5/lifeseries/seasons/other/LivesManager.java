@@ -228,6 +228,7 @@ public class LivesManager {
         return Component.literal(String.valueOf(lives)).withStyle(color);
     }
     public String getTeamForPlayer(ServerPlayer player) {
+		
         if (player.getTags().contains("nice")) {
             return "nice";
         }
@@ -236,6 +237,9 @@ public class LivesManager {
             return "naughty";
         }
 
+        if (LIVES_SYSTEM_DISABLED) {
+            return null;
+        }
         Integer lives = getPlayerLives(player);
         return getTeamForLives(lives);
     }
@@ -544,6 +548,12 @@ public class LivesManager {
     public boolean anyPlayersOnLives(int lives) {
         for (ServerPlayer player : getAlivePlayers()) {
             if (isOnSpecificLives(player, lives, false)) return true;
+        }
+        return false;
+    }
+    public boolean anyPlayersAtLeastLives(int lives) {
+        for (ServerPlayer player : getAlivePlayers()) {
+            if (isOnAtLeastLives(player, lives, false)) return true;
         }
         return false;
     }

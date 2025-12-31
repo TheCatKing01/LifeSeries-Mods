@@ -58,6 +58,11 @@ public enum PacketNames {
     ,VOTING_SCREEN
     ,VOTING_TIME
     ,SUBMIT_VOTE
+    ,SKYCOLOR
+    ,FOGCOLOR
+    ,CLOUDCOLOR
+    ,TRIVIA_ALL_WRONG
+    ,MIC_MUTED
     ;
 
     public static PacketNames fromName(String name) {

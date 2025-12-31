@@ -37,7 +37,6 @@ import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
 //? if > 1.20.5 {
@@ -453,6 +452,12 @@ public class NetworkHandlerServer {
 
     }
 
+    public static void sendStringPackets(PacketNames name, String value) {
+        StringPayload payload = new StringPayload(name.getName(), value);
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            ServerPlayNetworking.send(player, payload);
+        }
+    }
     public static void sendStringPacket(ServerPlayer player, PacketNames name, String value) {
         if (player == null) return;
         StringPayload payload = new StringPayload(name.getName(), value);
@@ -465,8 +470,8 @@ public class NetworkHandlerServer {
     }
 
     public static void sendStringListPackets(PacketNames name, List<String> value) {
+        StringListPayload payload = new StringListPayload(name.getName(), value);
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            StringListPayload payload = new StringListPayload(name.getName(), value);
             ServerPlayNetworking.send(player, payload);
         }
     }
@@ -515,6 +520,25 @@ public class NetworkHandlerServer {
         sendStringPacket(player, PacketNames.ANIMAL_DISGUISE_HANDS, String.valueOf(AnimalDisguise.SHOW_HANDS));
         sendStringListPacket(player, PacketNames.HUNGER_NON_EDIBLE, Hunger.nonEdibleStr);
         sendStringPacket(player, PacketNames.SNOWY_NETHER, String.valueOf(NiceLife.SNOWY_NETHER));
+
+        if (Season.skyColor != null) {
+            sendStringListPacket(player, PacketNames.SKYCOLOR, List.of(String.valueOf(Season.skyColorSetMode), String.valueOf((int)Season.skyColor.x), String.valueOf((int)Season.skyColor.y), String.valueOf((int)Season.skyColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.SKYCOLOR, List.of(String.valueOf(Season.skyColorSetMode)));
+        }
+        if (Season.fogColor != null) {
+            sendStringListPacket(player, PacketNames.FOGCOLOR, List.of(String.valueOf(Season.fogColorSetMode), String.valueOf((int)Season.fogColor.x), String.valueOf((int)Season.fogColor.y), String.valueOf((int)Season.fogColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.FOGCOLOR, List.of(String.valueOf(Season.fogColorSetMode)));
+        }
+        if (Season.cloudColor != null) {
+            sendStringListPacket(player, PacketNames.CLOUDCOLOR, List.of(String.valueOf(Season.cloudColorSetMode), String.valueOf((int)Season.cloudColor.x), String.valueOf((int)Season.cloudColor.y), String.valueOf((int)Season.cloudColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.CLOUDCOLOR, List.of(String.valueOf(Season.cloudColorSetMode)));
+        }
     }
 
     public static void sendUpdatePackets() {
@@ -560,7 +584,7 @@ public class NetworkHandlerServer {
 
     public static boolean wasHandshakeSuccessful(UUID uuid) {
         if (uuid == null) return false;
-        return NetworkHandlerServer.handshakeSuccessful.contains(uuid);
+        return handshakeSuccessful.contains(uuid) || preLoginHandshake.contains(uuid);
     }
 
     public static void sideTitle(ServerPlayer player, Component text) {

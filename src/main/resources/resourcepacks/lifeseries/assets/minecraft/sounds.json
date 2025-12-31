@@ -504,6 +504,11 @@
             "nicelife/nicelist_start"
         ]
     },
+    "nicelife_naughtylist": {
+        "sounds": [
+            "nicelife/naughtylist"
+        ]
+    },
 
     "nicelife_naughtylist": {
         "sounds": [

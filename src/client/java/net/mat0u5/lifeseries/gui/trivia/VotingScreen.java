@@ -56,7 +56,7 @@ public class VotingScreen extends Screen {
 
     public VotingScreen(String name, List<String> availablePlayers) {
         super(Component.literal(name));
-        if (name.endsWith("nice") || name.endsWith("naghty")) {
+        if (name.endsWith("nice") || name.endsWith("naughty")) {
             requiresSleep = true;
         }
         this.availablePlayers = availablePlayers;
@@ -144,7 +144,7 @@ public class VotingScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return false;
+        return !requiresSleep;
     }
 
     @Override
@@ -162,15 +162,17 @@ public class VotingScreen extends Screen {
         submitButton.active = selectedPlayer != null && !selectedPlayer.isEmpty();
 
         // Timer
-        long minutes = timerSeconds / 60;
-        long seconds = timerSeconds - minutes * 60;
-        String secondsStr = String.valueOf(seconds);
-        String minutesStr = String.valueOf(minutes);
-        while (secondsStr.length() < 2) secondsStr = "0" + secondsStr;
-        while (minutesStr.length() < 2) minutesStr = "0" + minutesStr;
-        Component timerText = TextUtils.format("{}:{}", minutesStr, secondsStr);
+        if (requiresSleep) {
+            long minutes = timerSeconds / 60;
+            long seconds = timerSeconds - minutes * 60;
+            String secondsStr = String.valueOf(seconds);
+            String minutesStr = String.valueOf(minutes);
+            while (secondsStr.length() < 2) secondsStr = "0" + secondsStr;
+            while (minutesStr.length() < 2) minutesStr = "0" + minutesStr;
+            Component timerText = TextUtils.format("{}:{}", minutesStr, secondsStr);
 
-        RenderUtils.text(timerText, listRight, 25).anchorCenter().colored(TextColors.WHITE).withShadow().render(graphics, font);
+            RenderUtils.text(timerText, listRight, 25).anchorCenter().colored(TextColors.WHITE).withShadow().render(graphics, font);
+        }
 
         int listTop = LIST_TOP;
         int listBottom = height - LIST_BOTTOM_OFFSET;
@@ -311,7 +313,12 @@ public class VotingScreen extends Screen {
 
     private void onSubmitVote() {
         if (selectedPlayer != null) {
-            Minecraft.getInstance().setScreen(new EmptySleepScreen(false));
+            if (requiresSleep) {
+                Minecraft.getInstance().setScreen(new EmptySleepScreen(false));
+            }
+            else {
+                Minecraft.getInstance().setScreen(null);
+            }
             NetworkHandlerClient.sendStringPacket(PacketNames.SUBMIT_VOTE, selectedPlayer);
         }
     }

@@ -79,13 +79,33 @@ public class NiceLifeConfig extends ConfigManager {
             "trivia_question_time", 68, ConfigTypes.SECONDS, "season.trivia[new]",
             "Trivia Question Time", "Controls how much time people have to answer the trivia, in seconds."
     );
+    public static final ConfigFileEntry<Boolean> BOT_CAN_BREAK_BEDS = new ConfigFileEntry<>(
+            "bot_can_break_beds", true, "season.trivia[new]",
+            "Bots Can Break Beds", "Controls whether descending santa bots can break the beds of other players in the way."
+    );
+    public static final ConfigFileEntry<Boolean> BOT_BREAKING_BLOCKS_DROP_RESOURCES = new ConfigFileEntry<>(
+            "bot_breaking_blocks_drop_resources", true, "season.trivia[new]",
+            "Bots Breaking Blocks Drop Resources", "Controls whether block broken by descending santa bots drop items."
+    );
     public static final ConfigFileEntry<Integer> VOTING_TIME = new ConfigFileEntry<>(
             "voting_time", 60, ConfigTypes.SECONDS, "season.voting[new]",
             "Voting Time", "Controls how much time people have for voting, in seconds."
     );
+    public static final ConfigFileEntry<Boolean> ALLOW_REDS_ON_NAUGHTY_LIST = new ConfigFileEntry<>(
+            "allow_reds_on_naughty_list", false, "season.voting[new]",
+            "Naughty List Allow Reds", "Controls red players can be voted for on the naughty list."
+    );
+    public static final ConfigFileEntry<Integer> NAUGHTY_LIST_PLAYERS = new ConfigFileEntry<>(
+            "naughty_list_players", 3, "season.voting[new]",
+            "Naughty List Player Amount", "Controls the maximum number of players that can be on the naughty list."
+    );
     public static final ConfigFileEntry<Double> NICE_LIST_CHANCE = new ConfigFileEntry<>(
             "nice_list_chance", 0.5, ConfigTypes.PERCENTAGE, "season.voting[new]",
             "Nice List Chance", "Percentage of how often the nice list will be chosen for the vote instead of the naughty list."
+    );
+    public static final ConfigFileEntry<Integer> NICE_LIST_PLAYERS = new ConfigFileEntry<>(
+            "nice_list_players", 3, "season.voting[new]",
+            "Nice List Player Amount", "Controls the maximum number of players that can be on the nice list."
     );
 
 
@@ -119,7 +139,12 @@ public class NiceLifeConfig extends ConfigManager {
                 ,GROUP_VOTING
 
                 ,TRIVIA_QUESTION_TIME
+                ,BOT_CAN_BREAK_BEDS
+                ,BOT_BREAKING_BLOCKS_DROP_RESOURCES
                 ,VOTING_TIME
+                ,ALLOW_REDS_ON_NAUGHTY_LIST
+                ,NAUGHTY_LIST_PLAYERS
+                ,NICE_LIST_PLAYERS
                 ,NICE_LIST_CHANCE
         ));
     }
