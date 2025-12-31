@@ -138,4 +138,19 @@ public class ClientSounds {
             }
         }
     }
+
+    public static void stopTriviaSounds() {
+        for (SoundInstance stopSound : onlyPlayLatest) {
+            if (stopSound != null) {
+                Minecraft.getInstance().getSoundManager().stop(stopSound);
+            }
+        }
+        for (SoundInstance stopSound : onlyPlayLatestEntities.values()) {
+            if (stopSound != null) {
+                Minecraft.getInstance().getSoundManager().stop(stopSound);
+            }
+        }
+        onlyPlayLatest.clear();
+        onlyPlayLatestEntities.clear();
+    }
 }
