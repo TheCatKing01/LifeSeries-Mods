@@ -8,6 +8,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.block.Blocks;
 
 //? if >= 1.21.2 {
@@ -61,7 +63,7 @@ public class MobRegistry {
     public static final EntityType<AngrySnowman> ANGRY_SNOWMAN = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             AngrySnowman.ID,
-            EntityType.Builder.of(AngrySnowman::new, MobCategory.MISC)
+            EntityType.Builder.of(AngrySnowman::new, MobCategory.MONSTER)
                     .immuneTo(Blocks.POWDER_SNOW)
                     .sized(0.7F, 1.9F)
                     //? if >= 1.20.5 {
@@ -81,5 +83,25 @@ public class MobRegistry {
         FabricDefaultAttributeRegistry.register(SNAIL, Snail.createAttributes());
         FabricDefaultAttributeRegistry.register(TRIVIA_BOT, TriviaBot.createAttributes());
         FabricDefaultAttributeRegistry.register(ANGRY_SNOWMAN, AngrySnowman.createAttributes());
+        registerAngrySnowmanSpawns();
+    }
+
+    private static void registerAngrySnowmanSpawns() {
+        SpawnPlacements.register(
+                ANGRY_SNOWMAN,
+                SpawnPlacements.Type.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                AngrySnowman::canSpawnAboveGroundAtNight
+        );
+
+        BiomeModifications.addSpawn(
+                BiomeSelectors.foundInOverworld(),
+                MobCategory.MONSTER,
+                ANGRY_SNOWMAN,
+                95,
+                1,
+                2
+        );
     }
 }
+
