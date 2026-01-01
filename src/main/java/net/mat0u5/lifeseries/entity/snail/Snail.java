@@ -46,12 +46,12 @@ import net.minecraft.resources.ResourceLocation;
 public class Snail extends Monster {
     //? if <= 1.21.9 {
     public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
-    public static final ResourceLocation TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/santa.png");
+    public static final ResourceLocation TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
     public static final ResourceLocation ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
     public static final ResourceLocation ID = IdentifierHelper.mod("snail");
     //?} else {
     /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
-    public static final Identifier TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/santa.png");
+    public static final Identifier TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
     public static final Identifier ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
     public static final Identifier ID = IdentifierHelper.mod("snail");
     *///?}
