@@ -185,32 +185,46 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         return false;
     }
 
-    public void answeredCorrect() {
-        super.answeredCorrect();
-        TaskScheduler.scheduleTask(145, this::spawnItemForPlayer);
-        TaskScheduler.scheduleTask(170, this::spawnItemForPlayer);
-        TaskScheduler.scheduleTask(198, this::spawnItemForPlayer);
-        TaskScheduler.scheduleTask(213, this::blessPlayer);
-        TaskScheduler.scheduleTask(72, () -> {
-			String soundId = OtherUtils.getRandomSound("nicelife_santabot_correct", 1, 6);
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(soundId)),
-                    SoundSource.NEUTRAL, 1f, 1);
-        });
-    }
+	@Override
+	public void answeredCorrect() {
+		super.answeredCorrect();
 
-    public void answeredIncorrect() {
-        super.answeredIncorrect();
-        TaskScheduler.scheduleTask(210, this::cursePlayer);
-        TaskScheduler.scheduleTask(72, () -> {
-			String soundId = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(soundId)),
-                    SoundSource.NEUTRAL, 1f, 1);
-        });
-    }
+		TaskScheduler.scheduleTask(145, this::spawnItemForPlayer);
+		TaskScheduler.scheduleTask(170, this::spawnItemForPlayer);
+		TaskScheduler.scheduleTask(198, this::spawnItemForPlayer);
+		TaskScheduler.scheduleTask(213, this::blessPlayer);
+
+		TaskScheduler.scheduleTask(72, () -> {
+			SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_correct", 1, 6);
+			PlayerUtils.playSoundWithSourceToPlayers(
+					PlayerUtils.getAllPlayers(),
+					bot,
+					sound,
+					SoundSource.NEUTRAL,
+					1f,
+					1f
+			);
+		});
+	}
+
+	@Override
+	public void answeredIncorrect() {
+		super.answeredIncorrect();
+
+		TaskScheduler.scheduleTask(210, this::cursePlayer);
+
+		TaskScheduler.scheduleTask(72, () -> {
+			SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
+			PlayerUtils.playSoundWithSourceToPlayers(
+					PlayerUtils.getAllPlayers(),
+					bot,
+					sound,
+					SoundSource.NEUTRAL,
+					1f,
+					1f
+			);
+		});
+	}
 
     public void cursePlayer() {
         ServerPlayer player = bot.serverData.getBoundPlayer();
