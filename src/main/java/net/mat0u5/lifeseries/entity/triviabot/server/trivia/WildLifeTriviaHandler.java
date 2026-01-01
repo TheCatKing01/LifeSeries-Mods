@@ -214,7 +214,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
 		TaskScheduler.scheduleTask(210, this::cursePlayer);
 
 		TaskScheduler.scheduleTask(72, () -> {
-			SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
+			SoundEvent sound = OtherUtils.getRandomSound("lifeseriesplus_santabot_incorrect", 1, 6);
 			PlayerUtils.playSoundWithSourceToPlayers(
 					PlayerUtils.getAllPlayers(),
 					bot,

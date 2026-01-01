@@ -22,13 +22,11 @@ public class ClientSounds {
     private static final List<String> onlyPlayLatestSounds = List.of(
             "wildlife_trivia_intro",
             "wildlife_trivia_suspense",
-			"wildlife_santabot_suspense",
             "wildlife_trivia_suspense_end",
             "wildlife_trivia_analyzing",
-			"wildlife_santabot_analyzing",
 
             "nicelife_santabot_intro",
-			"nicelife_trivia_intro",
+			"lifeseriesplus_trivia_intro",
             "nicelife_santabot_suspense",
             "nicelife_santabot_suspense_end",
             "nicelife_santabot_analyzing",
@@ -39,7 +37,13 @@ public class ClientSounds {
             "nicelife_santabot_incorrect5",
             "nicelife_santabot_incorrect6",
             "nicelife_santabot_vote",
-            "nicelife_santabot_turn"
+            "nicelife_santabot_turn",
+						
+						
+			"lifeseriesplus_santabot_analyzing",
+			"lifeseriesplus_santabot_suspense",
+			"lifeseriesplus_triviabot_intro"
+
     );
 
     public static void onSoundPlay(SoundInstance sound) {
@@ -82,8 +86,8 @@ public class ClientSounds {
     private static final List<String> onlyOneOf = List.of(
             "wildlife_trivia_intro",
             "wildlife_trivia_suspense",
-            "wildlife_santabot_suspense",
-            "wildlife_trivia_suspense_end"
+            "wildlife_trivia_suspense_end",
+			"lifeseriesplus_santabot_suspense",
     );
     private static long ticks = 0;
     public static void updateSingleSoundVolumes() {

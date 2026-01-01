@@ -419,7 +419,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         NetworkHandlerServer.sendStringListPacket(boundPlayer, PacketNames.VOTING_SCREEN, availableForVoting);
         NiceLifeVotingManager.allowedToVote.add(boundPlayer.getUUID());
         //TODO add the voting sound - "nicelife_santabot_vote"
-        SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_suspense"));
+        SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_suspense"));
         PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
         return true;
     }
@@ -433,7 +433,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         TaskScheduler.scheduleTask(delay+115, () -> spawnItemForPlayer(false));
         TaskScheduler.scheduleTask(delay+135, () -> spawnItemForPlayer(false));
 		SoundEvent sound = SoundEvent.createVariableRangeEvent(
-				IdentifierHelper.vanilla("nicelife_santabot_incorrect")
+				IdentifierHelper.vanilla("wildlife_trivia_incorrect")
 		);
 		TaskScheduler.scheduleTask(delay, () -> {
 			PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);

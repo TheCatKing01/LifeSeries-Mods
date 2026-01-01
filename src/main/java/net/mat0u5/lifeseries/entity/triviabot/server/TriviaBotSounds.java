@@ -30,7 +30,7 @@ public class TriviaBotSounds {
                 introSoundCooldown = 830;
             }
             else {
-                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_trivia_intro"));
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lifeseriesplus_triviabot_intro"));
                 PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
                 introSoundCooldown = 624;
             }
@@ -51,7 +51,7 @@ public class TriviaBotSounds {
         }
         else if (!playedCountdownSound && bot.interactedWith() && !bot.submittedAnswer() && !bot.ranOutOfTime()) {
             if (!bot.santaBot()) {
-                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_santabot_suspense"));
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lifeseries_santabot_suspense"));
                 PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 0.65f, 1);
             }
             else  {
