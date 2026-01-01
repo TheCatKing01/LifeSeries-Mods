@@ -104,12 +104,12 @@ public class LivesManager {
 		if (player == null || isWatcher(player)) return;
 
 		if (player.getTags().contains("nice")) {
-			joinTeam(player, "nice");
+			joinTeam(player, "nice_list");
 			return;
 		}
 
 		if (player.getTags().contains("naughty")) {
-			joinTeam(player, "naughty");
+			joinTeam(player, "naughty_list");
 			return;
 		}
 
@@ -193,8 +193,8 @@ public class LivesManager {
         TeamUtils.createTeam("lives_2", "Yellow", ChatFormatting.YELLOW);
         TeamUtils.createTeam("lives_3", "Green", ChatFormatting.GREEN);
         TeamUtils.createTeam("lives_4", "Dark Green", ChatFormatting.DARK_GREEN);
-		TeamUtils.createTeam("nice", "Nice", ChatFormatting.LIGHT_PURPLE);
-		TeamUtils.createTeam("naughty", "Naughty", ChatFormatting.DARK_PURPLE);
+		TeamUtils.createTeam("nice_list", "Nice List", ChatFormatting.LIGHT_PURPLE);
+		TeamUtils.createTeam("naughty_list", "Naughty List", ChatFormatting.DARK_PURPLE);
     }
 
     public void createScoreboards() {
@@ -230,11 +230,11 @@ public class LivesManager {
     public String getTeamForPlayer(ServerPlayer player) {
 		
         if (player.getTags().contains("nice")) {
-            return "nice";
+            return "nice_list";
         }
 
         if (player.getTags().contains("naughty")) {
-            return "naughty";
+            return "naughty_list";
         }
 
         if (LIVES_SYSTEM_DISABLED) {

@@ -357,7 +357,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
             bot.setAnalyzingTime(87);
             PlayerUtils.playSoundToPlayer(
                     bot.serverData.getBoundPlayer(),
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_analyzing")), 1f, 1);
+                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_analyzing")), 1f, 1);
             return true;
         }
         return false;
@@ -372,7 +372,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         TaskScheduler.scheduleTask(174+107, () -> spawnItemForPlayer(true));
         TaskScheduler.scheduleTask(174+126, () -> spawnItemForPlayer(true));
 
-        SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_correct", 1, 6);
+        SoundEvent sound = OtherUtils.getRandomSound("wildlife_trivia_correct");
         TaskScheduler.scheduleTask(174, () -> {
             PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
         });
@@ -430,7 +430,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         int delay = bot.ranOutOfTime() ? 0 : 174;
         TaskScheduler.scheduleTask(delay+115, () -> spawnItemForPlayer(false));
         TaskScheduler.scheduleTask(delay+135, () -> spawnItemForPlayer(false));
-        SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
+        SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_incorrect");
         TaskScheduler.scheduleTask(delay, () -> {
             PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
         });
