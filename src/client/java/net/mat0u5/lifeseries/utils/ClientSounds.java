@@ -83,7 +83,7 @@ public class ClientSounds {
             "wildlife_trivia_intro",
             "wildlife_trivia_suspense",
             "wildlife_santabot_suspense",
-            "wildlife_trivia_suspense_end",
+            "wildlife_trivia_suspense_end"
     );
     private static long ticks = 0;
     public static void updateSingleSoundVolumes() {
