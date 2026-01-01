@@ -192,7 +192,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         TaskScheduler.scheduleTask(198, this::spawnItemForPlayer);
         TaskScheduler.scheduleTask(213, this::blessPlayer);
         TaskScheduler.scheduleTask(72, () -> {
-			SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_correct", 1, 6);
+			String soundId = OtherUtils.getRandomSound("nicelife_santabot_correct", 1, 6);
             PlayerUtils.playSoundWithSourceToPlayers(
                     PlayerUtils.getAllPlayers(), bot,
                     SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(sound)),
@@ -204,7 +204,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         super.answeredIncorrect();
         TaskScheduler.scheduleTask(210, this::cursePlayer);
         TaskScheduler.scheduleTask(72, () -> {
-			SoundEvent sound = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
+			String soundId = OtherUtils.getRandomSound("nicelife_santabot_incorrect", 1, 6);
             PlayerUtils.playSoundWithSourceToPlayers(
                     PlayerUtils.getAllPlayers(), bot,
                     SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(sound)),
