@@ -51,7 +51,7 @@ public class TriviaBotSounds {
         }
         else if (!playedCountdownSound && bot.interactedWith() && !bot.submittedAnswer() && !bot.ranOutOfTime()) {
             if (!bot.santaBot()) {
-                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lifeseries_santabot_suspense"));
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lifeseriesplus_santabot_suspense"));
                 PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 0.65f, 1);
             }
             else  {
