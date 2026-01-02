@@ -312,7 +312,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<String> SANTA_BOT_MODEL = new ConfigFileEntry<>(
             "santa_bot_model", "santa", "models",
-            "santa Bot Model", ""
+            "Santa Bot Model", ""
     );
 
 
@@ -359,7 +359,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Object> GROUP_MODELS = new ConfigFileEntry<>(
             "group_models", null, ConfigTypes.TEXT, "{models}",
-            "Model Manager", ""
+            "Models Manager", ""
     );
     public final ConfigFileEntry<Object> GROUP_EVENTS = new ConfigFileEntry<>(
             "group_events", null, ConfigTypes.TEXT, "{events}",

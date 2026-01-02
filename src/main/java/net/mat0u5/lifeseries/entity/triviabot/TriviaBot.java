@@ -1,5 +1,7 @@
 package net.mat0u5.lifeseries.entity.triviabot;
 
+import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.entity.triviabot.goal.TriviaBotGlideGoal;
 import net.mat0u5.lifeseries.entity.triviabot.goal.TriviaBotLookAtPlayerGoal;
 import net.mat0u5.lifeseries.entity.triviabot.goal.TriviaBotTeleportGoal;
@@ -34,6 +36,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
+import java.util.Locale;
+
 //? if <= 1.21.9 {
 import net.minecraft.resources.ResourceLocation;
  //?} else {
@@ -42,8 +46,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TriviaBot extends AmbientCreature {
     //? if <= 1.21.9 {
-    public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
-    public static final ResourceLocation SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
+    public static ResourceLocation DEFAULT_TEXTURE;
+    public static ResourceLocation SANTABOT_TEXTURE;
     public static final ResourceLocation ID = IdentifierHelper.mod("triviabot");
     //?} else {
     /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
@@ -71,7 +75,10 @@ public class TriviaBot extends AmbientCreature {
     private static final EntityDataAccessor<Boolean> santaBot = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> waving = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> leaving = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
-
+	
+	static {
+        reloadTexturesFromConfig();
+    }
 
     public TriviaBot(EntityType<? extends AmbientCreature> entityType, Level level) {
         super(entityType, level);
@@ -87,6 +94,27 @@ public class TriviaBot extends AmbientCreature {
         else {
             triviaHandler = new WildLifeTriviaHandler(this);
         }
+    }
+	
+	public static void reloadTexturesFromConfig() {
+        DEFAULT_TEXTURE = selectTextureFromConfig("trivia_bot_model", "trivia");
+        SANTABOT_TEXTURE = selectTextureFromConfig("santa_bot_model", "santa");
+    }
+
+    private static ResourceLocation selectTextureFromConfig(String key, String defaultChoice) {
+        String textureChoice = defaultChoice;
+        ConfigManager mainConfig = Main.getMainConfig();
+        if (mainConfig != null) {
+            String configuredTexture = mainConfig.getOrCreateProperty(key, defaultChoice);
+            if (configuredTexture != null && !configuredTexture.isEmpty()) {
+                textureChoice = configuredTexture.trim().toLowerCase(Locale.ROOT);
+            }
+        }
+        return switch (textureChoice) {
+            case "santa" -> IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
+            case "trivia" -> IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+            default -> IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+        };
     }
 
     public static AttributeSupplier.Builder createAttributes() {
