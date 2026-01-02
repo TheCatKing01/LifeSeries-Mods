@@ -46,6 +46,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SEASON // Group
                 ,GROUP_LIVES
                 ,GROUP_TEAMS
+                ,GROUP_MODELS
                 ,GROUP_EVENTS
 
                 , GROUP_GLOBAL_LIVES // Group
@@ -90,6 +91,9 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,TAB_LIST_SHOW_DEAD_PLAYERS
                 ,GROUP_SPAWN_EGG // Group
                 ,GROUP_WATCHERS // Group
+				
+				,TRIVIA_BOT_MODEL
+				,SANTA_BOT_MODEL
 
 
                 //Group stuff
@@ -148,6 +152,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,WATCHERS_IN_TAB
                 ,WATCHERS_MUTED
+				
         ));
     }
 
