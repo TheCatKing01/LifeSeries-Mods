@@ -17,30 +17,28 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class Blocks {
 
-    //? if <= 1.20.5 {
-    private static BlockBehaviour.Properties copyProps(Block block) {
-        return BlockBehaviour.Properties.ofFullCopy(block);
-    }
-    //?} else {
     private static BlockBehaviour.Properties copyProps(Block block) {
         return BlockBehaviour.Properties.copy(block);
+    }
+
+    //? if <= 1.20.2 {
+    private static Block xpOre(Block base, int minXp, int maxXp) {
+        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
+    }
+    //?} else {
+    private static Block xpOre(Block base, int minXp, int maxXp) {
+        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
     }
     //?}
 
     public static final Block SNOWY_GOLD_ORE = registerBlock(
             "snowy_gold_ore",
-            new DropExperienceBlock(
-                    copyProps(net.minecraft.world.level.block.Blocks.NETHER_GOLD_ORE),
-                    UniformInt.of(0, 1)
-            )
+            xpOre(net.minecraft.world.level.block.Blocks.NETHER_GOLD_ORE, 0, 1)
     );
 
     public static final Block SNOWY_QUARTZ_ORE = registerBlock(
             "snowy_quartz_ore",
-            new DropExperienceBlock(
-                    copyProps(net.minecraft.world.level.block.Blocks.NETHER_QUARTZ_ORE),
-                    UniformInt.of(2, 5)
-            )
+            xpOre(net.minecraft.world.level.block.Blocks.NETHER_QUARTZ_ORE, 2, 5)
     );
 
     private static Block registerBlock(String name, Block block) {
