@@ -46,8 +46,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TriviaBot extends AmbientCreature {
     //? if <= 1.21.9 {
-    public static ResourceLocation DEFAULT_TEXTURE;
-    public static ResourceLocation SANTABOT_TEXTURE;
+    public static ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    public static ResourceLocation SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
     public static final ResourceLocation ID = IdentifierHelper.mod("triviabot");
     //?} else {
     /*public static Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
