@@ -50,8 +50,8 @@ public class TriviaBot extends AmbientCreature {
     public static ResourceLocation SANTABOT_TEXTURE;
     public static final ResourceLocation ID = IdentifierHelper.mod("triviabot");
     //?} else {
-    /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
-    public static final Identifier SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
+    /*public static Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    public static Identifier SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
     public static final Identifier ID = IdentifierHelper.mod("triviabot");
     *///?}
 
@@ -95,13 +95,17 @@ public class TriviaBot extends AmbientCreature {
             triviaHandler = new WildLifeTriviaHandler(this);
         }
     }
-	
-	public static void reloadTexturesFromConfig() {
+
+    public static void reloadTexturesFromConfig() {
         DEFAULT_TEXTURE = selectTextureFromConfig("trivia_bot_model", "trivia");
         SANTABOT_TEXTURE = selectTextureFromConfig("santa_bot_model", "santa");
     }
 
+    //? if <= 1.21.9 {
     private static ResourceLocation selectTextureFromConfig(String key, String defaultChoice) {
+    //?} else {
+    private static Identifier selectTextureFromConfig(String key, String defaultChoice) {
+    //?}
         String textureChoice = defaultChoice;
         ConfigManager mainConfig = Main.getMainConfig();
         if (mainConfig != null) {
@@ -116,6 +120,7 @@ public class TriviaBot extends AmbientCreature {
             default -> IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
         };
     }
+
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
