@@ -53,16 +53,20 @@ public class Blocks {
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
-        return block;
-    }
+		//? if <= 1.20.5 {
+        return Registry.register(Registries.BLOCK, new Identifier(Main.MOD_ID, name), block);
+        //?} else {
+        return Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Main.MOD_ID, name), block);
+        //?}
+#    }
 
     private static void registerBlockItem(String name, Block block) {
         //? if <= 1.20.5 {
-        Registry.register(Registries.ITEM, new Identifier(Main.MOD_ID, name),
-                new BlockItem(block, new Item.Settings()));
+		Registry.register(Registries.ITEM, new Identifier(Main.MOD_ID, name),
+			new BlockItem(block, new Item.Settings()));
         //?} else {
         Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Main.MOD_ID, name),
-                new BlockItem(block, new Item.Properties()));
+                new BlockItem(block, new Item.Properties()));		
         //?}
     }
 
