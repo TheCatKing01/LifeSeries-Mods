@@ -306,14 +306,6 @@ public class DefaultConfigValues {
             "additional_wither_skull_rate", 0.05, ConfigTypes.PERCENTAGE, "global",
             "Additional Wither Skull Rate", "Controls the additional chance for wither skeletons to drop skulls."
     );
-    public final ConfigFileEntry<String> TRIVIA_BOT_MODEL = new ConfigFileEntry<>(
-            "trivia_bot_model", "trivia", "models",
-            "Trivia Bot Model", ""
-    );
-    public final ConfigFileEntry<String> SANTA_BOT_MODEL = new ConfigFileEntry<>(
-            "santa_bot_model", "santa", "models",
-            "Santa Bot Model", ""
-    );
 
 
 
@@ -356,10 +348,6 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Object> GROUP_TEAMS = new ConfigFileEntry<>(
             "group_teams", null, ConfigTypes.TEXT, "{teams}",
             "Teams Manager", ""
-    );
-    public final ConfigFileEntry<Object> GROUP_MODELS = new ConfigFileEntry<>(
-            "group_models", null, ConfigTypes.TEXT, "{models}",
-            "Models Manager", ""
     );
     public final ConfigFileEntry<Object> GROUP_EVENTS = new ConfigFileEntry<>(
             "group_events", null, ConfigTypes.TEXT, "{events}",
