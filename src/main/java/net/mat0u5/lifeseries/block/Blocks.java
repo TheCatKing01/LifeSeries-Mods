@@ -58,7 +58,7 @@ public class Blocks {
         //?} else {
         return Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Main.MOD_ID, name), block);
         //?}
-#    }
+	}
 
     private static void registerBlockItem(String name, Block block) {
         //? if <= 1.20.5 {
