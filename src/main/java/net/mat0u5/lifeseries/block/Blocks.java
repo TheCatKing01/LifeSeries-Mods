@@ -17,9 +17,19 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class Blocks {
 
+    //? if <= 1.20.2 {
     private static BlockBehaviour.Properties copyProps(Block block) {
         return BlockBehaviour.Properties.copy(block);
     }
+    //?} elif <= 1.20.5 {
+    private static BlockBehaviour.Properties copyProps(Block block) {
+        return BlockBehaviour.Properties.ofFullCopy(block);
+    }
+    //?} else {
+    private static BlockBehaviour.Properties copyProps(Block block) {
+        return BlockBehaviour.Properties.copy(block);
+    }
+    //?}
 
     //? if <= 1.20.2 {
     private static Block xpOre(Block base, int minXp, int maxXp) {
