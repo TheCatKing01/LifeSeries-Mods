@@ -90,7 +90,8 @@ public class Main implements ModInitializer {
 
 		NetworkHandlerServer.registerPackets();
 		NetworkHandlerServer.registerServerReceiver();
-	}
+        Blocks.registerBlocks();
+    }
 
 	public static boolean modDisabled() {
 		if (clientHelper != null) {

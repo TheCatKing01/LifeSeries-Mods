@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "lifeseries:block/snowy_gold_ore"
+  }
+}
