@@ -16,13 +16,13 @@ public class Blocks {
 
     public static final Block SNOWY_GOLD_ORE = registerBlock("snowy_gold_ore",
             new DropExperienceBlock(
-                    FabricBlockSettings.copyOf(net.minecraft.world.level.block.Blocks.NETHER_GOLD_ORE),
-                    UniformInt.of(0, 1)));
+                    UniformInt.of(0, 1),
+                    FabricBlockSettings.copyOf(net.minecraft.world.level.block.Blocks.NETHER_GOLD_ORE)));
 					
     public static final Block SNOWY_QUARTZ_ORE = registerBlock("snowy_quartz_ore",
             new DropExperienceBlock(
-                    FabricBlockSettings.copyOf(net.minecraft.world.level.block.Blocks.NETHER_QUARTZ_ORE),
-                    UniformInt.of(2, 5)));
+                    UniformInt.of(2, 5),
+                    FabricBlockSettings.copyOf(net.minecraft.world.level.block.Blocks.NETHER_QUARTZ_ORE)));
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
