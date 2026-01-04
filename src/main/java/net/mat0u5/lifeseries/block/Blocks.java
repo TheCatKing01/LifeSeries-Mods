@@ -5,12 +5,7 @@ import net.mat0u5.lifeseries.Main;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-
-//? if <= 1.21.9 {
 import net.minecraft.resources.ResourceLocation;
-//?} else {
-import net.minecraft.util.Identifier;
-//?}
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -38,8 +33,6 @@ public class Blocks {
         //?}
     }
 
-    //? if <= 1.21.9 {
-
     private static ResourceLocation id(String name) {
         //? if <= 1.20.5 {
         return new ResourceLocation(Main.MOD_ID, name);
@@ -56,23 +49,6 @@ public class Blocks {
     private static void registerBlockItem(String name, Block block) {
         Registry.register(BuiltInRegistries.ITEM, id(name), new BlockItem(block, new Item.Properties()));
     }
-
-    //?} else {
-
-    private static Identifier id(String name) {
-        return Identifier.of(Main.MOD_ID, name);
-    }
-
-    private static Block registerBlock(String name, Block block) {
-        registerBlockItem(name, block);
-        return Registry.register(BuiltInRegistries.BLOCK, id(name), block);
-    }
-
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(BuiltInRegistries.ITEM, id(name), new BlockItem(block, new Item.Properties()));
-    }
-
-    //?}
 
     public static final Block SNOWY_GOLD_ORE = registerBlock(
             "snowy_gold_ore",
