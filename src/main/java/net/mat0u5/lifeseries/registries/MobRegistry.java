@@ -58,10 +58,11 @@ public class MobRegistry {
                     /*.build(TRIVIA_KEY)
                      *///?}
     );
-    public static final EntityType<AngrySnowman> ANGRY_SNOWMAN = Registry.register(
-            BuiltInRegistries.ENTITY_TYPE,
-            AngrySnowman.ID,
-            EntityType.Builder.of(AngrySnowman::new, MobCategory.MISC)
+	public static final EntityType<AngrySnowman> ANGRY_SNOWMAN =
+    Registry.register(BuiltInRegistries.ENTITY_TYPE, AngrySnowman.ID,
+        EntityType.Builder.<AngrySnowman>of(AngrySnowman::new, MobCategory.MONSTER)
+
+
                     .immuneTo(Blocks.POWDER_SNOW)
                     .sized(0.7F, 1.9F)
                     //? if >= 1.20.5 {

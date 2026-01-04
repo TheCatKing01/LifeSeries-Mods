@@ -90,6 +90,10 @@ public class Main implements ModInitializer {
 
 		NetworkHandlerServer.registerPackets();
 		NetworkHandlerServer.registerServerReceiver();
+
+                ModEntities.register();
+                ModSpawns.register();
+                ModSpawnRules.register();
     }
 
 	public static boolean modDisabled() {
