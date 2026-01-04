@@ -5,7 +5,12 @@ import net.mat0u5.lifeseries.Main;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+
+//? if >= 1.21 {
 import net.minecraft.resources.ResourceLocation;
+//?} else {
+import net.minecraft.resources.ResourceLocation;
+//?}
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -17,29 +22,29 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class Blocks {
 
-    //? if <= 1.20.2 {
     private static BlockBehaviour.Properties copyProps(Block block) {
-        return BlockBehaviour.Properties.copy(block);
-    }
-    //?} elif <= 1.20.5 {
-    private static BlockBehaviour.Properties copyProps(Block block) {
+        //? if >= 1.21 {
         return BlockBehaviour.Properties.ofFullCopy(block);
-    }
-    //?} else {
-    private static BlockBehaviour.Properties copyProps(Block block) {
+        //?} else {
         return BlockBehaviour.Properties.copy(block);
+        //?}
     }
-    //?}
 
-    //? if <= 1.20.2 {
     private static Block xpOre(Block base, int minXp, int maxXp) {
-        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
-    }
-    //?} else {
-    private static Block xpOre(Block base, int minXp, int maxXp) {
+        //? if >= 1.21 {
         return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
+        //?} else {
+        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
+        //?}
     }
-    //?}
+
+    private static ResourceLocation id(String name) {
+        //? if >= 1.21 {
+        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
+        //?} else {
+        return new ResourceLocation(Main.MOD_ID, name);
+        //?}
+    }
 
     public static final Block SNOWY_GOLD_ORE = registerBlock(
             "snowy_gold_ore",
@@ -55,7 +60,7 @@ public class Blocks {
         registerBlockItem(name, block);
         return Registry.register(
                 BuiltInRegistries.BLOCK,
-                new ResourceLocation(Main.MOD_ID, name),
+                id(name),
                 block
         );
     }
@@ -63,7 +68,7 @@ public class Blocks {
     private static void registerBlockItem(String name, Block block) {
         Registry.register(
                 BuiltInRegistries.ITEM,
-                new ResourceLocation(Main.MOD_ID, name),
+                id(name),
                 new BlockItem(block, new Item.Properties())
         );
     }
