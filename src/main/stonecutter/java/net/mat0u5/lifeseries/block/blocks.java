@@ -6,7 +6,6 @@ import net.mat0u5.lifeseries.Main;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.valueproviders.UniformInt;
 
 import net.minecraft.world.item.BlockItem;
@@ -17,21 +16,61 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
+//? if >= 1.21.11 {
+import net.minecraft.util.Identifier;
+//?} else {
+import net.minecraft.resources.ResourceLocation;
+//?}
+
 public class Blocks {
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, path);
+    /* ============================
+       ID helper
+       ============================ */
+
+    //? if >= 1.21.11 {
+    private static Identifier id(String path) {
+        return Identifier.of(Main.MOD_ID, path);
     }
+    //?} else {
+    private static ResourceLocation id(String path) {
+        // Avoid fromNamespaceAndPath (not in 1.20.x) and avoid (modid, path) ctor (private in some 1.21)
+        return new ResourceLocation(Main.MOD_ID + ":" + path);
+    }
+    //?}
+
+    /* ============================
+       Properties copy helper
+       ============================ */
 
     private static BlockBehaviour.Properties copyProps(Block base) {
+        // 1.20.x uses copy(); 1.21+ uses ofFullCopy()
+        //? if >= 1.21 {
         return BlockBehaviour.Properties.ofFullCopy(base);
+        //?} else {
+        return BlockBehaviour.Properties.copy(base);
+        //?}
     }
+
+    /* ============================
+       XP ore helper
+       ============================ */
 
     private static Block xpOreLike(Block base, int minXp, int maxXp) {
         BlockBehaviour.Properties props = copyProps(base);
         UniformInt xp = UniformInt.of(minXp, maxXp);
+
+        // Constructor order flips at 1.20.3 (your compiler errors proved this)
+        //? if >= 1.20.3 {
         return new DropExperienceBlock(xp, props);
+        //?} else {
+        return new DropExperienceBlock(props, xp);
+        //?}
     }
+
+    /* ============================
+       Registration helpers
+       ============================ */
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
@@ -46,6 +85,10 @@ public class Blocks {
         );
     }
 
+    /* ============================
+       Blocks
+       ============================ */
+
     public static final Block SNOWY_GOLD_ORE = registerBlock(
             "snowy_gold_ore",
             xpOreLike(net.minecraft.world.level.block.Blocks.NETHER_GOLD_ORE, 0, 1)
@@ -55,6 +98,10 @@ public class Blocks {
             "snowy_quartz_ore",
             xpOreLike(net.minecraft.world.level.block.Blocks.NETHER_QUARTZ_ORE, 2, 5)
     );
+
+    /* ============================
+       Creative tab
+       ============================ */
 
     public static void registerBlocks() {
         Main.LOGGER.info("Registering Blocks for " + Main.MOD_ID);
