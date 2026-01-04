@@ -5,12 +5,7 @@ import net.mat0u5.lifeseries.Main;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-
-//? if >= 1.21.11 {
-import net.minecraft.util.Identifier;
-//?} else {
 import net.minecraft.resources.ResourceLocation;
-//?}
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -38,11 +33,6 @@ public class Blocks {
         //?}
     }
 
-    //? if >= 1.21.11 {
-    private static Identifier id(String name) {
-        return new Identifier(Main.MOD_ID, name);
-    }
-    //?} else {
     private static ResourceLocation id(String name) {
         //? if <= 1.20.5 {
         return new ResourceLocation(Main.MOD_ID, name);
@@ -50,7 +40,6 @@ public class Blocks {
         return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
         //?}
     }
-    //?}
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
