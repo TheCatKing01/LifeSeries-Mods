@@ -6,7 +6,7 @@ import net.mat0u5.lifeseries.Main;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-// Default (raw file) must compile on :1.21 (Mojang mappings):
+// Default import for :1.21 (Mojang mappings)
 import net.minecraft.resources.ResourceLocation;
 
 /*//? if >= 1.21.11 {
@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public class Blocks {
 
     private static BlockBehaviour.Properties copyProps(Block block) {
+        // Default (works for 1.20.3+ and 1.21)
         return BlockBehaviour.Properties.ofFullCopy(block);
 
         /*//? if <= 1.20.2 {
@@ -32,6 +33,7 @@ public class Blocks {
     }
 
     private static Block xpOre(Block base, int minXp, int maxXp) {
+        // Default (works for 1.20.3+ and 1.21)
         return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
 
         /*//? if <= 1.20.2 {
@@ -39,7 +41,9 @@ public class Blocks {
         *///?}
     }
 
+    // Default: Mojang ResourceLocation path (for :1.21 and most)
     private static ResourceLocation id(String name) {
+        // Default (1.21+)
         return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
 
         /*//? if <= 1.20.5 {
@@ -48,7 +52,9 @@ public class Blocks {
     }
 
     /*//? if >= 1.21.11 {
+    // For 1.21.11 target if it really needs Identifier
     private static Identifier id(String name) {
+        // try constructor first; if it fails, switch to Identifier.of(...)
         return new Identifier(Main.MOD_ID, name);
     }
     *///?}
