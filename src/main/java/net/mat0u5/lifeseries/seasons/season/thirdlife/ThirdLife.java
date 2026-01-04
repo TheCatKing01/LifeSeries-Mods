@@ -6,8 +6,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 public class ThirdLife extends Season {
-    public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives";
-    public static final String COMMANDS_TEXT = "/claimkill, /lives";
+
     private final WandingTraders traders = new WandingTraders();
 
     @Override
