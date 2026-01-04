@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-// --- ID type differs in your mappings ---
 //? if >= 1.21.11 {
 import net.minecraft.util.Identifier;
 //?} else {
@@ -35,11 +34,8 @@ public class Blocks {
     }
     //?} else {
     private static ResourceLocation id(String path) {
-        //? if >= 1.21 {
-        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, path);
-        //?} else {
-        return new ResourceLocation(Main.MOD_ID, path);
-        //?}
+        // Avoid fromNamespaceAndPath (not in 1.20.x) and avoid (modid, path) ctor (private in some 1.21)
+        return new ResourceLocation(Main.MOD_ID + ":" + path);
     }
     //?}
 
@@ -48,7 +44,8 @@ public class Blocks {
        ============================ */
 
     private static BlockBehaviour.Properties copyProps(Block base) {
-        //? if >= 1.20.3 {
+        // 1.20.x uses copy(); 1.21+ uses ofFullCopy()
+        //? if >= 1.21 {
         return BlockBehaviour.Properties.ofFullCopy(base);
         //?} else {
         return BlockBehaviour.Properties.copy(base);
@@ -63,6 +60,7 @@ public class Blocks {
         BlockBehaviour.Properties props = copyProps(base);
         UniformInt xp = UniformInt.of(minXp, maxXp);
 
+        // Constructor order flips at 1.20.3 (your compiler errors proved this)
         //? if >= 1.20.3 {
         return new DropExperienceBlock(xp, props);
         //?} else {
