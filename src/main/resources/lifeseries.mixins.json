@@ -41,6 +41,8 @@
     "SimpleExplosionDamageCalculatorMixin",
     "SkullBlockEntityAccessor",
     "SleepStatusMixin",
+    "SnowballMixin",
+    "SnowLayerBlockMixin",
     "SpawnEggItemMixin",
     "ThrownEnderpearlMixin",
     "WanderingTraderSpawnerMixin",

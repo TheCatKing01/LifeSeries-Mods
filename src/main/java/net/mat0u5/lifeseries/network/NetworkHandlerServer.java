@@ -10,6 +10,9 @@ import net.mat0u5.lifeseries.network.packets.*;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeVotingManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
@@ -34,8 +37,8 @@ import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.world.scores.PlayerTeam;
 //? if > 1.20.5 {
 import net.minecraft.network.DisconnectionDetails;
@@ -86,11 +89,7 @@ public class NetworkHandlerServer {
         // Handle the response
         ServerLoginNetworking.registerGlobalReceiver(IdentifierHelper.mod("preloginpacket"),
                 (server, handler, understood, buf, synchronizer, responseSender) -> {
-                    if (understood) {
-                        GameProfile profile = ((ServerLoginPacketListenerImplAccessor) handler).getGameProfile();
-                        preLoginHandshake.add(OtherUtils.profileId(profile));
-                        LOGGER.info("Received pre-login packet from " + OtherUtils.profileName(profile));
-                    }
+                    handlePreLogin(understood, handler);
                 }
         );
 
@@ -128,11 +127,7 @@ public class NetworkHandlerServer {
         // Handle the response
         ServerLoginNetworking.registerGlobalReceiver(IdentifierHelper.mod("preloginpacket"),
                 (server, handler, understood, buf, synchronizer, responseSender) -> {
-                    if (understood) {
-                        GameProfile profile = ((ServerLoginPacketListenerImplAccessor) handler).getGameProfile();
-                        preLoginHandshake.add(OtherUtils.profileId(profile));
-                        LOGGER.info("Received pre-login packet from " + OtherUtils.profileName(profile));
-                    }
+                    handlePreLogin(understood, handler);
                 }
         );
 
@@ -158,6 +153,18 @@ public class NetworkHandlerServer {
         });
     }
     //?}
+
+    public static void handlePreLogin(boolean understood, ServerLoginPacketListenerImpl handler) {
+        GameProfile profile = ((ServerLoginPacketListenerImplAccessor) handler).getGameProfile();
+        if (understood) {
+            preLoginHandshake.add(OtherUtils.profileId(profile));
+            LOGGER.info("Received pre-login packet from " + OtherUtils.profileName(profile));
+        }
+        else if (currentSeason.getSeason().requiresClient()) {
+            LOGGER.info("Did not receive pre-login packet from " + OtherUtils.profileName(profile));
+            handler.disconnect(getDisconnectClientText());
+        }
+    }
 
     public static boolean updatedConfigThisTick = false;
     public static boolean configNeedsReload = false;
@@ -199,6 +206,9 @@ public class NetworkHandlerServer {
                     int value = Integer.parseInt(args.get(0));
                     seasonConfig.setProperty(id, String.valueOf(value));
                     updatedConfigThisTick = true;
+                    TaskScheduler.schedulePriorityTask(Time.ticks(1), () -> {
+                        ConfigManager.onUpdatedInteger(id, value);
+                    });
                 }catch(Exception e){}
             }
             else if (configType.parentNullableInteger() && args.isEmpty()) {
@@ -234,7 +244,12 @@ public class NetworkHandlerServer {
         int intValue = (int) value;
         if (name == PacketNames.TRIVIA_ANSWER) {
             if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, intValue));
-            TriviaWildcard.handleAnswer(player, intValue);
+            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+                NiceLifeTriviaManager.handleAnswer(player, intValue);
+            }
+            else {
+                TriviaWildcard.handleAnswer(player, intValue);
+            }
         }
     }
     public static void handleStringPacket(ServerPlayer player, StringPayload payload) {
@@ -280,6 +295,9 @@ public class NetworkHandlerServer {
                     tripleJump.isInAir = true;
                 }
             }
+        }
+        if (name == PacketNames.SUBMIT_VOTE) {
+            NiceLifeVotingManager.handleVote(player, value);
         }
     }
 
@@ -439,7 +457,14 @@ public class NetworkHandlerServer {
 
     }
 
+    public static void sendStringPackets(PacketNames name, String value) {
+        StringPayload payload = new StringPayload(name.getName(), value);
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            ServerPlayNetworking.send(player, payload);
+        }
+    }
     public static void sendStringPacket(ServerPlayer player, PacketNames name, String value) {
+        if (player == null) return;
         StringPayload payload = new StringPayload(name.getName(), value);
         ServerPlayNetworking.send(player, payload);
     }
@@ -450,8 +475,8 @@ public class NetworkHandlerServer {
     }
 
     public static void sendStringListPackets(PacketNames name, List<String> value) {
+        StringListPayload payload = new StringListPayload(name.getName(), value);
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            StringListPayload payload = new StringListPayload(name.getName(), value);
             ServerPlayNetworking.send(player, payload);
         }
     }
@@ -499,6 +524,28 @@ public class NetworkHandlerServer {
         sendStringPacket(player, PacketNames.ANIMAL_DISGUISE_ARMOR, String.valueOf(AnimalDisguise.SHOW_ARMOR));
         sendStringPacket(player, PacketNames.ANIMAL_DISGUISE_HANDS, String.valueOf(AnimalDisguise.SHOW_HANDS));
         sendStringListPacket(player, PacketNames.HUNGER_NON_EDIBLE, Hunger.nonEdibleStr);
+        sendStringPacket(player, PacketNames.SNOWY_NETHER, String.valueOf(NiceLife.SNOWY_NETHER));
+
+        if (Season.skyColor != null) {
+            sendStringListPacket(player, PacketNames.SKYCOLOR, List.of(String.valueOf(Season.skyColorSetMode), String.valueOf((int)Season.skyColor.x), String.valueOf((int)Season.skyColor.y), String.valueOf((int)Season.skyColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.SKYCOLOR, List.of(String.valueOf(Season.skyColorSetMode)));
+        }
+        if (Season.fogColor != null) {
+            sendStringListPacket(player, PacketNames.FOGCOLOR, List.of(String.valueOf(Season.fogColorSetMode), String.valueOf((int)Season.fogColor.x), String.valueOf((int)Season.fogColor.y), String.valueOf((int)Season.fogColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.FOGCOLOR, List.of(String.valueOf(Season.fogColorSetMode)));
+        }
+        if (Season.cloudColor != null) {
+            sendStringListPacket(player, PacketNames.CLOUDCOLOR, List.of(String.valueOf(Season.cloudColorSetMode), String.valueOf((int)Season.cloudColor.x), String.valueOf((int)Season.cloudColor.y), String.valueOf((int)Season.cloudColor.z)));
+        }
+        else {
+            sendStringListPacket(player, PacketNames.CLOUDCOLOR, List.of(String.valueOf(Season.cloudColorSetMode)));
+        }
+
+        sendStringPacket(player, PacketNames.ADMIN_INFO, String.valueOf(PermissionManager.isAdmin(player)));
     }
 
     public static void sendUpdatePackets() {
@@ -528,13 +575,17 @@ public class NetworkHandlerServer {
         if (server == null) return;
         if (currentSeason.getSeason() != Seasons.WILD_LIFE) return;
         if (wasHandshakeSuccessful(player)) return;
-        Component disconnectText = Component.literal("You must have the §2Life Series mod\n§l installed on the client§r§r§f to play Wild Life!\n").append(
-                Component.literal("§9§nThe Life Series mod is available on Modrinth."));
+
         //? if <= 1.20.5 {
-        /*player.connection.disconnect(disconnectText);
+        /*player.connection.disconnect(getDisconnectClientText());
         *///?} else {
-        player.connection.disconnect(new DisconnectionDetails(disconnectText));
+        player.connection.disconnect(new DisconnectionDetails(getDisconnectClientText()));
          //?}
+    }
+
+    public static Component getDisconnectClientText() {
+        return Component.literal("You must have the §2Life Series mod\n§l installed on the client§r§r§f to play "+currentSeason.getSeason().getName()+"!\n").append(
+                Component.literal("§9§nThe Life Series mod is available on Modrinth."));
     }
 
     public static boolean wasHandshakeSuccessful(ServerPlayer player) {
@@ -544,7 +595,7 @@ public class NetworkHandlerServer {
 
     public static boolean wasHandshakeSuccessful(UUID uuid) {
         if (uuid == null) return false;
-        return NetworkHandlerServer.handshakeSuccessful.contains(uuid);
+        return handshakeSuccessful.contains(uuid) || preLoginHandshake.contains(uuid);
     }
 
     public static void sideTitle(ServerPlayer player, Component text) {

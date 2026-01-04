@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.mixin.client.AbstractSoundInstanceAccessor;
 import net.mat0u5.lifeseries.mixin.client.EntityBoundSoundInstanceAccessor;
 import net.mat0u5.lifeseries.mixin.client.SoundManagerAccessor;
 import net.mat0u5.lifeseries.mixin.client.SoundEngineAccessor;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -16,36 +17,63 @@ import net.minecraft.world.phys.Vec3;
 import java.util.*;
 
 public class ClientSounds {
-    public static final Map<UUID, SoundInstance> trackedEntitySounds = new HashMap<>();
-    private static final List<String> trackedSounds = List.of(
+    public static final Map<UUID, SoundInstance> onlyPlayLatestEntities = new HashMap<>();
+    public static final List<SoundInstance> onlyPlayLatest = new ArrayList<>();
+    private static final List<String> onlyPlayLatestSounds = List.of(
             "wildlife_trivia_intro",
             "wildlife_trivia_suspense",
             "wildlife_trivia_suspense_end",
-            "wildlife_trivia_analyzing"
+            "wildlife_trivia_analyzing",
+
+            "nicelife_santabot_intro",
+            "nicelife_santabot_suspense",
+            "nicelife_santabot_suspense_end",
+            "nicelife_santabot_analyzing",
+            "nicelife_santabot_incorrect1",
+            "nicelife_santabot_incorrect2",
+            "nicelife_santabot_incorrect3",
+            "nicelife_santabot_incorrect4",
+            "nicelife_santabot_incorrect5",
+            "nicelife_santabot_incorrect6",
+            "nicelife_santabot_vote",
+            "nicelife_santabot_turn"
     );
 
     public static void onSoundPlay(SoundInstance sound) {
-        if (!(sound instanceof EntityBoundSoundInstance entityTrackingSound)) return;
 
         //? if <= 1.21.9 {
-        if (!trackedSounds.contains(entityTrackingSound.getLocation().getPath())) return;
+        if (!onlyPlayLatestSounds.contains(sound.getLocation().getPath())) return;
         //?} else {
-        /*if (!trackedSounds.contains(entityTrackingSound.getIdentifier().getPath())) return;
+        /*if (!onlyPlayLatestSounds.contains(sound.getIdentifier().getPath())) return;
         *///?}
 
-        if (!(entityTrackingSound instanceof EntityBoundSoundInstanceAccessor entityTrackingSoundAccessor)) return;
-        Entity entity = entityTrackingSoundAccessor.getEntity();
-        if (entity == null) return;
-        UUID uuid = entity.getUUID();
-        if (uuid == null) return;
+        if (sound instanceof EntityBoundSoundInstance entityTrackingSound) {
+            if ((entityTrackingSound instanceof EntityBoundSoundInstanceAccessor entityTrackingSoundAccessor)) {
+                Entity entity = entityTrackingSoundAccessor.getEntity();
+                if (entity == null) return;
+                UUID uuid = entity.getUUID();
+                if (uuid == null) return;
 
-        if (trackedEntitySounds.containsKey(uuid)) {
-            SoundInstance stopSound = trackedEntitySounds.get(uuid);
-            if (stopSound != null) {
-                Minecraft.getInstance().getSoundManager().stop(stopSound);
+                if (onlyPlayLatestEntities.containsKey(uuid)) {
+                    SoundInstance stopSound = onlyPlayLatestEntities.get(uuid);
+                    if (stopSound != null) {
+                        Minecraft.getInstance().getSoundManager().stop(stopSound);
+                    }
+                }
+                onlyPlayLatestEntities.put(uuid, sound);
+                return;
             }
         }
-        trackedEntitySounds.put(uuid, sound);
+
+        for (SoundInstance stopSound : onlyPlayLatest) {
+            if (stopSound != null) {
+                ClientTaskScheduler.schedulePriorityTask(5, () -> {
+                    Minecraft.getInstance().getSoundManager().stop(stopSound);
+                });
+            }
+        }
+        onlyPlayLatest.clear();
+        onlyPlayLatest.add(sound);
     }
 
     private static final List<String> onlyOneOf = List.of(
@@ -102,5 +130,20 @@ public class ClientSounds {
                 }
             }
         }
+    }
+
+    public static void stopTriviaSounds() {
+        for (SoundInstance stopSound : onlyPlayLatest) {
+            if (stopSound != null) {
+                Minecraft.getInstance().getSoundManager().stop(stopSound);
+            }
+        }
+        for (SoundInstance stopSound : onlyPlayLatestEntities.values()) {
+            if (stopSound != null) {
+                Minecraft.getInstance().getSoundManager().stop(stopSound);
+            }
+        }
+        onlyPlayLatest.clear();
+        onlyPlayLatestEntities.clear();
     }
 }

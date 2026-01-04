@@ -22,6 +22,7 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
+import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -42,6 +43,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.border.BorderStatus;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
@@ -94,6 +96,12 @@ public abstract class Season {
     private static boolean BROADCAST_LIFE_GAIN = false;
     private double ADDITIONAL_WITHER_SKULL_RATE = 0.05;
     public static Random rnd = new Random();
+    public static Vec3 skyColor = null;
+    public static boolean skyColorSetMode = false;
+    public static Vec3 fogColor = null;
+    public static boolean fogColorSetMode = false;
+    public static Vec3 cloudColor = null;
+    public static boolean cloudColorSetMode = false;
 
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
@@ -127,16 +135,22 @@ public abstract class Season {
         reload();
     }
 
+    public void seasonSwitched(Seasons changedTo) {
+    }
+
+    public void reloadStart() {
+    }
+
     public void updateStuff() {
         if (server == null) return;
 
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-        if (overworld != null) overworld.getWorldBorder().setSize(seasonConfig.WORLDBORDER_SIZE.get(seasonConfig));
+        if (overworld != null && overworld.getWorldBorder().getStatus() == BorderStatus.STATIONARY) overworld.getWorldBorder().setSize(seasonConfig.WORLDBORDER_SIZE.get(seasonConfig));
         //? if >= 1.21.9 {
         /*ServerLevel nether = server.getLevel(Level.NETHER);
         ServerLevel end = server.getLevel(Level.END);
-        if (nether != null) nether.getWorldBorder().setSize(seasonConfig.WORLDBORDER_NETHER_SIZE.get(seasonConfig));
-        if (end != null) end.getWorldBorder().setSize(seasonConfig.WORLDBORDER_END_SIZE.get(seasonConfig));
+        if (nether != null && nether.getWorldBorder().getStatus() == BorderStatus.STATIONARY) nether.getWorldBorder().setSize(seasonConfig.WORLDBORDER_NETHER_SIZE.get(seasonConfig));
+        if (end != null && end.getWorldBorder().getStatus() == BorderStatus.STATIONARY) end.getWorldBorder().setSize(seasonConfig.WORLDBORDER_END_SIZE.get(seasonConfig));
         *///?}
 
         if (overworld != null) {
@@ -230,6 +244,50 @@ public abstract class Season {
         DatapackIntegration.reload();
     }
 
+    public static void setSkyColor(Vec3 color, boolean setMode) {
+        skyColor = color;
+        skyColorSetMode = setMode;
+        NetworkHandlerServer.sendUpdatePackets();
+    }
+
+    public static void setFogColor(Vec3 color, boolean setMode) {
+        fogColor = color;
+        fogColorSetMode = setMode;
+        NetworkHandlerServer.sendUpdatePackets();
+    }
+
+    public static void setCloudColor(Vec3 color, boolean setMode) {
+        cloudColor = color;
+        cloudColorSetMode = setMode;
+        NetworkHandlerServer.sendUpdatePackets();
+    }
+
+    public String getAdminCommands() {
+        List<String> allCommands = new ArrayList<>();
+        for (Command command : CommandManager.commands) {
+            if (!command.isAllowed()) continue;
+            for (String commandStr : command.getAdminCommands()) {
+                allCommands.add("/"+commandStr);
+            }
+        }
+        return String.join(", ", allCommands);
+    }
+
+    public String getNonAdminCommands() {
+        List<String> allCommands = new ArrayList<>();
+        for (Command command : CommandManager.commands) {
+            if (!command.isAllowed()) continue;
+            for (String commandStr : command.getNonAdminCommands()) {
+                allCommands.add("/"+commandStr);
+            }
+        }
+        return String.join(", ", allCommands);
+    }
+
+    public void sendSetSeasonPacket(ServerPlayer player) {
+        NetworkHandlerServer.sendStringListPacket(player, PacketNames.SEASON_INFO, List.of(currentSeason.getSeason().getId(), currentSeason.getAdminCommands(), currentSeason.getNonAdminCommands()));
+    }
+
     public void reloadPlayers() {
         PlayerUtils.getAllPlayers().forEach(AttributeUtils::resetAttributesOnPlayerJoin);
     }
@@ -275,7 +333,7 @@ public abstract class Season {
         String team = getTeamForPlayer(player);
         Team currentTeam = player.getTeam();
 
-        if (currentTeam == null || !currentTeam.getName().equals(team)) {
+        if (team != null && (currentTeam == null || !currentTeam.getName().equals(team))) {
             TeamUtils.addEntityToTeam(team, player);
             playerChangedTeam(player);
         }
@@ -439,7 +497,7 @@ public abstract class Season {
             *///?}
             if (pos.y <= minY) continue;
 
-            PlayerUtils.teleport(player, player.ls$getServerLevel(), pos, entry.getValue().get(0), entry.getValue().get(1));
+            LevelUtils.teleport(player, player.ls$getServerLevel(), pos, entry.getValue().get(0), entry.getValue().get(1));
             break;
         }
     }

@@ -108,13 +108,8 @@ public class DoubleLife extends Season {
     }
 
     @Override
-    public String getAdminCommands() {
-        return COMMANDS_ADMIN_TEXT;
-    }
-
-    @Override
-    public String getNonAdminCommands() {
-        return COMMANDS_TEXT;
+    public void reloadStart() {
+        loadSoulmates();
     }
 
     @Override

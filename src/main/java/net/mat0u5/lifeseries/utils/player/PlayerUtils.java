@@ -10,6 +10,7 @@ import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
@@ -50,6 +51,11 @@ import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 //?}
+
+//? if >= 1.21.9 {
+/*import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.network.chat.contents.objects.PlayerSprite;
+*///?}
 
 public class PlayerUtils {
     private static HashMap<Component, Integer> broadcastCooldown = new HashMap<>();
@@ -113,6 +119,7 @@ public class PlayerUtils {
     }
 
     public static void playSoundToPlayer(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
+        if (player == null) return;
         player.ls$playNotifySound(sound, SoundSource.MASTER, volume, pitch);
     }
 
@@ -411,6 +418,12 @@ public class PlayerUtils {
         broadcastMessageToAdmins(message, 1);
     }
 
+    public static void broadcastMessage(List<ServerPlayer> players, Component message) {
+        for (ServerPlayer player : players) {
+            player.displayClientMessage(message, false);
+        }
+    }
+
     public static void broadcastMessageExcept(Component message, ServerPlayer exceptPlayer) {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             if (player == exceptPlayer) continue;
@@ -438,47 +451,15 @@ public class PlayerUtils {
     }
 
     public static void teleport(ServerPlayer player, BlockPos pos) {
-        //? if <= 1.20.5 {
-        /*teleport(player, player.ls$getServerLevel(), pos.getCenter());
-        *///?} else {
-        teleport(player, player.ls$getServerLevel(), pos.getBottomCenter());
-        //?}
+        LevelUtils.teleport(player, player.ls$getServerLevel(), Vec3.atBottomCenterOf(pos));
     }
 
     public static void teleport(ServerPlayer player, Vec3 pos) {
-        teleport(player, player.ls$getServerLevel(), pos);
+        LevelUtils.teleport(player, player.ls$getServerLevel(), pos);
     }
 
     public static void teleport(ServerPlayer player, double destX, double destY, double destZ) {
-        teleport(player, player.ls$getServerLevel(), destX, destY, destZ);
-    }
-
-    public static void teleport(ServerPlayer player, ServerLevel level, double destX, double destY, double destZ) {
-        teleport(player, level, destX, destY, destZ, player.getYRot(), player.getXRot());
-    }
-
-    public static void teleport(ServerPlayer player, ServerLevel level, BlockPos pos) {
-        //? if <= 1.20.5 {
-        /*teleport(player, level, pos.getCenter());
-        *///?} else {
-        teleport(player, level, pos.getBottomCenter());
-        //?}
-    }
-
-    public static void teleport(ServerPlayer player, ServerLevel level, Vec3 pos) {
-        teleport(player, level, pos.x(), pos.y(), pos.z(), player.getYRot(), player.getXRot());
-    }
-
-    public static void teleport(ServerPlayer player, ServerLevel level, Vec3 pos, float yaw, float pitch) {
-        teleport(player, level, pos.x(), pos.y(), pos.z(), yaw, pitch);
-    }
-
-    public static void teleport(ServerPlayer player, ServerLevel level, double destX, double destY, double destZ, float yaw, float pitch) {
-        //? if <= 1.21 {
-        player.teleportTo(level, destX, destY, destZ, EnumSet.noneOf(RelativeMovement.class), yaw, pitch);
-        //?} else {
-        /*player.teleportTo(level, destX, destY, destZ, EnumSet.noneOf(Relative.class), yaw, pitch, false);
-         *///?}
+        LevelUtils.teleport(player, player.ls$getServerLevel(), destX, destY, destZ);
     }
 
     public static void safelyPutIntoSurvival(ServerPlayer player) {
@@ -486,7 +467,7 @@ public class PlayerUtils {
 
         //Teleport to the highest block in the terrain
         BlockPos.MutableBlockPos playerBlockPos = player.blockPosition().mutable();
-        int safeY = LevelUtils.findTopSafeY(player.ls$getServerLevel(), playerBlockPos.getCenter());
+        int safeY = LevelUtils.findTopSafeY(player.ls$getServerLevel(), Vec3.atBottomCenterOf(playerBlockPos));
         playerBlockPos.setY(safeY);
         teleport(player, playerBlockPos);
 
@@ -522,5 +503,14 @@ public class PlayerUtils {
             if (hidePlayerFrom(player, broadcaster)) continue;
             player.sendSystemMessage(message);
         }
+    }
+
+    public static Component getPlayerNameWithIcon(ServerPlayer player) {
+        //? if < 1.21.9 {
+        return player.getDisplayName();
+        //?} else {
+        /*Component image = Component.object(new PlayerSprite(ResolvableProfile.createResolved(player.getGameProfile()), true));
+        return TextUtils.format("{} {}", image, player);
+        *///?}
     }
 }

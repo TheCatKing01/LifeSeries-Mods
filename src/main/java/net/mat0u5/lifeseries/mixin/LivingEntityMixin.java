@@ -1,6 +1,9 @@
 package net.mat0u5.lifeseries.mixin;
 
 import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.entity.angrysnowman.AngrySnowman;
+import net.mat0u5.lifeseries.entity.snail.Snail;
+import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -165,6 +168,11 @@ public abstract class LivingEntityMixin {
         if (ls$lastDamageSource == null) return strength;
 
         DamageSource source = ls$lastDamageSource;
+
+        if (source.getEntity() instanceof AngrySnowman) {
+            return 3;
+        }
+
         if (source.getEntity() instanceof ServerPlayer attacker &&
                 source.type() == attacker.damageSources().playerAttack(attacker).type() &&
                 SuperpowersWildcard.hasActivatedPower(attacker, Superpowers.SUPER_PUNCH)) {
@@ -237,4 +245,15 @@ public abstract class LivingEntityMixin {
         }
     }
     *///?}
+
+/*
+    @ModifyVariable(method = "handleRelativeFrictionAndCalculateMovement", at = @At("HEAD"), index = 2, argsOnly = true)
+    private float noSpecialFriction(float original) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (entity instanceof Snail || entity instanceof TriviaBot) {
+            return 0.6F;
+        }
+        return original;
+    }
+*/
 }

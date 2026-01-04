@@ -105,6 +105,12 @@ public class SecretLife extends Season {
         initializeItemSpawner();
     }
 
+
+    @Override
+    public void reloadStart() {
+        TaskManager.initialize();
+    }
+
     @Override
     public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
         super.tickSessionOn(server);
@@ -142,7 +148,7 @@ public class SecretLife extends Season {
             }
         }
         TaskTypes type = TaskManager.getPlayersTaskType(player);
-        if (player.ls$isOnLastLife(false) && TaskManager.submittedOrFailed.contains(player.getUUID()) && type == null) {
+        if (player.ls$isOnLastLife(false) && TaskManager.submittedOrFailed.contains(player.getUUID()) && type == null && currentSession.statusStarted()) {
             TaskManager.chooseTasks(List.of(player), TaskTypes.RED);
         }
     }

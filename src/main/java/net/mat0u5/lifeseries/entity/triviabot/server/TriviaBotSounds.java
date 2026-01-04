@@ -15,28 +15,49 @@ public class TriviaBotSounds {
     private int introSoundCooldown = 0;
     private boolean playedCountdownSound = false;
     private boolean playedCountdownEndingSound = false;
+    public int delay = 0;
     public void playSounds() {
+        if (delay > 0) {
+            delay--;
+            return;
+        }
         if (introSoundCooldown > 0) introSoundCooldown--;
 
         if (introSoundCooldown == 0 && !bot.interactedWith()) {
-            SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_intro"));
-            PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 1, 1);
-            introSoundCooldown = 830;
+            if (!bot.santaBot()) {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_intro"));
+                PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 1, 1);
+                introSoundCooldown = 830;
+            }
+            else {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_intro"));
+                PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
+                introSoundCooldown = 624;
+            }
         }
 
-        if (!playedCountdownEndingSound && bot.interactedWith() && !bot.submittedAnswer() && !bot.ranOutOfTime() && bot.triviaHandler.getRemainingTicks() <= 676) {
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_suspense_end")),
-                    SoundSource.NEUTRAL, 0.65f, 1);
+        if (!playedCountdownEndingSound && bot.interactedWith() && !bot.submittedAnswer() && !bot.ranOutOfTime()
+                && ((!bot.santaBot() && bot.triviaHandler.getRemainingTicks() <= 676) || (bot.santaBot() && bot.triviaHandler.getRemainingTicks() <= 643))) {
+            if (!bot.santaBot()) {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_suspense_end"));
+                PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 0.65f, 1);
+            }
+            else {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_suspense_end"));
+                PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
+            }
             playedCountdownEndingSound = true;
             playedCountdownSound = true;
         }
         else if (!playedCountdownSound && bot.interactedWith() && !bot.submittedAnswer() && !bot.ranOutOfTime()) {
-            PlayerUtils.playSoundWithSourceToPlayers(
-                    PlayerUtils.getAllPlayers(), bot,
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_suspense")),
-                    SoundSource.NEUTRAL, 0.65f, 1);
+            if (!bot.santaBot()) {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_trivia_suspense"));
+                PlayerUtils.playSoundWithSourceToPlayers(PlayerUtils.getAllPlayers(), bot, sound, SoundSource.NEUTRAL, 0.65f, 1);
+            }
+            else  {
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_suspense"));
+                PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
+            }
             playedCountdownSound = true;
         }
     }

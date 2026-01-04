@@ -21,7 +21,10 @@ public class TriviaBotRenderer extends MobRenderer<TriviaBot, TriviaBotModel<Tri
 
     @Override
     public ResourceLocation getTextureLocation(TriviaBot entity) {
-        return IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+        if (entity.santaBot()) {
+            return TriviaBot.SANTABOT_TEXTURE;
+        }
+        return TriviaBot.DEFAULT_TEXTURE;
     }
 
     @Override
@@ -48,7 +51,10 @@ public class TriviaBotRenderer extends AgeableMobRenderer<TriviaBot, TriviaBotRe
     //?} else {
     /^public Identifier getTextureLocation(TriviaBotRenderState state) {
     ^///?}
-        return IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+        if (state.santaBot) {
+            return TriviaBot.SANTABOT_TEXTURE;
+        }
+        return TriviaBot.DEFAULT_TEXTURE;
     }
 
     @Override
@@ -63,6 +69,19 @@ public class TriviaBotRenderer extends AgeableMobRenderer<TriviaBot, TriviaBotRe
         state.answerCorrectAnimationState.copyFrom(triviaBot.clientData.answerCorrectAnimationState);
         state.answerIncorrectAnimationState.copyFrom(triviaBot.clientData.answerIncorrectAnimationState);
         state.snailTransformAnimationState.copyFrom(triviaBot.clientData.snailTransformAnimationState);
+
+        state.santaAnalyzingAnimationState.copyFrom(triviaBot.clientData.santaAnalyzingAnimationState);
+        state.santaAnswerCorrectAnimationState.copyFrom(triviaBot.clientData.santaAnswerCorrectAnimationState);
+        state.santaAnswerIncorrectAnimationState.copyFrom(triviaBot.clientData.santaAnswerIncorrectAnimationState);
+        state.santaFlyAnimationState.copyFrom(triviaBot.clientData.santaFlyAnimationState);
+        state.santaGlideAnimationState.copyFrom(triviaBot.clientData.santaGlideAnimationState);
+        state.santaIdleAnimationState.copyFrom(triviaBot.clientData.santaIdleAnimationState);
+        state.santaWaveAnimationState.copyFrom(triviaBot.clientData.santaWaveAnimationState);
+
+        state.faceAngryAnimationState.copyFrom(triviaBot.clientData.faceAngryAnimationState);
+        state.faceHappyAnimationState.copyFrom(triviaBot.clientData.faceHappyAnimationState);
+
+        state.santaBot = triviaBot.santaBot();
     }
 }
 *///?}

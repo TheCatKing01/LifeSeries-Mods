@@ -53,6 +53,18 @@ public enum PacketNames {
     ,HUNGER_NON_EDIBLE
     ,SET_LIVES
     ,SET_TEAM
+    ,SNOWY_NETHER
+    ,EMPTY_SCREEN
+    ,HIDE_SLEEP_DARKNESS
+    ,VOTING_SCREEN
+    ,VOTING_TIME
+    ,SUBMIT_VOTE
+    ,SKYCOLOR
+    ,FOGCOLOR
+    ,CLOUDCOLOR
+    ,TRIVIA_ALL_WRONG
+    ,MIC_MUTED
+    ,ADMIN_INFO
     ;
 
     public static PacketNames fromName(String name) {

@@ -38,9 +38,13 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TriviaBot extends AmbientCreature {
     //? if <= 1.21.9 {
+    public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    public static final ResourceLocation SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
     public static final ResourceLocation ID = IdentifierHelper.mod("triviabot");
     //?} else {
-    /*public static final Identifier ID = IdentifierHelper.mod("triviabot");
+    /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    public static final Identifier SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
+    public static final Identifier ID = IdentifierHelper.mod("triviabot");
     *///?}
 
     public static final int STATIONARY_TP_COOLDOWN = 400; // No movement for 20 seconds teleports the bot
@@ -64,6 +68,9 @@ public class TriviaBot extends AmbientCreature {
     private static final EntityDataAccessor<Boolean> interactedWith = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> gliding = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> analyzing = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> santaBot = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> waving = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> leaving = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
 
 
     public TriviaBot(EntityType<? extends AmbientCreature> entityType, Level level) {
@@ -73,6 +80,14 @@ public class TriviaBot extends AmbientCreature {
         //? if <= 1.20.3 {
         /*this.setMaxUpStep(1.0F);
         *///?}
+		
+        if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            triviaHandler = new NiceLifeTriviaHandler(this);
+            setSantaBot(true);
+        }
+        else {
+            triviaHandler = new WildLifeTriviaHandler(this);
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -151,6 +166,7 @@ public class TriviaBot extends AmbientCreature {
 
     @Override
     protected boolean canRide(Entity entity) {
+        if (this.noPhysics) return false;
         return CAN_START_RIDING;
     }
 
@@ -209,6 +225,9 @@ public class TriviaBot extends AmbientCreature {
         this.entityData.define(interactedWith, false);
         this.entityData.define(gliding, false);
         this.entityData.define(analyzing, -1);
+        this.entityData.define(santaBot, false);
+        this.entityData.define(waving, 0);
+        this.entityData.define(leaving, false);
     }
     *///?} else {
     @Override
@@ -220,6 +239,9 @@ public class TriviaBot extends AmbientCreature {
         builder.define(interactedWith, false);
         builder.define(gliding, false);
         builder.define(analyzing, -1);
+        builder.define(santaBot, false);
+        builder.define(waving, -1);
+        builder.define(leaving, false);
     }
     //?}
     public void setRanOutOfTime(boolean value) {
@@ -240,6 +262,16 @@ public class TriviaBot extends AmbientCreature {
     public void setAnalyzingTime(int value) {
         this.entityData.set(analyzing, value);
     }
+    public void setSantaBot(boolean value) {
+        this.entityData.set(santaBot, value);
+    }
+    public void setWaving(int value) {
+        this.entityData.set(waving, value);
+    }
+    public void setLeaving(boolean value) {
+        this.entityData.set(leaving, value);
+    }
+
     public boolean ranOutOfTime() {
         return this.entityData.get(ranOutOfTime);
     }
@@ -257,5 +289,14 @@ public class TriviaBot extends AmbientCreature {
     }
     public int getAnalyzingTime() {
         return this.entityData.get(analyzing);
+    }
+    public boolean santaBot() {
+        return this.entityData.get(santaBot);
+    }
+    public int waving() {
+        return this.entityData.get(waving);
+    }
+    public boolean leaving() {
+        return this.entityData.get(leaving);
     }
 }
