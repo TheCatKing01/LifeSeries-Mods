@@ -22,21 +22,21 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class Blocks {
 
-    private static BlockBehaviour.Properties copyProps(Block block) {
-        //? if >= 1.21 {
-        return BlockBehaviour.Properties.ofFullCopy(block);
-        //?} else {
-        return BlockBehaviour.Properties.copy(block);
-        //?}
-    }
+	private static BlockBehaviour.Properties copyProps(Block block) {
+		//? if >= 1.20.3 {
+		return BlockBehaviour.Properties.ofFullCopy(block);
+		//?} else {
+		return BlockBehaviour.Properties.copy(block);
+		//?}
+	}
 
-    private static Block xpOre(Block base, int minXp, int maxXp) {
-        //? if >= 1.21 {
-        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
-        //?} else {
-        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
-        //?}
-    }
+	private static Block xpOre(Block base, int minXp, int maxXp) {
+		//? if >= 1.20.3 {
+		return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
+		//?} else {
+		return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
+		//?}
+	}
 
     private static ResourceLocation id(String name) {
         //? if >= 1.21 {
