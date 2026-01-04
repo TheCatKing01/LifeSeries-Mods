@@ -6,12 +6,11 @@ import net.mat0u5.lifeseries.Main;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-// Default import for :1.21 (Mojang mappings)
-import net.minecraft.resources.ResourceLocation;
-
-/*//? if >= 1.21.11 {
+//? if >= 1.21.11 {
 import net.minecraft.util.Identifier;
-*///?}
+//?} else {
+import net.minecraft.resources.ResourceLocation;
+//?}
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -24,40 +23,34 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public class Blocks {
 
     private static BlockBehaviour.Properties copyProps(Block block) {
-        // Default (works for 1.20.3+ and 1.21)
-        return BlockBehaviour.Properties.ofFullCopy(block);
-
-        /*//? if <= 1.20.2 {
+        //? if <= 1.20.2 {
         return BlockBehaviour.Properties.copy(block);
-        *///?}
+        //?} else {
+        return BlockBehaviour.Properties.ofFullCopy(block);
+        //?}
     }
 
     private static Block xpOre(Block base, int minXp, int maxXp) {
-        // Default (works for 1.20.3+ and 1.21)
-        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
-
-        /*//? if <= 1.20.2 {
+        //? if <= 1.20.2 {
         return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
-        *///?}
+        //?} else {
+        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
+        //?}
     }
 
-    // Default: Mojang ResourceLocation path (for :1.21 and most)
-    private static ResourceLocation id(String name) {
-        // Default (1.21+)
-        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
-
-        /*//? if <= 1.20.5 {
-        return new ResourceLocation(Main.MOD_ID, name);
-        *///?}
-    }
-
-    /*//? if >= 1.21.11 {
-    // For 1.21.11 target if it really needs Identifier
+    //? if >= 1.21.11 {
     private static Identifier id(String name) {
-        // try constructor first; if it fails, switch to Identifier.of(...)
         return new Identifier(Main.MOD_ID, name);
     }
-    *///?}
+    //?} else {
+    private static ResourceLocation id(String name) {
+        //? if <= 1.20.5 {
+        return new ResourceLocation(Main.MOD_ID, name);
+        //?} else {
+        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
+        //?}
+    }
+    //?}
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
