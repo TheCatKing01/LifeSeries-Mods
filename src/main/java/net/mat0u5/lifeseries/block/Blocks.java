@@ -5,7 +5,13 @@ import net.mat0u5.lifeseries.Main;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+
+// Default (raw file) must compile on :1.21 (Mojang mappings):
 import net.minecraft.resources.ResourceLocation;
+
+/*//? if >= 1.21.11 {
+import net.minecraft.util.Identifier;
+*///?}
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -18,28 +24,34 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public class Blocks {
 
     private static BlockBehaviour.Properties copyProps(Block block) {
-        //? if <= 1.20.2 {
-        return BlockBehaviour.Properties.copy(block);
-        //?} else {
         return BlockBehaviour.Properties.ofFullCopy(block);
-        //?}
+
+        /*//? if <= 1.20.2 {
+        return BlockBehaviour.Properties.copy(block);
+        *///?}
     }
 
     private static Block xpOre(Block base, int minXp, int maxXp) {
-        //? if <= 1.20.2 {
-        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
-        //?} else {
         return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
-        //?}
+
+        /*//? if <= 1.20.2 {
+        return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
+        *///?}
     }
 
     private static ResourceLocation id(String name) {
-        //? if <= 1.20.5 {
-        return new ResourceLocation(Main.MOD_ID, name);
-        //?} else {
         return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
-        //?}
+
+        /*//? if <= 1.20.5 {
+        return new ResourceLocation(Main.MOD_ID, name);
+        *///?}
     }
+
+    /*//? if >= 1.21.11 {
+    private static Identifier id(String name) {
+        return new Identifier(Main.MOD_ID, name);
+    }
+    *///?}
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
@@ -47,7 +59,11 @@ public class Blocks {
     }
 
     private static void registerBlockItem(String name, Block block) {
-        Registry.register(BuiltInRegistries.ITEM, id(name), new BlockItem(block, new Item.Properties()));
+        Registry.register(
+                BuiltInRegistries.ITEM,
+                id(name),
+                new BlockItem(block, new Item.Properties())
+        );
     }
 
     public static final Block SNOWY_GOLD_ORE = registerBlock(
