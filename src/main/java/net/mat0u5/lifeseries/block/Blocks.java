@@ -6,10 +6,10 @@ import net.mat0u5.lifeseries.Main;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-//? if == 1.21.11 {
-import net.minecraft.util.Identifier;
-//?} else {
+//? if <= 1.21.9 {
 import net.minecraft.resources.ResourceLocation;
+//?} else {
+import net.minecraft.util.Identifier;
 //?}
 
 import net.minecraft.util.valueproviders.UniformInt;
@@ -23,23 +23,41 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public class Blocks {
 
     private static BlockBehaviour.Properties copyProps(Block block) {
-        //? if >= 1.20.3 {
-        return BlockBehaviour.Properties.ofFullCopy(block);
-        //?} else {
+        //? if <= 1.20.2 {
         return BlockBehaviour.Properties.copy(block);
+        //?} else {
+        return BlockBehaviour.Properties.ofFullCopy(block);
         //?}
     }
 
     private static Block xpOre(Block base, int minXp, int maxXp) {
-        //? if >= 1.20.3 {
-        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
-        //?} else {
+        //? if <= 1.20.2 {
         return new DropExperienceBlock(copyProps(base), UniformInt.of(minXp, maxXp));
+        //?} else {
+        return new DropExperienceBlock(UniformInt.of(minXp, maxXp), copyProps(base));
         //?}
     }
 
+    //? if <= 1.21.9 {
 
-    //? if == 1.21.11 {
+    private static ResourceLocation id(String name) {
+        //? if <= 1.20.5 {
+        return new ResourceLocation(Main.MOD_ID, name);
+        //?} else {
+        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
+        //?}
+    }
+
+    private static Block registerBlock(String name, Block block) {
+        registerBlockItem(name, block);
+        return Registry.register(BuiltInRegistries.BLOCK, id(name), block);
+    }
+
+    private static void registerBlockItem(String name, Block block) {
+        Registry.register(BuiltInRegistries.ITEM, id(name), new BlockItem(block, new Item.Properties()));
+    }
+
+    //?} else {
 
     private static Identifier id(String name) {
         return Identifier.of(Main.MOD_ID, name);
@@ -47,46 +65,11 @@ public class Blocks {
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
-        return Registry.register(
-                BuiltInRegistries.BLOCK,
-                id(name),
-                block
-        );
+        return Registry.register(BuiltInRegistries.BLOCK, id(name), block);
     }
 
     private static void registerBlockItem(String name, Block block) {
-        Registry.register(
-                BuiltInRegistries.ITEM,
-                id(name),
-                new BlockItem(block, new Item.Properties())
-        );
-    }
-
-    //?} else {
-
-    private static ResourceLocation id(String name) {
-        //? if >= 1.21 {
-        return ResourceLocation.fromNamespaceAndPath(Main.MOD_ID, name);
-        //?} else {
-        return new ResourceLocation(Main.MOD_ID, name);
-        //?}
-    }
-
-    private static Block registerBlock(String name, Block block) {
-        registerBlockItem(name, block);
-        return Registry.register(
-                BuiltInRegistries.BLOCK,
-                id(name),
-                block
-        );
-    }
-
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(
-                BuiltInRegistries.ITEM,
-                id(name),
-                new BlockItem(block, new Item.Properties())
-        );
+        Registry.register(BuiltInRegistries.ITEM, id(name), new BlockItem(block, new Item.Properties()));
     }
 
     //?}
