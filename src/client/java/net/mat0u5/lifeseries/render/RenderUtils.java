@@ -1,109 +1,173 @@
-package net.mat0u5.lifeseries.render;
-
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RenderUtils {
 
-    // ---------- Basic text: left ----------
-    public static void drawTextLeft(GuiGraphics g, Font font, Component text, int x, int y) {
-        g.drawString(font, text, x, y, 0xFFFFFFFF, false);
+    // -------------------- TEXT BUILDER --------------------
+    public static TextBuilder text(String s, int x, int y) {
+        return new TextBuilder(Component.literal(s), x, y);
     }
 
-    public static void drawTextLeft(GuiGraphics g, Font font, net.minecraft.network.chat.MutableComponent text, int x, int y) {
-        g.drawString(font, text, x, y, 0xFFFFFFFF, false);
+    public static TextBuilder text(Component c, int x, int y) {
+        return new TextBuilder(c, x, y);
     }
 
-    public static void drawTextLeft(GuiGraphics g, Font font, int color, Component text, int x, int y) {
-        g.drawString(font, text, x, y, color, false);
+    public static TextBuilder text(MutableComponent c, int x, int y) {
+        return new TextBuilder(c, x, y);
     }
 
-    public static void drawTextLeft(GuiGraphics g, Font font, int color, net.minecraft.network.chat.MutableComponent text, int x, int y) {
-        g.drawString(font, text, x, y, color, false);
+    public static TextBuilder text(FormattedCharSequence seq, int x, int y) {
+        return new TextBuilder(seq, x, y);
     }
 
-    // ---------- Center ----------
-    public static void drawTextCenter(GuiGraphics g, Font font, Component text, int centerX, int y) {
-        int w = font.width(text);
-        g.drawString(font, text, centerX - (w / 2), y, 0xFFFFFFFF, false);
-    }
+    public static class TextBuilder {
+        private final int x;
+        private final int y;
 
-    // ---------- Right ----------
-    public static void drawTextRight(GuiGraphics g, Font font, int color, Component text, int rightX, int y) {
-        int w = font.width(text);
-        g.drawString(font, text, rightX - w, y, color, false);
-    }
+        private Component component;
+        private FormattedCharSequence sequence;
 
-    // Overload used in TextHud: includes dropShadow boolean
-    public static void drawTextRight(GuiGraphics g, Font font, int color, Component text, int rightX, int y, boolean dropShadow) {
-        int w = font.width(text);
-        g.drawString(font, text, rightX - w, y, color, dropShadow);
-    }
+        private boolean anchorCenter = false;
+        private boolean anchorRight = false;
+        private boolean shadow = false;
 
-    // ---------- Scaled text ----------
-    public static void drawTextLeftScaled(GuiGraphics g, Font font, Component text, int x, int y, float scaleX, float scaleY) {
-        var pose = g.pose();
-        pose.pushPose();
-        pose.translate(x, y, 0);
-        pose.scale(scaleX, scaleY, 1.0f);
-        g.drawString(font, text, 0, 0, 0xFFFFFFFF, false);
-        pose.popPose();
-    }
+        private int color = 0xFFFFFFFF;
 
-    public static void drawTextCenterScaled(GuiGraphics g, Font font, Component text, int centerX, int y, float scaleX, float scaleY) {
-        int w = font.width(text);
-        var pose = g.pose();
-        pose.pushPose();
-        pose.translate(centerX, y, 0);
-        pose.scale(scaleX, scaleY, 1.0f);
-        // center around 0 after translating to centerX
-        g.drawString(font, text, -(w / 2), 0, 0xFFFFFFFF, false);
-        pose.popPose();
-    }
+        private float scaleX = 1f;
+        private float scaleY = 1f;
 
-    public static void drawTextRightScaled(
-            GuiGraphics g, Font font, int color, Component text,
-            int rightX, int y, float scaleX, float scaleY, boolean dropShadow
-    ) {
-        int w = font.width(text);
-        var pose = g.pose();
-        pose.pushPose();
-        pose.translate(rightX, y, 0);
-        pose.scale(scaleX, scaleY, 1.0f);
-        g.drawString(font, text, -w, 0, color, dropShadow);
-        pose.popPose();
-    }
+        private int wrapWidth = -1;
+        private int wrapSpacing = 0;
 
-    // ---------- Wrapped lines ----------
-    public static void drawTextLeftWrapLines(
-            GuiGraphics g, Font font, int color, Component text,
-            int x, int y, int maxWidth, int lineSpacing
-    ) {
-        List<FormattedCharSequence> lines = font.split(text, maxWidth);
-        int yy = y;
-        for (FormattedCharSequence line : lines) {
-            g.drawString(font, line, x, yy, color, false);
-            yy += font.lineHeight + lineSpacing;
+        TextBuilder(Component c, int x, int y) {
+            this.component = c;
+            this.x = x;
+            this.y = y;
+        }
+
+        TextBuilder(FormattedCharSequence seq, int x, int y) {
+            this.sequence = seq;
+            this.x = x;
+            this.y = y;
+        }
+
+        public TextBuilder anchorCenter() { this.anchorCenter = true; this.anchorRight = false; return this; }
+        public TextBuilder anchorRight()  { this.anchorRight = true; this.anchorCenter = false; return this; }
+
+        public TextBuilder colored(int color) { this.color = color; return this; }
+
+        public TextBuilder withShadow() { this.shadow = true; return this; }
+
+        public TextBuilder scaled(float sx, float sy) { this.scaleX = sx; this.scaleY = sy; return this; }
+
+        public TextBuilder wrapLines(int width, int spacing) { this.wrapWidth = width; this.wrapSpacing = spacing; return this; }
+
+        /** returns the pixel height drawn (so callers can do currentY += render(...)) */
+        public int render(GuiGraphics g, Font font) {
+            var pose = g.pose();
+            pose.pushPose();
+            pose.translate(x, y, 0);
+            pose.scale(scaleX, scaleY, 1f);
+
+            // compute x offset for anchor
+            int drawX = 0;
+            if (sequence == null && component != null) {
+                int w = font.width(component);
+                if (anchorCenter) drawX = -(w / 2);
+                else if (anchorRight) drawX = -w;
+            } else if (sequence != null) {
+                int w = font.width(sequence);
+                if (anchorCenter) drawX = -(w / 2);
+                else if (anchorRight) drawX = -w;
+            }
+
+            int height = 0;
+
+            if (wrapWidth > 0 && component != null) {
+                List<FormattedCharSequence> lines = font.split(component, wrapWidth);
+                int yy = 0;
+                for (FormattedCharSequence line : lines) {
+                    g.drawString(font, line, drawX, yy, color, shadow);
+                    yy += font.lineHeight + wrapSpacing;
+                }
+                height = yy;
+            } else {
+                if (sequence != null) g.drawString(font, sequence, drawX, 0, color, shadow);
+                else g.drawString(font, component, drawX, 0, color, shadow);
+
+                height = font.lineHeight;
+            }
+
+            pose.popPose();
+
+            // height is in scaled coordinates; convert back to screen pixels
+            return (int) (height * scaleY);
         }
     }
 
-    // ---------- Scaled texture ----------
-    public static void drawTextureScaled(
-            GuiGraphics g, ResourceLocation texture,
-            int x, int y, int u, int v, int w, int h,
-            float scaleX, float scaleY
-    ) {
-        var pose = g.pose();
-        pose.pushPose();
-        pose.translate(x, y, 0);
-        pose.scale(scaleX, scaleY, 1.0f);
-        // draw at (0,0) because we translated to x,y already
-        g.blit(texture, 0, 0, u, v, w, h);
-        pose.popPose();
+    // -------------------- TEXTURE BUILDER --------------------
+    public static TextureBuilder texture(ResourceLocation tex, int x, int y, int w, int h) {
+        return new TextureBuilder(tex, x, y, w, h);
+    }
+
+    public static class TextureBuilder {
+        private final ResourceLocation tex;
+        private final int x, y;
+        private int u = 0, v = 0;
+        private int inW, inH;
+
+        private int outW, outH;
+        private int texW = 256, texH = 256;
+
+        private float scaleX = 1f, scaleY = 1f;
+
+        TextureBuilder(ResourceLocation tex, int x, int y, int w, int h) {
+            this.tex = tex;
+            this.x = x;
+            this.y = y;
+            this.inW = w;
+            this.inH = h;
+            this.outW = w;
+            this.outH = h;
+        }
+
+        public TextureBuilder uv(int u, int v) { this.u = u; this.v = v; return this; }
+
+        public TextureBuilder textureSize(int w, int h) { this.texW = w; this.texH = h; return this; }
+
+        public TextureBuilder outSize(int w, int h) { this.outW = w; this.outH = h; return this; }
+
+        public TextureBuilder scaled(float sx, float sy) { this.scaleX = sx; this.scaleY = sy; return this; }
+
+        public void render(GuiGraphics g) {
+            var pose = g.pose();
+            pose.pushPose();
+            pose.translate(x, y, 0);
+            pose.scale(scaleX, scaleY, 1f);
+
+            // blit takes size in pixels; using outW/outH at (0,0) after translation
+            g.blit(tex, 0, 0, u, v, outW, outH, texW, texH);
+
+            pose.popPose();
+        }
+    }
+
+    // -------------------- BORDER --------------------
+    public static void drawBorder(GuiGraphics g, int x, int y, int width, int height, int color) {
+        // top
+        g.fill(x, y, x + width, y + 1, color);
+        // bottom
+        g.fill(x, y + height - 1, x + width, y + height, color);
+        // left
+        g.fill(x, y, x + 1, y + height, color);
+        // right
+        g.fill(x + width - 1, y, x + width, y + height, color);
     }
 }
