@@ -573,9 +573,8 @@ public class NetworkHandlerServer {
 
     public static void tryKickFailedHandshake(ServerPlayer player) {
         if (server == null) return;
-        if (currentSeason.getSeason() != Seasons.WILD_LIFE) return;
+        if (!currentSeason.getSeason().requiresClient()) return;
         if (wasHandshakeSuccessful(player)) return;
-
         //? if <= 1.20.5 {
         /*player.connection.disconnect(getDisconnectClientText());
         *///?} else {
