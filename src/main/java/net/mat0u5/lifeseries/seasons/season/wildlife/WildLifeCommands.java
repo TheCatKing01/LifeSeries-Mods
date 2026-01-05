@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Callback;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Hunger;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.SnailSkins;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
@@ -43,6 +44,14 @@ public class WildLifeCommands extends Command {
     @Override
     public Component getBannedText() {
         return Component.nullToEmpty("This command is only available when playing Wild Life.");
+    }
+
+    public List<String> getAdminCommands() {
+        return List.of("wildcard", "snail", "superpower", "hunger");
+    }
+
+    public List<String> getNonAdminCommands() {
+        return List.of("snail");
     }
 
     @Override
@@ -86,6 +95,18 @@ public class WildLifeCommands extends Command {
                         .executes(context -> activateFinale(
                                 context.getSource())
                         )
+                .then(literal("effect")
+                        .then(literal("dots")
+                                .executes(context -> effectDots(
+                                        context.getSource())
+                                )
+                        )
+                        .then(literal("makeItWild")
+                                .executes(context -> effectMakeItWild(
+                                        context.getSource())
+                                )
+                        )
+                )
                 )
         );
 		
@@ -184,6 +205,22 @@ public class WildLifeCommands extends Command {
                         .executes(context -> randomizeFood(context.getSource()))
                 )
         );
+    }
+
+    public int effectDots(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+
+        WildcardManager.showDots();
+
+        return 1;
+    }
+
+    public int effectMakeItWild(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+
+        Callback.showEndingTitles();
+
+        return 1;
     }
 
     public int activateFinale(CommandSourceStack source) {

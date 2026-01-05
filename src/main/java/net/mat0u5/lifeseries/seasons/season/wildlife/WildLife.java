@@ -3,7 +3,8 @@ package net.mat0u5.lifeseries.seasons.season.wildlife;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
-import net.mat0u5.lifeseries.entity.triviabot.server.TriviaHandler;
+import net.mat0u5.lifeseries.entity.triviabot.server.trivia.NiceLifeTriviaHandler;
+import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -15,9 +16,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.*;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,9 +41,6 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 *///?}
 
 public class WildLife extends Season {
-    public static final String COMMANDS_ADMIN_TEXT = "/lifeseries, /session, /claimkill, /lives, /wildcard, /superpower, /snail";
-    public static final String COMMANDS_TEXT = "/claimkill, /lives, /snail";
-
     @Override
     public Seasons getSeason() {
         return Seasons.WILD_LIFE;
@@ -57,23 +53,11 @@ public class WildLife extends Season {
     }
 
     @Override
-    public String getAdminCommands() {
-        return COMMANDS_ADMIN_TEXT;
-    }
-
-    @Override
-    public String getNonAdminCommands() {
-        return COMMANDS_TEXT;
-    }
-
-    private final WandingTraders traders = new WandingTraders();
-
-    @Override
     public void initialize() {
         super.initialize();
         Snails.loadConfig();
         Snails.loadSnailNames();
-        TriviaHandler.initializeItemSpawner();
+        WildLifeTriviaHandler.initializeItemSpawner();
     }
 
     @Override
@@ -124,7 +108,6 @@ public class WildLife extends Season {
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
         WildcardManager.tickSessionOn();
-        traders.tickSessionOn(server);
     }
 
     @Override
@@ -186,25 +169,18 @@ public class WildLife extends Season {
 
         TriviaBot.CAN_START_RIDING = WildLifeConfig.WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.get(config);
         TriviaWildcard.TRIVIA_BOTS_PER_PLAYER = WildLifeConfig.WILDCARD_TRIVIA_BOTS_PER_PLAYER.get(config);
-        TriviaBot.EASY_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_EASY.get(config);
-        TriviaBot.NORMAL_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_NORMAL.get(config);
-        TriviaBot.HARD_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_HARD.get(config);
+        WildLifeTriviaHandler.EASY_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_EASY.get(config);
+        WildLifeTriviaHandler.NORMAL_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_NORMAL.get(config);
+        WildLifeTriviaHandler.HARD_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_HARD.get(config);
         WindCharge.MAX_MACE_DAMAGE = WildLifeConfig.WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE.get(config);
         Superspeed.STEP_UP = WildLifeConfig.WILDCARD_SUPERPOWERS_SUPERSPEED_STEP.get(config);
         WildcardManager.ACTIVATE_WILDCARD_MINUTE = WildLifeConfig.ACTIVATE_WILDCARD_MINUTE.get(config);
         SuperpowersWildcard.WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = WildLifeConfig.WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME.get(config);
         SuperpowersWildcard.setBlacklist(WildLifeConfig.WILDCARD_SUPERPOWERS_POWER_BLACKLIST.get(config));
         SuperpowersWildcard.ZOMBIES_HEALTH = WildLifeConfig.WILDCARD_SUPERPOWERS_ZOMBIES_HEALTH.get(config);
-		SuperpowersWildcard.POWERS_PER_ROLL = WildLifeConfig.WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.get(config);
-        SuperpowersWildcard.POWERS_PER_PLAYER = WildLifeConfig.WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.get(config);
-		SuperpowersWildcard.WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE = WildLifeConfig.WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.get(config);
-		SuperpowersWildcard.WILDCARD_CALLBACK_POWER_STACKING = WildLifeConfig.WILDCARD_CALLBACK_POWER_STACKING.get(config);
-		SuperpowersWildcard.WILDCARD_CALLBACK_OVERRIDE_TURN_OFF = WildLifeConfig.WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.get(config);
-		SuperpowersWildcard.WILDCARD_CALLBACK_RESET_AT_MAX = WildLifeConfig.WILDCARD_CALLBACK_RESET_AT_MAX.get(config);
         Callback.setBlacklist(WildLifeConfig.WILDCARD_CALLBACK_WILDCARDS_BLACKLIST.get(config));
         Callback.TURN_OFF = WildLifeConfig.WILDCARD_CALLBACK_TURN_OFF.get(config);
         Callback.NERFED_WILDCARDS = WildLifeConfig.WILDCARD_CALLBACK_NERFED_WILDCARDS.get(config);
-
 
         AnimalDisguise.SHOW_ARMOR = WildLifeConfig.WILDCARD_SUPERPOWERS_ANIMALDISGUISE_ARMOR.get(config);
         AnimalDisguise.SHOW_HANDS = WildLifeConfig.WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS.get(config);
@@ -241,11 +217,11 @@ public class WildLife extends Season {
 
         super.onPlayerDeath(player, source);
 
-        TriviaHandler.cursedGigantificationPlayers.remove(player.getUUID());
-        TriviaHandler.cursedHeartPlayers.remove(player.getUUID());
+        WildLifeTriviaHandler.cursedGigantificationPlayers.remove(player.getUUID());
+        WildLifeTriviaHandler.cursedHeartPlayers.remove(player.getUUID());
         AttributeUtils.resetMaxPlayerHealthIfNecessary(player);
 
-        TriviaHandler.cursedMoonJumpPlayers.remove(player.getUUID());
+        WildLifeTriviaHandler.cursedMoonJumpPlayers.remove(player.getUUID());
         AttributeUtils.resetPlayerJumpHeight(player);
 
         Superpower power = SuperpowersWildcard.getSuperpowerInstance(player);
@@ -349,5 +325,4 @@ public class WildLife extends Season {
         super.onUpdatedInventory(player);
         Hunger.updateInventory(player);
     }
-
 }
