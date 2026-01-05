@@ -14,18 +14,18 @@ import java.util.List;
 
 //? if <= 1.21.9 {
 import net.minecraft.resources.ResourceLocation;
- //?} else {
+//?} else {
 /*import net.minecraft.resources.Identifier;
 *///?}
 
 public class RenderUtils {
 
     public static void debugX(GuiGraphics context, int x) {
-        context.fill(x, 0, x+1, context.guiHeight(), TextColors.DEBUG);
+        context.fill(x, 0, x + 1, context.guiHeight(), TextColors.DEBUG);
     }
 
     public static void debugY(GuiGraphics context, int y) {
-        context.fill(0, y, context.guiWidth(), y+1, TextColors.DEBUG);
+        context.fill(0, y, context.guiWidth(), y + 1, TextColors.DEBUG);
     }
 
     //? if <= 1.21.9 {
@@ -42,6 +42,7 @@ public class RenderUtils {
         /*drawTextureScaled(context, texture, x, y, u, v, width, height, width, height, scaleX, scaleY);
         *///?}
     }
+
     //? if <= 1.21.9 {
     public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int u, int v, int width, int height) {
     //?} else {
@@ -53,38 +54,80 @@ public class RenderUtils {
         /*drawTexture(context, texture, x, y, u, v, width, height, width, height);
         *///?}
     }
-    public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
+
+    // ✅ This is the ONLY 10-arg drawTexture now (no duplicates elsewhere)
+    //? if <= 1.21.9 {
+    public static void drawTexture(GuiGraphics context, ResourceLocation texture,
+                                   int x, int y, int u, int v,
+                                   int width, int height,
+                                   int textureWidth, int textureHeight) {
+        //? if <= 1.21 {
         context.blit(texture, x, y, u, v, width, height, textureWidth, textureHeight);
+        //?} else if >= 1.21.2 && <= 1.21.5 {
+        /*context.blit(RenderType::guiTextured, texture,
+                x, y,
+                (float) u, (float) v,
+                width, height,
+                textureWidth, textureHeight);*/
+        //?} else if >= 1.21.6 && <= 1.21.9 {
+        /*context.blit(RenderPipelines.GUI_TEXTURED, texture,
+                x, y,
+                u, v,
+                width, height,
+                textureWidth, textureHeight);*/
+        //?}
     }
+    //?} else {
+    /*public static void drawTexture(GuiGraphics context, Identifier texture,
+                                   int x, int y, int u, int v,
+                                   int width, int height,
+                                   int textureWidth, int textureHeight) {
+        context.blit(RenderPipelines.GUI_TEXTURED, texture,
+                x, y, u, v, width, height, textureWidth, textureHeight);
+    }*/
+    //?}
+
+    // ✅ Keep ONLY the *scaled* textureWidth/textureHeight helpers in these blocks.
+    // ❌ Do NOT define drawTexture(... textureWidth, textureHeight) here anymore.
+
     //? if >= 1.21.2 && <= 1.21.5 {
-    /*public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture, float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight, float scaleX, float scaleY) {
+    /*public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture,
+            float x, float y, int u, int v, int width, int height,
+            int textureWidth, int textureHeight, float scaleX, float scaleY) {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
-        context.blit(RenderType::guiTextured, texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height, textureWidth, textureHeight);
+        context.blit(RenderType::guiTextured, texture,
+                (int) (x / scaleX), (int) (y / scaleY),
+                (float) u, (float) v,
+                width, height,
+                textureWidth, textureHeight);
         context.pose().popPose();
     }
-    public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
-        context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight);
-    }
     *///?} else if >= 1.21.6 && <= 1.21.9 {
-    /*public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture, float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight, float scaleX, float scaleY) {
+    /*public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture,
+            float x, float y, int u, int v, int width, int height,
+            int textureWidth, int textureHeight, float scaleX, float scaleY) {
         context.pose().pushMatrix();
         context.pose().scale(scaleX, scaleY);
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height, textureWidth, textureHeight);
+        context.blit(RenderPipelines.GUI_TEXTURED, texture,
+                (int) (x / scaleX), (int) (y / scaleY),
+                u, v,
+                width, height,
+                textureWidth, textureHeight);
         context.pose().popMatrix();
-    }
-    public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight);
     }
     *///?} else if > 1.21.9 {
-    /*public static void drawTextureScaled(GuiGraphics context, Identifier texture, float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight, float scaleX, float scaleY) {
+    /*public static void drawTextureScaled(GuiGraphics context, Identifier texture,
+            float x, float y, int u, int v, int width, int height,
+            int textureWidth, int textureHeight, float scaleX, float scaleY) {
         context.pose().pushMatrix();
         context.pose().scale(scaleX, scaleY);
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height, textureWidth, textureHeight);
+        context.blit(RenderPipelines.GUI_TEXTURED, texture,
+                (int) (x / scaleX), (int) (y / scaleY),
+                u, v,
+                width, height,
+                textureWidth, textureHeight);
         context.pose().popMatrix();
-    }
-    public static void drawTexture(GuiGraphics context, Identifier texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight);
     }
     *///?}
 
@@ -98,14 +141,14 @@ public class RenderUtils {
     }
 
     public static void drawTextCenter(GuiGraphics context, Font textRenderer, int textColor, Component text, int x, int y) {
-        context.drawString(textRenderer, text, x - textRenderer.width(text)/2, y, textColor, false);
+        context.drawString(textRenderer, text, x - textRenderer.width(text) / 2, y, textColor, false);
     }
 
     public static void drawTextCenterScaled(GuiGraphics context, Font textRenderer, int textColor, Component text, double x, double y, float scaleX, float scaleY) {
         //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
-        context.drawString(textRenderer, text, (int)(x / scaleX - textRenderer.width(text)/2.0), (int)(y / scaleY), textColor, false);
+        context.drawString(textRenderer, text, (int) (x / scaleX - textRenderer.width(text) / 2.0), (int) (y / scaleY), textColor, false);
         context.pose().popPose();
         //?} else {
         /*context.pose().pushMatrix();
@@ -114,7 +157,6 @@ public class RenderUtils {
         context.pose().popMatrix();
         *///?}
     }
-
 
     //Left Fixed Text
     public static void drawTextLeft(GuiGraphics context, Font textRenderer, Component text, int x, int y) {
@@ -137,7 +179,7 @@ public class RenderUtils {
         //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
-        context.drawString(textRenderer, text, (int)(x / scaleX), (int)(y / scaleY), textColor, false);
+        context.drawString(textRenderer, text, (int) (x / scaleX), (int) (y / scaleY), textColor, false);
         context.pose().popPose();
         //?} else {
         /*context.pose().pushMatrix();
@@ -156,9 +198,11 @@ public class RenderUtils {
         }
         return offsetY;
     }
+
     public static int drawTextLeftWrapLines(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y, int maxWidth, int gapY) {
         return drawTextLeftWrapLines(context, textRenderer, textColor, Component.literal(text), x, y, maxWidth, gapY);
     }
+
     //Right Fixed Text
     public static void drawTextRight(GuiGraphics context, Font textRenderer, Component text, int x, int y) {
         drawTextRight(context, textRenderer, TextColors.DEFAULT, text, x, y);
@@ -185,7 +229,7 @@ public class RenderUtils {
         //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
-        context.drawString(textRenderer, text, (int)(x / scaleX - width), (int)(y / scaleY), textColor, shadow);
+        context.drawString(textRenderer, text, (int) (x / scaleX - width), (int) (y / scaleY), textColor, shadow);
         context.pose().popPose();
         //?} else {
         /*context.pose().pushMatrix();
@@ -194,7 +238,6 @@ public class RenderUtils {
         context.pose().popMatrix();
         *///?}
     }
-
 
     public static void drawTextCenter(GuiGraphics context, Font textRenderer, String text, int x, int y) {
         drawTextCenter(context, textRenderer, TextColors.DEFAULT, Component.literal(text), x, y);
