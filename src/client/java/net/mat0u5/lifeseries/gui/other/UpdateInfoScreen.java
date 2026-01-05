@@ -124,7 +124,7 @@ public class UpdateInfoScreen extends DefaultScreen {
         String vn = asPlainString(versionName);
 
         RenderUtils.drawTextLeft(context, this.font,
-                Component.literal(TextUtils.formatLoosely("§0§nChangelog in version §l{}§0:", vn)),
+				TextUtils.formatLoosely("§0§nChangelog in version §l{}§0:", vn),
                 startX + 7, startY + 25 + font.lineHeight
         );
 
