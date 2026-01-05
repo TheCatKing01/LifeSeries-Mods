@@ -23,7 +23,7 @@ public class RenderUtils {
 
     public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture, float x, float y,
                                          int u, int v, int width, int height, float scaleX, float scaleY) {
-        //? if <= 1.21
+        //? if <= 1.21 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
         context.blit(texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height);
@@ -35,7 +35,7 @@ public class RenderUtils {
 
     public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y,
                                    int u, int v, int width, int height) {
-        //? if <= 1.21
+        //? if <= 1.21 {
         context.blit(texture, x, y, u, v, width, height);
         //?} else {
         /*drawTexture(context, texture, x, y, u, v, width, height, width, height);*/
@@ -58,7 +58,7 @@ public class RenderUtils {
 
     public static void drawTextCenterScaled(GuiGraphics context, Font textRenderer, int textColor, Component text,
                                            double x, double y, float scaleX, float scaleY) {
-        //? if <= 1.21.5
+        //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
         context.drawString(textRenderer, text,
@@ -94,8 +94,8 @@ public class RenderUtils {
     }
 
     public static void drawTextLeftScaled(GuiGraphics context, Font textRenderer, int textColor, Component text,
-                                         double x, double y, float scaleX, float scaleY) {
-        //? if <= 1.21.5
+                                          double x, double y, float scaleX, float scaleY) {
+        //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
         context.drawString(textRenderer, text, (int) (x / scaleX), (int) (y / scaleY), textColor, false);
@@ -146,7 +146,7 @@ public class RenderUtils {
     public static void drawTextRightScaled(GuiGraphics context, Font textRenderer, int textColor,
                                           Component text, double x, double y, float scaleX, float scaleY, boolean shadow) {
         int width = textRenderer.width(text);
-        //? if <= 1.21.5
+        //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
         context.drawString(textRenderer, text, (int) (x / scaleX - width), (int) (y / scaleY), textColor, shadow);
