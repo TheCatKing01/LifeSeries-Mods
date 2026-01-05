@@ -53,6 +53,9 @@ public class RenderUtils {
         /*drawTexture(context, texture, x, y, u, v, width, height, width, height);
         *///?}
     }
+    public static void drawTexture(GuiGraphics context, ResourceLocation texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
+        context.blit(texture, x, y, u, v, width, height, textureWidth, textureHeight);
+    }
     //? if >= 1.21.2 && <= 1.21.5 {
     /*public static void drawTextureScaled(GuiGraphics context, ResourceLocation texture, float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight, float scaleX, float scaleY) {
         context.pose().pushPose();
@@ -153,7 +156,9 @@ public class RenderUtils {
         }
         return offsetY;
     }
-
+    public static int drawTextLeftWrapLines(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y, int maxWidth, int gapY) {
+        return drawTextLeftWrapLines(context, textRenderer, textColor, Component.literal(text), x, y, maxWidth, gapY);
+    }
     //Right Fixed Text
     public static void drawTextRight(GuiGraphics context, Font textRenderer, Component text, int x, int y) {
         drawTextRight(context, textRenderer, TextColors.DEFAULT, text, x, y);
@@ -190,6 +195,90 @@ public class RenderUtils {
         *///?}
     }
 
+
+    public static void drawTextCenter(GuiGraphics context, Font textRenderer, String text, int x, int y) {
+        drawTextCenter(context, textRenderer, TextColors.DEFAULT, Component.literal(text), x, y);
+    }
+
+    public static void drawTextCenter(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y) {
+        drawTextCenter(context, textRenderer, textColor, Component.literal(text), x, y);
+    }
+
+    public static void drawTextCenter(GuiGraphics context, Font textRenderer, FormattedCharSequence text, int x, int y) {
+        context.drawString(textRenderer, text, x - textRenderer.width(text) / 2, y, TextColors.DEFAULT, false);
+    }
+
+    public static void drawTextLeft(GuiGraphics context, Font textRenderer, String text, int x, int y) {
+        drawTextLeft(context, textRenderer, TextColors.DEFAULT, Component.literal(text), x, y);
+    }
+
+    public static void drawTextLeft(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y) {
+        drawTextLeft(context, textRenderer, textColor, Component.literal(text), x, y);
+    }
+
+    public static void drawTextLeft(GuiGraphics context, Font textRenderer, int textColor, FormattedCharSequence text, int x, int y) {
+        context.drawString(textRenderer, text, x, y, textColor, false);
+    }
+
+    public static void drawTextRight(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y) {
+        drawTextRight(context, textRenderer, textColor, Component.literal(text), x, y, false);
+    }
+
+    public static void drawTextRight(GuiGraphics context, Font textRenderer, int textColor, String text, int x, int y, boolean shadow) {
+        drawTextRight(context, textRenderer, textColor, Component.literal(text), x, y, shadow);
+    }
+
+    public static TextBuilder text(String text, int x, int y) {
+        return text(Component.literal(text), x, y);
+    }
+
+    public static TextBuilder text(Component text, int x, int y) {
+        return new TextBuilder(text, x, y);
+    }
+
+    public static class TextBuilder {
+        private final Component text;
+        private final int x;
+        private final int y;
+        private Anchor anchor = Anchor.LEFT;
+        private int color = TextColors.DEFAULT;
+
+        private TextBuilder(Component text, int x, int y) {
+            this.text = text;
+            this.x = x;
+            this.y = y;
+        }
+
+        public TextBuilder anchorCenter() {
+            this.anchor = Anchor.CENTER;
+            return this;
+        }
+
+        public TextBuilder anchorRight() {
+            this.anchor = Anchor.RIGHT;
+            return this;
+        }
+
+        public TextBuilder colored(int color) {
+            this.color = color;
+            return this;
+        }
+
+        public void render(GuiGraphics context, Font textRenderer) {
+            int renderX = switch (anchor) {
+                case LEFT -> x;
+                case CENTER -> x - textRenderer.width(text) / 2;
+                case RIGHT -> x - textRenderer.width(text);
+            };
+            context.drawString(textRenderer, text, renderX, y, color, false);
+        }
+    }
+
+    private enum Anchor {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
 
     public static void drawBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
         context.fill(x, y, x + width, y + 1, color);
