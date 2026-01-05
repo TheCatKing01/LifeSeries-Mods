@@ -212,10 +212,6 @@ public abstract class Season {
                 ScoreboardUtils.setObjectiveInSlot(belowNameSlot, null);
             }
         }
-
-        if (getSeason() != Seasons.SIMPLE_LIFE) {
-            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
-        }
     }
 
     public void reload() {
