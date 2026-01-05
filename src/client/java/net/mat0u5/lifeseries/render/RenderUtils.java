@@ -33,8 +33,7 @@ public class RenderUtils {
         context.blit(texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height);
         context.pose().popPose();
         //?} else {
-        // Newer versions tend to prefer the "with texture size" blit overloads.
-        // We forward to the overload below and assume a 256x256 atlas unless caller supplies otherwise.
+        // Forward to overload that includes texture size. Assume a 256x256 atlas if caller doesn't specify.
         drawTextureScaled(context, texture, x, y, u, v, width, height, 256, 256, scaleX, scaleY);
         //?}
     }
@@ -62,24 +61,23 @@ public class RenderUtils {
                                          int texW, int texH,
                                          float scaleX, float scaleY) {
         //? if <= 1.21 {
-        // Older versions: scale the pose and use the simpler blit.
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
         context.blit(texture, (int) (x / scaleX), (int) (y / scaleY), u, v, width, height);
         context.pose().popPose();
         //?} else {
-        // Newer versions: also scale the pose, but use the "with texture size" blit.
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
 
-        // In 1.21.2+ GuiGraphics.blit usually requires a RenderType supplier as the first arg.
         //? if >= 1.21.2 {
-        context.blit(net.minecraft.client.renderer.RenderType::guiTextured, texture,
+        // 1.21.2+ often uses blit(Function<ResourceLocation, RenderType>, ...)
+        context.blit(net.minecraft.client.renderer.RenderType::gui, texture,
                 (int) (x / scaleX), (int) (y / scaleY),
                 (float) u, (float) v,
                 width, height,
                 texW, texH);
         //?} else {
+        // Older "with texture size" overload
         context.blit(texture,
                 (int) (x / scaleX), (int) (y / scaleY),
                 u, v,
@@ -99,11 +97,10 @@ public class RenderUtils {
                                    int u, int v, int width, int height,
                                    int texW, int texH) {
         //? if <= 1.21 {
-        // Older versions may not have the RenderType-first overload; try the classic with-size blit if present.
         context.blit(texture, x, y, u, v, width, height);
         //?} else {
         //? if >= 1.21.2 {
-        context.blit(net.minecraft.client.renderer.RenderType::guiTextured, texture,
+        context.blit(net.minecraft.client.renderer.RenderType::gui, texture,
                 x, y,
                 (float) u, (float) v,
                 width, height,
@@ -377,14 +374,12 @@ public class RenderUtils {
             pose.scale(scaleX, scaleY, 1f);
 
             //? if >= 1.21.2 {
-            // Newer versions: blit expects a RenderType supplier first.
-            g.blit(net.minecraft.client.renderer.RenderType::guiTextured, tex,
+            g.blit(net.minecraft.client.renderer.RenderType::gui, tex,
                     0, 0,
                     (float) u, (float) v,
                     outW, outH,
                     texW, texH);
             //?} else {
-            // Older versions: classic overload without RenderType supplier.
             g.blit(tex, 0, 0, u, v, outW, outH, texW, texH);
             //?}
 
