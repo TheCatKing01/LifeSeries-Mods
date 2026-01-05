@@ -8,8 +8,8 @@ public enum PacketNames {
     ,CURSE_SLIDING
     ,LIMITED_LIFE_TIMER("limited_life_timer__")
     ,SESSION_TIMER
-	
 	,TICKS_PER_SECOND
+
     ,MIMICRY_COOLDOWN
     ,SUPERPOWER_COOLDOWN
     ,FAKE_THUNDER

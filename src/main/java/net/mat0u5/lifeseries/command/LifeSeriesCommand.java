@@ -18,6 +18,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
+
 import static net.mat0u5.lifeseries.Main.ALLOWED_SEASON_NAMES;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
@@ -31,6 +33,14 @@ public class LifeSeriesCommand extends Command {
     @Override
     public Component getBannedText() {
         return Component.nullToEmpty("");
+    }
+
+    public List<String> getAdminCommands() {
+        return List.of("lifeseries");
+    }
+
+    public List<String> getNonAdminCommands() {
+        return List.of("lifeseries");
     }
 
     @Override
@@ -143,7 +153,7 @@ public class LifeSeriesCommand extends Command {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Changing the season to {}§7...", setTo));
             PlayerUtils.broadcastMessage(TextUtils.format("Successfully changed the season to {}",setTo).withStyle(ChatFormatting.GREEN));
 			
-            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
+			OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
             OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=ComplexLifeTrader]");
 			
             boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
@@ -208,7 +218,7 @@ public class LifeSeriesCommand extends Command {
         if (checkBanned(source)) return -1;
         OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("Current season: {}", currentSeason.getSeason().getId()));
         if (source.getPlayer() != null) {
-            NetworkHandlerServer.sendStringPacket(source.getPlayer(), PacketNames.SEASON_INFO, currentSeason.getSeason().getId());
+            currentSeason.sendSetSeasonPacket(source.getPlayer());
         }
         return 1;
     }

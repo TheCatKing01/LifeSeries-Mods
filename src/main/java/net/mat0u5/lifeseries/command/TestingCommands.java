@@ -18,6 +18,8 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
+import static net.mat0u5.lifeseries.Main.server;
+
 public class TestingCommands extends Command {
 
     @Override
@@ -62,7 +64,9 @@ public class TestingCommands extends Command {
         if (checkBanned(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
-		
+
+        NetworkHandlerServer.sendStringPackets(PacketNames.TRIVIA_ALL_WRONG, "");
+
         return 1;
     }
 
