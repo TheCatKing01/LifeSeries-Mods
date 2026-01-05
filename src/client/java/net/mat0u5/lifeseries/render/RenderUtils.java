@@ -5,6 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+
 import java.util.List;
 
 //? if >= 1.21.2 && <= 1.21.5
@@ -107,12 +108,14 @@ public class RenderUtils {
         //? if <= 1.21.5 {
         context.pose().pushPose();
         context.pose().scale(scaleX, scaleY, 1.0f);
-        context.drawString(textRenderer, text, (int)(x / scaleX - textRenderer.width(text)/2.0), (int)(y / scaleY), textColor, false);
-        context.pose().popPose();
         //?} else {
         context.pose().pushMatrix();
         context.pose().scale(scaleX, scaleY);
+        //?}
         context.drawString(textRenderer, text, (int)(x / scaleX - textRenderer.width(text)/2.0), (int)(y / scaleY), textColor, false);
+        //? if <= 1.21.5 {
+        context.pose().popPose();
+        //?} else {
         context.pose().popMatrix();
         //?}
     }
@@ -289,7 +292,11 @@ public class RenderUtils {
                 else if (anchorRight) drawX = -w;
 
                 g.drawString(font, sequence, drawX, 0, color, shadow);
-                //? if <= 1.21.5 { pose.popPose(); //?} else { pose.popMatrix(); //?}
+                //? if <= 1.21.5 {
+                pose.popPose();
+                //?} else {
+                pose.popMatrix();
+                //?}
                 return (int) (font.lineHeight * scaleY);
             }
 
@@ -310,7 +317,11 @@ public class RenderUtils {
                     yy += font.lineHeight;
                 }
 
-                //? if <= 1.21.5 { pose.popPose(); //?} else { pose.popMatrix(); //?}
+                //? if <= 1.21.5 {
+                pose.popPose();
+                //?} else {
+                pose.popMatrix();
+                //?}
                 return (int) (yy * scaleY);
             } else {
                 int w = component == null ? 0 : font.width(component);
@@ -321,7 +332,11 @@ public class RenderUtils {
                 if (component != null) {
                     g.drawString(font, component, drawX, 0, color, shadow);
                 }
-                //? if <= 1.21.5 { pose.popPose(); //?} else { pose.popMatrix(); //?}
+                //? if <= 1.21.5 {
+                pose.popPose();
+                //?} else {
+                pose.popMatrix();
+                //?}
                 return (int) (font.lineHeight * scaleY);
             }
         }
