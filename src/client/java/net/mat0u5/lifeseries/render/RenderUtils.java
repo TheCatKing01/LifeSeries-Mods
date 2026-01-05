@@ -1,50 +1,109 @@
 package net.mat0u5.lifeseries.render;
 
-import net.mat0u5.lifeseries.utils.TextColors;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
-//? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
- //?} else {
-/*import net.minecraft.resources.Identifier;
-*///?}
+import java.util.List;
 
 public class RenderUtils {
 
-    public static void debugX(GuiGraphics context, int x) {
-        context.fill(x, 0, x+1, context.guiHeight(), TextColors.DEBUG);
+    // ---------- Basic text: left ----------
+    public static void drawTextLeft(GuiGraphics g, Font font, Component text, int x, int y) {
+        g.drawString(font, text, x, y, 0xFFFFFFFF, false);
     }
 
-    public static void debugY(GuiGraphics context, int y) {
-        context.fill(0, y, context.guiWidth(), y+1, TextColors.DEBUG);
+    public static void drawTextLeft(GuiGraphics g, Font font, net.minecraft.network.chat.MutableComponent text, int x, int y) {
+        g.drawString(font, text, x, y, 0xFFFFFFFF, false);
     }
 
-    public static void drawBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
-        context.fill(x, y, x + width, y + 1, color);
-        context.fill(x, y + height - 1, x + width, y + height, color);
-        context.fill(x, y + 1, x + 1, y + height - 1, color);
-        context.fill(x + width - 1, y + 1, x + width, y + height - 1, color);
+    public static void drawTextLeft(GuiGraphics g, Font font, int color, Component text, int x, int y) {
+        g.drawString(font, text, x, y, color, false);
     }
 
-    //? if <= 1.21.9 {
-    public static CustomTextureRenderer texture(ResourceLocation texture, float x, float y, int width, int height) {
-        //?} else {
-        /*public static CustomTextureRenderer texture(Identifier texture, float x, float y, int width, int height) {
-         *///?}
-        return new CustomTextureRenderer(texture, x, y, width, height);
+    public static void drawTextLeft(GuiGraphics g, Font font, int color, net.minecraft.network.chat.MutableComponent text, int x, int y) {
+        g.drawString(font, text, x, y, color, false);
     }
 
-    public static CustomTextRenderer text(Component text, int x, int y) {
-        return new CustomTextRenderer(text, x, y);
+    // ---------- Center ----------
+    public static void drawTextCenter(GuiGraphics g, Font font, Component text, int centerX, int y) {
+        int w = font.width(text);
+        g.drawString(font, text, centerX - (w / 2), y, 0xFFFFFFFF, false);
     }
 
-    public static CustomTextRenderer text(FormattedCharSequence text, int x, int y) {
-        return new CustomTextRenderer(text, x, y);
+    // ---------- Right ----------
+    public static void drawTextRight(GuiGraphics g, Font font, int color, Component text, int rightX, int y) {
+        int w = font.width(text);
+        g.drawString(font, text, rightX - w, y, color, false);
     }
 
-    public static CustomTextRenderer text(String text, int x, int y) {
-        return new CustomTextRenderer(Component.nullToEmpty(text), x, y);
+    // Overload used in TextHud: includes dropShadow boolean
+    public static void drawTextRight(GuiGraphics g, Font font, int color, Component text, int rightX, int y, boolean dropShadow) {
+        int w = font.width(text);
+        g.drawString(font, text, rightX - w, y, color, dropShadow);
+    }
+
+    // ---------- Scaled text ----------
+    public static void drawTextLeftScaled(GuiGraphics g, Font font, Component text, int x, int y, float scaleX, float scaleY) {
+        var pose = g.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0);
+        pose.scale(scaleX, scaleY, 1.0f);
+        g.drawString(font, text, 0, 0, 0xFFFFFFFF, false);
+        pose.popPose();
+    }
+
+    public static void drawTextCenterScaled(GuiGraphics g, Font font, Component text, int centerX, int y, float scaleX, float scaleY) {
+        int w = font.width(text);
+        var pose = g.pose();
+        pose.pushPose();
+        pose.translate(centerX, y, 0);
+        pose.scale(scaleX, scaleY, 1.0f);
+        // center around 0 after translating to centerX
+        g.drawString(font, text, -(w / 2), 0, 0xFFFFFFFF, false);
+        pose.popPose();
+    }
+
+    public static void drawTextRightScaled(
+            GuiGraphics g, Font font, int color, Component text,
+            int rightX, int y, float scaleX, float scaleY, boolean dropShadow
+    ) {
+        int w = font.width(text);
+        var pose = g.pose();
+        pose.pushPose();
+        pose.translate(rightX, y, 0);
+        pose.scale(scaleX, scaleY, 1.0f);
+        g.drawString(font, text, -w, 0, color, dropShadow);
+        pose.popPose();
+    }
+
+    // ---------- Wrapped lines ----------
+    public static void drawTextLeftWrapLines(
+            GuiGraphics g, Font font, int color, Component text,
+            int x, int y, int maxWidth, int lineSpacing
+    ) {
+        List<FormattedCharSequence> lines = font.split(text, maxWidth);
+        int yy = y;
+        for (FormattedCharSequence line : lines) {
+            g.drawString(font, line, x, yy, color, false);
+            yy += font.lineHeight + lineSpacing;
+        }
+    }
+
+    // ---------- Scaled texture ----------
+    public static void drawTextureScaled(
+            GuiGraphics g, ResourceLocation texture,
+            int x, int y, int u, int v, int w, int h,
+            float scaleX, float scaleY
+    ) {
+        var pose = g.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0);
+        pose.scale(scaleX, scaleY, 1.0f);
+        // draw at (0,0) because we translated to x,y already
+        g.blit(texture, 0, 0, u, v, w, h);
+        pose.popPose();
     }
 }

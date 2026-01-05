@@ -44,23 +44,19 @@ public abstract class DefaultScreen extends Screen {
     protected int startX;
     protected int centerX;
     protected int endX;
-    protected int backgroundWidth;
 
     protected int startY;
     protected int centerY;
     protected int endY;
-    protected int backgroundHeight;
 
     public void calculateCoordinates() {
         startX = (this.width - BG_WIDTH) / 2 + offsetX;
         endX = startX + BG_WIDTH;
         centerX = (startX + endX) / 2;
-        backgroundWidth = endX - startX;
 
         startY = (this.height - BG_HEIGHT) / 2 + offsetY;
         endY = startY + BG_HEIGHT;
         centerY = (startY + endY) / 2;
-        backgroundHeight = endY - startY;
     }
 
     public boolean allowCloseButton() {
@@ -168,6 +164,7 @@ public abstract class DefaultScreen extends Screen {
 
         context.fill(topRightX-2-1, topRightY+4-1, topRightX-1, topRightY+5, color);
         context.fill(topRightX-5-1, topRightY+4-1, topRightX-4, topRightY+5, color);
+
     }
 
     @Override
