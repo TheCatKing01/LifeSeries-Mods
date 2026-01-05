@@ -160,7 +160,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
 
 
         String prompt = "Select the season you want to play.";
-        RenderUtils.text(prompt, centerX, startY + 20).anchorCenter().render(context, this.font);
+        RenderUtils.drawTextCenter(context, this.font, prompt, centerX, startY + 20);
 
         if (hasAprilFoolsSeasons) {
             Component aprilFools = Component.nullToEmpty("April Fools Seasons");
@@ -179,7 +179,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
             if (currentRegion == -1) {
                 color = TextColors.PURE_WHITE;
             }
-            RenderUtils.text(aprilFools, rect.x+1, rect.y+1).colored(color).render(context, this.font);
+            RenderUtils.drawTextLeft(context, this.font, color, aprilFools, rect.x + 1, rect.y + 1);
         }
     }
 
@@ -188,7 +188,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
         if (seasonRegion.id == currentRegion) {
             context.fill(rect.x, rect.y, rect.x+rect.width, rect.y+rect.height, TextColors.LIGHT_GRAY);
         }
-        RenderUtils.texture(seasonRegion.season.getLogo(), rect.x, rect.y, textureSize, textureSize).scaled(scale, scale).render(context);
+        RenderUtils.drawTextureScaled(context, seasonRegion.season.getLogo(), rect.x, rect.y, 0, 0, textureSize, textureSize, scale, scale);
     }
 }
 

@@ -25,38 +25,38 @@ public class SeasonInfoScreen extends DefaultScreen {
         // Background + images
         var logo = season.getLogo();
         if (logo != null) {
-            RenderUtils.texture(logo, startX + 5, endY - 64, 256, 256).scaled(0.25f, 0.25f).render(context);
-            RenderUtils.texture(logo, endX - 64 - 5, endY - 64, 256, 256).scaled(0.25f, 0.25f).render(context);
+            RenderUtils.drawTextureScaled(context, logo, startX + 5, endY - 64, 0, 0, 256, 256, 0.25f, 0.25f);
+            RenderUtils.drawTextureScaled(context, logo, endX - 64 - 5, endY - 64, 0, 0, 256, 256, 0.25f, 0.25f);
         }
 
         String seasonName = season.getName();
-        RenderUtils.text("§0" + seasonName, centerX, startY + 10).anchorCenter().scaled(2.25f, 2.25f).render(context, this.font);
+        RenderUtils.drawTextCenterScaled(context, this.font, Component.literal("§0" + seasonName), centerX, startY + 10, 2.25f, 2.25f);
 
         int currentY = startY + 40;
         MutableComponent adminCommandsText = Component.literal("§8Available §nadmin§8 commands: ");
         MutableComponent adminCommandsTextActual = Component.literal(adminCommands);
         MutableComponent combinedAdminCommands = adminCommandsText.copy().append(adminCommandsTextActual);
-        currentY += 3 + RenderUtils.text(combinedAdminCommands, startX+15, currentY).wrapLines(BG_WIDTH-20, 6).render(context, this.font);
+        currentY += 3 + RenderUtils.drawTextLeftWrapLines(context, this.font, TextColors.DEFAULT, combinedAdminCommands, startX + 15, currentY, BG_WIDTH - 20, 6);
 
         MutableComponent commandsText = Component.literal("§8Available §nnon-admin§8 commands: ");
         MutableComponent commandsTextActual = Component.literal(nonAdminCommands);
         MutableComponent combinedNonAdminCommands = commandsText.copy().append(commandsTextActual);
-        currentY += 3 + RenderUtils.text(combinedNonAdminCommands, startX+15, currentY).wrapLines(BG_WIDTH-20, 6).render(context, this.font);
+        currentY += 3 + RenderUtils.drawTextLeftWrapLines(context, this.font, TextColors.DEFAULT, combinedNonAdminCommands, startX + 15, currentY, BG_WIDTH - 20, 6);
 
         String howToStart = "§0§nHow to start a session";
-        RenderUtils.text(howToStart, startX + 15, currentY+3).scaled(1.3f, 1.3f).render(context, this.font);
+        RenderUtils.drawTextLeftScaled(context, this.font, Component.literal(howToStart), startX + 15, currentY + 3, 1.3f, 1.3f);
         currentY += font.lineHeight + 13;
 
         Component sessionTimer = Component.nullToEmpty("§8Run §3'/session timer set <time>'§8 to set the desired session time.");
-        RenderUtils.text(sessionTimer, startX + 15, currentY).render(context, this.font);
+        RenderUtils.drawTextLeft(context, this.font, sessionTimer, startX + 15, currentY);
         currentY += font.lineHeight + 5;
 
         Component sessionStart = Component.nullToEmpty("§8After that, run §3'/session start'§8 to start the session.");
-        RenderUtils.text(sessionStart, startX + 15, currentY).render(context, this.font);
+        RenderUtils.drawTextLeft(context, this.font, sessionTimer, startX + 15, currentY);
         currentY += font.lineHeight + 15;
 
         Component configText = Component.nullToEmpty("§0§nRun §8§n'/lifeseries config'§0§n to open the Life Series configuration!");
-        RenderUtils.text(configText, startX + 15, currentY).render(context, this.font);
+        RenderUtils.drawTextLeft(context, this.font, configText, startX + 15, currentY);
         currentY += font.lineHeight + 5;
     }
 
