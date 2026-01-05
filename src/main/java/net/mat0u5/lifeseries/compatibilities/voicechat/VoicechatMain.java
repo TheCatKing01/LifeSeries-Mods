@@ -117,7 +117,7 @@ public class VoicechatMain implements VoicechatPlugin {
             VoicechatConnection connection = event.getSenderConnection();
             if (connection == null) return;
             UUID senderUUID = connection.getPlayer().getUuid();
-            if (!TriviaHandler.cursedRoboticVoicePlayers.contains(senderUUID)) {
+            if (!WildLifeTriviaHandler.cursedRoboticVoicePlayers.contains(senderUUID)) {
                 return;
             }
 

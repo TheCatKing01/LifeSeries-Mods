@@ -20,16 +20,6 @@ public class ThirdLife extends Season {
     }
 
     @Override
-    public String getAdminCommands() {
-        return COMMANDS_ADMIN_TEXT;
-    }
-
-    @Override
-    public String getNonAdminCommands() {
-        return COMMANDS_TEXT;
-    }
-
-    @Override
     public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
         super.tickSessionOn(server);
         traders.tickSessionOn(server);
