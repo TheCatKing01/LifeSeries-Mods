@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.utils.versions.UpdateChecker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+
 //? if <= 1.21.9 {
 import net.minecraft.Util;
 //?} else {
@@ -16,59 +17,86 @@ import net.minecraft.Util;
 *///?}
 
 public class UpdateInfoScreen extends DefaultScreen {
-    private String versionName;
-    private String description;
-    private Component dismissText = Component.nullToEmpty("Dismiss for this update");
+
+    /**
+     * Stonecutter may generate this as String in some versions and as Component in others.
+     * Using Object + normalize-to-string avoids compile errors across versions.
+     */
+    private final Object versionName;
+    private final String description;
+
+    private final Component dismissText = Component.nullToEmpty("Dismiss for this update");
+
     private int textWidth = 0;
     private Button dismissButton;
 
-    public UpdateInfoScreen(String versionName, String description) {
+    public UpdateInfoScreen(Object versionName, String description) {
         super(Component.nullToEmpty("New Life Series Update"), 400, 225, 0, +10);
         this.versionName = versionName;
-        this.description = description.replace("\r","");
+        this.description = description == null ? "" : description.replace("\r", "");
+    }
+
+    private static String asPlainString(Object value) {
+        if (value == null) return "";
+        if (value instanceof Component c) return c.getString();
+        return String.valueOf(value);
     }
 
     public boolean isInCheckboxRegion(int x, int y) {
-        return (x >= endX - textWidth/2-2-40) && (x <= endX + textWidth/2+1-40)
+        return (x >= endX - textWidth / 2 - 2 - 40) && (x <= endX + textWidth / 2 + 1 - 40)
                 && y >= startY - 23 && y <= startY + 3;
     }
 
     @Override
     protected void init() {
         super.init();
+
         textWidth = font.width(dismissText) + 5;
 
         this.addRenderableWidget(
-                Button.builder(Component.literal("Join Discord").withStyle(style -> style.withColor(TextColors.PASTEL_WHITE)),btn -> {
-                            Util.getPlatform().openUri("https://discord.gg/QWJxfb4zQZ");
-                        })
+                Button.builder(
+                                Component.literal("Join Discord")
+                                        .withStyle(style -> style.withColor(TextColors.PASTEL_WHITE)),
+                                btn -> Util.getPlatform().openUri("https://discord.gg/QWJxfb4zQZ")
+                        )
                         .pos(startX + 5, endY - 25)
                         .size(80, 20)
                         .build()
         );
+
         this.addRenderableWidget(
-                Button.builder(Component.literal("Full Changelog").withStyle(style -> style.withColor(TextColors.PASTEL_WHITE)), btn -> {
-                            Util.getPlatform().openUri(UpdateChecker.getChangelogLink());
-                        })
+                Button.builder(
+                                Component.literal("Full Changelog")
+                                        .withStyle(style -> style.withColor(TextColors.PASTEL_WHITE)),
+                                btn -> Util.getPlatform().openUri(UpdateChecker.getChangelogLink())
+                        )
                         .pos(endX - 80 - 5, endY - 25)
                         .size(80, 20)
                         .build()
         );
+
         this.addRenderableWidget(
-                Button.builder(Component.literal("Download on Modrinth"), btn -> {
-                            this.onClose();
-                            Util.getPlatform().openUri("https://modrinth.com/mod/life-series"); //Same as having a text with a click event, but that doesnt work in GUIs
-                        })
+                Button.builder(
+                                Component.literal("Download on Modrinth"),
+                                btn -> {
+                                    this.onClose();
+                                    Util.getPlatform().openUri("https://modrinth.com/mod/life-series");
+                                }
+                        )
                         .pos(centerX - 85, endY - 25)
                         .size(170, 20)
                         .build()
         );
+
         dismissButton = this.addRenderableWidget(
-                Button.builder(dismissText, btn -> {
-                            MainClient.clientConfig.setProperty("ignore_update", String.valueOf(UpdateChecker.version));
-                            this.onClose();
-                        })
-                        .pos(endX - textWidth/2-40, startY - 20)
+                Button.builder(
+                                dismissText,
+                                btn -> {
+                                    MainClient.clientConfig.setProperty("ignore_update", String.valueOf(UpdateChecker.version));
+                                    this.onClose();
+                                }
+                        )
+                        .pos(endX - textWidth / 2 - 40, startY - 20)
                         .size(textWidth, 16)
                         .build()
         );
@@ -77,19 +105,33 @@ public class UpdateInfoScreen extends DefaultScreen {
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY) {
         if (isInCheckboxRegion(mouseX, mouseY)) {
-            context.fill(endX - textWidth/2-3-40, startY - 23, endX + textWidth/2+3-40, startY, TextColors.BLACK);
-            context.fill(endX - textWidth/2-2-40, startY - 22, endX + textWidth/2+2-40, startY - 1, TextColors.GUI_BACKGROUND);
+            context.fill(endX - textWidth / 2 - 3 - 40, startY - 23, endX + textWidth / 2 + 3 - 40, startY, TextColors.BLACK);
+            context.fill(endX - textWidth / 2 - 2 - 40, startY - 22, endX + textWidth / 2 + 2 - 40, startY - 1, TextColors.GUI_BACKGROUND);
             dismissButton.visible = true;
-        }
-        else {
+        } else {
             dismissButton.visible = false;
         }
         super.renderBackground(context, mouseX, mouseY);
     }
+
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY) {
-        RenderUtils.drawTextCenter(context, this.font, Component.literal("§0§nA new Life Series mod update is available!"), centerX, startY + 7);
-        RenderUtils.drawTextLeft(context, this.font, Component.literal(TextUtils.formatLoosely("§0§nChangelog in version §l{}§0:", versionName)), startX + 7, startY + 25 + font.lineHeight);
-        RenderUtils.drawTextLeftWrapLines(context, this.font, TextColors.DEFAULT, Component.literal(description), startX + 7, startY + 30 + font.lineHeight * 2, BG_WIDTH - 14, 5);
+        RenderUtils.drawTextCenter(context, this.font,
+                Component.literal("§0§nA new Life Series mod update is available!"),
+                centerX, startY + 7
+        );
+
+        String vn = asPlainString(versionName);
+
+        RenderUtils.drawTextLeft(context, this.font,
+                Component.literal(TextUtils.formatLoosely("§0§nChangelog in version §l{}§0:", vn)),
+                startX + 7, startY + 25 + font.lineHeight
+        );
+
+        RenderUtils.drawTextLeftWrapLines(context, this.font, TextColors.DEFAULT,
+                Component.literal(description),
+                startX + 7, startY + 30 + font.lineHeight * 2,
+                BG_WIDTH - 14, 5
+        );
     }
 }
