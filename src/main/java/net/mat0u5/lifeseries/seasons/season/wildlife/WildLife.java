@@ -41,6 +41,9 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 *///?}
 
 public class WildLife extends Season {
+	
+	private final WandingTraders traders = new WandingTraders();
+
     @Override
     public Seasons getSeason() {
         return Seasons.WILD_LIFE;
@@ -107,6 +110,7 @@ public class WildLife extends Season {
     @Override
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
+		traders.tickSessionOn(server);
         WildcardManager.tickSessionOn();
     }
 

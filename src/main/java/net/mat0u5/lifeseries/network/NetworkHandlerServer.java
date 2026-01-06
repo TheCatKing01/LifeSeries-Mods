@@ -282,6 +282,8 @@ public class NetworkHandlerServer {
                 if (Main.changeSeasonTo(newSeason.getId())) {
                     boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
                     PlayerUtils.broadcastMessage(TextUtils.formatLoosely("§aSuccessfully changed the season to {}.", value));
+                    OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
+                    OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=ComplexLifeTrader]");
                     if (prevTickFreeze != currentTickFreeze) {
                         OtherUtils.setFreezeGame(currentTickFreeze);
                     }
