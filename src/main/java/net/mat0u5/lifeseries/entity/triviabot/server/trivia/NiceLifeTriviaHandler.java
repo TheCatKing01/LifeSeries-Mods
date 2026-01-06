@@ -59,6 +59,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
 
     public enum BotState {
         LANDING,
+        LANDED,
         APPROACHING,
         APPROACHED,
         QUESTION,
@@ -107,6 +108,10 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         }
         else {
             bot.setGliding(false);
+        }
+
+        if (currentState == BotState.LANDED) {
+            landedTick(level, boundPlayer);
         }
 
         if (currentState == BotState.APPROACHING) {
@@ -171,6 +176,10 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         while (newYaw > 180.0f) newYaw -= 360.0f;
         while (newYaw < -180.0f) newYaw += 360.0f;
 
+        if (turnSpeed >= 180) {
+            newYaw = targetYaw;
+        }
+
         bot.setYRot(newYaw);
         bot.setYBodyRot(newYaw);
         bot.setYHeadRot(newYaw);
@@ -178,10 +187,11 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
 
     public void landingTick(ServerLevel level) {
         sameStateTime.tick();
+        turnToBed(1000);
         if (bot.position().y() < (spawnInfo.spawnPos().getY()+botPosOffset.y) || sameStateTime.isLarger(Time.seconds(30))) {
             bot.setDeltaMovement(0, 0,0);
             bot.setPos(bot.position().x, spawnInfo.spawnPos().getY()+botPosOffset.y, bot.position().z);
-            changeStateTo(BotState.APPROACHING);
+            changeStateTo(BotState.LANDED);
             for (BlockPos pos : BlockPos.betweenClosed(spawnInfo.spawnPos().above(), spawnInfo.bedPos())) {
                 BlockState state = level.getBlockState(pos);
                 if (state.getBlock() instanceof BedBlock) continue;
@@ -201,6 +211,16 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         }
     }
 
+    public void landedTick(ServerLevel level, ServerPlayer boundPlayer) {
+        sameStateTime.tick();
+        turnToBed(1000);
+        bot.setDeltaMovement(0, 0, 0);
+
+        if (sameStateTime.getTicks() >= 55) {
+            changeStateTo(BotState.APPROACHING);
+        }
+    }
+
     public void approachingTick(ServerLevel level, ServerPlayer boundPlayer) {
         sameStateTime.tick();
 
@@ -212,7 +232,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
             Vec3 bedVector = Vec3.atBottomCenterOf(spawnInfo.bedPos()).subtract(Vec3.atBottomCenterOf(spawnInfo.spawnPos()));
             if (bedVector.length() > 4) {
                 Vec3 middlePos = Vec3.atBottomCenterOf(spawnInfo.spawnPos()).add(botPosOffset).add(bedVector.scale(0.4));
-                boolean atMiddlePos = botPos.distanceTo(middlePos) <= 0.1;
+                boolean atMiddlePos = botPos.distanceTo(middlePos) <= 0.2;
                 if (atMiddlePos) {
                     bot.setDeltaMovement(0, 0, 0);
                     bot.setWaving(78);
@@ -237,7 +257,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         Vec3 speed = new Vec3(speedX, 0,speedZ);
         bot.setDeltaMovement(speed);
 
-        boolean atPos = botPos.distanceTo(bedPos) <= 0.1;
+        boolean atPos = botPos.distanceTo(bedPos) <= 0.2;
         if (atPos || sameStateTime.isLarger(Time.seconds(10))) {
             if (!atPos) {
                 LevelUtils.teleport(bot, level, Vec3.atBottomCenterOf(spawnInfo.bedPos()).add(botPosOffset));
@@ -305,7 +325,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
 
         Vec3 speed = new Vec3(speedX, 0,speedZ);
         bot.setDeltaMovement(speed);
-        boolean atPos = botPos.distanceTo(leavePos) <= 0.1;
+        boolean atPos = botPos.distanceTo(leavePos) <= 0.2;
         if (atPos || sameStateTime.isLarger(Time.seconds(10))) {
             if (!atPos) {
                 LevelUtils.teleport(bot, level, Vec3.atBottomCenterOf(spawnInfo.spawnPos()).add(botPosOffset));
@@ -329,7 +349,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
     public void changeStateTo(BotState newState) {
         currentState = newState;
         sameStateTime = Time.zero();
-        if (newState == BotState.APPROACHING) {
+        if (newState == BotState.APPROACHING || newState == BotState.LANDED) {
             turnToBed(1000);
         }
         if (newState == BotState.APPROACHED) {

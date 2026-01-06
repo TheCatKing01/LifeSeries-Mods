@@ -243,6 +243,7 @@ public abstract class Season {
         livesManager.reload();
         currentSession.freezeIfNecessary();
         DatapackIntegration.reload();
+        PlayerUtils.resendCommandTrees();
     }
 
     public static void setSkyColor(Vec3 color, boolean setMode) {

@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.command;
+package net.mat0u5.lifeseries.seasons.season.wildlife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -20,21 +20,14 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
-public class TriviaCommand extends Command {
+public class WildLifeTriviaCommand extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() == Seasons.WILD_LIFE;
-    }
-
-    public boolean isWildLife() {
         return currentSeason.getSeason() == Seasons.WILD_LIFE;
     }
 
@@ -57,8 +50,8 @@ public class TriviaCommand extends Command {
                 literal("trivia")
                         .requires(PermissionManager::isAdmin)
                         .then(literal("assign")
+                                .requires(source -> isAllowed())
                                 .then(argument("player", EntityArgument.players())
-                                        .requires(context -> this.isWildLife())
                                         .then(argument("difficulty", StringArgumentType.string())
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(List.of("easy","normal","hard"), builder))
 
@@ -82,6 +75,7 @@ public class TriviaCommand extends Command {
                                 )
                         )
                         .then(literal("bot")
+                                .requires(source -> isAllowed())
                                 .then(literal("spawnFor")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> spawnBotFor(
@@ -92,6 +86,7 @@ public class TriviaCommand extends Command {
                                 )
                         )
                         .then(literal("punishment")
+                                .requires(source -> isAllowed())
                                 .then(literal("clear")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> clearPunishment(
@@ -105,7 +100,8 @@ public class TriviaCommand extends Command {
                                                 .then(argument("punishment", StringArgumentType.string())
                                                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                                                                 List.of(
-                                                                        "slippery_ground"
+                                                                        "random"
+                                                                        ,"slippery_ground"
                                                                         ,"hunger"
                                                                         ,"beeswarm"
                                                                         ,"moonjump"
@@ -133,6 +129,7 @@ public class TriviaCommand extends Command {
         );
     }
 
+    private static Random rnd = new Random();
     public int setPunishment(CommandSourceStack source, Collection<ServerPlayer> targets, String punishment) {
         if (checkBanned(source)) return -1;
         if (!CompatibilityManager.voicechatLoaded() && punishment.equals("robotic_voice")) {
@@ -141,9 +138,28 @@ public class TriviaCommand extends Command {
         }
 
         int totalSVC = 0;
-        for (ServerPlayer player : targets) {
-            switch (punishment) {
 
+
+        for (ServerPlayer player : targets) {
+            String playerPunishment = punishment;
+
+            if (punishment.equalsIgnoreCase("random")) {
+                List<String> possibleValues = new ArrayList<>(List.of(
+                        "slippery_ground", "hunger", "beeswarm", "moonjump", "binding_armor", "ravager", "hearts"
+                        //? if >= 1.21 {
+                        , "infestation"
+                        //?}
+                        //? if > 1.20.3 {
+                        , "gigantification"
+                        //?}
+                ));
+                if (VoicechatMain.isConnectedToSVC(player.getUUID())) {
+                    possibleValues.add("robotic_voice");
+                }
+                playerPunishment = possibleValues.get(rnd.nextInt(possibleValues.size()));
+            }
+
+            switch (playerPunishment) {
                 //? if >= 1.21 {
                 case "infestation":
                     WildLifeTriviaHandler.curseInfestation(player);
