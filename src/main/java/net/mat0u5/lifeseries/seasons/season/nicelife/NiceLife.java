@@ -37,8 +37,8 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import net.minecraft.world.level.material.Fluids;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import static net.mat0u5.lifeseries.Main.*;
 
