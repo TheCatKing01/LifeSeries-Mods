@@ -26,19 +26,20 @@ public class NiceLifeVotingManager {
     public static VoteType voteType = VoteType.NAUGHTY_LIST;
     public static double NICE_LIST_CHANCE = 0.5;
     public static Time VOTING_TIME = Time.seconds(60);
-    public static boolean REDS_ON_NAUGHTY_LIST = false; //TODO config
+    public static boolean REDS_ON_NAUGHTY_LIST = false;
     public static List<UUID> allowedToVote = new ArrayList<>();
     public static List<UUID> playersVoted = new ArrayList<>();
     public static Map<UUID, Integer> votesByCount = new HashMap<>();
     public static Map<UUID, UUID> votesByPerson = new HashMap<>();
-    public static int NICE_LIST_COUNT = 3; //TODO config
-    public static int NAUGHTY_LIST_COUNT = 3; //TODO config
+    public static int NICE_LIST_COUNT = 3;
+    public static int NAUGHTY_LIST_COUNT = 3;
     public static List<UUID> niceListMembers = new ArrayList<>();
     public static List<UUID> naughtyListMembers = new ArrayList<>();
     public static String NAUGHTY_LIST_TEAM = "naughty_list";
     public static String NAUGHTY_LIST_TEAM_NAME = "Naughty List";
     public static String NICE_LIST_TEAM = "nice_list";
     public static String NICE_LIST_TEAM_NAME = "Nice List";
+    public static Optional<VoteType> forcedTriviaVote = Optional.empty();
 
     public enum VoteType {
         NICE_LIST,
@@ -61,6 +62,12 @@ public class NiceLifeVotingManager {
     }
 
     public static void chooseVote() {
+        if (forcedTriviaVote.isPresent()) {
+            voteType = forcedTriviaVote.get();
+            forcedTriviaVote = Optional.empty();
+            return;
+        }
+
         voteType = VoteType.NICE_LIST;
         if (rnd.nextDouble() > NICE_LIST_CHANCE) {
             voteType = VoteType.NONE;
@@ -154,6 +161,15 @@ public class NiceLifeVotingManager {
         }
         currentSeason.reloadAllPlayerTeams();
         reset();
+    }
+
+    public static void endListsIfNecessary() {
+        if (!naughtyListMembers.isEmpty()) {
+            endNaughtyList();
+        }
+        if (!niceListMembers.isEmpty()) {
+            endNiceList();
+        }
     }
 
     public static void announceNaughtyList() {
@@ -305,6 +321,7 @@ public class NiceLifeVotingManager {
             naughtyListMembers.clear();
             currentSeason.reloadAllPlayerTeams();
         });
+        NiceLife.postponeTriviaStart(Time.ticks(delay+20));
     }
 
     public static void endNiceList() {
@@ -334,6 +351,7 @@ public class NiceLifeVotingManager {
         TaskScheduler.scheduleTask(delay, () -> {
             actuallyEndNiceList();
         });
+        NiceLife.postponeTriviaStart(Time.ticks(delay+85));
     }
 
     public static void actuallyEndNiceList() {
@@ -438,7 +456,8 @@ public class NiceLifeVotingManager {
         if (votedFor.ls$isDead()) return;
         if (niceListMembers.contains(votedFor.getUUID())) return;
 
-        player.sendSystemMessage(TextUtils.format("\n §6[§e!§6]§7 You voted for {}§7.\n", PlayerUtils.getPlayerNameWithIcon(player)), false);
+        PlayerUtils.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_BELL.value(), 1f, 1);
+        player.sendSystemMessage(TextUtils.format("\n §6[§e!§6]§7 You voted for {}§7.\n", PlayerUtils.getPlayerNameWithIcon(votedFor)), false);
         votesByPerson.put(player.getUUID(), votedFor.getUUID());
     }
 
