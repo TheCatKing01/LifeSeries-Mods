@@ -96,7 +96,7 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
             currentY += entryHeight + ConfigListWidget.ENTRY_GAP;
 
             String expandText = !mainEntry.shouldExpand() ? "Click to expand" : "Click to collapse";
-            RenderUtils.drawTextRight(context, textRenderer, TextColors.LIGHT_GRAY_A128, expandText, mainEntry.expandTextX(x, width), y + LABEL_OFFSET_Y);
+            RenderUtils.text(expandText, mainEntry.expandTextX(x, width), y + LABEL_OFFSET_Y).anchorRight().colored(TextColors.LIGHT_GRAY_A128).render(context, textRenderer);
         }
 
 

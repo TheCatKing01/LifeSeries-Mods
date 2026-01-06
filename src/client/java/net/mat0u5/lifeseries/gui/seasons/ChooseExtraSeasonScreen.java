@@ -128,7 +128,7 @@ public class ChooseExtraSeasonScreen extends DefaultScreen {
         }
 
         String prompt = "Select the season you want to play.";
-        RenderUtils.drawTextCenter(context, this.font, prompt, centerX, startY + 15);
+        RenderUtils.text(prompt, centerX, startY + 15).anchorCenter().render(context, this.font);
 
         Component goBack = Component.nullToEmpty("Go Back");
         int textWidth = font.width(goBack);
@@ -145,7 +145,7 @@ public class ChooseExtraSeasonScreen extends DefaultScreen {
         if (currentRegion == -1) {
             color = TextColors.PURE_WHITE;
         }
-        RenderUtils.drawTextLeft(context, this.font, color, goBack, rect.x + 1, rect.y + 1);
+        RenderUtils.text(goBack, rect.x+1, rect.y+1).colored(color).render(context, this.font);
 
     }
 }

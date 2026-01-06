@@ -136,18 +136,18 @@ public class NewQuizScreen extends Screen {
         while (minutesStr.length() < 2) minutesStr = "0" + minutesStr;
 
         Component timerText = TextUtils.format("{}:{}", minutesStr, secondsStr);
-        RenderUtils.drawTextCenter(context, this.font, TextColors.WHITE, timerText, quarter2, 9);
+        RenderUtils.text(timerText, quarter2, 9).colored(TextColors.WHITE).anchorCenter().render(context, this.font);
 
         // Question
         int questionWidth = quarter1-14;
-        RenderUtils.drawTextLeft(context, this.font, TextColors.WHITE, Component.literal("Question").withStyle(ChatFormatting.UNDERLINE), 7, 9);
+        RenderUtils.text(Component.literal("Question").withStyle(ChatFormatting.UNDERLINE), 7, 9).colored(TextColors.WHITE).render(context, this.font);
         List<FormattedCharSequence> wrappedQuestion = this.font.split(Component.literal(Trivia.question), questionWidth);
         for (int i = 0; i < wrappedQuestion.size(); i++) {
-            RenderUtils.drawTextLeft(context, this.font, TextColors.WHITE, wrappedQuestion.get(i), 7, 25 + i * this.font.lineHeight);
+            RenderUtils.text(wrappedQuestion.get(i), 7, 25 + i * this.font.lineHeight).colored(TextColors.WHITE).render(context, this.font);
         }
 
         // Answers
-        RenderUtils.drawTextLeft(context, this.font, TextColors.WHITE, Component.literal("Answers").withStyle(ChatFormatting.UNDERLINE), quarter3 + 7, 9);
+        RenderUtils.text(Component.literal("Answers").withStyle(ChatFormatting.UNDERLINE), quarter3+7, 9).colored(TextColors.WHITE).render(context, this.font);
         for (int i = 0; i < Trivia.answers.size(); i++) {
             Rectangle rect = answerRects.get(i);
 
@@ -159,7 +159,7 @@ public class NewQuizScreen extends Screen {
             // Draw each line
             int lineY = rect.y + 2;
             for (FormattedCharSequence line : answers.get(i)) {
-                RenderUtils.drawTextLeft(context, this.font, TextColors.WHITE, line, rect.x + 1, lineY);
+                RenderUtils.text(line, rect.x+1, lineY).withShadow().colored(TextColors.WHITE).render(context, this.font);
                 lineY += this.font.lineHeight;
             }
         }

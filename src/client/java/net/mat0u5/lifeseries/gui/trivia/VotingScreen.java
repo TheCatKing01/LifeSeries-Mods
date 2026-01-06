@@ -156,8 +156,7 @@ public class VotingScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        int titleX = (width / 2) - font.width(title) / 2;
-        graphics.drawString(font, title, titleX, 10, TextColors.WHITE, true);
+        RenderUtils.text(title, width / 2, 10).anchorCenter().colored(TextColors.WHITE).withShadow().render(graphics, font);
         searchBox.render(graphics, mouseX, mouseY, partialTick);
 
         submitButton.active = selectedPlayer != null && !selectedPlayer.isEmpty();
@@ -172,8 +171,7 @@ public class VotingScreen extends Screen {
             while (minutesStr.length() < 2) minutesStr = "0" + minutesStr;
             Component timerText = TextUtils.format("{}:{}", minutesStr, secondsStr);
 
-            int timerX = listRight - font.width(timerText) / 2;
-            graphics.drawString(font, timerText, timerX, 25, TextColors.WHITE, true);
+            RenderUtils.text(timerText, listRight, 25).anchorCenter().colored(TextColors.WHITE).withShadow().render(graphics, font);
         }
 
         int listTop = LIST_TOP;
@@ -210,11 +208,11 @@ public class VotingScreen extends Screen {
         graphics.fill(x, y, x + width, y + PLAYER_ENTRY_HEIGHT, bgColor);
 
         // Player head texture
-        RenderUtils.drawTexture(graphics, player.skin, x + 4, y + 4, 8, 8, 24, 24, 64, 64);
-        RenderUtils.drawTexture(graphics, player.skin, x + 4, y + 4, 40, 8, 24, 24, 64, 64);
+        RenderUtils.texture(player.skin, x + 4, y + 4, 8, 8).outSize(24, 24).uv(8, 8).textureSize(64, 64).render(graphics);
+        RenderUtils.texture(player.skin, x + 4, y + 4, 8, 8).outSize(24, 24).uv(40, 8).textureSize(64, 64).render(graphics);
 
         // Player name
-        graphics.drawString(font, player.name, x + 32, y + 12, TextColors.WHITE, true);
+        RenderUtils.text(player.name, x + 32, y + 12).colored(TextColors.WHITE).withShadow().render(graphics, font);
     }
 
     private void drawScrollbar(GuiGraphics graphics, int listTop, int listBottom) {
