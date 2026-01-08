@@ -379,7 +379,7 @@ public class WildLifeConfig extends ConfigManager {
 				,WILDCARD_CALLBACK_POWER_STACKING
 				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
 				,WILDCARD_CALLBACK_RESET_AT_MAX
-                ,SPAWN_BOTS_AT_MIDNIGH
+                ,SPAWN_BOTS_AT_MIDNIGHT
         ));
     }
 
