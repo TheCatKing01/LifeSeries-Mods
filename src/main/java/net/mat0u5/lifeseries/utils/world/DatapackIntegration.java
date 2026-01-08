@@ -222,8 +222,8 @@ public class DatapackIntegration {
         TRIVIA_BOT_OPEN("trivia_bot_open", "Trivia Bot Open", "Triggers when a player opens a trivia bot.\nAvailable macros: $(Player), $(TriviaBot)", false),
         TRIVIA_SUCCEED("trivia_succeed", "Trivia Succeed", "Triggers when a player answers correctly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
         TRIVIA_FAIL("trivia_fail", "Trivia Fail", "Triggers when a player answers incorrectly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
-        SUPERPOWER_TRIGGER("superpower_trigger", "Superpower Trigger", "Triggers when a player triggers their superpower.\nAvailable macros: $(Player), $(SuperpowerIndex)", false);
-        MIDNIGHT_CHIMES("midnight_chimes", "Chimes End", "Triggers after the midnight chimes play.", false),
+        SUPERPOWER_TRIGGER("superpower_trigger", "Superpower Trigger", "Triggers when a player triggers their superpower.\nAvailable macros: $(Player), $(SuperpowerIndex)", false),
+        MIDNIGHT_CHIMES("midnight_chimes", "Chimes End", "Triggers after the midnight chimes play.", false);
 
         //TEMP("name", "Name", "Description\nAvailable macros: $(Player)", false);
 
