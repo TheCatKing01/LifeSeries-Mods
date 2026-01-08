@@ -93,6 +93,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_WATCHERS // Group
 
                 ,SIMPLE_LIFE //Group
+                ,MIDNIGHT_CHIMES
 
                 //Group stuff
                 ,SHOW_HEALTH_BELOW_NAME

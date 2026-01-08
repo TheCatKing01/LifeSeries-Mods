@@ -300,6 +300,11 @@ public class WildLifeConfig extends ConfigManager {
             "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
     );
 
+    public static final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
+            "spawn_bots_at_midnight", true, "lifeseries_plus.chimes",
+            "Spawn Bots At Midnight", "Controls whether trivia bots spawn after midnight chimes."
+    );
+
     public WildLifeConfig() {
         super("./config/"+ Main.MOD_ID,"wildlife.properties");
     }
@@ -374,6 +379,7 @@ public class WildLifeConfig extends ConfigManager {
 				,WILDCARD_CALLBACK_POWER_STACKING
 				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
 				,WILDCARD_CALLBACK_RESET_AT_MAX
+                ,SPAWN_BOTS_AT_MIDNIGH
         ));
     }
 

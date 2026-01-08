@@ -63,10 +63,9 @@ public class NiceLife extends Season {
     public double snowLayerTickChance = 1.0 / 43;
     public int precipitationTicks = 1;
     public double chancePerTick = snowLayerTickChance;
-	private final WandingTraders traders = new WandingTraders();
+    private final WandingTraders traders = new WandingTraders();
 
     public int currentMaxSnowLayers = -1;
-    public static boolean playedMidnightChimes = false;
     public static boolean reachedSunset = false;
     public static boolean reachedPreSunset = false;
     public static boolean redWinter = false;
@@ -177,13 +176,6 @@ public class NiceLife extends Season {
                 if (serverPlayer.isSleeping()) {
                     serverPlayer.displayClientMessage(Component.nullToEmpty("You are too excited to fall asleep"), true);
                 }
-            }
-            if (!playedMidnightChimes && isTimeBetween(18000-23*20, 20000)) {
-                playedMidnightChimes = true;
-                PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
-                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_midnight_chimes")),
-                        1f, 1);
-                postponeTriviaStart(Time.ticks(779));
             }
         }
 

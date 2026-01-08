@@ -12,6 +12,7 @@ import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
+import net.mat0u5.lifeseries.seasons.other.MidnightChimes;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
@@ -110,6 +111,7 @@ public abstract class Season {
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
     public LivesManager livesManager = createLivesManager();
+	private final MidnightChimes midnightChimes = new MidnightChimes();
 
     public abstract Seasons getSeason();
     public abstract ConfigManager createConfig();
@@ -133,6 +135,17 @@ public abstract class Season {
         return seasonConfig.DEFAULT_LIVES.get(seasonConfig);
     }
 
+    protected int getMidnightChimesStartTime() {
+        return 18000;
+    }
+
+    protected int getMidnightChimesEndTime() {
+        return 20000;
+    }
+
+    protected void onMidnightChimes() {
+    }
+	
     public void initialize() {
         reload();
     }
@@ -426,7 +439,12 @@ public abstract class Season {
             reloadAllPlayerTeams();
         }
     }
-    public void tickSessionOn(MinecraftServer server) {}
+    public void tickSessionOn(MinecraftServer server) {
+        if (midnightChimes.tick(server, seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig),
+                getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
+            onMidnightChimes();
+        }
+    }
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();

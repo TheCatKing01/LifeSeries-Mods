@@ -16,6 +16,9 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.*;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
+import net.mat0u5.lifeseries.utils.other.OtherUtils;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.minecraft.server.MinecraftServer;
@@ -42,7 +45,9 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 
 public class WildLife extends Season {
 	
-	private final WandingTraders traders = new WandingTraders();
+    private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
+    private static final String MIDNIGHT_SPAWN_BOTS_COMMAND = "/trivia bot spawnFor @a";
+    private final WandingTraders traders = new WandingTraders();
 
     @Override
     public Seasons getSeason() {
@@ -112,6 +117,16 @@ public class WildLife extends Season {
         super.tickSessionOn(server);
 		traders.tickSessionOn(server);
         WildcardManager.tickSessionOn();
+    }
+
+    @Override
+    protected void onMidnightChimes() {
+        if (seasonConfig instanceof WildLifeConfig config) {
+            if (WildLifeConfig.WILDCARD_TRIVIA_MIDNIGHT_BOT_SPAWN.get(config)) {
+                TaskScheduler.scheduleTask(MIDNIGHT_SOUND_DURATION,
+                        () -> OtherUtils.executeCommand(MIDNIGHT_SPAWN_BOTS_COMMAND));
+            }
+        }
     }
 
     @Override
