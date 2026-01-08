@@ -122,7 +122,7 @@ public class WildLife extends Season {
     @Override
     protected void onMidnightChimes() {
         if (seasonConfig instanceof WildLifeConfig config) {
-            if (WildLifeConfig.WILDCARD_TRIVIA_MIDNIGHT_BOT_SPAWN.get(config)) {
+            if (WildLifeConfig.SPAWN_BOTS_AT_MIDNIGHT.get(config)) {
                 TaskScheduler.scheduleTask(MIDNIGHT_SOUND_DURATION,
                         () -> OtherUtils.executeCommand(MIDNIGHT_SPAWN_BOTS_COMMAND));
             }
