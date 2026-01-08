@@ -299,6 +299,11 @@ public class WildLifeConfig extends ConfigManager {
             "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "season.general",
             "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
     );
+	
+	public final ConfigFileEntry<Boolean> MIDNIGHT_CHIMES = new ConfigFileEntry<>(
+            "midnight_chimes", false, "{lifeseries_plus.chimes}",
+            "Play Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
+    );
 
     public static final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
             "spawn_bots_at_midnight", true, "lifeseries_plus.chimes",
@@ -321,6 +326,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_MOBSWAP //Group
                 ,GROUP_SUPERPOWERS //Group
                 ,GROUP_CALLBACK //Group
+				,MIDNIGHT_CHIMES //Group
 
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE

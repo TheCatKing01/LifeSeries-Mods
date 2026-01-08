@@ -154,6 +154,7 @@ public class NiceLifeConfig extends ConfigManager {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
         BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        MIDNIGHT_CHIMES.defaultValue = true;
         super.instantiateProperties();
     }
 }

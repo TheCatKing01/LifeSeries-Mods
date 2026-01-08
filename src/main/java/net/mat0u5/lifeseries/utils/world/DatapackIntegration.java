@@ -52,6 +52,7 @@ public class DatapackIntegration {
     public static final Events EVENT_TRIVIA_SUCCEED = Events.TRIVIA_SUCCEED;
     public static final Events EVENT_TRIVIA_FAIL = Events.TRIVIA_FAIL;
     public static final Events EVENT_SUPERPOWER_TRIGGER = Events.SUPERPOWER_TRIGGER;
+    public static final Events EVENT_MIDNIGHT_CHIMES = Events.MIDNIGHT_CHIMES;
 
     public static void reload() {
         EVENT_PLAYER_JOIN.reload();
@@ -83,6 +84,7 @@ public class DatapackIntegration {
         EVENT_TRIVIA_SUCCEED.reload();
         EVENT_TRIVIA_FAIL.reload();
         EVENT_SUPERPOWER_TRIGGER.reload();
+        EVENT_MIDNIGHT_CHIMES.reload();
 
     }
 
@@ -117,6 +119,7 @@ public class DatapackIntegration {
                 ,EVENT_TRIVIA_SUCCEED
                 ,EVENT_TRIVIA_FAIL
                 ,EVENT_SUPERPOWER_TRIGGER
+                ,EVENT_MIDNIGHT_CHIMES
         );
     }
 
@@ -220,6 +223,7 @@ public class DatapackIntegration {
         TRIVIA_SUCCEED("trivia_succeed", "Trivia Succeed", "Triggers when a player answers correctly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
         TRIVIA_FAIL("trivia_fail", "Trivia Fail", "Triggers when a player answers incorrectly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
         SUPERPOWER_TRIGGER("superpower_trigger", "Superpower Trigger", "Triggers when a player triggers their superpower.\nAvailable macros: $(Player), $(SuperpowerIndex)", false);
+        MIDNIGHT_CHIMES("midnight_chimes", "Chimes End", "Triggers after the midnight chimes play.", false),
 
         //TEMP("name", "Name", "Description\nAvailable macros: $(Player)", false);
 

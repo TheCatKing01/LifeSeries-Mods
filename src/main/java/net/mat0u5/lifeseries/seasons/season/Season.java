@@ -442,9 +442,11 @@ public abstract class Season {
     public void tickSessionOn(MinecraftServer server) {
         if (midnightChimes.tick(server, seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig),
                 getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
+            TaskScheduler.scheduleTask(Time.seconds(38), DatapackIntegration.EVENT_MIDNIGHT_CHIMES::trigger);
             onMidnightChimes();
         }
     }
+	
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
