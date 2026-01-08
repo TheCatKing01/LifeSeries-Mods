@@ -439,13 +439,19 @@ public abstract class Season {
             reloadAllPlayerTeams();
         }
     }
-    public void tickSessionOn(MinecraftServer server) {
-        if (midnightChimes.tick(server, seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig),
-                getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
-            TaskScheduler.scheduleTask(Time.seconds(38), DatapackIntegration.EVENT_MIDNIGHT_CHIMES::trigger);
-            onMidnightChimes();
-        }
-    }
+	
+	public void tickSessionOn(MinecraftServer server) {
+		Boolean norm = seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig);
+		Boolean wild = seasonConfig.WILD_MIDNIGHT_CHIMES.get(seasonConfig);
+
+		boolean enabled = Boolean.TRUE.equals(norm) || Boolean.TRUE.equals(wild);
+
+		if (enabled && midnightChimes.tick(server, true,
+				getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
+			TaskScheduler.scheduleTask(Time.seconds(38), DatapackIntegration.EVENT_MIDNIGHT_CHIMES::trigger);
+			onMidnightChimes();
+		}
+	}
 	
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
