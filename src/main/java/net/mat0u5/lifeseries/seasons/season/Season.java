@@ -442,7 +442,7 @@ public abstract class Season {
 	
 	public void tickSessionOn(MinecraftServer server) {
 		Boolean norm = seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig);
-		Boolean wild = seasonConfig.WILD_MIDNIGHT_CHIMES.get(seasonConfig);
+		Boolean wild = wildLifeConfig.WILD_MIDNIGHT_CHIMES.get(wildLifeConfig);
 
 		boolean enabled = Boolean.TRUE.equals(norm) || Boolean.TRUE.equals(wild);
 
