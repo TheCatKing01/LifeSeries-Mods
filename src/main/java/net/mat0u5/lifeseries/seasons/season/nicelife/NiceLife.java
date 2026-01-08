@@ -268,6 +268,16 @@ public class NiceLife extends Season {
             triviaCannotStartFor = time;
         }
     }
+	
+	@Override
+    protected int getMidnightChimesStartTime() {
+        return 18000 - 23 * 20;
+    }
+
+    @Override
+    protected void onMidnightChimes() {
+        postponeTriviaStart(Time.ticks(779));
+    }
 
     @Override
     public void tickSessionOn(MinecraftServer server) {
@@ -320,7 +330,6 @@ public class NiceLife extends Season {
             long newTime = overworld.getDayTime() + 24000L;
             overworld.setDayTime(newTime - newTime % 24000L);
             accessor.ls$wakeUpAllPlayers();
-            playedMidnightChimes = false;
             NiceLifeTriviaManager.endTrivia();
         }
     }
@@ -340,7 +349,6 @@ public class NiceLife extends Season {
         NiceLifeTriviaManager.sessionStart();
         NiceLifeVotingManager.endListsIfNecessary();
         wakeUpAllPlayers();
-        playedMidnightChimes = false;
         return true;
     }
 
