@@ -38,7 +38,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import static net.mat0u5.lifeseries.Main.*;
 
@@ -63,7 +62,6 @@ public class NiceLife extends Season {
     public double snowLayerTickChance = 1.0 / 43;
     public int precipitationTicks = 1;
     public double chancePerTick = snowLayerTickChance;
-    private final WandingTraders traders = new WandingTraders();
 
     public int currentMaxSnowLayers = -1;
     public static boolean reachedSunset = false;
@@ -282,7 +280,6 @@ public class NiceLife extends Season {
     @Override
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
-		traders.tickSessionOn(server);
         if (timePassed.isMultipleOf(naughtyListGlowTimeInterval)) {
             MobEffectInstance glowing = new MobEffectInstance(MobEffects.GLOWING, naughtyListGlowTime.getTicks(), 0);
             for (UUID uuid : NiceLifeVotingManager.naughtyListMembers) {

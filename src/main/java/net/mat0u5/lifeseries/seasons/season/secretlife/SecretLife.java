@@ -27,7 +27,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 import java.util.*;
 
@@ -60,7 +59,6 @@ public class SecretLife extends Season {
     public static double MAX_HEALTH = 60.0d;
     public static double MAX_KILL_HEALTH = 1000.0d;
     public static boolean ONLY_LOSE_HEARTS_IN_SESSION = false;
-    private final WandingTraders traders = new WandingTraders();
 
     public ItemSpawner itemSpawner;
     SessionAction taskWarningAction = new SessionAction(Time.minutes(-5).add(Time.seconds(1))) {
@@ -98,13 +96,6 @@ public class SecretLife extends Season {
     @Override
     public void reloadStart() {
         TaskManager.initialize();
-    }
-
-    @Override
-    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
-        super.tickSessionOn(server);
-        traders.tickSessionOn(server);
-
     }
 
     @Override

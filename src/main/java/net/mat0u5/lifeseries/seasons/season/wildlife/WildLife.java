@@ -37,7 +37,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
 //? if >= 1.21.2 {
 /*import net.minecraft.server.level.ServerLevel;
@@ -47,7 +46,6 @@ public class WildLife extends Season {
 	
     private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
     private static final String MIDNIGHT_SPAWN_BOTS_COMMAND = "/trivia bot spawnFor @a";
-    private final WandingTraders traders = new WandingTraders();
 
     @Override
     public Seasons getSeason() {
@@ -115,7 +113,6 @@ public class WildLife extends Season {
     @Override
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
-		traders.tickSessionOn(server);
         WildcardManager.tickSessionOn();
     }
 

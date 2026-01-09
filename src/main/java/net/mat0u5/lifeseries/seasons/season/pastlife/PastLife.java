@@ -11,11 +11,8 @@ import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 
 public class PastLife extends Season {
-
-	private final WandingTraders traders = new WandingTraders();
 	
     @Override
     public Seasons getSeason() {
@@ -30,12 +27,6 @@ public class PastLife extends Season {
     @Override
     public BoogeymanManager createBoogeymanManager() {
         return new PastLifeBoogeymanManager();
-    }
-	
-	@Override
-    public void tickSessionOn(net.minecraft.server.MinecraftServer server) {
-        super.tickSessionOn(server);
-        traders.tickSessionOn(server);
     }
 
     @Override

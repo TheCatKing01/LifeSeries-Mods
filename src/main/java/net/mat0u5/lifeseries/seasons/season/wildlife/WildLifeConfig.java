@@ -390,6 +390,13 @@ public class WildLifeConfig extends ConfigManager {
     }
 
     @Override
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
+        defaultEntries.remove(MIDNIGHT_CHIMES);
+        return defaultEntries;
+    }
+
+    @Override
     public void instantiateProperties() {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);

@@ -13,6 +13,7 @@ import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.other.MidnightChimes;
+import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
@@ -111,6 +112,7 @@ public abstract class Season {
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
     public LivesManager livesManager = createLivesManager();
+	private final WandingTraders traders = new WandingTraders();
 	private final MidnightChimes midnightChimes = new MidnightChimes();
 
     public abstract Seasons getSeason();
@@ -441,10 +443,15 @@ public abstract class Season {
     }
 	
 	public void tickSessionOn(MinecraftServer server) {
+		traders.tickSessionOn(server);
 		Boolean norm = seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig);
-		Boolean wild = wildLifeConfig.WILD_MIDNIGHT_CHIMES.get(wildLifeConfig);
 
-		boolean enabled = Boolean.TRUE.equals(norm) || Boolean.TRUE.equals(wild);
+		boolean wild = false;
+		if (seasonConfig instanceof net.mat0u5.lifeseries.seasons.season.wildlife.WildLifeConfig wlc) {
+			wild = Boolean.TRUE.equals(wlc.WILD_MIDNIGHT_CHIMES.get(wlc));
+		}
+
+		boolean enabled = Boolean.TRUE.equals(norm) || wild;
 
 		if (enabled && midnightChimes.tick(server, true,
 				getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
