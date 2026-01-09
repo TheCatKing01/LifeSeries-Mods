@@ -134,6 +134,10 @@ public class NiceLifeConfig extends ConfigManager {
                 ,SNOW_LAYER_INCREMENT_DELAY
                 ,ADVANCE_TIME_WHEN_NOT_IN_SESSION
                 ,SNOWY_NETHER
+                ,new ConfigFileEntry<>(
+                        MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season.voting[new]",
+                        MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
+                )
 
                 ,GROUP_TRIVIA
                 ,GROUP_VOTING
