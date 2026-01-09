@@ -302,12 +302,12 @@ public class WildLifeConfig extends ConfigManager {
 	
 	public static final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
             "wild_midnight_chimes", false, "{lifeseries_plus.chimes}",
-            "Play Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
+            "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
 
     public static final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
             "spawn_bots_at_midnight", true, "lifeseries_plus.chimes",
-            "Spawn Bots At Midnight", "Controls whether trivia bots spawn after midnight chimes."
+            "Spawn Bots After Chimes", "Controls whether trivia bots spawn after the midnight chimes."
     );
 
     public WildLifeConfig() {

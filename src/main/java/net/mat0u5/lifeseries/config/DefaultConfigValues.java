@@ -309,7 +309,7 @@ public class DefaultConfigValues {
 
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
             "simple_life", false, "{lifeseries_plus.simplelife}",
-            "Simple Life Traders Enabled", "Enables the wandering traders from Simple Life to spawn."
+            "Simple Life Traders", "Enables the wandering traders from Simple Life to spawn."
     );
     public final ConfigFileEntry<Integer> TRADERS_MAX_AMOUNT = new ConfigFileEntry<>(
             "traders_max_amount", 3, "lifeseries_plus.simplelife",
@@ -320,8 +320,8 @@ public class DefaultConfigValues {
             "Complex Life Trades", "Changes the Simple Life trades to be custom Complex Life ones."
     );
     public final ConfigFileEntry<Boolean> MIDNIGHT_CHIMES = new ConfigFileEntry<>(
-            "midnight_chimes", false, "lifeseries_plus.chimes",
-            "Play Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
+            "midnight_chimes", false, "lifeseries_plus",
+            "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
 
     /*
