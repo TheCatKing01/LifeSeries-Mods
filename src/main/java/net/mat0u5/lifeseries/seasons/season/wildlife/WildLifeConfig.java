@@ -300,7 +300,7 @@ public class WildLifeConfig extends ConfigManager {
             "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
     );
 	
-	public final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
+	public static final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
             "wild_midnight_chimes", false, "{lifeseries_plus.chimes}",
             "Play Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
