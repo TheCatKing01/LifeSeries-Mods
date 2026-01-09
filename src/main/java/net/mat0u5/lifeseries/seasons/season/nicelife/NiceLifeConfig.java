@@ -133,11 +133,12 @@ public class NiceLifeConfig extends ConfigManager {
 				,SNOW_WHEN_NOT_IN_SESSION
                 ,LIGHT_MELTS_SNOW
 				,SNOWY_NETHER
-                ,ADVANCE_TIME_WHEN_NOT_IN_SESSION
                 ,new ConfigFileEntry<>(
                         MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season",
                         MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
                 )
+				,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+
 
                 ,GROUP_TRIVIA
                 ,GROUP_VOTING
