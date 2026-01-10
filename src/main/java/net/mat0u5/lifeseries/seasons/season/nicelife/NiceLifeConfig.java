@@ -78,7 +78,6 @@ public class NiceLifeConfig extends ConfigManager {
             "snowy_nether", true, "season[new]",
             "Snowy Nether", "Controls the nether is frozen."
     );
-
     public static final ConfigFileEntry<Integer> TRIVIA_QUESTION_TIME = new ConfigFileEntry<>(
             "trivia_question_time", 68, ConfigTypes.SECONDS, "season.trivia[new]",
             "Trivia Question Time", "Controls how much time people have to answer the trivia, in seconds."
@@ -113,7 +112,7 @@ public class NiceLifeConfig extends ConfigManager {
     );
 	
 	public final ConfigFileEntry<Boolean> ENDLESS_SNOW = new ConfigFileEntry<>(
-            "endless_snow", True, "{season.snow}",
+            "endless_snow", true, "{season.snow}",
             "Endless Snow", "Controls whether it endlessly snows"
     );
 
