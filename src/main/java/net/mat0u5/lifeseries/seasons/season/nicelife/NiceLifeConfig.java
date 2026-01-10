@@ -52,22 +52,26 @@ public class NiceLifeConfig extends ConfigManager {
     );
 
     public static final ConfigFileEntry<Boolean> LIGHT_MELTS_SNOW = new ConfigFileEntry<>(
-            "light_melts_snow", false, "season[new]",
+            "light_melts_snow", false, "season.snow[new]",
             "Light Melts Snow", "Controls whether light sources will melt snow."
     );
 
     public static final ConfigFileEntry<Boolean> SNOW_WHEN_NOT_IN_SESSION = new ConfigFileEntry<>(
-            "snow_when_not_in_session", false, "season[new]",
+            "snow_when_not_in_session", false, "season.snow[new]",
             "Snow When Not In Session", "Controls it snows when the session is not started."
     );
 
     public static final ConfigFileEntry<Integer> SNOW_LAYER_INCREMENT_DELAY = new ConfigFileEntry<>(
-            "snow_layer_increment_delay", 600, ConfigTypes.SECONDS, "season[new]",
+            "snow_layer_increment_delay", 600, ConfigTypes.SECONDS, "season.snow[new]",
             "Snow Layer Increment Delay", "Controls the interval between snow layer increments, in seconds."
     );
     public static final ConfigFileEntry<Boolean> ADVANCE_TIME_WHEN_NOT_IN_SESSION = new ConfigFileEntry<>(
             "advance_time_not_in_session", false, "season[new]",
             "Advance Time When Not In Session", "Controls whether the daylight cycle is paused when not in session."
+    );
+    public static final ConfigFileEntry<Boolean> FREEZE_TIME_AT_MIDNIGHT = new ConfigFileEntry<>(
+            "freeze_time_at_midnight", true, "season[new]",
+            "Freeze Time At Midnight", "Controls whether time freezes at midnight."
     );
 
     public static final ConfigFileEntry<Boolean> SNOWY_NETHER = new ConfigFileEntry<>(
@@ -107,6 +111,11 @@ public class NiceLifeConfig extends ConfigManager {
             "nice_list_players", 3, "season.voting[new]",
             "Nice List Player Amount", "Controls the maximum number of players that can be on the nice list."
     );
+	
+	public final ConfigFileEntry<Boolean> ENDLESS_SNOW = new ConfigFileEntry<>(
+            "endless_snow", True, "{season.snow}",
+            "Endless Snow", "Controls whether it endlessly snows"
+    );
 
 
     public static final ConfigFileEntry<Object> GROUP_TRIVIA = new ConfigFileEntry<>(
@@ -129,7 +138,8 @@ public class NiceLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         return new ArrayList<>(List.of(
-		        SNOW_LAYER_INCREMENT_DELAY
+				ENDLESS_SNOW
+		        ,SNOW_LAYER_INCREMENT_DELAY
 				,SNOW_WHEN_NOT_IN_SESSION
                 ,LIGHT_MELTS_SNOW
 				,SNOWY_NETHER
@@ -137,11 +147,13 @@ public class NiceLifeConfig extends ConfigManager {
                         MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season",
                         MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
                 )
-				,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+		,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+     		,FREEZE_TIME_AT_MIDNIGHT
 
 
                 ,GROUP_TRIVIA
                 ,GROUP_VOTING
+
 
                 ,TRIVIA_QUESTION_TIME
                 ,BOT_CAN_BREAK_BEDS

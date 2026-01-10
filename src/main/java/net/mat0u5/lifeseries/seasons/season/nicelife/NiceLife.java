@@ -11,6 +11,7 @@ import net.mat0u5.lifeseries.mixin.ServerLevelAccessor;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -53,10 +54,12 @@ import java.util.UUID;
 
 public class NiceLife extends Season {
 
+    public boolean ENDLESS_SNOW = true;
     public static boolean SNOWY_NETHER = true;
     public static boolean LIGHT_MELTS_SNOW = false;
     public boolean SNOW_WHEN_NOT_IN_SESSION = false;
     public static boolean ADVANCE_TIME_WHEN_NOT_IN_SESSION = false;
+    public boolean FREEZE_TIME_AT_MIDNIGHT = true;
     public Time SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(600);
     public Time snowTicks = Time.zero();
     public double snowLayerTickChance = 1.0 / 43;
@@ -107,10 +110,12 @@ public class NiceLife extends Season {
     public void reload() {
         super.reload();
         NiceLifeVotingManager.createTeams();
+		ENDLESS_SNOW = NiceLifeConfig.ENDLESS_SNOW.get(seasonConfig);
         LIGHT_MELTS_SNOW = NiceLifeConfig.LIGHT_MELTS_SNOW.get(seasonConfig);
         SNOW_WHEN_NOT_IN_SESSION = NiceLifeConfig.SNOW_WHEN_NOT_IN_SESSION.get(seasonConfig);
         SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(NiceLifeConfig.SNOW_LAYER_INCREMENT_DELAY.get(seasonConfig));
         ADVANCE_TIME_WHEN_NOT_IN_SESSION = NiceLifeConfig.ADVANCE_TIME_WHEN_NOT_IN_SESSION.get(seasonConfig);
+		FREEZE_TIME_AT_MIDNIGHT = NiceLifeConfig.FREEZE_TIME_AT_MIDNIGHT.get(seasonConfig);
         SNOWY_NETHER = NiceLifeConfig.SNOWY_NETHER.get(seasonConfig);
         snowLayerTickChance = 280.0 / Math.max(SNOW_LAYER_INCREASE_INTERVAL.getTicks(), 1);
         if (currentMaxSnowLayers == -1) {
@@ -147,8 +152,9 @@ public class NiceLife extends Season {
     public void tick(MinecraftServer server) {
         super.tick(server);
         timePassed.tick();
-        if (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION) {
-            snowTicks.tick();
+        boolean freezeAtMidnight = shouldFreezeAtMidnight();
+        if (!freezeAtMidnight && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {		
+			snowTicks.tick();
             if (snowTicks.isLarger(SNOW_LAYER_INCREASE_INTERVAL)) {
                 snowTicks = Time.zero();
                 currentMaxSnowLayers++;
@@ -160,10 +166,16 @@ public class NiceLife extends Season {
             }
         }
         ServerLevel overworld = server.overworld();
-        overworld.setWeatherParameters(0, 1000, true, false);
-
-        boolean advanceTime = !isMidnight() && (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION);
-        //? if <= 1.21.9 {
+        if (freezeAtMidnight) {
+            overworld.setWeatherParameters(0, 0, false, false);
+        }
+        else if (ENDLESS_SNOW) {
+            overworld.setWeatherParameters(0, 1000, true, false);
+        }
+		
+        boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
+                && (!isMidnight() || !isTimeFreezeEnabled());
+		//? if <= 1.21.9 {
         OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
         //?} else {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
@@ -372,6 +384,9 @@ public class NiceLife extends Season {
     }
 
     public void tickChunk(ServerLevel level, ChunkPos chunkPos) {
+        if (shouldFreezeAtMidnight()) {
+            return;
+        }
         if (level.dimension() != Level.OVERWORLD) {
             return;
         }
@@ -504,6 +519,14 @@ public class NiceLife extends Season {
             }
         }
         return false;
+    }
+	
+    private boolean shouldFreezeAtMidnight() {
+        return isTimeFreezeEnabled() && isMidnight();
+    }
+
+    private boolean isTimeFreezeEnabled() {
+        return FREEZE_TIME_AT_MIDNIGHT;
     }
 
     public static final BlockState blueIce = Blocks.BLUE_ICE.defaultBlockState();
