@@ -54,12 +54,12 @@ import java.util.UUID;
 
 public class NiceLife extends Season {
 
-    public boolean ENDLESS_SNOW = true;
+    public static boolean ENDLESS_SNOW = true;
     public static boolean SNOWY_NETHER = true;
     public static boolean LIGHT_MELTS_SNOW = false;
     public boolean SNOW_WHEN_NOT_IN_SESSION = false;
     public static boolean ADVANCE_TIME_WHEN_NOT_IN_SESSION = false;
-    public boolean FREEZE_TIME_AT_MIDNIGHT = true;
+    public static boolean FREEZE_TIME_AT_MIDNIGHT = true;
     public Time SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(600);
     public Time snowTicks = Time.zero();
     public double snowLayerTickChance = 1.0 / 43;

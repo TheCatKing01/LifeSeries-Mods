@@ -111,7 +111,7 @@ public class NiceLifeConfig extends ConfigManager {
             "Nice List Player Amount", "Controls the maximum number of players that can be on the nice list."
     );
 	
-	public final ConfigFileEntry<Boolean> ENDLESS_SNOW = new ConfigFileEntry<>(
+	public static final ConfigFileEntry<Boolean> ENDLESS_SNOW = new ConfigFileEntry<>(
             "endless_snow", true, "{season.snow}",
             "Endless Snow", "Controls whether it endlessly snows"
     );
