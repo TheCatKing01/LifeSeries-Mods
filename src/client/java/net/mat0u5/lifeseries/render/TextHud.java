@@ -8,7 +8,6 @@ import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
-import net.mat0u5.lifeseries.utils.other.Time;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -130,8 +129,8 @@ public class TextHud {
             }
 
             if (remainingTime < 0) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
-
-            else timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", Time.millis(remainingTime).formatLong()));
+            else
+                timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", OtherUtils.formatTimeMillis(remainingTime)));
         }
 
         return drawHudText(client, context, timerText, y);
@@ -165,7 +164,6 @@ public class TextHud {
 
     public static int renderTriviaTimer(Minecraft client, GuiGraphics context, int y) {
         if (!Trivia.isDoingTrivia()) return 0;
-        if (MainClient.clientCurrentSeason == Seasons.NICE_LIFE) return 0;
 
         if (sessionSecondChanged || MainClient.sessionTime <= 0 || Math.abs(triviaTimer - Trivia.getRemainingSeconds()) >= 2) {
             triviaTimer = Trivia.getRemainingSeconds();
@@ -173,7 +171,7 @@ public class TextHud {
 
         int secondsLeft = triviaTimer;
 
-        Component actualTimer = Component.nullToEmpty(Time.seconds(secondsLeft).format());
+        Component actualTimer = Component.nullToEmpty(OtherUtils.formatTimeMillis(secondsLeft * 1000));
         Component timerText = Component.nullToEmpty("§7Trivia timer: ");
 
         int screenWidth = client.getWindow().getGuiScaledWidth();
@@ -202,7 +200,7 @@ public class TextHud {
         boolean keyPressed = pressedAgo < 500;
         if (pressedAgo > 6000) return 0;
 
-        Component timerText = TextUtils.formatLoosely("{}Superpower cooldown:§f {}", (keyPressed?"§c§n":"§7") , Time.millis(millisLeft).format());
+        Component timerText = TextUtils.formatLoosely("{}Superpower cooldown:§f {}", (keyPressed ? "§c§n" : "§7"), OtherUtils.formatTimeMillis(millisLeft));
 
         return drawHudText(client, context, timerText, y);
     }
@@ -214,44 +212,29 @@ public class TextHud {
         long millisLeft = roundTime(MainClient.MIMICRY_COOLDOWN_TIMESTAMP) - currentMillis;
         if (millisLeft > 10000000) return 0;
 
-        Component timerText = TextUtils.formatLoosely("§7Mimic power cooldown: §f{}", Time.millis(millisLeft).format());
+        Component timerText = TextUtils.formatLoosely("§7Mimic power cooldown: §f{}", OtherUtils.formatTimeMillis(millisLeft));
 
         return drawHudText(client, context, timerText, y);
     }
 
-	public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int y) {
-		int screenWidth = client.getWindow().getGuiScaledWidth();
-		int x = screenWidth - 5;
-		return drawHudText(client, context, text, x, y);
-	}
+    public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int y) {
+        int screenWidth = client.getWindow().getGuiScaledWidth();
+        int x = screenWidth - 5;
+        return drawHudText(client, context, text, x, y);
+    }
 
-	public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int x, int y) {
-		return drawHudText(client, context, TextColors.DEFAULT, text, x, y);
-	}
+    public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int x, int y) {
+        return drawHudText(client, context, TextColors.DEFAULT, text, x, y);
+    }
 
-	public static int drawHudText(Minecraft client, GuiGraphics context, int color, Component text, int x, int y) {
-		if (MainClient.TEXT_HUD_SCALE != 1) {
-			float scaleX = (float) MainClient.TEXT_HUD_SCALE;
-			float scaleY = (float) MainClient.TEXT_HUD_SCALE;
-
-			RenderUtils.text(text, x, y)
-					.anchorRight()
-					.colored(color)
-					.scaled(scaleX, scaleY)
-					.withShadow()
-					.render(context, client.font);
-
-			return -((int) Math.ceil(client.font.lineHeight * MainClient.TEXT_HUD_SCALE) + 5);
-		}
-
-		RenderUtils.text(text, x, y)
-				.anchorRight()
-				.colored(color)
-				.withShadow()
-				.render(context, client.font);
-
-		return -client.font.lineHeight - 5;
-	}
+    public static int drawHudText(Minecraft client, GuiGraphics context, int color, Component text, int x, int y) {
+        if (MainClient.TEXT_HUD_SCALE != 1) {
+            RenderUtils.drawTextRightScaled(context, client.font, color, text, x, y, (float) MainClient.TEXT_HUD_SCALE, (float) MainClient.TEXT_HUD_SCALE, true);
+            return -((int) Math.ceil((client.font.lineHeight) * MainClient.TEXT_HUD_SCALE) + 5);
+        }
+        RenderUtils.drawTextRight(context, client.font, color, text, x, y, true);
+        return -client.font.lineHeight - 5;
+    }
 
     public static long roundTime(long time) {
         return time - (time % 1000);
