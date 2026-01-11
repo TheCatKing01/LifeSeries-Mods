@@ -74,7 +74,6 @@ public class NiceLife extends Season {
     public static Time naughtyListGlowTime = Time.seconds(5);
     public static Time timePassed = Time.zero();
     public static Time triviaCannotStartFor = Time.zero();
-	public boolean clearWeatherNextTick = false;
 
     @Override
     public void initialize() {
@@ -110,7 +109,6 @@ public class NiceLife extends Season {
     @Override
     public void reload() {
         super.reload();
-		boolean previousEndlessSnow = ENDLESS_SNOW;
         NiceLifeVotingManager.createTeams();
 		ENDLESS_SNOW = NiceLifeConfig.ENDLESS_SNOW.get(seasonConfig);
         LIGHT_MELTS_SNOW = NiceLifeConfig.LIGHT_MELTS_SNOW.get(seasonConfig);
@@ -120,9 +118,6 @@ public class NiceLife extends Season {
 		FREEZE_TIME_AT_MIDNIGHT = NiceLifeConfig.FREEZE_TIME_AT_MIDNIGHT.get(seasonConfig);
         SNOWY_NETHER = NiceLifeConfig.SNOWY_NETHER.get(seasonConfig);
         snowLayerTickChance = 280.0 / Math.max(SNOW_LAYER_INCREASE_INTERVAL.getTicks(), 1);
-		if (previousEndlessSnow && !ENDLESS_SNOW) {
-            clearWeatherNextTick = true;
-        }
         if (currentMaxSnowLayers == -1) {
             currentMaxSnowLayers = seasonConfig.getOrCreateInt("current_snow_layers", 1);
         }
@@ -158,8 +153,7 @@ public class NiceLife extends Season {
         super.tick(server);
         timePassed.tick();
         boolean freezeAtMidnight = shouldFreezeAtMidnight();
-        boolean allowSnowEffects = ENDLESS_SNOW && !freezeAtMidnight;
-        if (allowSnowEffects && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {	
+        if (!freezeAtMidnight && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {		
 			snowTicks.tick();
             if (snowTicks.isLarger(SNOW_LAYER_INCREASE_INTERVAL)) {
                 snowTicks = Time.zero();
@@ -171,13 +165,9 @@ public class NiceLife extends Season {
                 seasonConfig.setProperty("current_snow_layers", String.valueOf(currentMaxSnowLayers));
             }
         }
+        ServerLevel overworld = server.overworld();
         if (freezeAtMidnight) {
             overworld.setWeatherParameters(0, 0, false, false);
-            clearWeatherNextTick = false;
-        }
-        else if (clearWeatherNextTick) {
-            overworld.setWeatherParameters(0, 0, false, false);
-            clearWeatherNextTick = false;
         }
         else if (ENDLESS_SNOW) {
             overworld.setWeatherParameters(0, 1000, true, false);
