@@ -52,17 +52,17 @@ public class NiceLifeConfig extends ConfigManager {
     );
 
     public static final ConfigFileEntry<Boolean> LIGHT_MELTS_SNOW = new ConfigFileEntry<>(
-            "light_melts_snow", false, "season.snow[new]",
+            "light_melts_snow", false, "snow[new]",
             "Light Melts Snow", "Controls whether light sources will melt snow."
     );
 
     public static final ConfigFileEntry<Boolean> SNOW_WHEN_NOT_IN_SESSION = new ConfigFileEntry<>(
-            "snow_when_not_in_session", false, "season.snow[new]",
+            "snow_when_not_in_session", false, "snow[new]",
             "Snow When Not In Session", "Controls it snows when the session is not started."
     );
 
     public static final ConfigFileEntry<Integer> SNOW_LAYER_INCREMENT_DELAY = new ConfigFileEntry<>(
-            "snow_layer_increment_delay", 600, ConfigTypes.SECONDS, "season.snow[new]",
+            "snow_layer_increment_delay", 600, ConfigTypes.SECONDS, "snow[new]",
             "Snow Layer Increment Delay", "Controls the interval between snow layer increments, in seconds."
     );
     public static final ConfigFileEntry<Boolean> ADVANCE_TIME_WHEN_NOT_IN_SESSION = new ConfigFileEntry<>(
@@ -110,12 +110,6 @@ public class NiceLifeConfig extends ConfigManager {
             "nice_list_players", 3, "season.voting[new]",
             "Nice List Player Amount", "Controls the maximum number of players that can be on the nice list."
     );
-	
-	public static final ConfigFileEntry<Boolean> ENDLESS_SNOW = new ConfigFileEntry<>(
-            "endless_snow", true, "{season.snow}",
-            "Endless Snow", "Controls whether it endlessly snows"
-    );
-
 
     public static final ConfigFileEntry<Object> GROUP_TRIVIA = new ConfigFileEntry<>(
             "group_trivia", null, ConfigTypes.TEXT, "{season.trivia}[new]",
@@ -137,8 +131,7 @@ public class NiceLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         return new ArrayList<>(List.of(
-				ENDLESS_SNOW
-		        ,SNOW_LAYER_INCREMENT_DELAY
+		        SNOW_LAYER_INCREMENT_DELAY
 				,SNOW_WHEN_NOT_IN_SESSION
                 ,LIGHT_MELTS_SNOW
 				,SNOWY_NETHER

@@ -54,7 +54,6 @@ import java.util.UUID;
 
 public class NiceLife extends Season {
 
-    public static boolean ENDLESS_SNOW = true;
     public static boolean SNOWY_NETHER = true;
     public static boolean LIGHT_MELTS_SNOW = false;
     public boolean SNOW_WHEN_NOT_IN_SESSION = false;
@@ -110,7 +109,6 @@ public class NiceLife extends Season {
     public void reload() {
         super.reload();
         NiceLifeVotingManager.createTeams();
-		ENDLESS_SNOW = NiceLifeConfig.ENDLESS_SNOW.get(seasonConfig);
         LIGHT_MELTS_SNOW = NiceLifeConfig.LIGHT_MELTS_SNOW.get(seasonConfig);
         SNOW_WHEN_NOT_IN_SESSION = NiceLifeConfig.SNOW_WHEN_NOT_IN_SESSION.get(seasonConfig);
         SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(NiceLifeConfig.SNOW_LAYER_INCREMENT_DELAY.get(seasonConfig));
@@ -169,7 +167,7 @@ public class NiceLife extends Season {
         if (freezeAtMidnight) {
             overworld.setWeatherParameters(0, 0, false, false);
         }
-        else if (ENDLESS_SNOW) {
+        else {
             overworld.setWeatherParameters(0, 1000, true, false);
         }
 		
