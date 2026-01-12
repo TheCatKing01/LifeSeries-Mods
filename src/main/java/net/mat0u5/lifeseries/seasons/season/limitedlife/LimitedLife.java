@@ -123,6 +123,9 @@ public class LimitedLife extends Season {
     }
 
     private int secondCounter = 0;
+    public int getTicksPerSecond() {
+        return TICKS_PER_SECOND;
+    }
 	
 	@Override
 	public void tickSessionOn(MinecraftServer server) {
@@ -252,6 +255,7 @@ public class LimitedLife extends Season {
         NEW_KILL_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get(seasonConfig));
         TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get(seasonConfig);
         TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get(seasonConfig);
+        NetworkHandlerServer.sendNumberPackets(PacketNames.TICKS_PER_SECOND, TICKS_PER_SECOND);
         LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get(seasonConfig);
     }
 

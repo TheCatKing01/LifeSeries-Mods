@@ -42,7 +42,10 @@ public class TextHud {
         lastTickTime = now;
 
         if (limitedLifeTimeMillis > 0) {
-            limitedLifeTimeMillis -= delta;
+            int ticksPerSecond = MainClient.TICKS_PER_SECOND > 0 ? MainClient.TICKS_PER_SECOND : 20;
+            double scale = 20.0 / ticksPerSecond;
+            long scaledDelta = Math.round(delta * scale);
+            limitedLifeTimeMillis -= scaledDelta;
             if (limitedLifeTimeMillis < 0) limitedLifeTimeMillis = 0;
         }
     }
@@ -138,6 +141,7 @@ public class TextHud {
     }
 
     private static long limitedLifeTimeMillis = -1;
+    private static long lastLimitedLifeUpdateMillis = 0;
 
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
         if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
@@ -145,7 +149,8 @@ public class TextHud {
 
         MutableComponent timerText = Component.empty();
 
-        if (sessionSecondChanged || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
+        if (MainClient.limitedLifeTimeLastUpdated != lastLimitedLifeUpdateMillis || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
+            lastLimitedLifeUpdateMillis = MainClient.limitedLifeTimeLastUpdated;
             limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
         }
 

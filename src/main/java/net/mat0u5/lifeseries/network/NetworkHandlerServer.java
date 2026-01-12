@@ -13,6 +13,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeVotingManager;
+import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
@@ -516,6 +517,9 @@ public class NetworkHandlerServer {
                 activeWildcards.add(wildcard.getStringName());
             }
             sendStringPacket(player, PacketNames.ACTIVE_WILDCARDS, String.join("__", activeWildcards));
+        }
+        if (currentSeason instanceof LimitedLife limitedLife) {
+            sendNumberPacket(player, PacketNames.TICKS_PER_SECOND, limitedLife.getTicksPerSecond());
         }
         sendStringPacket(player, PacketNames.CURRENT_SEASON, currentSeason.getSeason().getId());
         sendStringPacket(player, PacketNames.TABLIST_SHOW_EXACT, String.valueOf(Season.TAB_LIST_SHOW_EXACT_LIVES));
