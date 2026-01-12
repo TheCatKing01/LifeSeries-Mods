@@ -133,38 +133,7 @@ public class TextHud {
 
         return drawHudText(client, context, timerText, y);
     }
-
-    private static double limitedLifeTimeMillis = -1;
-    private static long lastLimitedLifeUpdateMillis = 0;
-
-    public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
-        if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
-        if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
-
-		MutableComponent timerText = Component.empty();
-        if (MainClient.sessionTime == SessionTimerStates.ENDED.getValue())
-            timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
-        else if (MainClient.sessionTime == SessionTimerStates.PAUSED.getValue())
-            timerText = timerText.append(Component.nullToEmpty("§7Session has been paused"));
-        else if (MainClient.sessionTime == SessionTimerStates.NOT_STARTED.getValue())
-            timerText = timerText.append(Component.nullToEmpty("§7Session has not started"));
-        else {
-            long remainingTime = roundTime(MainClient.sessionTime) - System.currentTimeMillis();
-            sessionSeconds = (int) Math.ceil(remainingTime / 1000.0);
-            if (lastSessionSeconds != sessionSeconds) {
-                lastSessionSeconds = sessionSeconds;
-            } else {
-                sessionSecondChanged = false;
-            }
-
-            if (remainingTime < 0) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
-
-            else timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", Time.millis(remainingTime).formatLong()));
-        }
-
-        return drawHudText(client, context, timerText, y);
-    }
-
+	
     private static double limitedLifeTimeMillis = -1;
     private static long lastLimitedLifeUpdateMillis = 0;
 
