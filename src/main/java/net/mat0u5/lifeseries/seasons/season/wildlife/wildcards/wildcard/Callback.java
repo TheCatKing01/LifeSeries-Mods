@@ -57,7 +57,8 @@ public class Callback extends Wildcard {
         int passedTimeTicks = currentSession.getPassedTime().getTicks();
         int sessionLengthTicks = currentSession.getSessionLength().getTicks();
 
-        double sessionProgress = (passedTimeTicks -activatedAt) / (sessionLengthTicks -activatedAt);
+   	if (activatedAt < 0) return;
+        double sessionProgress = (passedTimeTicks - activatedAt) / (double) (sessionLengthTicks - activatedAt);
 
         if (nextActivationTick == -1) {
             nextActivationTick = passedTimeTicks + 20 * 60 * 5; // First activation after 5 minutes
