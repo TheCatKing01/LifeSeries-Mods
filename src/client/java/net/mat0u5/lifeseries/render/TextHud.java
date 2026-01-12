@@ -44,8 +44,7 @@ public class TextHud {
         if (limitedLifeTimeMillis > 0) {
             int ticksPerSecond = MainClient.TICKS_PER_SECOND > 0 ? MainClient.TICKS_PER_SECOND : 20;
             double scale = 20.0 / ticksPerSecond;
-            long scaledDelta = Math.round(delta * scale);
-            limitedLifeTimeMillis -= scaledDelta;
+            limitedLifeTimeMillis -= delta * scale;
             if (limitedLifeTimeMillis < 0) limitedLifeTimeMillis = 0;
         }
     }
@@ -140,7 +139,7 @@ public class TextHud {
         return drawHudText(client, context, timerText, y);
     }
 
-    private static long limitedLifeTimeMillis = -1;
+    private static double limitedLifeTimeMillis = -1;
     private static long lastLimitedLifeUpdateMillis = 0;
 
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
@@ -151,11 +150,11 @@ public class TextHud {
 
         if (MainClient.limitedLifeTimeLastUpdated != lastLimitedLifeUpdateMillis || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
             lastLimitedLifeUpdateMillis = MainClient.limitedLifeTimeLastUpdated;
-            limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000L;
+            limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000.0;
         }
 
-        long remainingTime = limitedLifeTimeMillis;
-
+        long remainingTime = Math.round(limitedLifeTimeMillis);
+		
         if (remainingTime < 0) {
             timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
         } else {
