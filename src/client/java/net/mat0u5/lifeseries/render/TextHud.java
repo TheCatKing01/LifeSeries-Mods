@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public class TextHud {
-    private static long lastTickTime = System.currentTimeMillis();
 
     public static void renderText(GuiGraphics context) {
         Minecraft client = Minecraft.getInstance();
@@ -37,14 +36,9 @@ public class TextHud {
             sideTitleRemainTicks--;
         }
 
-        long now = System.currentTimeMillis();
-        long delta = now - lastTickTime;
-        lastTickTime = now;
-
         if (limitedLifeTimeMillis > 0) {
             int ticksPerSecond = MainClient.TICKS_PER_SECOND > 0 ? MainClient.TICKS_PER_SECOND : 20;
             double scale = 20.0 / ticksPerSecond;
-            limitedLifeTimeMillis -= delta * scale;
             if (limitedLifeTimeMillis < 0) limitedLifeTimeMillis = 0;
         }
     }
@@ -141,7 +135,6 @@ public class TextHud {
 
     private static double limitedLifeTimeMillis = -1;
     private static long lastLimitedLifeUpdateMillis = 0;
-    private static long lastLimitedLifeDisplayMillis = -1;
 
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
         if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
@@ -152,14 +145,9 @@ public class TextHud {
         if (MainClient.limitedLifeTimeLastUpdated != lastLimitedLifeUpdateMillis || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
             lastLimitedLifeUpdateMillis = MainClient.limitedLifeTimeLastUpdated;
             limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000.0;
-            lastLimitedLifeDisplayMillis = -1;
-		}
+            limitedLifeTimeMillis = Math.max(0, limitedLifeTimeMillis);
 
         long remainingTime = (long) Math.floor(limitedLifeTimeMillis);
-        if (lastLimitedLifeDisplayMillis >= 0 && remainingTime > lastLimitedLifeDisplayMillis) {
-            remainingTime = lastLimitedLifeDisplayMillis;
-        }
-        lastLimitedLifeDisplayMillis = remainingTime;
 		
         if (remainingTime < 0) {
             timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
