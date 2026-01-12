@@ -37,8 +37,6 @@ public class TextHud {
         }
 
         if (limitedLifeTimeMillis > 0) {
-            int ticksPerSecond = MainClient.TICKS_PER_SECOND > 0 ? MainClient.TICKS_PER_SECOND : 20;
-            double scale = 20.0 / ticksPerSecond;
             if (limitedLifeTimeMillis < 0) limitedLifeTimeMillis = 0;
         }
     }
@@ -61,6 +59,9 @@ public class TextHud {
         if (guiScale <= 3 && guiScale != 0) {
 
             String textString = "Don't worry, the game is not broken ";
+            if (currentMillis % 1500 <= 750) textString = "§7§n" + textString;
+            else textString = "§7" + textString;
+
             if (currentMillis % 1500 <= 750) textString = "§7§n" + textString;
             else textString = "§7" + textString;
 
@@ -140,15 +141,47 @@ public class TextHud {
         if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
         if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
+		MutableComponent timerText = Component.empty();
+        if (MainClient.sessionTime == SessionTimerStates.ENDED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
+        else if (MainClient.sessionTime == SessionTimerStates.PAUSED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has been paused"));
+        else if (MainClient.sessionTime == SessionTimerStates.NOT_STARTED.getValue())
+            timerText = timerText.append(Component.nullToEmpty("§7Session has not started"));
+        else {
+            long remainingTime = roundTime(MainClient.sessionTime) - System.currentTimeMillis();
+            sessionSeconds = (int) Math.ceil(remainingTime / 1000.0);
+            if (lastSessionSeconds != sessionSeconds) {
+                lastSessionSeconds = sessionSeconds;
+            } else {
+                sessionSecondChanged = false;
+            }
+
+            if (remainingTime < 0) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
+
+            else timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", Time.millis(remainingTime).formatLong()));
+        }
+
+        return drawHudText(client, context, timerText, y);
+    }
+
+    private static double limitedLifeTimeMillis = -1;
+    private static long lastLimitedLifeUpdateMillis = 0;
+
+    public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
+        if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
+        if (System.currentTimeMillis() - MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
+
         MutableComponent timerText = Component.empty();
 
         if (MainClient.limitedLifeTimeLastUpdated != lastLimitedLifeUpdateMillis || MainClient.sessionTime <= 0 || limitedLifeTimeMillis == -1) {
             lastLimitedLifeUpdateMillis = MainClient.limitedLifeTimeLastUpdated;
             limitedLifeTimeMillis = MainClient.limitedLifeLives * 1000.0;
             limitedLifeTimeMillis = Math.max(0, limitedLifeTimeMillis);
+        }
 
         long remainingTime = (long) Math.floor(limitedLifeTimeMillis);
-		
+
         if (remainingTime < 0) {
             timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
         } else {
