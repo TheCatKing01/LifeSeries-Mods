@@ -143,19 +143,19 @@ public class WandingTraders {
                 offers.add(new MerchantOffer(new ItemStack(Items.COBBLESTONE, 1), ItemStack.EMPTY, Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemStack(Items.COBBLESTONE, 1), ItemStack.EMPTY, Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemStack(Items.COBBLESTONE, 5), ItemStack.EMPTY, Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                offers.add(new MerchantOffer(new ItemStack(Items.COBBLESTONE, 10), ItemStack.EMPTY, Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemStack(Items.COBBLESTONE, 5), ItemStack.EMPTY, Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-                offers.add(new MerchantOffer(new ItemStack(Items.IRON_INGOT, 10), ItemStack.EMPTY, Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemStack(Items.IRON_INGOT, 5), ItemStack.EMPTY, Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemStack(Items.IRON_INGOT, 16), ItemStack.EMPTY, Items.WOLF_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemStack(Items.IRON_INGOT, 40), ItemStack.EMPTY, Items.TRIDENT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-                offers.add(new MerchantOffer(new ItemStack(Items.GOLD_INGOT, 5), ItemStack.EMPTY, Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemStack(Items.GOLD_INGOT, 3), ItemStack.EMPTY, Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
                 int rand = rnd.nextInt(2);
-                if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 5), ItemStack.EMPTY, Items.NETHERITE_SCRAP.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 10), ItemStack.EMPTY, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 4), ItemStack.EMPTY, Items.NETHERITE_SCRAP.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 5), ItemStack.EMPTY, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 3), ItemStack.EMPTY, Items.CREEPER_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 16), ItemStack.EMPTY, Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemStack(Items.DIAMOND, 6), ItemStack.EMPTY, Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
                 trader.addTag("ComplexLifeTrader");
             }
@@ -195,19 +195,19 @@ public class WandingTraders {
                 offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 10), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemCost(Items.COBBLESTONE, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-                offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 10), Optional.empty(), Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 5), Optional.empty(), Items.DIAMOND.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 16), Optional.empty(), Items.WOLF_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemCost(Items.IRON_INGOT, 40), Optional.empty(), Items.TRIDENT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-                offers.add(new MerchantOffer(new ItemCost(Items.GOLD_INGOT, 5), Optional.empty(), Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemCost(Items.GOLD_INGOT, 3), Optional.empty(), Items.LAPIS_LAZULI.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
                 int rand = rnd.nextInt(2);
-                if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 10), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 4), Optional.empty(), Items.NETHERITE_SCRAP.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 5), Optional.empty(), Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance(), 0, 999999, 0, 0, 0));
                 offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 3), Optional.empty(), Items.CREEPER_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 16), Optional.empty(), Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                offers.add(new MerchantOffer(new ItemCost(Items.DIAMOND, 6), Optional.empty(), Items.END_CRYSTAL.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
                 trader.addTag("ComplexLifeTrader");
             }
