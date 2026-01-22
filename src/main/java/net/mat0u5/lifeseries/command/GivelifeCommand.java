@@ -96,6 +96,9 @@ public class GivelifeCommand extends Command {
         if (currentSeason instanceof DoubleLife doubleLife) {
             ServerPlayer soulmate = doubleLife.getSoulmate(self);
             if (soulmate != null) {
+				if (!SOULMATES_SHARE_LIVES) {
+					return -1;
+				}
                 if (soulmate.equals(target)) {
                     source.sendFailure(TextUtils.format("You cannot give {} to your soulmate", livesOrTime));
                     return -1;

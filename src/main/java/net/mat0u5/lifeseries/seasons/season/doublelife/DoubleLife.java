@@ -475,6 +475,15 @@ public class DoubleLife extends Season {
         super.onPlayerDeath(player, source);
 
         if (player == null) return;
+		
+		if (!SOULMATES_SHARE_LIVES && source.is(DoubleLife.SOULMATE_DAMAGE)) {
+			Integer lives = player.ls$getLives();
+			if (lives != null) {
+				player.ls$setLives(Math.max(lives - 1, 0));
+			}
+			return;
+		}
+		
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
 
