@@ -105,7 +105,7 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 	
 	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_LIVES = new ConfigFileEntry<>(
-            "soulmates_share_lives", true, ConfigTypes.TEXT, "{season.sharelives}",
+            "soulmates_share_lives", true, "{season.sharelives}",
             "Soulmate Share Lives", "Controls whether soulmates share the same life count."
     );
 
@@ -122,9 +122,9 @@ public class DoubleLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
-                ANNOUNCE_SOULMATES
+				SOULMATES_SHARE_LIVES
                 ,GROUP_SOULBIND //Group
-				,SOULMATES_SHARE_LIVES
+				,ANNOUNCE_SOULMATES
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
 
