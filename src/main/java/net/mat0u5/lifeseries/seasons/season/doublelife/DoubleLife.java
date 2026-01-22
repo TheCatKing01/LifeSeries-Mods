@@ -51,6 +51,7 @@ public class DoubleLife extends Season {
     public boolean DISABLE_START_TELEPORT = false;
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
+    public boolean SOULMATES_SHARE_LIVES = true;
 
     public SessionAction actionChooseSoulmates = new SessionAction(Time.minutes(1), "Assign Soulmates if necessary") {
         @Override
@@ -146,6 +147,7 @@ public class DoubleLife extends Season {
         DISABLE_START_TELEPORT = DoubleLifeConfig.DISABLE_START_TELEPORT.get(seasonConfig);
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
+		SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
         syncAllPlayers();
     }
 
@@ -532,30 +534,34 @@ public class DoubleLife extends Season {
                 soulmate.setHealth(sharedHealth);
             }
         }
-        
-        Integer soulmateLives = soulmate.ls$getLives();
-        Integer playerLives = player.ls$getLives();
-        if (soulmateLives != null && playerLives != null)  {
-            if (!Objects.equals(soulmateLives, playerLives)) {
-                int minLives = Math.min(soulmateLives,playerLives);
-                player.ls$setLives(minLives);
-                soulmate.ls$setLives(minLives);
-            }
-        }
+		
+		if (SOULMATES_SHARE_LIVES) {
+			Integer soulmateLives = soulmate.ls$getLives();
+			Integer playerLives = player.ls$getLives();
+			if (soulmateLives != null && playerLives != null)  {
+				if (!Objects.equals(soulmateLives, playerLives)) {
+					int minLives = Math.min(soulmateLives,playerLives);
+					player.ls$setLives(minLives);
+					soulmate.ls$setLives(minLives);
+				}
+			}
+		}
 
         updateFood(player, soulmate);
         syncPlayerInventory(player, soulmate);
     }
 
     public void syncSoulboundLives(ServerPlayer player) {
-        if (player == null) return;
-        Integer lives = player.ls$getLives();
-        ServerPlayer soulmate = getSoulmate(player);
-        if (lives == null) return;
-        if (soulmate == null) return;
-        if (!player.isAlive() || !soulmate.isAlive()) return;
-        soulmate.ls$setLives(lives);
-    }
+		if (SOULMATES_SHARE_LIVES) {
+			if (player == null) return;
+			Integer lives = player.ls$getLives();
+			ServerPlayer soulmate = getSoulmate(player);
+			if (lives == null) return;
+			if (soulmate == null) return;
+			if (!player.isAlive() || !soulmate.isAlive()) return;
+			soulmate.ls$setLives(lives);
+		}
+	}
 
     public void canFoodHeal(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         boolean orig =  player.getHealth() > 0.0F && player.getHealth() < player.getMaxHealth();

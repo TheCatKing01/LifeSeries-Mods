@@ -103,6 +103,11 @@ public class DoubleLifeConfig extends ConfigManager {
             "soulmates_pvp_allowed", true, "season",
             "Soulmates PvP Allowed", "Controls whether soulmates can hit each other."
     );
+	
+	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_LIVES = new ConfigFileEntry<>(
+            "soulmates_share_lives", true, ConfigTypes.TEXT, "{season.sharelives}",
+            "Soulmate Share Lives", "Controls whether soulmates share the same life count."
+    );
 
 
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
@@ -119,15 +124,17 @@ public class DoubleLifeConfig extends ConfigManager {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
                 ANNOUNCE_SOULMATES
                 ,GROUP_SOULBIND //Group
+				,SOULMATES_SHARE_LIVES
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
-
 
                 ,SOULBOUND_FOOD
                 ,SOULBOUND_EFFECTS
                 ,SOULBOUND_INVENTORIES
                 , SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED
+				
+				
         ));
         //? if >= 1.21.6 {
         /*result.add(SOULMATE_LOCATOR_BAR);
