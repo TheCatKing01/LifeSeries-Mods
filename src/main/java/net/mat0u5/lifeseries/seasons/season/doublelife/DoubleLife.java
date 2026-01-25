@@ -53,6 +53,9 @@ public class DoubleLife extends Season {
     public boolean SOULMATES_PVP_ALLOWED = true;
     public boolean SOULMATES_SHARE_LIVES = true;
 
+    private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
+    private final Set<UUID> processingLinkedDeath = new HashSet<>();
+
     public SessionAction actionChooseSoulmates = new SessionAction(Time.minutes(1), "Assign Soulmates if necessary") {
         @Override
         public void trigger() {
@@ -147,7 +150,7 @@ public class DoubleLife extends Season {
         DISABLE_START_TELEPORT = DoubleLifeConfig.DISABLE_START_TELEPORT.get(seasonConfig);
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
-		SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
+        SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
         syncAllPlayers();
     }
 
@@ -469,62 +472,96 @@ public class DoubleLife extends Season {
 
         TaskScheduler.scheduleTask(1,() -> syncPlayers(player, soulmate));
     }
-	
-	@Override
-	public void onPlayerDeath(ServerPlayer player, DamageSource source) {
-		if (player == null) return;
 
-		Integer beforeLives = player.ls$getLives();
+    private void ensureLifeConsumed(ServerPlayer player, @Nullable Integer livesBefore) {
+        if (player == null || livesBefore == null) return;
+        Integer livesAfter = player.ls$getLives();
+        if (livesAfter == null) return;
 
-		super.onPlayerDeath(player, source);
+        if (Objects.equals(livesBefore, livesAfter)) {
+            player.ls$setLives(Math.max(livesAfter - 1, 0));
+        }
+    }
 
-		if (!SOULMATES_SHARE_LIVES && source.is(DoubleLife.SOULMATE_DAMAGE)) {
-			Integer afterLives = player.ls$getLives();
+    @Override
+    public void onPlayerDeath(ServerPlayer player, DamageSource source) {
+        if (player == null) return;
 
-			if (beforeLives != null && afterLives != null && Objects.equals(beforeLives, afterLives)) {
-				player.ls$setLives(Math.max(afterLives - 1, 0));
-			}
+        UUID playerId = player.getUUID();
+        Integer beforeLives = player.ls$getLives();
 
-			TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
-			return;
-		}
-		
+        if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
+            super.onPlayerDeath(player, source);
+
+            if (pendingSoulmateLifeLoss.remove(playerId)) {
+                ensureLifeConsumed(player, beforeLives);
+            }
+
+            TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
+            return;
+        }
+
+        super.onPlayerDeath(player, source);
+
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
 
         ServerPlayer soulmate = getSoulmate(player);
-
         if (soulmate == null) return;
         if (!soulmate.isAlive()) return;
-        //? if <= 1.21.9 {
-        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-        //?} else {
-        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-        *///?}
-        if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
-            soulmate.getInventory().clearContent();
+
+        if (!processingLinkedDeath.add(playerId)) return;
+
+        try {
+            //? if <= 1.21.9 {
+            boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+            //?} else {
+            /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+            *///?}
+            if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
+                soulmate.getInventory().clearContent();
+            }
+
+            pendingSoulmateLifeLoss.add(soulmate.getUUID());
+
+            //? if <=1.21 {
+            DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
+                    .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
+            soulmate.setLastHurtByMob(player);
+            soulmate.setLastHurtByPlayer(player);
+            soulmate.hurt(damageSource, 1000);
+            //?} else {
+            /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
+                    .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
+            soulmate.setLastHurtByMob(player);
+            //? if <= 1.21.4 {
+            soulmate.setLastHurtByPlayer(player);
+            //?} else {
+            /^soulmate.setLastHurtByPlayer(player, 100);
+            ^///?}
+            soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
+            *///?}
+
+            TaskScheduler.scheduleTask(1, () -> {
+                syncPlayer(player);
+                syncPlayer(soulmate);
+
+                if (SOULMATES_SHARE_LIVES) {
+                    Integer a = player.ls$getLives();
+                    Integer b = soulmate.ls$getLives();
+                    if (a != null && b != null) {
+                        int min = Math.min(a, b);
+                        player.ls$setLives(min);
+                        soulmate.ls$setLives(min);
+                    }
+                }
+
+                checkForEnding();
+            });
+
+        } finally {
+            processingLinkedDeath.remove(playerId);
         }
-
-        //? if <=1.21 {
-        DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
-                .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
-        soulmate.setLastHurtByMob(player);
-        soulmate.setLastHurtByPlayer(player);
-        soulmate.hurt(damageSource, 1000);
-         //?} else {
-        /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
-                .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
-        soulmate.setLastHurtByMob(player);
-        //? if <= 1.21.4 {
-        soulmate.setLastHurtByPlayer(player);
-        //?} else {
-        /^soulmate.setLastHurtByPlayer(player, 100);
-        ^///?}
-        soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
-        *///?}
-
-
-        TaskScheduler.scheduleTask(1, this::checkForEnding);
     }
 
     public void syncAllPlayers() {
@@ -548,34 +585,34 @@ public class DoubleLife extends Season {
                 soulmate.setHealth(sharedHealth);
             }
         }
-		
-		if (SOULMATES_SHARE_LIVES) {
-			Integer soulmateLives = soulmate.ls$getLives();
-			Integer playerLives = player.ls$getLives();
-			if (soulmateLives != null && playerLives != null)  {
-				if (!Objects.equals(soulmateLives, playerLives)) {
-					int minLives = Math.min(soulmateLives,playerLives);
-					player.ls$setLives(minLives);
-					soulmate.ls$setLives(minLives);
-				}
-			}
-		}
+
+        if (SOULMATES_SHARE_LIVES) {
+            Integer soulmateLives = soulmate.ls$getLives();
+            Integer playerLives = player.ls$getLives();
+            if (soulmateLives != null && playerLives != null)  {
+                if (!Objects.equals(soulmateLives, playerLives)) {
+                    int minLives = Math.min(soulmateLives,playerLives);
+                    player.ls$setLives(minLives);
+                    soulmate.ls$setLives(minLives);
+                }
+            }
+        }
 
         updateFood(player, soulmate);
         syncPlayerInventory(player, soulmate);
     }
 
     public void syncSoulboundLives(ServerPlayer player) {
-		if (SOULMATES_SHARE_LIVES) {
-			if (player == null) return;
-			Integer lives = player.ls$getLives();
-			ServerPlayer soulmate = getSoulmate(player);
-			if (lives == null) return;
-			if (soulmate == null) return;
-			if (!player.isAlive() || !soulmate.isAlive()) return;
-			soulmate.ls$setLives(lives);
-		}
-	}
+        if (SOULMATES_SHARE_LIVES) {
+            if (player == null) return;
+            Integer lives = player.ls$getLives();
+            ServerPlayer soulmate = getSoulmate(player);
+            if (lives == null) return;
+            if (soulmate == null) return;
+            if (!player.isAlive() || !soulmate.isAlive()) return;
+            soulmate.ls$setLives(lives);
+        }
+    }
 
     public void canFoodHeal(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         boolean orig =  player.getHealth() > 0.0F && player.getHealth() < player.getMaxHealth();
