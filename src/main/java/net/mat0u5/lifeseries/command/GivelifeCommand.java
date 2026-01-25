@@ -93,32 +93,31 @@ public class GivelifeCommand extends Command {
             source.sendFailure(TextUtils.format("That player cannot receive any more {}", livesOrTime));
             return -1;
         }
-        if (currentSeason instanceof DoubleLife doubleLife) {
-            ServerPlayer soulmate = doubleLife.getSoulmate(self);
-            if (soulmate != null) {
-                if (!doubleLife.SOULMATES_SHARE_LIVES) {
-                    return -1;
-                }
-                if (soulmate.equals(target)) {
-                    source.sendFailure(TextUtils.format("You cannot give {} to your soulmate", livesOrTime));
-                    return -1;
-                }
-                boolean success = doubleLifeGiveLife(source, self, soulmate, target);
-                if (!success) {
-                    return -1;
-                }
-            }
-        }
+				
+		if (currentSeason instanceof DoubleLife doubleLife) {
+			ServerPlayer soulmate = doubleLife.getSoulmate(self);
+
+			if (soulmate != null && doubleLife.SOULMATES_SHARE_LIVES) {
+
+				if (soulmate.equals(target)) {
+					source.sendFailure(TextUtils.format("You cannot give {} to your soulmate", livesOrTime));
+					return -1;
+				}
+
+				boolean success = doubleLifeGiveLife(source, self, soulmate, target);
+				if (!success) return -1;
+			}
+		}
 
         Component currentPlayerName = self.getDisplayName();
         self.ls$addLives(-giveAmount);
         livesManager.addToLivesNoUpdate(target, giveAmount);
         AnimationUtils.playTotemAnimation(self);
         TaskScheduler.scheduleTask(Time.seconds(2), () -> livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive));
-
-        if (currentSeason instanceof DoubleLife doubleLife) {
-            doubleLife.syncSoulboundLives(self);
-        }
+		
+		if (currentSeason instanceof DoubleLife doubleLife && doubleLife.SOULMATES_SHARE_LIVES) {
+			doubleLife.syncSoulboundLives(self);
+		}
 
         return 1;
     }

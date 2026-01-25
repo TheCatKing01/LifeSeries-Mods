@@ -469,18 +469,23 @@ public class DoubleLife extends Season {
 
         TaskScheduler.scheduleTask(1,() -> syncPlayers(player, soulmate));
     }
+	
+	@Override
+	public void onPlayerDeath(ServerPlayer player, DamageSource source) {
+		if (player == null) return;
 
-    @Override
-    public void onPlayerDeath(ServerPlayer player, DamageSource source) {
-        super.onPlayerDeath(player, source);
+		Integer beforeLives = player.ls$getLives();
 
-        if (player == null) return;
-		
+		super.onPlayerDeath(player, source);
+
 		if (!SOULMATES_SHARE_LIVES && source.is(DoubleLife.SOULMATE_DAMAGE)) {
-			Integer lives = player.ls$getLives();
-			if (lives != null) {
-				player.ls$setLives(Math.max(lives - 1, 0));
+			Integer afterLives = player.ls$getLives();
+
+			if (beforeLives != null && afterLives != null && Objects.equals(beforeLives, afterLives)) {
+				player.ls$setLives(Math.max(afterLives - 1, 0));
 			}
+
+			TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
 			return;
 		}
 		
