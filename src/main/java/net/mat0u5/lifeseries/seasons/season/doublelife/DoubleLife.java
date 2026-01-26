@@ -489,17 +489,30 @@ public class DoubleLife extends Season {
 
         UUID playerId = player.getUUID();
         Integer beforeLives = player.ls$getLives();
+		
+		if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
+			boolean shouldConsume = pendingSoulmateLifeLoss.remove(playerId);
 
-        if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
-            super.onPlayerDeath(player, source);
+			Integer before = player.ls$getLives();
+			Integer target = null;
 
-            if (pendingSoulmateLifeLoss.remove(playerId)) {
-                ensureLifeConsumed(player, beforeLives);
-            }
+			if (shouldConsume && before != null) {
+				target = Math.max(before - 1, 0);
+				player.ls$setLives(target);
+			}
 
-            TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
-            return;
-        }
+			super.onPlayerDeath(player, source);
+
+			if (shouldConsume && target != null) {
+				Integer after = player.ls$getLives();
+				if (after != null && !Objects.equals(after, target)) {
+					player.ls$setLives(target);
+				}
+			}
+
+			TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
+			return;
+		}
 
         super.onPlayerDeath(player, source);
 
@@ -527,8 +540,6 @@ public class DoubleLife extends Season {
             //? if <=1.21 {
             DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
                     .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
-            soulmate.setLastHurtByMob(player);
-            soulmate.setLastHurtByPlayer(player);
             soulmate.hurt(damageSource, 1000);
             //?} else {
             /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
