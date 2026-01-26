@@ -105,7 +105,7 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 	
 	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_LIVES = new ConfigFileEntry<>(
-            "soulmates_share_lives", true, "{season.sharelives}",
+            "soulmates_share_lives", true, "season",
             "Soulmates Share Lives", "Controls whether soulmates share the same life count."
     );
 	

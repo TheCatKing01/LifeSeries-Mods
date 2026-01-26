@@ -773,7 +773,7 @@ public class DoubleLife extends Season {
     }
 	
 	public void handleSoulmateSplitOnRed(ServerPlayer player, Integer livesBefore, int livesAfter) {
-        if (!SPLIT_SOULMATES_WEHN_RED) return;
+        if (!SPLIT_SOULMATES_WHEN_RED) return;
         if (player == null) return;
         if (livesBefore == null) return;
         if (livesBefore <= 1 || livesAfter != 1) return;
