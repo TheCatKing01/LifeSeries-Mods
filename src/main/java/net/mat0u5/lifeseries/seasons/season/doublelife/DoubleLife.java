@@ -46,6 +46,7 @@ public class DoubleLife extends Season {
     public boolean SOULBOUND_FOOD = false;
     public boolean SOULBOUND_EFFECTS = false;
     public boolean SOULBOUND_INVENTORIES = false;
+	public boolean SPLIT_SOULMATES_WHEN_RED = false;
     public static boolean SOULBOUND_BOOGEYMAN = false;
     public boolean BREAKUP_LAST_PAIR_STANDING = false;
     public boolean DISABLE_START_TELEPORT = false;
@@ -147,6 +148,7 @@ public class DoubleLife extends Season {
         SOULBOUND_EFFECTS = DoubleLifeConfig.SOULBOUND_EFFECTS.get(seasonConfig);
         SOULBOUND_INVENTORIES = DoubleLifeConfig.SOULBOUND_INVENTORIES.get(seasonConfig);
         BREAKUP_LAST_PAIR_STANDING = DoubleLifeConfig.BREAKUP_LAST_PAIR_STANDING.get(seasonConfig);
+		SPLIT_SOULMATES_WHEN_RED = DoubleLifeConfig.SPLIT_SOULMATES_WHEN_RED.get(seasonConfig);
         DISABLE_START_TELEPORT = DoubleLifeConfig.DISABLE_START_TELEPORT.get(seasonConfig);
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
@@ -768,6 +770,35 @@ public class DoubleLife extends Season {
                 soulmate.addEffect(player.getEffect(effect.getEffect()));
             }
         }
+    }
+	
+	public void handleSoulmateSplitOnRed(ServerPlayer player, Integer livesBefore, int livesAfter) {
+        if (!SPLIT_SOULMATES_WEHN_RED) return;
+        if (player == null) return;
+        if (livesBefore == null) return;
+        if (livesBefore <= 1 || livesAfter != 1) return;
+        if (!hasSoulmate(player)) return;
+
+        ServerPlayer soulmate = getSoulmate(player);
+        sendSoulmateSplitMessage(player,
+                "You have become a §cred§r name, so your soulbound with your soulmate has been broken.");
+        if (soulmate != null) {
+            if (soulmate.ls$isOnLastLife(false)) {
+                sendSoulmateSplitMessage(soulmate,
+                        "You have become a §cred§r name, so your soulbound with your soulmate has been broken.");
+            }
+            else {
+                sendSoulmateSplitMessage(soulmate,
+                        "Your soulmate has become a §cred§r name, so your soulbound with them has been broken.");
+            }
+        }
+        resetSoulmate(player);
+    }
+
+    private void sendSoulmateSplitMessage(ServerPlayer target, String template) {
+        if (target == null) return;
+        if (template == null || template.isBlank()) return;
+        target.sendSystemMessage(Component.nullToEmpty(template));
     }
 
     public void checkForEnding() {

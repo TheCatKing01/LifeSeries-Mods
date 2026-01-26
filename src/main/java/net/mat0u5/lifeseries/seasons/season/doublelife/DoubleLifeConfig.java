@@ -108,6 +108,11 @@ public class DoubleLifeConfig extends ConfigManager {
             "soulmates_share_lives", true, "{season.sharelives}",
             "Soulmates Share Lives", "Controls whether soulmates share the same life count."
     );
+	
+	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
+            "split_soulmates_when_red", false, "season.soulbind",
+            "Breakup Soulmates when Red", "Controls whether soulmates are broken up when one of them become red"
+    );
 
 
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
@@ -122,9 +127,10 @@ public class DoubleLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
-				SOULMATES_SHARE_LIVES
-                ,GROUP_SOULBIND //Group
+                GROUP_SOULBIND //Group
+				,SOULMATES_SHARE_LIVES
 				,ANNOUNCE_SOULMATES
+				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
 

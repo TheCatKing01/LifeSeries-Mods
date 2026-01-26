@@ -329,6 +329,9 @@ public class LivesManager {
         if (player == null || isWatcher(player)) return;
         Integer livesBefore = getPlayerLives(player);
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
+        if (currentSeason instanceof DoubleLife doubleLife) {
+            doubleLife.handleSoulmateSplitOnRed(player, livesBefore, lives);
+        }
         if (lives <= 0) {
             playerLostAllLives(player, livesBefore);
         }
