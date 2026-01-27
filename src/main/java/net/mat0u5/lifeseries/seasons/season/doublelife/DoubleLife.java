@@ -843,7 +843,7 @@ public class DoubleLife extends Season {
     }
 	
     public void handleSoulmateSplitOnRed(ServerPlayer player, Integer livesBefore, int livesAfter) {
-        if (!SPLIT_SOULMATES_ON_RED) return;
+        if (!SPLIT_SOULMATES_WHEN_RED) return;
         if (player == null) return;
         if (livesBefore == null) return;
         if (suppressSplitOnRedDuringDeath.contains(player.getUUID())) return;
@@ -867,7 +867,7 @@ public class DoubleLife extends Season {
     }
 
     private void handleSoulmateSplitOnRedAfterDeath(ServerPlayer player, Integer livesBefore) {
-        if (!SPLIT_SOULMATES_ON_RED) return;
+        if (!SPLIT_SOULMATES_WHEN_RED) return;
         if (player == null) return;
         if (livesBefore == null) return;
         Integer livesAfter = player.ls$getLives();
