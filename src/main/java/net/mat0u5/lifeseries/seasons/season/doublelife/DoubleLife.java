@@ -335,28 +335,26 @@ public class DoubleLife extends Season {
             PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("Your soulmate is...").withStyle(ChatFormatting.GREEN),10,50,20);
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
-        TaskScheduler.scheduleTask(165, () -> {
-            chooseRandomSoulmates();
-			Map<UUID, Integer> assignedLives = assignRandomLives(playersToRoll);
-            for (ServerPlayer player : playersToRoll) {
-                Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
-                if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
-                    ServerPlayer soulmate = getSoulmate(player);
-                    if (soulmate != null) {
-                        text = TextUtils.format("{}", soulmate);
-                    }
-                }
-				if (RANDOM_LIVES_ENABLED && assignedLives.containsKey(player.getUUID())) {
-                    Component subtitle = formatSoulmateLivesSubtitle(assignedLives.get(player.getUUID()));
-                    PlayerUtils.sendTitleWithSubtitle(player, text, subtitle, 20, 60, 20);
-                }
-                else {
-                    PlayerUtils.sendTitle(player, text,20,60,20);
-                }
-                PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
-            }
+		TaskScheduler.scheduleTask(165, () -> {
+			chooseRandomSoulmates();
+
 			assignRandomLives(playersToRoll);
-        });
+
+			for (ServerPlayer player : playersToRoll) {
+				Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
+				if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
+					ServerPlayer soulmate = getSoulmate(player);
+					if (soulmate != null) {
+						text = TextUtils.format("{}", soulmate);
+					}
+				}
+
+				PlayerUtils.sendTitle(player, text, 20, 60, 20);
+
+				PlayerUtils.playSoundToPlayer(player,
+						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
+			}
+		});
     }
 	
     private void assignRandomLives(List<ServerPlayer> players) {
@@ -1039,4 +1037,9 @@ public class DoubleLife extends Season {
     public void preventSoulmates(ServerPlayer player, ServerPlayer soulmate) {
         soulmatesPrevent.put(player.getUUID(), soulmate.getUUID());
     }
+	
+	private Component formatSoulmateLivesSubtitle(Integer lives) {
+		int safeLives = (lives == null) ? 0 : lives;
+		return Component.nullToEmpty("§aLives: §f" + safeLives);
+	}
 }
