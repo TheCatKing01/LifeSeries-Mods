@@ -113,7 +113,19 @@ public class DoubleLifeConfig extends ConfigManager {
             "split_soulmates_when_red", false, "season",
             "Breakup Soulmates When Red", "Controls whether soulmates are broken up when one of them become red"
     );
-
+	
+	    public static final ConfigFileEntry<Boolean> RANDOM_LIVES_ENABLED = new ConfigFileEntry<>(
+"random_lives_enabled", false, "{season.lives}",
+            "Roll Random Lives", "Controls whether random lives are assigned after the soulmate roll."
+    );
+    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
+            "random_lives_min", 2, "season.lives",
+            "Random Lives Min", "The minimum lives you can get from the random roll."
+    );
+    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MAX = new ConfigFileEntry<>(
+            "random_lives_max", 6, "season.lives",
+            "Random Lives Max", "The maximum lives you can get from the random roll."
+    );
 
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
             "group_soulbind", null, ConfigTypes.TEXT, "{season.soulbind}",
@@ -133,6 +145,9 @@ public class DoubleLifeConfig extends ConfigManager {
 				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
+				,RANDOM_LIVES_ENABLED
+                ,RANDOM_LIVES_MIN
+                ,RANDOM_LIVES_MAX
 
                 ,SOULBOUND_FOOD
                 ,SOULBOUND_EFFECTS

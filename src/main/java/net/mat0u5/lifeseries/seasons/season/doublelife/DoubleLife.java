@@ -53,6 +53,9 @@ public class DoubleLife extends Season {
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
     public boolean SOULMATES_SHARE_LIVES = true;
+	public boolean RANDOM_LIVES_ENABLED = false;
+    public int RANDOM_LIVES_MIN = 2;
+    public int RANDOM_LIVES_MAX = 6;
 
     private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
     private final Set<UUID> processingLinkedDeath = new HashSet<>();
@@ -153,6 +156,11 @@ public class DoubleLife extends Season {
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
         SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
+		RANDOM_LIVES_ENABLED = DoubleLifeConfig.RANDOM_LIVES_ENABLED.get(seasonConfig);
+        int minLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MIN.get(seasonConfig);
+        int maxLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MAX.get(seasonConfig);
+        RANDOM_LIVES_MIN = Math.min(minLivesConfig, maxLivesConfig);
+        RANDOM_LIVES_MAX = Math.max(minLivesConfig, maxLivesConfig);
         syncAllPlayers();
     }
 
@@ -322,6 +330,7 @@ public class DoubleLife extends Season {
         });
         TaskScheduler.scheduleTask(165, () -> {
             chooseRandomSoulmates();
+			Map<UUID, Integer> assignedLives = assignRandomLives(playersToRoll);
             for (ServerPlayer player : playersToRoll) {
                 Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
                 if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
@@ -330,10 +339,56 @@ public class DoubleLife extends Season {
                         text = TextUtils.format("{}", soulmate);
                     }
                 }
-                PlayerUtils.sendTitle(player, text,20,60,20);
+				if (RANDOM_LIVES_ENABLED && assignedLives.containsKey(player.getUUID())) {
+                    Component subtitle = formatSoulmateLivesSubtitle(assignedLives.get(player.getUUID()));
+                    PlayerUtils.sendTitleWithSubtitle(player, text, subtitle, 20, 60, 20);
+                }
+                else {
+                    PlayerUtils.sendTitle(player, text,20,60,20);
+                }
                 PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
         });
+    }
+	
+	    private Map<UUID, Integer> assignRandomLives(List<ServerPlayer> players) {
+        if (!RANDOM_LIVES_ENABLED) return Collections.emptyMap();
+        Map<UUID, Integer> assignedLives = new HashMap<>();
+        Set<UUID> processed = new HashSet<>();
+        for (ServerPlayer player : players) {
+            if (player == null) continue;
+            UUID playerId = player.getUUID();
+            if (processed.contains(playerId)) continue;
+            int lives = getRandomLife();
+            if (SOULMATES_SHARE_LIVES) {
+                setRandomLivesForPlayer(player, lives, assignedLives, processed);
+                ServerPlayer soulmate = getSoulmate(player);
+                if (soulmate != null) {
+                    setRandomLivesForPlayer(soulmate, lives, assignedLives, processed);
+                }
+            }
+            else {
+                setRandomLivesForPlayer(player, lives, assignedLives, processed);
+            }
+        }
+        return assignedLives;
+    }
+
+    private void setRandomLivesForPlayer(ServerPlayer player, int lives, Map<UUID, Integer> assignedLives, Set<UUID> processed) {
+        if (player == null) return;
+        livesManager.setPlayerLives(player, lives);
+        SessionTranscript.assignRandomLives(player, lives);
+        assignedLives.put(player.getUUID(), lives);
+        processed.add(player.getUUID());
+    }
+
+    private int getRandomLife() {
+        return rnd.nextInt(RANDOM_LIVES_MIN, RANDOM_LIVES_MAX + 1);
+    }
+
+    private Component formatSoulmateLivesSubtitle(int lives) {
+        String bothPrefix = SOULMATES_SHARE_LIVES ? "both " : "";
+        return TextUtils.format("§7and you {}have {} {}.", bothPrefix, livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives));
     }
 
     public List<ServerPlayer> getNonAssignedPlayers() {
@@ -491,30 +546,39 @@ public class DoubleLife extends Season {
 
         UUID playerId = player.getUUID();
         Integer beforeLives = player.ls$getLives();
+		suppressSplitOnRedDuringDeath.add(playerId);
 
         if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
-            super.onPlayerDeath(player, source);
-
-            if (pendingSoulmateLifeLoss.remove(playerId)) {
-                ensureLifeConsumed(player, beforeLives);
+			try {
+				super.onPlayerDeath(player, source);
+			
+				if (pendingSoulmateLifeLoss.remove(playerId)) {
+					ensureLifeConsumed(player, beforeLives);
+				}
+			
+				TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
+					return;
+            } finally {
+                suppressSplitOnRedDuringDeath.remove(playerId);
             }
 
             TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
             return;
         }
 
-        super.onPlayerDeath(player, source);
+		try {
+            super.onPlayerDeath(player, source);
 
-        if (!hasSoulmate(player)) return;
-        if (!isSoulmateOnline(player)) return;
+			if (!hasSoulmate(player)) return;
+			if (!isSoulmateOnline(player)) return;
 
-        ServerPlayer soulmate = getSoulmate(player);
-        if (soulmate == null) return;
-        if (!soulmate.isAlive()) return;
+			ServerPlayer soulmate = getSoulmate(player);
+			if (soulmate == null) return;
+			if (!soulmate.isAlive()) return;
 
-        if (!processingLinkedDeath.add(playerId)) return;
+			if (!processingLinkedDeath.add(playerId)) return;
 
-        try {
+			try {
             //? if <= 1.21.9 {
             boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
             //?} else {
@@ -559,7 +623,13 @@ public class DoubleLife extends Season {
                 }
 
                 checkForEnding();
+				
+				
             });
+            TaskScheduler.scheduleTask(1, () -> handleSoulmateSplitOnRedAfterDeath(player, beforeLives));
+            } finally {
+                processingLinkedDeath.remove(playerId);
+            }
 
         } finally {
             processingLinkedDeath.remove(playerId);
@@ -772,24 +842,50 @@ public class DoubleLife extends Season {
         }
     }
 	
-	public void handleSoulmateSplitOnRed(ServerPlayer player, Integer livesBefore, int livesAfter) {
-        if (!SPLIT_SOULMATES_WHEN_RED) return;
+    public void handleSoulmateSplitOnRed(ServerPlayer player, Integer livesBefore, int livesAfter) {
+        if (!SPLIT_SOULMATES_ON_RED) return;
         if (player == null) return;
         if (livesBefore == null) return;
+        if (suppressSplitOnRedDuringDeath.contains(player.getUUID())) return;
         if (livesBefore <= 1 || livesAfter != 1) return;
         if (!hasSoulmate(player)) return;
 
         ServerPlayer soulmate = getSoulmate(player);
         sendSoulmateSplitMessage(player,
-                "§7You have become a §cred§7 name, so your soulbound with your soulmate has been broken.");
+                "§cYou have become red, so your soulbound with your soulmate has been broken.");
         if (soulmate != null) {
             if (soulmate.ls$isOnLastLife(false)) {
                 sendSoulmateSplitMessage(soulmate,
-                        "§7You have become a §cred§7 name, so your soulbound with your soulmate has been broken.");
+                        "§cYou have become red, so your soulbound with your soulmate has been broken.");
             }
             else {
                 sendSoulmateSplitMessage(soulmate,
-                        "§7Your soulmate has become a §cred§7 name, so your soulbound with them has been broken.");
+                        "§cYour soulmate has become red, so your soulbound with them has been broken.");
+            }
+        }
+        resetSoulmate(player);
+    }
+
+    private void handleSoulmateSplitOnRedAfterDeath(ServerPlayer player, Integer livesBefore) {
+        if (!SPLIT_SOULMATES_ON_RED) return;
+        if (player == null) return;
+        if (livesBefore == null) return;
+        Integer livesAfter = player.ls$getLives();
+        if (livesAfter == null) return;
+        if (livesBefore <= 1 || livesAfter != 1) return;
+        if (!hasSoulmate(player)) return;
+
+        ServerPlayer soulmate = getSoulmate(player);
+        sendSoulmateSplitMessage(player,
+                "§cYou have become red, so your soulbound with your soulmate has been broken.");
+        if (soulmate != null) {
+            if (soulmate.ls$isOnLastLife(false)) {
+                sendSoulmateSplitMessage(soulmate,
+                        "§cYou have become red, so your soulbound with your soulmate has been broken.");
+            }
+            else {
+                sendSoulmateSplitMessage(soulmate,
+                        "§cYour soulmate has become red, so your soulbound with them has been broken.");
             }
         }
         resetSoulmate(player);
