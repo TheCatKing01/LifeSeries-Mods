@@ -59,6 +59,7 @@ public class DoubleLife extends Season {
 
     private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
     private final Set<UUID> processingLinkedDeath = new HashSet<>();
+	private final Set<UUID> suppressSplitOnRedDuringDeath = new HashSet<>();
 
     public SessionAction actionChooseSoulmates = new SessionAction(Time.minutes(1), "Assign Soulmates if necessary") {
         @Override
