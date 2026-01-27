@@ -338,8 +338,6 @@ public class DoubleLife extends Season {
 		TaskScheduler.scheduleTask(165, () -> {
 			chooseRandomSoulmates();
 
-			assignRandomLives(playersToRoll);
-
 			for (ServerPlayer player : playersToRoll) {
 				Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
 				if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
