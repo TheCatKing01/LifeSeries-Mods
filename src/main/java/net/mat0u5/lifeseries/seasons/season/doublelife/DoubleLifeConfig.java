@@ -110,8 +110,8 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 	
 	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
-            "split_soulmates_when_red", false, "season.soulbind",
-            "Breakup Soulmates when Red", "Controls whether soulmates are broken up when one of them become red"
+            "split_soulmates_when_red", false, "season",
+            "Breakup Soulmates When Red", "Controls whether soulmates are broken up when one of them become red"
     );
 
 

@@ -781,15 +781,15 @@ public class DoubleLife extends Season {
 
         ServerPlayer soulmate = getSoulmate(player);
         sendSoulmateSplitMessage(player,
-                "You have become a §cred§r name, so your soulbound with your soulmate has been broken.");
+                "§7You have become a §cred§7 name, so your soulbound with your soulmate has been broken.");
         if (soulmate != null) {
             if (soulmate.ls$isOnLastLife(false)) {
                 sendSoulmateSplitMessage(soulmate,
-                        "You have become a §cred§r name, so your soulbound with your soulmate has been broken.");
+                        "§7You have become a §cred§7 name, so your soulbound with your soulmate has been broken.");
             }
             else {
                 sendSoulmateSplitMessage(soulmate,
-                        "Your soulmate has become a §cred§r name, so your soulbound with them has been broken.");
+                        "§7Your soulmate has become a §cred§7 name, so your soulbound with them has been broken.");
             }
         }
         resetSoulmate(player);
