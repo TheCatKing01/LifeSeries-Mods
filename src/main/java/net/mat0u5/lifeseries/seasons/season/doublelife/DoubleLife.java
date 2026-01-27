@@ -504,7 +504,7 @@ public class DoubleLife extends Season {
     public List<ServerPlayer> getNonAssignedPlayers() {
         List<ServerPlayer> playersToRoll = new ArrayList<>();
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
-            if (player.ls$isDead()) continue;
+			if (player.ls$isDead() && !(RANDOM_LIVES_ENABLED && !player.ls$hasAssignedLives())) continue;
             if (hasSoulmate(player)) continue;
             playersToRoll.add(player);
         }
