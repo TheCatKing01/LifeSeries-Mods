@@ -354,10 +354,11 @@ public class DoubleLife extends Season {
 				PlayerUtils.playSoundToPlayer(player,
 						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
 			}
+			TaskScheduler.scheduleTask(70, () -> assignRandomLives(playersToRoll));
 		});
     }
 	
-    private void assignRandomLives(List<ServerPlayer> players) {
+	private void assignRandomLives(List<ServerPlayer> players) {
         if (!RANDOM_LIVES_ENABLED) return;
         List<ServerPlayer> rollTargets = getPlayersWithoutLives(players);
         if (rollTargets.isEmpty()) return;
