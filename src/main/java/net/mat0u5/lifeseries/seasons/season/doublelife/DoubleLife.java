@@ -549,23 +549,20 @@ public class DoubleLife extends Season {
         Integer beforeLives = player.ls$getLives();
 		suppressSplitOnRedDuringDeath.add(playerId);
 
-        if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
+		if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
 			try {
 				super.onPlayerDeath(player, source);
-			
+
 				if (pendingSoulmateLifeLoss.remove(playerId)) {
 					ensureLifeConsumed(player, beforeLives);
 				}
-			
-				TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
-					return;
-            } finally {
-                suppressSplitOnRedDuringDeath.remove(playerId);
-            }
 
-            TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
-            return;
-        }
+				TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
+				return;
+			} finally {
+				suppressSplitOnRedDuringDeath.remove(playerId);
+			}
+		}
 
 		try {
             super.onPlayerDeath(player, source);
