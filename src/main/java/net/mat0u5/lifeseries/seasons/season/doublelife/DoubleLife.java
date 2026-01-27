@@ -164,6 +164,12 @@ public class DoubleLife extends Season {
         RANDOM_LIVES_MAX = Math.max(minLivesConfig, maxLivesConfig);
         syncAllPlayers();
     }
+	
+	@Override
+    public void assignDefaultLives(ServerPlayer player) {
+        if (RANDOM_LIVES_ENABLED) return;
+        super.assignDefaultLives(player);
+    }
 
     public void loadSoulmates() {
         soulmates = getAllSoulmates();
@@ -349,47 +355,152 @@ public class DoubleLife extends Season {
                 }
                 PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
+			assignRandomLives(playersToRoll);
         });
     }
 	
-	    private Map<UUID, Integer> assignRandomLives(List<ServerPlayer> players) {
-        if (!RANDOM_LIVES_ENABLED) return Collections.emptyMap();
-        Map<UUID, Integer> assignedLives = new HashMap<>();
-        Set<UUID> processed = new HashSet<>();
-        for (ServerPlayer player : players) {
-            if (player == null) continue;
-            UUID playerId = player.getUUID();
-            if (processed.contains(playerId)) continue;
-            int lives = getRandomLife();
-            if (SOULMATES_SHARE_LIVES) {
-                setRandomLivesForPlayer(player, lives, assignedLives, processed);
-                ServerPlayer soulmate = getSoulmate(player);
-                if (soulmate != null) {
-                    setRandomLivesForPlayer(soulmate, lives, assignedLives, processed);
-                }
-            }
-            else {
-                setRandomLivesForPlayer(player, lives, assignedLives, processed);
-            }
-        }
-        return assignedLives;
+    private void assignRandomLives(List<ServerPlayer> players) {
+        if (!RANDOM_LIVES_ENABLED) return;
+        List<ServerPlayer> rollTargets = getPlayersWithoutLives(players);
+        if (rollTargets.isEmpty()) return;
+        String bothPrefix = SOULMATES_SHARE_LIVES ? " both" : "";
+        PlayerUtils.sendTitleToPlayers(rollTargets, Component.literal("And you" + bothPrefix + " will have...").withStyle(ChatFormatting.GRAY), 10, 40, 10);
+        TaskScheduler.scheduleTask(Time.seconds(3), () -> rollRandomLives(rollTargets));
     }
 
-    private void setRandomLivesForPlayer(ServerPlayer player, int lives, Map<UUID, Integer> assignedLives, Set<UUID> processed) {
+    private void rollRandomLives(List<ServerPlayer> players) {
+        int delay = showRandomNumbers(players) + 20;
+        Map<ServerPlayer, Integer> lives = buildRandomLives(players);
+
+        TaskScheduler.scheduleTask(delay, () -> {
+            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
+                Integer livesNum = playerEntry.getValue();
+                ServerPlayer player = playerEntry.getKey();
+                Component textLives = livesManager.getFormattedLives(livesNum);
+                PlayerUtils.sendTitle(player, textLives, 0, 25, 0);
+            }
+            PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+        });
+
+        delay += 20;
+
+        TaskScheduler.scheduleTask(delay, () -> {
+            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
+                Integer livesNum = playerEntry.getValue();
+                ServerPlayer player = playerEntry.getKey();
+                Component textLives = TextUtils.format("{}§a {}.", livesManager.getFormattedLives(livesNum), TextUtils.pluralize("life", "lives", livesNum));
+                PlayerUtils.sendTitle(player, textLives, 0, 60, 20);
+                SessionTranscript.assignRandomLives(player, livesNum);
+                livesManager.setPlayerLives(player, livesNum);
+            }
+            PlayerUtils.playSoundToPlayers(lives.keySet(), SoundEvents.END_PORTAL_SPAWN);
+            reloadAllPlayerTeams();
+        });
+    }
+
+    private int showRandomNumbers(List<ServerPlayer> players) {
+        int currentDelay = 0;
+        int lastLives = -1;
+        for (int i = 0; i < 80; i++) {
+            if (i >= 75) currentDelay += 20;
+            else if (i >= 65) currentDelay += 8;
+            else if (i >= 50) currentDelay += 4;
+            else if (i >= 30) currentDelay += 2;
+            else currentDelay += 1;
+
+            int lives = getRandomLife(lastLives);
+            lastLives = lives;
+
+            TaskScheduler.scheduleTask(currentDelay, () -> {
+                PlayerUtils.sendTitleToPlayers(players, livesManager.getFormattedLives(lives), 0, 25, 0);
+                PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+            });
+        }
+
+        return currentDelay;
+    }
+
+    private Map<ServerPlayer, Integer> buildRandomLives(List<ServerPlayer> players) {
+        Map<ServerPlayer, Integer> lives = new HashMap<>();
+        List<ServerPlayer> rollTargets = new ArrayList<>();
+        Set<UUID> processed = new HashSet<>();
+
+        for (ServerPlayer player : players) {
+            if (player == null) continue;
+            if (player.ls$hasAssignedLives()) continue;
+            if (SOULMATES_SHARE_LIVES) {
+                ServerPlayer soulmate = getSoulmate(player);
+                if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
+            }
+            UUID playerId = player.getUUID();
+            if (processed.contains(playerId)) continue;
+            processed.add(playerId);
+            if (SOULMATES_SHARE_LIVES) {
+                ServerPlayer soulmate = getSoulmate(player);
+                if (soulmate != null) {
+                    processed.add(soulmate.getUUID());
+                }
+            }
+            rollTargets.add(player);
+        }
+
+        int totalSize = rollTargets.size();
+        int chosenNotRandomly = RANDOM_LIVES_MIN;
+        for (ServerPlayer player : rollTargets) {
+            int diff = RANDOM_LIVES_MAX - RANDOM_LIVES_MIN + 2;
+            int assignedLives = getRandomLife();
+            if (chosenNotRandomly <= RANDOM_LIVES_MAX && totalSize > diff) {
+                assignedLives = chosenNotRandomly;
+                chosenNotRandomly++;
+            }
+
+            setLivesForPlayer(player, assignedLives, lives);
+            if (SOULMATES_SHARE_LIVES) {
+                ServerPlayer soulmate = getSoulmate(player);
+                if (soulmate != null) {
+                    setLivesForPlayer(soulmate, assignedLives, lives);
+                }
+            }
+        }
+
+        return lives;
+    }
+
+    private List<ServerPlayer> getPlayersWithoutLives(List<ServerPlayer> players) {
+        List<ServerPlayer> result = new ArrayList<>();
+        for (ServerPlayer player : players) {
+            if (player == null) continue;
+            if (player.ls$hasAssignedLives()) continue;
+            if (SOULMATES_SHARE_LIVES) {
+                ServerPlayer soulmate = getSoulmate(player);
+                if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
+            }
+            result.add(player);
+        }
+        return result;
+    }
+
+    private void setLivesForPlayer(ServerPlayer player, int lives, Map<ServerPlayer, Integer> livesMap) {
         if (player == null) return;
-        livesManager.setPlayerLives(player, lives);
-        SessionTranscript.assignRandomLives(player, lives);
-        assignedLives.put(player.getUUID(), lives);
-        processed.add(player.getUUID());
+        livesMap.put(player, lives);
     }
 
     private int getRandomLife() {
         return rnd.nextInt(RANDOM_LIVES_MIN, RANDOM_LIVES_MAX + 1);
     }
 
-    private Component formatSoulmateLivesSubtitle(int lives) {
-        String bothPrefix = SOULMATES_SHARE_LIVES ? "both " : "";
-        return TextUtils.format("§7and you {}have {} {}.", bothPrefix, livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives));
+    private int getRandomLife(int except) {
+        if (RANDOM_LIVES_MIN != RANDOM_LIVES_MAX) {
+            int tries = 0;
+            while (tries < 100) {
+                tries++;
+                int lives = getRandomLife();
+                if (lives != except) {
+                    return lives;
+                }
+            }
+        }
+        return getRandomLife();
     }
 
     public List<ServerPlayer> getNonAssignedPlayers() {

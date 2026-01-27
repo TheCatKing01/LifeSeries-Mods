@@ -140,20 +140,21 @@ public class DoubleLifeConfig extends ConfigManager {
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
                 GROUP_SOULBIND //Group
+				,RANDOM_LIVES_ENABLED
 				,SOULMATES_SHARE_LIVES
 				,ANNOUNCE_SOULMATES
 				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
-				,RANDOM_LIVES_ENABLED
-                ,RANDOM_LIVES_MIN
-                ,RANDOM_LIVES_MAX
 
                 ,SOULBOUND_FOOD
                 ,SOULBOUND_EFFECTS
                 ,SOULBOUND_INVENTORIES
                 , SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED
+				
+				,RANDOM_LIVES_MIN
+                ,RANDOM_LIVES_MAX
 				
 				
         ));
