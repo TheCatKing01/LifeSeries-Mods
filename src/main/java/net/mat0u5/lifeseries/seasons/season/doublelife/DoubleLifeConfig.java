@@ -105,8 +105,13 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 	
 	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_LIVES = new ConfigFileEntry<>(
-            "soulmates_share_lives", true, "season",
-            "Soulmates Share Lives", "Controls whether soulmates share the same life count."
+			"soulmates_share_lives", true, "{season.lives}",
+            "Soulmate Share Lives", "Controls whether soulmates share the same life count."
+    );
+	
+	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_ROLL = new ConfigFileEntry<>(
+			"soulmates_share_roll", true, "season.lives",
+            "Share Lives Rolled", "Controls whether soulmates are rolled the same amount of lives (only works when share lives is false)."
     );
 	
 	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
@@ -115,7 +120,7 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 	
 	    public static final ConfigFileEntry<Boolean> RANDOM_LIVES_ENABLED = new ConfigFileEntry<>(
-"random_lives_enabled", false, "{season.lives}",
+			"random_lives_enabled", false, "{season.lives}",
             "Roll Random Lives", "Controls whether random lives are assigned after the soulmate roll."
     );
     public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
@@ -139,9 +144,9 @@ public class DoubleLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
-                GROUP_SOULBIND //Group
+				SOULMATES_SHARE_LIVES
+                ,GROUP_SOULBIND //Group
 				,RANDOM_LIVES_ENABLED
-				,SOULMATES_SHARE_LIVES
 				,ANNOUNCE_SOULMATES
 				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
@@ -153,9 +158,10 @@ public class DoubleLifeConfig extends ConfigManager {
                 , SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED
 				
-				,RANDOM_LIVES_MIN
-                ,RANDOM_LIVES_MAX
+				,SOULMATES_SHARE_ROLL
 				
+				,RANDOM_LIVES_MIN
+                ,RANDOM_LIVES_MAX				
 				
         ));
         //? if >= 1.21.6 {

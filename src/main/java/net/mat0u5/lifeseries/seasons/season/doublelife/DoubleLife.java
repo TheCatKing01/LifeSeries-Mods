@@ -53,6 +53,7 @@ public class DoubleLife extends Season {
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
     public boolean SOULMATES_SHARE_LIVES = true;
+    public boolean SOULMATES_SHARE_ROLL = true;
 	public boolean RANDOM_LIVES_ENABLED = false;
     public int RANDOM_LIVES_MIN = 2;
     public int RANDOM_LIVES_MAX = 6;
@@ -157,6 +158,7 @@ public class DoubleLife extends Season {
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
         SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
+	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
 		RANDOM_LIVES_ENABLED = DoubleLifeConfig.RANDOM_LIVES_ENABLED.get(seasonConfig);
         int minLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MIN.get(seasonConfig);
         int maxLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MAX.get(seasonConfig);
@@ -360,7 +362,7 @@ public class DoubleLife extends Season {
         if (!RANDOM_LIVES_ENABLED) return;
         List<ServerPlayer> rollTargets = getPlayersWithoutLives(players);
         if (rollTargets.isEmpty()) return;
-        String bothPrefix = SOULMATES_SHARE_LIVES ? " both" : "";
+        String bothPrefix = (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) ? " both" : "";
         PlayerUtils.sendTitleToPlayers(rollTargets, Component.literal("And you" + bothPrefix + " will have...").withStyle(ChatFormatting.GRAY), 10, 40, 10);
         TaskScheduler.scheduleTask(Time.seconds(3), () -> rollRandomLives(rollTargets));
     }
@@ -425,14 +427,14 @@ public class DoubleLife extends Season {
         for (ServerPlayer player : players) {
             if (player == null) continue;
             if (player.ls$hasAssignedLives()) continue;
-            if (SOULMATES_SHARE_LIVES) {
+            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
                 ServerPlayer soulmate = getSoulmate(player);
                 if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
             }
             UUID playerId = player.getUUID();
             if (processed.contains(playerId)) continue;
             processed.add(playerId);
-            if (SOULMATES_SHARE_LIVES) {
+            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
                 ServerPlayer soulmate = getSoulmate(player);
                 if (soulmate != null) {
                     processed.add(soulmate.getUUID());
@@ -452,7 +454,7 @@ public class DoubleLife extends Season {
             }
 
             setLivesForPlayer(player, assignedLives, lives);
-            if (SOULMATES_SHARE_LIVES) {
+            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
                 ServerPlayer soulmate = getSoulmate(player);
                 if (soulmate != null) {
                     setLivesForPlayer(soulmate, assignedLives, lives);
@@ -468,7 +470,7 @@ public class DoubleLife extends Season {
         for (ServerPlayer player : players) {
             if (player == null) continue;
             if (player.ls$hasAssignedLives()) continue;
-            if (SOULMATES_SHARE_LIVES) {
+            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
                 ServerPlayer soulmate = getSoulmate(player);
                 if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
             }
