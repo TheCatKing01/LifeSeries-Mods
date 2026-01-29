@@ -167,7 +167,6 @@ public class DoubleLife extends Season {
         syncAllPlayers();
     }
 	
-	@Override
     public void assignDefaultLives(ServerPlayer player) {
         if (RANDOM_LIVES_ENABLED) return;
         super.assignDefaultLives(player);
