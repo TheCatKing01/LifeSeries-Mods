@@ -170,7 +170,7 @@ public class DoubleLife extends Season {
 	@Override
     public void assignDefaultLives(ServerPlayer player) {
         if (RANDOM_LIVES_ENABLED) return;
-        super.assignDefaultLives(player);
+        super.assignLivesForPlayer(player);
     }
 
     public void loadSoulmates() {
@@ -1053,4 +1053,24 @@ public class DoubleLife extends Season {
 	}
 	return eligible;
 	}
+	
+	public void assignLivesForPlayer(ServerPlayer player) {
+		if (player == null) return;
+
+		if (RANDOM_LIVES_ENABLED) {
+			List<ServerPlayer> singlePlayerList = Collections.singletonList(player);
+			assignRandomLives(singlePlayerList);
+		} else {
+			int defaultLives = 3;
+			livesManager.setPlayerLives(player, defaultLives);
+
+			if (SOULMATES_SHARE_LIVES) {
+				ServerPlayer soulmate = getSoulmate(player);
+				if (soulmate != null) {
+					livesManager.setPlayerLives(soulmate, defaultLives);
+				}
+			}
+		}
+	}
+
 }
