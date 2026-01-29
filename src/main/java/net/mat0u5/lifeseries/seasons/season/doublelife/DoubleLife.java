@@ -142,7 +142,7 @@ public class DoubleLife extends Season {
 		}
 
 		if (REROLL_SESSION) {
-			actionRerollSession = new SessionAction(Time.seconds(5), "Reroll Soulmates (Session Start)") {
+			actionRerollSession = new SessionAction(Time.seconds(5), "Roll new soulmates") {
 				@Override
 				public void trigger() {
 					rerollSoulmates(false);
@@ -152,11 +152,7 @@ public class DoubleLife extends Season {
 		}
 
 		if (REROLL_MIDSESSION) {
-			actionRerollMidSession = new SessionAction(
-					Time.minutes(REROLL_TIME),
-					"Reroll Soulmates (Mid Session)",
-					true // repeating
-			) {
+			actionRerollMidSession = new SessionAction(Time.minutes(REROLL_TIME), "Reroll soulmates") {
 				@Override
 				public void trigger() {
 					rerollSoulmates(true);
