@@ -185,13 +185,13 @@ public class DoubleLifeConfig extends ConfigManager {
 				,REROLL_MIDSESSION
 				,REROLL_TIME
 				,REROLL_LIVES
-				.REROLL_UNBOUND
+				,REROLL_UNBOUND
 				,REROLL_REDS
 
                 ,SOULBOUND_FOOD
                 ,SOULBOUND_EFFECTS
                 ,SOULBOUND_INVENTORIES
-                , SOULBOUND_BOOGEYMAN
+                ,SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED
 								
 				,RANDOM_LIVES_MIN
