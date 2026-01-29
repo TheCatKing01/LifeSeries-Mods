@@ -172,8 +172,8 @@ public class DoubleLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
-				GROUP_REROLL //Group
-				,GROUP_SOULBIND //Group
+				GROUP_SOULBIND //Group
+				,GROUP_REROLL //Group
 				,RANDOM_LIVES_ENABLED
 				,SOULMATES_SHARE_LIVES
 				,ANNOUNCE_SOULMATES

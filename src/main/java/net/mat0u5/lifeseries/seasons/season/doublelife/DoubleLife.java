@@ -132,35 +132,24 @@ public class DoubleLife extends Season {
     }
 	
 	@Override
-	public void addSessionActions() {
-		super.addSessionActions();
+    public void addSessionActions() {
+        super.addSessionActions();
+        currentSession.addSessionAction(actionChooseSoulmates);
 
-		currentSession.addSessionAction(actionChooseSoulmates);
+        if (!DISABLE_START_TELEPORT) {
+            currentSession.addSessionAction(actionRandomTP);
+        }
 
-		if (!DISABLE_START_TELEPORT) {
-			currentSession.addSessionAction(actionRandomTP);
-		}
-
-		if (REROLL_SESSION) {
-			actionRerollSession = new SessionAction(Time.seconds(5), "Roll new soulmates") {
-				@Override
-				public void trigger() {
-					rerollSoulmates(false);
-				}
-			};
-			currentSession.addSessionAction(actionRerollSession);
-		}
-
-		if (REROLL_MIDSESSION) {
-			actionRerollMidSession = new SessionAction(Time.minutes(REROLL_TIME), "Reroll soulmates") {
-				@Override
-				public void trigger() {
-					rerollSoulmates(true);
-				}
-			};
-			currentSession.addSessionAction(actionRerollMidSession);
-		}
-	}
+        if (REROLL_MIDSESSION) {
+            actionRerollMidSession = new SessionAction(Time.minutes(REROLL_TIME), "Mid-session Soulmate Reroll") {
+                @Override
+                public void trigger() {
+                    rerollSoulmates(true);
+                }
+            };
+            currentSession.addSessionAction(actionRerollMidSession);
+        }
+    }
 
     @Override
     public boolean isAllowedToAttack(ServerPlayer attacker, ServerPlayer victim, boolean allowSelfDefense) {
@@ -355,44 +344,48 @@ public class DoubleLife extends Season {
     public void resetAllSoulmates() {
         soulmates = new HashMap<>();
         soulmatesOrdered = new HashMap<>();
-        soulmateConfig.resetProperties("-- DO NOT MODIFY --");
+       	   soulmateConfig.resetProperties("-- DO NOT MODIFY --");
     }
+	
+	public void rollSoulmates(boolean midSession) {
+		List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
 
-    public void rollSoulmates() {
-        List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
+        if (playersToRoll.size() < 2) return;
+
+        // Play initial sounds & countdown
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("3").withStyle(ChatFormatting.GREEN),5,20,5);
+        PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("3").withStyle(ChatFormatting.GREEN), 5, 20, 5);
+
         TaskScheduler.scheduleTask(25, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("2").withStyle(ChatFormatting.GREEN),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("2").withStyle(ChatFormatting.GREEN), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(50, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("1").withStyle(ChatFormatting.GREEN),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("1").withStyle(ChatFormatting.GREEN), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(75, () -> {
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("Your soulmate is...").withStyle(ChatFormatting.GREEN),10,50,20);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("Your soulmate is...").withStyle(ChatFormatting.GREEN), 10, 50, 20);
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
-		TaskScheduler.scheduleTask(165, () -> {
-			chooseRandomSoulmates();
+        TaskScheduler.scheduleTask(165, () -> {
+            chooseRandomSoulmates();
 
-			for (ServerPlayer player : playersToRoll) {
-				Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
-				if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
-					ServerPlayer soulmate = getSoulmate(player);
-					if (soulmate != null) {
-						text = TextUtils.format("{}", soulmate);
-					}
-				}
+            for (ServerPlayer player : playersToRoll) {
+                Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
+                if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
+                    ServerPlayer soulmate = getSoulmate(player);
+                    if (soulmate != null) {
+                        text = TextUtils.format("{}", soulmate);
+                    }
+                }
+                PlayerUtils.sendTitle(player, text, 20, 60, 20);
+                PlayerUtils.playSoundToPlayer(player,
+                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
+            }
 
-				PlayerUtils.sendTitle(player, text, 20, 60, 20);
-
-				PlayerUtils.playSoundToPlayer(player,
-						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
-			}
-			TaskScheduler.scheduleTask(70, () -> assignRandomLives(playersToRoll));
-		});
+            TaskScheduler.scheduleTask(70, () -> assignRandomLives(playersToRoll));
+        });
     }
 	
 	private void assignRandomLives(List<ServerPlayer> players) {
@@ -1082,50 +1075,35 @@ public class DoubleLife extends Season {
 	}
 	
 	public void rerollSoulmates(boolean midSession) {
-		List<ServerPlayer> candidates = new ArrayList<>();
+        List<ServerPlayer> candidates = new ArrayList<>();
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+            if (!shouldRerollPlayer(player)) continue;
+            candidates.add(player);
+        }
 
-		for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
-			if (!shouldRerollPlayer(player)) continue;
-			candidates.add(player);
-		}
+        if (candidates.size() < 2) return;
 
-		if (candidates.size() < 2) return;
+        for (ServerPlayer player : candidates) resetSoulmate(player);
 
-		for (ServerPlayer player : candidates) {
-			resetSoulmate(player);
-		}
+        PlayerUtils.broadcastMessageToAdmins(
+                Component.literal("[Double Life] Rerolling soulmates" + (midSession ? " mid-session." : " at session start."))
+        );
 
-		PlayerUtils.broadcastMessageToAdmins(
-				Component.literal("[Double Life] Rerolling soulmates" +
-						(midSession ? " mid-session." : " at session start."))
-		);
-
-		chooseRandomSoulmates();
-	}
+        rollSoulmates(midSession);
+    }
 	
 	private boolean shouldRerollPlayer(ServerPlayer player) {
-		if (player == null) return false;
-		if (player.ls$isDead()) return false;
-
-		if (!REROLL_REDS && player.ls$isOnLastLife(false)) {
-			return false;
-		}
-
-		if (REROLL_UNBOUND && hasSoulmate(player)) {
-			return false;
-		}
-
-		if (REROLL_LIVES && hasSoulmate(player)) {
-			ServerPlayer soulmate = getSoulmate(player);
-			if (soulmate != null) {
-				Integer a = player.ls$getLives();
-				Integer b = soulmate.ls$getLives();
-				if (Objects.equals(a, b)) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
+        if (player == null || player.ls$isDead()) return false;
+        if (!REROLL_REDS && player.ls$isOnLastLife(false)) return false;
+        if (REROLL_UNBOUND && hasSoulmate(player)) return false;
+        if (REROLL_LIVES && hasSoulmate(player)) {
+            ServerPlayer soulmate = getSoulmate(player);
+            if (soulmate != null) {
+                Integer a = player.ls$getLives();
+                Integer b = soulmate.ls$getLives();
+                if (Objects.equals(a, b)) return false;
+            }
+        }
+        return true;
+    }
 }
