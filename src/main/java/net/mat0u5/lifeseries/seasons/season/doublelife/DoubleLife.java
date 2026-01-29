@@ -57,6 +57,12 @@ public class DoubleLife extends Season {
 	public boolean RANDOM_LIVES_ENABLED = false;
     public int RANDOM_LIVES_MIN = 2;
     public int RANDOM_LIVES_MAX = 6;
+	public boolean REROLL_SESSION = false;
+	public boolean REROLL_MIDSESSION = false;
+	public double REROLL_TIME = 30.0;
+	public boolean REROLL_REDS = true;
+	public boolean REROLL_UNBOUND = false;
+	public boolean REROLL_LIVES = false;
 
     private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
     private final Set<UUID> processingLinkedDeath = new HashSet<>();
@@ -74,6 +80,9 @@ public class DoubleLife extends Season {
             distributePlayers();
         }
     };
+	
+	private SessionAction actionRerollSession;
+	private SessionAction actionRerollMidSession;
 
     public Map<UUID, UUID> soulmates = new TreeMap<>();
     public Map<UUID, UUID> soulmatesOrdered = new TreeMap<>();
@@ -121,15 +130,41 @@ public class DoubleLife extends Season {
 
         syncPlayer(player);
     }
+	
+	@Override
+	public void addSessionActions() {
+		super.addSessionActions();
 
-    @Override
-    public void addSessionActions() {
-        super.addSessionActions();
-        currentSession.addSessionAction(actionChooseSoulmates);
-        if (!DISABLE_START_TELEPORT) {
-            currentSession.addSessionAction(actionRandomTP);
-        }
-    }
+		currentSession.addSessionAction(actionChooseSoulmates);
+
+		if (!DISABLE_START_TELEPORT) {
+			currentSession.addSessionAction(actionRandomTP);
+		}
+
+		if (REROLL_SESSION) {
+			actionRerollSession = new SessionAction(Time.seconds(5), "Reroll Soulmates (Session Start)") {
+				@Override
+				public void trigger() {
+					rerollSoulmates(false);
+				}
+			};
+			currentSession.addSessionAction(actionRerollSession);
+		}
+
+		if (REROLL_MIDSESSION) {
+			actionRerollMidSession = new SessionAction(
+					Time.minutes(REROLL_TIME),
+					"Reroll Soulmates (Mid Session)",
+					true // repeating
+			) {
+				@Override
+				public void trigger() {
+					rerollSoulmates(true);
+				}
+			};
+			currentSession.addSessionAction(actionRerollMidSession);
+		}
+	}
 
     @Override
     public boolean isAllowedToAttack(ServerPlayer attacker, ServerPlayer victim, boolean allowSelfDefense) {
@@ -164,6 +199,12 @@ public class DoubleLife extends Season {
         int maxLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MAX.get(seasonConfig);
         RANDOM_LIVES_MIN = Math.min(minLivesConfig, maxLivesConfig);
         RANDOM_LIVES_MAX = Math.max(minLivesConfig, maxLivesConfig);
+		REROLL_SESSION = DoubleLifeConfig.REROLL_SESSION.get(seasonConfig);
+		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
+		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
+		REROLL_REDS = DoubleLifeConfig.REROLL_REDS.get(seasonConfig);
+		REROLL_UNBOUND = DoubleLifeConfig.REROLL_UNBOUND.get(seasonConfig);
+		REROLL_LIVES = DoubleLifeConfig.REROLL_LIVES.get(seasonConfig);
         syncAllPlayers();
     }
 	
@@ -1042,5 +1083,53 @@ public class DoubleLife extends Season {
 	private Component formatSoulmateLivesSubtitle(Integer lives) {
 		int safeLives = (lives == null) ? 0 : lives;
 		return Component.nullToEmpty("§aLives: §f" + safeLives);
+	}
+	
+	public void rerollSoulmates(boolean midSession) {
+		List<ServerPlayer> candidates = new ArrayList<>();
+
+		for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+			if (!shouldRerollPlayer(player)) continue;
+			candidates.add(player);
+		}
+
+		if (candidates.size() < 2) return;
+
+		for (ServerPlayer player : candidates) {
+			resetSoulmate(player);
+		}
+
+		PlayerUtils.broadcastMessageToAdmins(
+				Component.literal("[Double Life] Rerolling soulmates" +
+						(midSession ? " mid-session." : " at session start."))
+		);
+
+		chooseRandomSoulmates();
+	}
+	
+	private boolean shouldRerollPlayer(ServerPlayer player) {
+		if (player == null) return false;
+		if (player.ls$isDead()) return false;
+
+		if (!REROLL_REDS && player.ls$isOnLastLife(false)) {
+			return false;
+		}
+
+		if (REROLL_UNBOUND && hasSoulmate(player)) {
+			return false;
+		}
+
+		if (REROLL_LIVES && hasSoulmate(player)) {
+			ServerPlayer soulmate = getSoulmate(player);
+			if (soulmate != null) {
+				Integer a = player.ls$getLives();
+				Integer b = soulmate.ls$getLives();
+				if (Objects.equals(a, b)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
