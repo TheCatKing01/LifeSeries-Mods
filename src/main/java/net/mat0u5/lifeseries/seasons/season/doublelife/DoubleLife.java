@@ -1033,8 +1033,8 @@ public class DoubleLife extends Season {
 		List<ServerPlayer> eligible = getPlayersForReroll();
 		if (!eligible.isEmpty()) {
 		chooseRandomSoulmates(eligible);
+		}
 	}
-	
 	private List<ServerPlayer> getPlayersForReroll() {
 		List<ServerPlayer> eligible = new ArrayList<>();
 		boolean includeReds = DoubleLifeConfig.REROLL_REDS.get(seasonConfig);
