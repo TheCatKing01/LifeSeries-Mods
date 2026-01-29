@@ -131,10 +131,38 @@ public class DoubleLifeConfig extends ConfigManager {
             "random_lives_max", 6, "season.lives",
             "Random Lives Max", "The maximum lives you can get from the random roll."
     );
+	public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntry<>(
+			"reroll_session", false, "season.reroll",
+            "Reroll Soulmates Each Session", "Controls whether soulmates are given a new soulbound each session. "
+    );
+	public static final ConfigFileEntry<Boolean> REROLL_MIDSESSION = new ConfigFileEntry<>(
+			"reroll_midsession", false, "{season.reroll.midsession}",
+            "Reroll Soulmates Mid-Session", "Controls whether soulmates are given a new soulbound mid-session. "
+    );
+	public static final ConfigFileEntry<Double> REROLL_TIME = new ConfigFileEntry<>(
+			"reroll_time", 30.0, ConfigTypes.MINUTES, "season.reroll.midsession",
+            "Reroll Interval", "How often soulmates are rerolled within a session. "
+    );
+	public static final ConfigFileEntry<Boolean> REROLL_REDS = new ConfigFileEntry<>(
+			"reroll_reds", true, "season.reroll",
+            "Reroll Red Names", "Controls whether red names can be given a new soulbound. "
+    );
+	public static final ConfigFileEntry<Boolean> REROLL_UNBOUND = new ConfigFileEntry<>(
+			"reroll_unbound", false, "season.reroll",
+            "Only Reroll Unbound Players", "Controls if only players without a soulmate are rerolled. "
+    );
+	public static final ConfigFileEntry<Boolean> REROLL_LIVES = new ConfigFileEntry<>(
+			"reroll_lives", false, "season.reroll",
+            "Reroll Based On Life Count", "Controls if soulbounds are rerolled by based on life counts. "
+    );
 
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
             "group_soulbind", null, ConfigTypes.TEXT, "{season.soulbind}",
             "More Soulbind Options", ""
+    );
+	public static final ConfigFileEntry<Object> GROUP_REROLL = new ConfigFileEntry<>(
+            "group_reroll", null, ConfigTypes.TEXT, "{season.reroll}",
+            "Soulmate Rerolling Options", ""
     );
 
     public DoubleLifeConfig() {
@@ -144,13 +172,21 @@ public class DoubleLifeConfig extends ConfigManager {
     @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
-				GROUP_SOULBIND //Group
+				GROUP_REROLL //Group
+				,GROUP_SOULBIND //Group
 				,RANDOM_LIVES_ENABLED
 				,SOULMATES_SHARE_LIVES
 				,ANNOUNCE_SOULMATES
 				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
+			
+				,REROLL_SESSION
+				,REROLL_MIDSESSION
+				,REROLL_TIME
+				,REROLL_LIVES
+				.REROLL_UNBOUND
+				,REROLL_REDS
 
                 ,SOULBOUND_FOOD
                 ,SOULBOUND_EFFECTS
@@ -160,7 +196,7 @@ public class DoubleLifeConfig extends ConfigManager {
 								
 				,RANDOM_LIVES_MIN
                 ,RANDOM_LIVES_MAX	
-				,SOULMATES_SHARE_ROLL				
+				,SOULMATES_SHARE_ROLL					
 				
         ));
         //? if >= 1.21.6 {
