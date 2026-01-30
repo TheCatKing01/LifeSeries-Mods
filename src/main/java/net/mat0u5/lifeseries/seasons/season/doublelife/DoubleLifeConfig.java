@@ -148,7 +148,7 @@ public class DoubleLifeConfig extends ConfigManager {
             "Reroll Red Names", "Controls whether red names can be given a new soulbound. "
     );
 	public static final ConfigFileEntry<Boolean> REROLL_UNBOUND = new ConfigFileEntry<>(
-			"reroll_unbound", false, "season.reroll",
+			"reroll_unbound", true, "season.reroll",
             "Only Reroll Unbound Players", "Controls if only players without a soulmate are rerolled. "
     );
 	public static final ConfigFileEntry<Boolean> REROLL_LIVES = new ConfigFileEntry<>(
