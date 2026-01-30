@@ -766,7 +766,7 @@ public class DoubleLife extends Season {
 				
 				
             });
-            TaskScheduler.scheduleTask(1, () -> handleSoulmateSplitOnRedAfterDeath(player, beforeLives));
+            TaskScheduler.scheduleTask(2, () -> handleSoulmateSplitOnRedAfterDeath(player, beforeLives));
             } finally {
                 processingLinkedDeath.remove(playerId);
             }
@@ -1003,7 +1003,7 @@ public class DoubleLife extends Season {
                         "§cYour soulmate has become red, so your soulbound with them has been broken.");
             }
         }
-        resetSoulmate(player);
+		resetSoulmatePair(player);
     }
 
     private void handleSoulmateSplitOnRedAfterDeath(ServerPlayer player, Integer livesBefore) {
@@ -1028,7 +1028,7 @@ public class DoubleLife extends Season {
                         "§cYour soulmate has become red, so your soulbound with them has been broken.");
             }
         }
-        resetSoulmate(player);
+		resetSoulmatePair(player);
     }
 
     private void sendSoulmateSplitMessage(ServerPlayer target, String template) {
@@ -1044,7 +1044,7 @@ public class DoubleLife extends Season {
             ServerPlayer player2 = remainingPlayers.get(1);
             if (hasSoulmate(player1) && hasSoulmate(player2)) {
                 if (getSoulmate(player1) == player2) {
-                    resetSoulmate(player1);
+					resetSoulmatePair(player);
                     List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
                     TaskScheduler.scheduleTask(Time.seconds(10), () -> {
                         PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§aYour fate is your own..."), 20, 40, 20);
@@ -1077,17 +1077,35 @@ public class DoubleLife extends Season {
 	}
 	
 	private boolean canParticipateInSoulmateRoll(ServerPlayer player) {
-    if (player == null) return false;
+		if (player == null) return false;
 
-    if (!REROLL_REDS && player.ls$isOnLastLife(false)) {
-        return false;
-    }
+		if (!REROLL_REDS && player.ls$isOnLastLife(false)) {
+			return false;
+		}
 
-    if (REROLL_UNBOUND && hasSoulmate(player)) {
-        return false;
-    }
+		if (REROLL_UNBOUND && hasSoulmate(player)) {
+			return false;
+		}
 
-    return true;
-}
+		return true;
+	}
+	public void resetSoulmatePair(ServerPlayer player) {
+		if (player == null) return;
+
+		UUID a = player.getUUID();
+		UUID b = soulmates.get(a);
+		if (b == null) return;
+
+		soulmates.remove(a);
+		soulmates.remove(b);
+
+		updateOrderedSoulmates();
+
+		ServerPlayer other = PlayerUtils.getPlayer(b);
+		if (other != null) {
+			syncPlayer(other);
+		}
+		syncPlayer(player);
+	}
 
 }
