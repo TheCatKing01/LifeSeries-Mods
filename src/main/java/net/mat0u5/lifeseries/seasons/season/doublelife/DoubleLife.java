@@ -1044,7 +1044,7 @@ public class DoubleLife extends Season {
             ServerPlayer player2 = remainingPlayers.get(1);
             if (hasSoulmate(player1) && hasSoulmate(player2)) {
                 if (getSoulmate(player1) == player2) {
-					resetSoulmatePair(player);
+					resetSoulmatePair(player1);
                     List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
                     TaskScheduler.scheduleTask(Time.seconds(10), () -> {
                         PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§aYour fate is your own..."), 20, 40, 20);
