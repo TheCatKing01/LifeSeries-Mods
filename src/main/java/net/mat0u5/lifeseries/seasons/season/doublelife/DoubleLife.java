@@ -85,6 +85,7 @@ public class DoubleLife extends Season {
     public Map<UUID, UUID> soulmatesOrdered = new TreeMap<>();
     public static Map<UUID, UUID> soulmatesForce = new HashMap<>();
     public static Map<UUID, UUID> soulmatesPrevent = new HashMap<>();
+	private final Map<UUID, Integer> lastKnownLives = new HashMap<>();
 
     @Override
     public void initialize() {
@@ -813,6 +814,27 @@ public class DoubleLife extends Season {
         updateFood(player, soulmate);
         syncPlayerInventory(player, soulmate);
     }
+	
+	public void syncSoulboundLives(ServerPlayer player) {
+		if (player == null) return;
+
+		Integer oldLives = lastKnownLives.get(player.getUUID());
+
+		if (SOULMATES_SHARE_LIVES) {
+			Integer lives = player.ls$getLives();
+			ServerPlayer soulmate = getSoulmate(player);
+			if (lives != null && soulmate != null && player.isAlive() && soulmate.isAlive()) {
+				soulmate.ls$setLives(lives);
+			}
+		}
+
+		checkRedTransition(player, oldLives);
+
+		Integer now = player.ls$getLives();
+		if (now != null) {
+			lastKnownLives.put(player.getUUID(), now);
+		}
+	}
 
     public void syncSoulboundLives(ServerPlayer player) {
         if (SOULMATES_SHARE_LIVES) {
@@ -1106,6 +1128,19 @@ public class DoubleLife extends Season {
 			syncPlayer(other);
 		}
 		syncPlayer(player);
+	}
+	
+	private void checkRedTransition(ServerPlayer player, @Nullable Integer oldLives) {
+		if (!SPLIT_SOULMATES_WHEN_RED) return;
+		if (player == null) return;
+		if (oldLives == null) return;
+
+		Integer newLives = player.ls$getLives();
+		if (newLives == null) return;
+
+		if (oldLives > 1 && newLives == 1) {
+			handleSoulmateSplitOnRed(player, oldLives, newLives);
+		}
 	}
 
 }
