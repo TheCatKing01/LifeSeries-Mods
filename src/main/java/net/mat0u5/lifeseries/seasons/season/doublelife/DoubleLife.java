@@ -836,18 +836,6 @@ public class DoubleLife extends Season {
 		}
 	}
 
-    public void syncSoulboundLives(ServerPlayer player) {
-        if (SOULMATES_SHARE_LIVES) {
-            if (player == null) return;
-            Integer lives = player.ls$getLives();
-            ServerPlayer soulmate = getSoulmate(player);
-            if (lives == null) return;
-            if (soulmate == null) return;
-            if (!player.isAlive() || !soulmate.isAlive()) return;
-            soulmate.ls$setLives(lives);
-        }
-    }
-
     public void canFoodHeal(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         boolean orig =  player.getHealth() > 0.0F && player.getHealth() < player.getMaxHealth();
         if (!orig) {
