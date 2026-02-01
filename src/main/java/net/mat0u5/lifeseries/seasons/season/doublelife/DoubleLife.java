@@ -691,7 +691,7 @@ public class DoubleLife extends Season {
         UUID playerId = player.getUUID();
         Integer beforeLives = player.ls$getLives();
 		suppressSplitOnRedDuringDeath.add(playerId);
-
+		
 		if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
 			try {
 				super.onPlayerDeath(player, source);
@@ -700,7 +700,11 @@ public class DoubleLife extends Season {
 					ensureLifeConsumed(player, beforeLives);
 				}
 
-				TaskScheduler.scheduleTask(1, () -> syncPlayer(player));
+				TaskScheduler.scheduleTask(1, () -> {
+					syncPlayer(player);
+					handleSoulmateSplitOnRedAfterDeath(player, beforeLives);
+				});
+
 				return;
 			} finally {
 				suppressSplitOnRedDuringDeath.remove(playerId);
