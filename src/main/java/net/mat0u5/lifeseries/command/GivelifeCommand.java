@@ -109,15 +109,19 @@ public class GivelifeCommand extends Command {
 			}
 		}
 
-        Component currentPlayerName = self.getDisplayName();
-        self.ls$addLives(-giveAmount);
-        livesManager.addToLivesNoUpdate(target, giveAmount);
-        AnimationUtils.playTotemAnimation(self);
-        TaskScheduler.scheduleTask(Time.seconds(2), () -> livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive));
-		
+		Component currentPlayerName = self.getDisplayName();
+		self.ls$addLives(-giveAmount);
+		livesManager.addToLivesNoUpdate(target, giveAmount);
+		AnimationUtils.playTotemAnimation(self);
+
 		if (currentSeason instanceof DoubleLife doubleLife && doubleLife.SOULMATES_SHARE_LIVES) {
 			doubleLife.syncSoulboundLives(self);
+			doubleLife.syncSoulboundLives(target);
 		}
+
+		TaskScheduler.scheduleTask(Time.seconds(2), () -> 
+			livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive)
+		);
 
         return 1;
     }
