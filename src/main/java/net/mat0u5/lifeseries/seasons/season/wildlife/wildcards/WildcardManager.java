@@ -37,12 +37,6 @@ public class WildcardManager {
 
     public static void addSessionActions() {
         currentSession.addSessionActionIfTime(
-		new SessionAction(Time.minutes(2.5), "Assign Tasks")
-		}
-		new SessionAction(Time.minutes(1.5),"Assign lives if necessary") {
-		}
-		new SessionAction(Time.minutes(1), "Assign Soulmates if necessary")
-		}
                 new SessionAction(Time.minutes(ACTIVATE_WILDCARD_MINUTE-2)) {
                     @Override
                     public void trigger() {
