@@ -324,6 +324,35 @@ public class DefaultConfigValues {
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
 
+    public final ConfigFileEntry<Boolean> LISTS = new ConfigFileEntry<>(
+            "lists", false, ConfigTypes.LISTS, "{lifeseries_plus.lists}",
+            "Naughty/Nice Lists Enabled", "Enables the naughty/nice lists."
+    );
+    public final ConfigFileEntry<Integer> LISTS_MIN_AMOUNT = new ConfigFileEntry<>(
+            "lists_min_amount", 1, "lifeseries_plus.lists",
+            "Minimum List Amount", "The minimum amount of players who will be on the naughty/nice list."
+    );
+    public final ConfigFileEntry<Integer> LISTS_MAX_AMOUNT = new ConfigFileEntry<>(
+            "lists_max_amount", 99, "lifeseries_plus.lists",
+            "Maximum Lists Amount", "The maximum amount of players who will be on the naughty/nice list."
+    );
+    public final ConfigFileEntry<String> LISTS_IGNORE = new ConfigFileEntry<>(
+            "lists_ignore", "[]", "lifeseries_plus.lists",
+            "Lists Ignore List", "A list of players that cannot be on the naughty/nice list."
+    );
+    public final ConfigFileEntry<String> LISTS_FORCE = new ConfigFileEntry<>(
+            "lists_force", "[]", "lifeseries_plus.lists",
+            "Lists Force List", "A list of players that are forced be on the naughty/nice list."
+    );
+    public final ConfigFileEntry<Double> LISTS_CHOOSE_MINUTE = new ConfigFileEntry<>(
+            "lists_choose_minute", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
+            "Lists Choose Time", "The number of minutes (in the session) after which the the naughty/nice lists are rolled."
+    );
+    public final ConfigFileEntry<Boolean> LISTS_ANNOUNCE_OUTCOME = new ConfigFileEntry<>(
+            "lists_announce_outcome", true, "lifeseries_plus.lists",
+            "Lists Announce Outcome", "Shows a message in chat when a player fails surviving the naughty list."
+    );
+
     /*
      * Group Entries
      */

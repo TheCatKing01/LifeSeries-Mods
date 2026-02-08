@@ -42,6 +42,7 @@ public class DatapackIntegration {
     public static final Events EVENT_SOCIETY_MEMBER_ADDED = Events.SOCIETY_MEMBER_ADDED;
     public static final Events EVENT_SOCIETY_SUCCESS_REWARD = Events.SOCIETY_SUCCESS_REWARD;
     public static final Events EVENT_SOCIETY_FAIL_REWARD = Events.SOCIETY_FAIL_REWARD;
+    public static final Events EVENT_LISTS_ADDED = Events.LISTS_ADDED;
     public static final Events EVENT_TASK_SUCCEED = Events.TASK_SUCCEED;
     public static final Events EVENT_TASK_FAIL = Events.TASK_FAIL;
     public static final Events EVENT_TASK_REROLL = Events.TASK_REROLL;
@@ -74,6 +75,7 @@ public class DatapackIntegration {
         EVENT_SOCIETY_MEMBER_ADDED.reload();
         EVENT_SOCIETY_SUCCESS_REWARD.reload();
         EVENT_SOCIETY_FAIL_REWARD.reload();
+        EVENT_LISTS_ADDED.reload();
         EVENT_TASK_SUCCEED.reload();
         EVENT_TASK_FAIL.reload();
         EVENT_TASK_REROLL.reload();
@@ -109,6 +111,7 @@ public class DatapackIntegration {
                 ,EVENT_SOCIETY_MEMBER_ADDED
                 ,EVENT_SOCIETY_SUCCESS_REWARD
                 ,EVENT_SOCIETY_FAIL_REWARD
+                ,EVENT_LISTS_ADDED
                 ,EVENT_TASK_SUCCEED
                 ,EVENT_TASK_FAIL
                 ,EVENT_TASK_REROLL
@@ -213,6 +216,7 @@ public class DatapackIntegration {
         SOCIETY_MEMBER_ADDED("society_member_added", "Society Member Added", "Triggers when a secret society member is added.\nAvailable macros: $(Player)", false),
         SOCIETY_SUCCESS_REWARD("society_success_reward", "Secret Society Success §7Reward", "Triggers when a society member succeeds.\nAvailable macros: $(Player)", true),
         SOCIETY_FAIL_REWARD("society_fail_reward", "Secret Society Fail §7Punishment", "Triggers when a society member fails.\nAvailable macros: $(Player)", true),
+        LISTS_ADDED("lists_added", "Lists Added", "Triggers when a player is added to naughty/nice list.\nAvailable macros: $(Player)", false),
         TASK_SUCCEED("task_succeed", "Task Succeed", "Triggers when a player succeeds their task in Secret Life.\nAvailable macros: $(Player)", false),
         TASK_FAIL("task_fail", "Task Fail", "Triggers when a player fails their task in Secret Life.\nAvailable macros: $(Player)", false),
         TASK_REROLL("task_reroll", "Task Reroll", "Triggers when a player rerolls their task in Secret Life.\nAvailable macros: $(Player)", false),

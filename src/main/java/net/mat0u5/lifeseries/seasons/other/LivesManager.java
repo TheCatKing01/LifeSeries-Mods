@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.scores.Scoreboard;
 
 import java.util.*;
 
@@ -74,6 +75,46 @@ public class LivesManager {
         }
         return result;
     }
+
+	public static void joinTeam(ServerPlayer player, String teamName) {
+		if (player == null) return;
+
+		//? if <= 1.20.2 {
+		/*var server = player.getServer();
+		*///?} else {
+		var server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
+		//?}
+
+		Scoreboard scoreboard = server.getScoreboard();
+
+		PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+		if (team == null) return;
+
+		String name = player.getScoreboardName();
+
+		PlayerTeam current = scoreboard.getPlayersTeam(name);
+		if (current != null && current != team) {
+			scoreboard.removePlayerFromTeam(name, current);
+		}
+
+		scoreboard.addPlayerToTeam(name, team);
+	}
+	
+	public void applyCorrectTeam(ServerPlayer player) {
+		if (player == null || isWatcher(player)) return;
+
+		if (player.getTags().contains("nice")) {
+			joinTeam(player, "nice_list");
+			return;
+		}
+
+		if (player.getTags().contains("naughty")) {
+			joinTeam(player, "naughty_list");
+			return;
+		}
+
+		currentSeason.reloadPlayerTeam(player);
+	}
 
     public void updateTeams() {
         MAX_TAB_NUMBER = 4;
@@ -152,6 +193,8 @@ public class LivesManager {
         TeamUtils.createTeam("lives_2", "Yellow", ChatFormatting.YELLOW);
         TeamUtils.createTeam("lives_3", "Green", ChatFormatting.GREEN);
         TeamUtils.createTeam("lives_4", "Dark Green", ChatFormatting.DARK_GREEN);
+		TeamUtils.createTeam("nice_list", "Nice List", ChatFormatting.LIGHT_PURPLE);
+		TeamUtils.createTeam("naughty_list", "Naughty List", ChatFormatting.DARK_PURPLE);
     }
 
     public void createScoreboards() {
@@ -185,6 +228,15 @@ public class LivesManager {
         return Component.literal(String.valueOf(lives)).withStyle(color);
     }
     public String getTeamForPlayer(ServerPlayer player) {
+		
+        if (player.getTags().contains("nice")) {
+            return "nice_list";
+        }
+
+        if (player.getTags().contains("naughty")) {
+            return "naughty_list";
+        }
+
         if (LIVES_SYSTEM_DISABLED) {
             return null;
         }
@@ -258,7 +310,7 @@ public class LivesManager {
 
     public void resetPlayerLife(ServerPlayer player) {
         ScoreboardUtils.resetScore(player, SCOREBOARD_NAME);
-        currentSeason.reloadPlayerTeam(player);
+        applyCorrectTeam(player);
         currentSeason.assignDefaultLives(player);
         if (currentSeason instanceof DoubleLife doubleLife) {
             doubleLife.syncSoulboundLives(player);
@@ -277,7 +329,9 @@ public class LivesManager {
         }
         //?}
 
-        currentSeason.reloadAllPlayerTeams();
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+			applyCorrectTeam(player);
+		}
     }
 
     public void resetAllPlayerLives() {
@@ -315,7 +369,7 @@ public class LivesManager {
         target.sendSystemMessage(TextUtils.format("You received a life from {}", playerName));
         PlayerUtils.sendTitleWithSubtitle(target, Component.nullToEmpty("You received a life"), TextUtils.format("from {}", playerName), 10, 60, 10);
         AnimationUtils.createSpiral(target, 175);
-        currentSeason.reloadPlayerTeam(target);
+		applyCorrectTeam(target);
         SessionTranscript.givelife(playerName, target);
         if (currentSeason instanceof DoubleLife doubleLife) {
             doubleLife.syncSoulboundLives(target);
@@ -329,16 +383,23 @@ public class LivesManager {
         if (player == null || isWatcher(player)) return;
         Integer livesBefore = getPlayerLives(player);
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
-        if (currentSeason instanceof DoubleLife doubleLife) {
+		if (currentSeason instanceof DoubleLife doubleLife) {
             doubleLife.handleSoulmateSplitOnRed(player, livesBefore, lives);
         }
+		
+		if (livesBefore != null && lives < livesBefore) {
+			if (player.getTags().contains("naughty")) {
+				player.removeTag("naughty");
+			}
+		}
+		
         if (lives <= 0) {
             playerLostAllLives(player, livesBefore);
         }
         else if (player.isSpectator()) {
             PlayerUtils.safelyPutIntoSurvival(player);
         }
-        currentSeason.reloadPlayerTeam(player);
+        applyCorrectTeam(player);
 
         if (SubInManager.isSubbingIn(player.getUUID())) {
             String substitutedPlayerName =OtherUtils.profileName(SubInManager.getSubstitutedPlayer(player.getUUID()));
@@ -348,7 +409,9 @@ public class LivesManager {
 
     public void setScore(String playerName, int lives) {
         ScoreboardUtils.setScore(playerName, SCOREBOARD_NAME, lives);
-        currentSeason.reloadAllPlayerTeams();
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+			applyCorrectTeam(player);
+		}
     }
 
     @Nullable

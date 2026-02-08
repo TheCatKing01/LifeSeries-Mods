@@ -92,6 +92,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SPAWN_EGG // Group
                 ,GROUP_WATCHERS // Group
 
+                ,LISTS // Group
                 ,SIMPLE_LIFE //Group
                 ,MIDNIGHT_CHIMES
 
@@ -151,6 +152,12 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,WATCHERS_IN_TAB
                 ,WATCHERS_MUTED
+
+                ,LISTS_MIN_AMOUNT
+                ,LISTS_MAX_AMOUNT
+                ,LISTS_IGNORE
+                ,LISTS_FORCE
+                ,LISTS_CHOOSE_MINUTE
 
                 ,TRADERS_MAX_AMOUNT
                 ,COMPLEX_LIFE_TRADES
