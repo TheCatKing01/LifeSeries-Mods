@@ -250,6 +250,7 @@ public abstract class Season {
 
         boogeymanManager.onReload();
         secretSociety.onReload();
+        listsManager.onReload();
         createTeams();
         createScoreboards();
         updateStuff();
