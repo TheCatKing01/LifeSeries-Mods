@@ -97,7 +97,6 @@ public class ListsCommand extends Command {
 			));
         return -1;
     }
-            bm.reset(player);
         }
 
         if (targets.size() == 1) {
@@ -130,7 +129,6 @@ public class ListsCommand extends Command {
 				));
 				return -1;
 			}
-            bm.cure(player);
         }
 
         return 1;

@@ -10,6 +10,7 @@ import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
+import net.mat0u5.lifeseries.seasons.lists.ListsManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.other.MidnightChimes;

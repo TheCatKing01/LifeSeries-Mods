@@ -348,10 +348,6 @@ public class DefaultConfigValues {
             "lists_choose_minute", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
             "Lists Choose Time", "The number of minutes (in the session) after which the the naughty/nice lists are rolled."
     );
-    public final ConfigFileEntry<Boolean> LISTS_ANNOUNCE_OUTCOME = new ConfigFileEntry<>(
-            "lists_announce_outcome", true, "lifeseries_plus.lists",
-            "Lists Announce Outcome", "Shows a message in chat when a player fails surviving the naughty list."
-    );
 
     /*
      * Group Entries

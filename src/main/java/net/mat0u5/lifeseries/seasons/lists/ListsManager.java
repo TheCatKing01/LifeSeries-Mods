@@ -237,4 +237,8 @@ public class ListsManager {
     public enum ListsRollType {
         NORMAL
     }
+	
+	private void messageLists(Lists lists, ServerPlayer player) {
+    // TODO: implement later
+	}
 }
