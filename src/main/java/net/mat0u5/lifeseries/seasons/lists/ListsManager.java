@@ -78,11 +78,11 @@ public class ListsManager {
 
         TaskScheduler.scheduleTask(30, () ->
 		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0);
+            PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0)
         );
         TaskScheduler.scheduleTask(60, () ->
 		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0);
+            PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0)
         );
         TaskScheduler.scheduleTask(90, () -> {
             PlayerUtils.playSoundToPlayers(players,
