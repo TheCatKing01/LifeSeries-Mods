@@ -250,5 +250,9 @@ public class SessionTranscript {
         return TextUtils.format("§7Click {}§7 to copy the session transcript.", TextUtils.copyClipboardText(SessionTranscript.getStats()));
     }
 
+	public static void listsChosen(List<ServerPlayer> players) {
+   		 // TODO: implement later
+	}
+
     public record TranscriptPlayerRecord(UUID uuid, String name, int kills, int deaths) {}
 }

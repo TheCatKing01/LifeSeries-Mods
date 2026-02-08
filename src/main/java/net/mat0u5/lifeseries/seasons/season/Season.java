@@ -128,6 +128,7 @@ public abstract class Season {
     public SecretSociety createSecretSociety() {
         return new SecretSociety();
     }
+	public ListsManager listsManager = new ListsManager();
 
     public LivesManager createLivesManager() {
         return new LivesManager();

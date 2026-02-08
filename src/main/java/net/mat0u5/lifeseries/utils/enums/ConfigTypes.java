@@ -17,6 +17,7 @@ public enum ConfigTypes {
     EFFECT_LIST("effectlist"),
     ENCHANT_LIST("enchantlist"),
     BOOGEYMAN("boogeyman"),
+    LISTS("lists"),
     SECONDS("seconds"),
     MINUTES("minutes"),
     STRING_LIST("list"),

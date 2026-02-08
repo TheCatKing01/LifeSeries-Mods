@@ -73,13 +73,13 @@ public class ListsCommand extends Command {
         );
     }
 
-    public listManager getBM() {
-        return currentSeason.listManager;
+    public ListsManager getBM() {
+        return currentSeason.listsManager;
     }
 	
     public int resetNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
-        ListManager bm = getBM();
+        ListsManager bm = getBM();
         if (bm == null) return -1;
 
         if (targets.size() == 1) {
@@ -112,7 +112,7 @@ public class ListsCommand extends Command {
 
     public int cureNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
-        ListManager bm = getBM();
+        ListsManager bm = getBM();
         if (bm == null) return -1;
 
         if (targets.size() == 1) {
@@ -138,7 +138,7 @@ public class ListsCommand extends Command {
 
     public int listsClear(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        ListManager bm = getBM();
+        ListsManager bm = getBM();
         if (bm == null) return -1;
 
         bm.resetLists();
@@ -148,7 +148,7 @@ public class ListsCommand extends Command {
 
     public int listsChooseRandom(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        ListManager bm = getBM();
+        ListsManager bm = getBM();
         if (bm == null) return -1;
 
         OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7CRolling naughty/nice lists..."));
