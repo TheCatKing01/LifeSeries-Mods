@@ -29,14 +29,14 @@ public class ListsCommand extends Command {
         return Component.nullToEmpty("This command is only available when the naughty/nice lists are enabled in the Life Series config.");
     }
 
-    public List<String> getAdminCommands() {
-        return List.of("lists");
-    }
-	
 	private boolean isNaughty(ServerPlayer player) {
 		return player.getTags().contains("naughty");
 	}
 
+    public List<String> getAdminCommands() {
+        return List.of("lists");
+    }
+	
     public List<String> getNonAdminCommands() {
         return List.of("lists");
     }
@@ -149,7 +149,7 @@ public class ListsCommand extends Command {
         ListsManager bm = getBM();
         if (bm == null) return -1;
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7CRolling naughty/nice lists..."));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Rolling naughty/nice lists..."));
 
         bm.resetLists();
         bm.prepareToChooseLists();

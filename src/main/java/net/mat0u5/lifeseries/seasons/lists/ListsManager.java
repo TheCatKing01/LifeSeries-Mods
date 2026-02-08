@@ -38,7 +38,7 @@ public class ListsManager {
         if (!LISTS_ENABLED) return;
 
         currentSession.addSessionAction(
-            new SessionAction(Time.minutes(LISTS_CHOOSE_MINUTE), "Roll Naughty/Nice Lists") {
+            new SessionAction(Time.minutes(LISTS_CHOOSE_MINUTE), "Roll naughty/nice lists") {
                 @Override
                 public void trigger() {
                     if (!LISTS_ENABLED || listsChosen) return;
@@ -52,7 +52,7 @@ public class ListsManager {
         if (!LISTS_ENABLED) return;
 
         PlayerUtils.broadcastMessage(
-            Component.literal("The Naughty/Nice List is about to be rolled.")
+            Component.literal("The naughty/nice list is about to be rolled.")
                 .withStyle(ChatFormatting.RED)
         );
         PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
@@ -77,9 +77,11 @@ public class ListsManager {
         PlayerUtils.sendTitleToPlayers(players, Component.literal("3").withStyle(ChatFormatting.GREEN), 0, 35, 0);
 
         TaskScheduler.scheduleTask(30, () ->
+		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0)
         );
         TaskScheduler.scheduleTask(60, () ->
+		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0)
         );
         TaskScheduler.scheduleTask(90, () -> {
@@ -161,15 +163,13 @@ public class ListsManager {
             if (i % 2 == 0) {
                 player.addTag("nice");
                 PlayerUtils.sendTitle(player,
-                    Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),
-                    10, 50, 20
-                );
+                    Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
+					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start")));
             } else {
                 player.addTag("naughty");
                 PlayerUtils.sendTitle(player,
-                    Component.literal("The Naughty List").withStyle(ChatFormatting.RED),
-                    10, 50, 20
-                );
+                    Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
+					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
             }
 
             Lists entry = addLists(player);
@@ -201,7 +201,7 @@ public class ListsManager {
             if (p != null) {
                 p.removeTag("nice");
                 p.removeTag("naughty");
-                p.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the Naughty/Nice list."));
+                p.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
             }
         }
         lists.clear();
