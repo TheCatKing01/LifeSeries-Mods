@@ -71,26 +71,28 @@ public class ListsManager {
         TaskScheduler.scheduleTask(Time.seconds(9),
             () -> listsChooseRandom(allowedPlayers, rollType));
     }
+	
+	public void showRolling(List<ServerPlayer> players) {
+		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+		PlayerUtils.sendTitleToPlayers(players, Component.literal("3").withStyle(ChatFormatting.GREEN), 0, 35, 0);
 
-    public void showRolling(List<ServerPlayer> players) {
-        PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(players, Component.literal("3").withStyle(ChatFormatting.GREEN), 0, 35, 0);
+		TaskScheduler.scheduleTask(30, () -> {
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+			PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0);
+		});
 
-        TaskScheduler.scheduleTask(30, () ->
-		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0)
-        );
-        TaskScheduler.scheduleTask(60, () ->
-		    PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0)
-        );
-        TaskScheduler.scheduleTask(90, () -> {
-            PlayerUtils.playSoundToPlayers(players,
-                SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_wait")));
-            PlayerUtils.sendTitleToPlayers(players,
-                Component.literal("You are on...").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
-        });
-    }
+		TaskScheduler.scheduleTask(60, () -> {
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+			PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0);
+		});
+
+		TaskScheduler.scheduleTask(90, () -> {
+			PlayerUtils.playSoundToPlayers(players,
+				SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_wait")));
+			PlayerUtils.sendTitleToPlayers(players,
+				Component.literal("You are on...").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
+		});
+	}
 
     public void listsChooseRandom(List<ServerPlayer> allowedPlayers, ListsRollType rollType) {
         if (!LISTS_ENABLED) return;
