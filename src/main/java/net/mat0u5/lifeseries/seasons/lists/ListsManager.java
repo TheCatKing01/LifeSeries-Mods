@@ -73,24 +73,43 @@ public class ListsManager {
     }
 	
 	public void showRolling(List<ServerPlayer> players) {
-		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
-		PlayerUtils.sendTitleToPlayers(players, Component.literal("3").withStyle(ChatFormatting.GREEN), 0, 35, 0);
+		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+		PlayerUtils.sendTitleToPlayers(
+			players,
+			Component.literal("3").withStyle(ChatFormatting.GREEN),
+			0, 35, 0
+		);
 
 		TaskScheduler.scheduleTask(30, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
-			PlayerUtils.sendTitleToPlayers(players, Component.literal("2").withStyle(ChatFormatting.YELLOW), 0, 35, 0);
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+			PlayerUtils.sendTitleToPlayers(
+				players,
+				Component.literal("2").withStyle(ChatFormatting.YELLOW),
+				0, 35, 0
+			);
 		});
 
 		TaskScheduler.scheduleTask(60, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
-			PlayerUtils.sendTitleToPlayers(players, Component.literal("1").withStyle(ChatFormatting.RED), 0, 35, 0);
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+			PlayerUtils.sendTitleToPlayers(
+				players,
+				Component.literal("1").withStyle(ChatFormatting.RED),
+				0, 35, 0
+			);
 		});
 
 		TaskScheduler.scheduleTask(90, () -> {
-			PlayerUtils.playSoundToPlayers(players,
-				SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_wait")));
-			PlayerUtils.sendTitleToPlayers(players,
-				Component.literal("You are on...").withStyle(ChatFormatting.YELLOW), 10, 50, 20);
+			PlayerUtils.playSoundToPlayers(
+				players,
+				SoundEvent.createVariableRangeEvent(
+					IdentifierHelper.vanilla("lastlife_boogeyman_wait")
+				).value()
+			);
+			PlayerUtils.sendTitleToPlayers(
+				players,
+				Component.literal("You are on...").withStyle(ChatFormatting.YELLOW),
+				10, 50, 20
+			);
 		});
 	}
 
@@ -166,11 +185,22 @@ public class ListsManager {
                 player.addTag("nice");
                 PlayerUtils.sendTitle(player,
                     Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
-					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start")));
+					PlayerUtils.playSoundToPlayers(
+						List.of(player),
+						SoundEvent.createVariableRangeEvent(
+							IdentifierHelper.vanilla("nicelife_nicelist_start")
+						).value()
+					);
             } else {
                 player.addTag("naughty");
                 PlayerUtils.sendTitle(player,
                     Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
+					PlayerUtils.playSoundToPlayers(
+						List.of(player),
+						SoundEvent.createVariableRangeEvent(
+							IdentifierHelper.vanilla("nicelife_naughtylist")
+						).value()
+					);
 					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
             }
 
