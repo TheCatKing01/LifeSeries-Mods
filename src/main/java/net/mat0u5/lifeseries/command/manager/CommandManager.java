@@ -28,6 +28,7 @@ public class CommandManager {
 
         commands.add(new BoogeymanCommand());
         commands.add(new GivelifeCommand());
+        commands.add(new ListsCommand());
         commands.add(new WatcherCommand());
         commands.add(new SocietyCommands());
         commands.add(new SubInCommands());
