@@ -209,24 +209,37 @@ public class ListsManager {
         listsChosen = false;
     }
 
-    public void onReload() {
-        LISTS_ENABLED = seasonConfig.LISTS.get(seasonConfig);
-        LISTS_AMOUNT_MIN = seasonConfig.LISTS_MIN_AMOUNT.get(seasonConfig);
-        LISTS_AMOUNT_MAX = seasonConfig.LISTS_MAX_AMOUNT.get(seasonConfig);
-        LISTS_CHOOSE_MINUTE = seasonConfig.LISTS_CHOOSE_MINUTE.get(seasonConfig);
+	public void onReload() {
+		LISTS_ENABLED = seasonConfig.LISTS.get(seasonConfig);
+		if (!LISTS_ENABLED) {
+			resetLists();
+		}
 
-        LISTS_IGNORE.clear();
-        LISTS_FORCE.clear();
+		LISTS_AMOUNT_MIN = seasonConfig.LISTS_MIN_AMOUNT.get(seasonConfig);
+		LISTS_AMOUNT_MAX = seasonConfig.LISTS_MAX_AMOUNT.get(seasonConfig);
+		LISTS_CHOOSE_MINUTE = seasonConfig.LISTS_CHOOSE_MINUTE.get(seasonConfig);
 
-        for (String s : seasonConfig.LISTS_IGNORE.get(seasonConfig).split(",")) {
-            if (!s.isBlank()) LISTS_IGNORE.add(s.trim().toLowerCase(Locale.ROOT));
-        }
-        for (String s : seasonConfig.LISTS_FORCE.get(seasonConfig).split(",")) {
-            if (!s.isBlank()) LISTS_FORCE.add(s.trim().toLowerCase(Locale.ROOT));
-        }
+		LISTS_IGNORE.clear();
+		LISTS_FORCE.clear();
 
-        if (!LISTS_ENABLED) resetLists();
-    }
+		for (String s : seasonConfig.LISTS_IGNORE.get(seasonConfig)
+				.replaceAll("\\[","")
+				.replaceAll("]","")
+				.replaceAll(" ","")
+				.trim()
+				.split(",")) {
+			if (!s.isEmpty()) LISTS_IGNORE.add(s.toLowerCase(Locale.ROOT));
+		}
+
+		for (String s : seasonConfig.LISTS_FORCE.get(seasonConfig)
+				.replaceAll("\\[","")
+				.replaceAll("]","")
+				.replaceAll(" ","")
+				.trim()
+				.split(",")) {
+			if (!s.isEmpty()) LISTS_FORCE.add(s.toLowerCase(Locale.ROOT));
+		}
+	}
 
     public void tick() {
         if (!LISTS_ENABLED) return;
