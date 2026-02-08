@@ -18,10 +18,10 @@ import static net.mat0u5.lifeseries.Main.*;
 
 public class ListsManager {
 
-    public boolean LISTS_ENABLED = false;
+    public boolean LISTS_ENABLED = true;
     public int LISTS_AMOUNT_MIN = 1;
     public int LISTS_AMOUNT_MAX = 99;
-    public double LISTS_CHOOSE_MINUTE = 10;
+    public double LISTS_CHOOSE_MINUTE = 1;
 
     public List<String> LISTS_IGNORE = new ArrayList<>();
     public List<String> LISTS_FORCE = new ArrayList<>();
