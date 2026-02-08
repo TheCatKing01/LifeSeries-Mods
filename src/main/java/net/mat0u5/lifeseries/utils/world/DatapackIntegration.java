@@ -216,7 +216,7 @@ public class DatapackIntegration {
         SOCIETY_MEMBER_ADDED("society_member_added", "Society Member Added", "Triggers when a secret society member is added.\nAvailable macros: $(Player)", false),
         SOCIETY_SUCCESS_REWARD("society_success_reward", "Secret Society Success §7Reward", "Triggers when a society member succeeds.\nAvailable macros: $(Player)", true),
         SOCIETY_FAIL_REWARD("society_fail_reward", "Secret Society Fail §7Punishment", "Triggers when a society member fails.\nAvailable macros: $(Player)", true),
-        LISTS_ADDED("lists_added", "Lists Added", "Triggers when a player is added to naughty/nice list.\nAvailable macros: $(Player)", false),
+        LISTS_ADDED("lists_added", "Player Added To List", "Triggers when a player is added to naughty/nice list.\nAvailable macros: $(Player)", false),
         TASK_SUCCEED("task_succeed", "Task Succeed", "Triggers when a player succeeds their task in Secret Life.\nAvailable macros: $(Player)", false),
         TASK_FAIL("task_fail", "Task Fail", "Triggers when a player fails their task in Secret Life.\nAvailable macros: $(Player)", false),
         TASK_REROLL("task_reroll", "Task Reroll", "Triggers when a player rerolls their task in Secret Life.\nAvailable macros: $(Player)", false),

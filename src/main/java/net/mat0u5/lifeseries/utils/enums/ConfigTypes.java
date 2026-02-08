@@ -45,7 +45,7 @@ public enum ConfigTypes {
         return this == TEXT || this == TEAM_ENTRY;
     }
     public boolean parentBoolean() {
-        return this == BOOLEAN || this == BOOGEYMAN;
+        return this == BOOLEAN || this == BOOGEYMAN || this == LISTS;
     }
     public boolean parentInteger() {
         return this == INTEGER || this == HEARTS || this == SECONDS;
