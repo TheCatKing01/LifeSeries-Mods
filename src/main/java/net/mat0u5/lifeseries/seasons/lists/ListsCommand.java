@@ -30,7 +30,7 @@ public class ListsCommand extends Command {
     }
 
 	private boolean isNaughty(ServerPlayer player) {
-		return player.getTags().contains("naughty");
+		return getBM().isNaughtyListMember(player);
 	}
 
     public List<String> getAdminCommands() {
@@ -91,13 +91,12 @@ public class ListsCommand extends Command {
         }
 
         for (ServerPlayer player : targets) {
-		if (!isNaughty(player)) {
-			source.sendFailure(Component.nullToEmpty(
-				player.getName().getString() + " is not on the naughty list"
-			));
-        return -1;
-    }
-        }
+			if (!isNaughty(player)) {
+				source.sendFailure(Component.nullToEmpty(
+					player.getName().getString() + " is not on the naughty list"
+				));
+			return -1;
+		}
 
         if (targets.size() == 1) {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {}§7...", targets.iterator().next()));
@@ -105,6 +104,8 @@ public class ListsCommand extends Command {
         else {
             OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {} targets§7...", targets.size()));
         }
+		
+		bm.resetNaughtyStatus(targets);
 
         return 1;
     }
@@ -114,14 +115,6 @@ public class ListsCommand extends Command {
         ListsManager bm = getBM();
         if (bm == null) return -1;
 
-        if (targets.size() == 1) {
-            ServerPlayer target = targets.iterator().next();
-            if (!bm.isOnLists(target)) {
-                source.sendFailure(Component.nullToEmpty("That player is not on the naughty list"));
-                return -1;
-            }
-        }
-
         for (ServerPlayer player : targets) {
 			if (!isNaughty(player)) {
 				source.sendFailure(Component.nullToEmpty(
@@ -130,6 +123,8 @@ public class ListsCommand extends Command {
 				return -1;
 			}
         }
+		
+		bm.cureNaughtyList(targets);
 
         return 1;
     }

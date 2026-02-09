@@ -422,12 +422,13 @@ public abstract class Season {
     public void sessionEnd() {
         boogeymanManager.sessionEnd();
         secretSociety.sessionEnd();
+        listsManager.resetLists();
     }
 
     public boolean sessionStart() {
         boogeymanManager.resetBoogeymen();
         secretSociety.resetMembers();
-        addSessionActions();
+        listsManager.resetLists();
         return true;
     }
 
@@ -466,6 +467,7 @@ public abstract class Season {
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
+        listsManager.addSessionActions();o
     }
 
     /*
@@ -712,6 +714,7 @@ public abstract class Season {
                 SubInManager.removeSubIn(player);
             }
         });
+        listsManager.onPlayerJoin(player);
     }
 
     public void assignDefaultLives(ServerPlayer player) {

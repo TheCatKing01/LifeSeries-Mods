@@ -50,17 +50,8 @@ public class ListsManager {
 
     public void prepareToChooseLists() {
         if (!LISTS_ENABLED) return;
-
-        PlayerUtils.broadcastMessage(
-            Component.literal("The naughty/nice list is about to be rolled.")
-                .withStyle(ChatFormatting.RED)
-        );
-        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.LIGHTNING_BOLT_THUNDER);
-
-        TaskScheduler.scheduleTask(Time.seconds(5), () -> {
-            resetLists();
-            chooseLists(livesManager.getAlivePlayers(), ListsRollType.NORMAL);
-        });
+		resetLists();
+        chooseLists(livesManager.getAlivePlayers(), ListsRollType.NORMAL);
     }
 
     public void chooseLists(List<ServerPlayer> allowedPlayers, ListsRollType rollType) {
@@ -203,20 +194,26 @@ public class ListsManager {
 					);
             }
 
-            Lists entry = addLists(player);
+            Lists.ListType listType = i % 2 == 0 ? Lists.ListType.NICE : Lists.ListType.NAUGHTY;
+            Lists entry = addLists(player, listType);
             messageLists(entry, player);
         }
 
         SessionTranscript.listsChosen(listPlayers);
+		
     }
 
     public boolean isOnLists(ServerPlayer player) {
         return lists.stream().anyMatch(l -> l.uuid.equals(player.getUUID()));
     }
 
-    public Lists addLists(ServerPlayer player) {
-        rolledPlayers.add(player.getUUID());
-        Lists entry = new Lists(player);
+    public boolean isNaughtyListMember(ServerPlayer player) {
+        Lists entry = getListEntry(player);
+        return entry != null && entry.listType == Lists.ListType.NAUGHTY;
+    }
+
+    public Lists addLists(ServerPlayer player, Lists.ListType listType) {        rolledPlayers.add(player.getUUID());
+        Lists entry = new Lists(player, listType);
         lists.add(entry);
         listsListChanged = true;
 
@@ -227,17 +224,79 @@ public class ListsManager {
     }
 
     public void resetLists() {
-        for (Lists l : lists) {
-            ServerPlayer p = PlayerUtils.getPlayer(l.uuid);
-            if (p != null) {
-                p.removeTag("nice");
-                p.removeTag("naughty");
-                p.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
-            }
-        }
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            clearListTags(player, true);
         lists.clear();
         rolledPlayers.clear();
         listsChosen = false;
+    }
+	
+    public void onPlayerJoin(ServerPlayer player) {
+        if (!isListsActive()) {
+            removePlayerFromLists(player, true);
+        }
+    }
+
+    public boolean isListsActive() {
+        return LISTS_ENABLED && listsChosen;
+    }
+
+    public void resetNaughtyStatus(Collection<ServerPlayer> targets) {
+        for (ServerPlayer player : targets) {
+            Lists entry = getListEntry(player);
+            if (entry == null || entry.listType != Lists.ListType.NAUGHTY) {
+                continue;
+            }
+            entry.cured = false;
+            if (!player.getTags().contains("naughty")) {
+                player.addTag("naughty");
+            }
+            livesManager.applyCorrectTeam(player);
+        }
+    }
+
+    public void cureNaughtyList(Collection<ServerPlayer> targets) {
+        for (ServerPlayer player : targets) {
+            Lists entry = getListEntry(player);
+            if (entry == null || entry.listType != Lists.ListType.NAUGHTY) {
+                continue;
+            }
+            entry.cured = true;
+            if (player.getTags().contains("naughty")) {
+                player.removeTag("naughty");
+            }
+            livesManager.applyCorrectTeam(player);
+        }
+    }
+
+    private Lists getListEntry(ServerPlayer player) {
+        for (Lists entry : lists) {
+            if (entry.uuid.equals(player.getUUID())) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    private void removePlayerFromLists(ServerPlayer player, boolean notify) {
+        lists.removeIf(entry -> entry.uuid.equals(player.getUUID()));
+        rolledPlayers.remove(player.getUUID());
+        clearListTags(player, notify);
+    }
+
+    private void clearListTags(ServerPlayer player, boolean notify) {
+        boolean removed = false;
+        if (player.getTags().contains("nice")) {
+            player.removeTag("nice");
+            removed = true;
+        }
+        if (player.getTags().contains("naughty")) {
+            player.removeTag("naughty");
+            removed = true;
+        }
+        if (removed && notify) {
+            player.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
+        }
     }
 
 	public void onReload() {

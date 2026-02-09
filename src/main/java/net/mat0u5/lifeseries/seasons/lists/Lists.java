@@ -11,14 +11,17 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 public class Lists {
     public UUID uuid;
     public String name;
+    public ListType listType;
     public boolean cured = false;
     public boolean failed = false;
     public boolean died = false;
+
     public Time timeLists = Time.zero();
 
-    public Lists(ServerPlayer player) {
+    public Lists(ServerPlayer player, ListType listType) {
         uuid = player.getUUID();
         name = player.getScoreboardName();
+        this.listType = listType;
     }
 
     public ServerPlayer getPlayer() {
@@ -27,5 +30,11 @@ public class Lists {
 
     public void tick() {
         timeLists.tick();
+    }
+}
+
+    public enum ListType {
+        NICE,
+        NAUGHTY
     }
 }
