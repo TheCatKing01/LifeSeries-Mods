@@ -77,6 +77,38 @@ public class ListsCommand extends Command {
         return currentSeason.listsManager;
     }
 	
+	public int resetNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
+		if (checkBanned(source)) return -1;
+		ListsManager bm = getBM();
+		if (bm == null) return -1;
+
+		if (targets.size() == 1) {
+			ServerPlayer target = targets.iterator().next();
+			if (!isNaughty(target)) {
+				source.sendFailure(Component.nullToEmpty("That player is not on the naughty list"));
+				return -1;
+			}
+		}
+
+		for (ServerPlayer player : targets) {
+			if (!isNaughty(player)) {
+				source.sendFailure(Component.nullToEmpty(
+					player.getName().getString() + " is not on the naughty list"
+				));
+				return -1;
+			}
+		}
+
+		if (targets.size() == 1) {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {}§7...", targets.iterator().next()));
+		} else {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {} targets§7...", targets.size()));
+		}
+
+		bm.resetNaughtyStatus(targets);
+		return 1;
+	}
+	
     public int resetNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
         ListsManager bm = getBM();
