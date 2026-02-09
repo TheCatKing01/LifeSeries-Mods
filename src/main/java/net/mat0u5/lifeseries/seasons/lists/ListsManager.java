@@ -73,7 +73,7 @@ public class ListsManager {
     }
 	
 	public void showRolling(List<ServerPlayer> players) {
-		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
 		PlayerUtils.sendTitleToPlayers(
 			players,
 			Component.literal("3").withStyle(ChatFormatting.GREEN),
@@ -81,7 +81,7 @@ public class ListsManager {
 		);
 
 		TaskScheduler.scheduleTask(30, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
 			PlayerUtils.sendTitleToPlayers(
 				players,
 				Component.literal("2").withStyle(ChatFormatting.YELLOW),
@@ -90,7 +90,7 @@ public class ListsManager {
 		});
 
 		TaskScheduler.scheduleTask(60, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK);
+			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
 			PlayerUtils.sendTitleToPlayers(
 				players,
 				Component.literal("1").withStyle(ChatFormatting.RED),
@@ -103,7 +103,7 @@ public class ListsManager {
 				players,
 				SoundEvent.createVariableRangeEvent(
 					IdentifierHelper.vanilla("lastlife_boogeyman_wait")
-				)
+				).value()
 			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
@@ -185,14 +185,23 @@ public class ListsManager {
                 player.addTag("nice");
                 PlayerUtils.sendTitle(player,
                     Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
-					PlayerUtils.playSoundToPlayers(List.of(player),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_start"))
+					PlayerUtils.playSoundToPlayers(
+						List.of(player),
+						SoundEvent.createVariableRangeEvent(
+							IdentifierHelper.vanilla("nicelife_nicelist_start")
+						).value()
 					);
             } else {
                 player.addTag("naughty");
                 PlayerUtils.sendTitle(player,
                     Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
-					PlayerUtils.playSoundToPlayers(List.of(player),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist"))
+					PlayerUtils.playSoundToPlayers(
+						List.of(player),
+						SoundEvent.createVariableRangeEvent(
+							IdentifierHelper.vanilla("nicelife_naughtylist")
+						).value()
 					);
+					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
             }
 
             Lists entry = addLists(player);
