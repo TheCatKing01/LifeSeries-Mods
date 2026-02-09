@@ -31,7 +31,6 @@ public class Lists {
     public void tick() {
         timeLists.tick();
     }
-}
 
     public enum ListType {
         NICE,
