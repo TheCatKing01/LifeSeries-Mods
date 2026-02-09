@@ -226,6 +226,7 @@ public class ListsManager {
     public void resetLists() {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             clearListTags(player, true);
+		}
         lists.clear();
         rolledPlayers.clear();
         listsChosen = false;
