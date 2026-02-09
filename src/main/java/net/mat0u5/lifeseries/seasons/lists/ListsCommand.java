@@ -109,25 +109,24 @@ public class ListsCommand extends Command {
 
         return 1;
     }
+	
+	public int cureNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
+		if (checkBanned(source)) return -1;
+		ListsManager bm = getBM();
+		if (bm == null) return -1;
 
-    public int cureNaughty(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
-        ListsManager bm = getBM();
-        if (bm == null) return -1;
-
-        for (ServerPlayer player : targets) {
+		for (ServerPlayer player : targets) {
 			if (!isNaughty(player)) {
 				source.sendFailure(Component.nullToEmpty(
 					player.getName().getString() + " is not on the naughty list"
 				));
 				return -1;
 			}
-        }
-		
-		bm.cureNaughtyList(targets);
+		}
 
-        return 1;
-    }
+		bm.cureNaughtyList(targets);
+		return 1;
+	}
 
     public int listsClear(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
