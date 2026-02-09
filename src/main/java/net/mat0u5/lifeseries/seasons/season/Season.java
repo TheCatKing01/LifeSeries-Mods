@@ -467,7 +467,7 @@ public abstract class Season {
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
-        listsManager.addSessionActions();o
+        listsManager.addSessionActions();
     }
 
     /*
