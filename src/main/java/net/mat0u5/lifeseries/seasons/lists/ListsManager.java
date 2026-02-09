@@ -103,7 +103,7 @@ public class ListsManager {
 				players,
 				SoundEvent.createVariableRangeEvent(
 					IdentifierHelper.vanilla("lastlife_boogeyman_wait")
-				).value()
+				)
 			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
@@ -189,7 +189,7 @@ public class ListsManager {
 						List.of(player),
 						SoundEvent.createVariableRangeEvent(
 							IdentifierHelper.vanilla("nicelife_nicelist_start")
-						).value()
+						)
 					);
             } else {
                 player.addTag("naughty");
@@ -199,9 +199,8 @@ public class ListsManager {
 						List.of(player),
 						SoundEvent.createVariableRangeEvent(
 							IdentifierHelper.vanilla("nicelife_naughtylist")
-						).value()
+						)
 					);
-					PlayerUtils.playSoundToPlayers(List.of(lists),SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_naughtylist")));
             }
 
             Lists entry = addLists(player);
