@@ -429,6 +429,7 @@ public abstract class Season {
         boogeymanManager.resetBoogeymen();
         secretSociety.resetMembers();
         listsManager.resetLists();
+        addSessionActions();
         return true;
     }
 
