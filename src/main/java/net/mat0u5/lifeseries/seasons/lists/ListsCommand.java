@@ -65,52 +65,26 @@ public class ListsCommand extends Command {
                     .executes(context -> cureNaughty(context.getSource(), EntityArgument.getPlayers(context, "player")))
 					)
 			)
-
-            .then(literal("add")
-                .requires(PermissionManager::isAdmin)
-                .then(literal("naughty")
-                    .then(argument("player", EntityArgument.player())
-                        .executes(context -> addPlayerToList(
-                            context.getSource(),
-                            EntityArgument.getPlayer(context, "player"),
-                            Lists.ListType.NAUGHTY
-                        ))
-                    )
-                )
-                .then(literal("nice")
-                    .then(argument("player", EntityArgument.player())
-                        .executes(context -> addPlayerToList(
-                            context.getSource(),
-                            EntityArgument.getPlayer(context, "player"),
-                            Lists.ListType.NICE
-                        ))
-                    )
-                )
-            )
-
-            .then(literal("list")
-                .requires(PermissionManager::isAdmin)
-                .then(literal("add")
-                    .then(literal("naughty")
-                        .then(argument("player", EntityArgument.player())
-                            .executes(context -> addPlayerToList(
-                                context.getSource(),
-                                EntityArgument.getPlayer(context, "player"),
-                                Lists.ListType.NAUGHTY
-                            ))
-                        )
-                    )
-                    .then(literal("nice")
-                        .then(argument("player", EntityArgument.player())
-                            .executes(context -> addPlayerToList(
-                                context.getSource(),
-                                EntityArgument.getPlayer(context, "player"),
-                                Lists.ListType.NICE
-                            ))
-                        )
-                    )
-                )
-            )
+			
+			.then(literal("add")
+				.requires(PermissionManager::isAdmin)
+				.then(argument("player", EntityArgument.player())
+					.then(literal("naughty")
+						.executes(context -> addPlayerToList(
+							context.getSource(),
+							EntityArgument.getPlayer(context, "player"),
+							Lists.ListType.NAUGHTY
+						))
+					)
+					.then(literal("nice")
+						.executes(context -> addPlayerToList(
+							context.getSource(),
+							EntityArgument.getPlayer(context, "player"),
+							Lists.ListType.NICE
+						))
+					)
+				)
+			)
 
             .then(literal("remove")
                 .requires(PermissionManager::isAdmin)

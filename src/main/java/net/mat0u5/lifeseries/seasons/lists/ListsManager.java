@@ -239,7 +239,30 @@ public class ListsManager {
     public void onPlayerJoin(ServerPlayer player) {
         if (!isListsActive()) {
             removePlayerFromLists(player, true);
+            return;
         }
+
+        Lists entry = getListEntry(player);
+        if (entry == null) {
+            clearListTags(player, false);
+            return;
+        }
+
+        if (entry.listType == Lists.ListType.NICE) {
+            player.addTag("nice");
+            player.removeTag("naughty");
+        }
+        else {
+            player.removeTag("nice");
+            if (entry.cured) {
+                player.removeTag("naughty");
+            }
+            else {
+                player.addTag("naughty");
+            }
+        }
+
+        livesManager.applyCorrectTeam(player);
     }
 
     public boolean isListsActive() {
