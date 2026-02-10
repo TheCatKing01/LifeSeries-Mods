@@ -1,17 +1,16 @@
 package net.mat0u5.lifeseries.seasons.lists;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,34 +42,91 @@ public class ListsCommand extends Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-            literal("lists")
-                .then(literal("clear")
-                    .requires(PermissionManager::isAdmin)
-                    .executes(context -> listsClear(
-                        context.getSource()
-                    ))
-                )
+		dispatcher.register(buildRootCommand());
+    }
+    private LiteralArgumentBuilder<CommandSourceStack> buildRootCommand() {
+        return literal("lists")
+            .then(literal("clear")
+                .requires(PermissionManager::isAdmin)
+                .executes(context -> listsClear(
+                    context.getSource()
+                ))
+            )
 
-                .then(literal("reset")
-                        .requires(PermissionManager::isAdmin)
-                        .then(argument("player", EntityArgument.players())
-                                .executes(context -> resetNaughty(context.getSource(), EntityArgument.getPlayers(context, "player")))
-                        )
-                )
-                .then(literal("cure")
+            .then(literal("reset")
                     .requires(PermissionManager::isAdmin)
                     .then(argument("player", EntityArgument.players())
-                        .executes(context -> cureNaughty(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                            .executes(context -> resetNaughty(context.getSource(), EntityArgument.getPlayers(context, "player")))                    )
+                )
+			)
+            .then(literal("cure")
+                .requires(PermissionManager::isAdmin)
+                .then(argument("player", EntityArgument.players())
+                    .executes(context -> cureNaughty(context.getSource(), EntityArgument.getPlayers(context, "player")))
+					            )
+
+            .then(literal("add")
+                .requires(PermissionManager::isAdmin)
+                .then(literal("naughty")
+                    .then(argument("player", EntityArgument.player())
+                        .executes(context -> addPlayerToList(
+                            context.getSource(),
+                            EntityArgument.getPlayer(context, "player"),
+                            Lists.ListType.NAUGHTY
+                        ))
                     )
                 )
-                .then(literal("randomize")
-                    .requires(PermissionManager::isAdmin)
-                    .executes(context -> listsChooseRandom(
-                        context.getSource()
+                .then(literal("nice")
+                    .then(argument("player", EntityArgument.player())
+                        .executes(context -> addPlayerToList(
+                            context.getSource(),
+                            EntityArgument.getPlayer(context, "player"),
+                            Lists.ListType.NICE
+                        ))
+                    )
+                )
+            )
+
+            .then(literal("list")
+                .requires(PermissionManager::isAdmin)
+                .then(literal("add")
+                    .then(literal("naughty")
+                        .then(argument("player", EntityArgument.player())
+                            .executes(context -> addPlayerToList(
+                                context.getSource(),
+                                EntityArgument.getPlayer(context, "player"),
+                                Lists.ListType.NAUGHTY
+                            ))
+                        )
+                    )
+                    .then(literal("nice")
+                        .then(argument("player", EntityArgument.player())
+                            .executes(context -> addPlayerToList(
+                                context.getSource(),
+                                EntityArgument.getPlayer(context, "player"),
+                                Lists.ListType.NICE
+                            ))
+                        )
+                    )
+                )
+            )
+
+            .then(literal("remove")
+                .requires(PermissionManager::isAdmin)
+                .then(argument("player", EntityArgument.player())
+                    .executes(context -> removePlayerFromLists(
+                        context.getSource(),
+                        EntityArgument.getPlayer(context, "player")
                     ))
                 )
-        );
+            )
+
+            .then(literal("randomize")
+                .requires(PermissionManager::isAdmin)
+                .executes(context -> listsChooseRandom(
+                    context.getSource()
+                ))
+            );
     }
 
     public ListsManager getBM() {
@@ -126,6 +182,34 @@ public class ListsCommand extends Command {
 		bm.cureNaughtyList(targets);
 		return 1;
 	}
+	
+    public int addPlayerToList(CommandSourceStack source, ServerPlayer target, Lists.ListType listType) {
+        if (checkBanned(source)) return -1;
+        ListsManager bm = getBM();
+        if (bm == null) return -1;
+
+        bm.addPlayerToList(target, listType, true);
+        String listTypeName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {}§7 to the §e{}§7 list.", target, listTypeName));
+        return 1;
+    }
+
+
+    public int removePlayerFromLists(CommandSourceStack source, ServerPlayer target) {
+        if (checkBanned(source)) return -1;
+        ListsManager bm = getBM();
+        if (bm == null) return -1;
+
+        var removedType = bm.removePlayerFromLists(target, true);
+        if (removedType.isEmpty()) {
+            source.sendFailure(TextUtils.format("{}§c is not on any list.", target));
+            return -1;
+        }
+
+        String listTypeName = removedType.get() == Lists.ListType.NAUGHTY ? "naughty" : "nice";
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {}§7 from the §e{}§7 list.", target, listTypeName));
+        return 1;
+    }
 
     public int listsClear(CommandSourceStack source) {
         if (checkBanned(source)) return -1;

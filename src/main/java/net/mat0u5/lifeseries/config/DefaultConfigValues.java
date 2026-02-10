@@ -338,11 +338,11 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<String> LISTS_IGNORE = new ConfigFileEntry<>(
             "lists_ignore", "[]", "lifeseries_plus.lists",
-            "Lists Ignore List", "A list of players that cannot be on the naughty/nice list."
+            "Lists Ignore List", "A list of players that cannot be on the naughty/nice lists."
     );
     public final ConfigFileEntry<String> LISTS_FORCE = new ConfigFileEntry<>(
             "lists_force", "[]", "lifeseries_plus.lists",
-            "Lists Force List", "A list of players that are forced be on the naughty/nice list."
+            "Lists Force List", "A list of players that are forced be on the naughty/nice lists."
     );
     public final ConfigFileEntry<Double> LISTS_CHOOSE_MINUTE = new ConfigFileEntry<>(
             "lists_choose_minute", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",

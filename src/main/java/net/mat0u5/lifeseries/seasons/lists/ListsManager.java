@@ -163,6 +163,10 @@ public class ListsManager {
             Component.literal("No List").withStyle(ChatFormatting.YELLOW),
             10, 50, 20
         );
+		PlayerUtils.playSoundToPlayers(
+            normalPlayers,
+            SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no"))
+        );
 
         Collections.shuffle(listPlayers, rnd);
 
@@ -279,10 +283,44 @@ public class ListsManager {
         return null;
     }
 
-    private void removePlayerFromLists(ServerPlayer player, boolean notify) {
-        lists.removeIf(entry -> entry.uuid.equals(player.getUUID()));
+    public Optional<Lists.ListType> removePlayerFromLists(ServerPlayer player, boolean notify) {
+        Lists entry = getListEntry(player);
+        lists.removeIf(listEntry -> listEntry.uuid.equals(player.getUUID()));
         rolledPlayers.remove(player.getUUID());
         clearListTags(player, notify);
+        if (entry == null) {
+            return Optional.empty();
+        }
+        return Optional.of(entry.listType);
+    }
+
+    public void addPlayerToList(ServerPlayer player, Lists.ListType listType, boolean notify) {
+        removePlayerFromLists(player, false);
+
+        if (listType == Lists.ListType.NAUGHTY) {
+            player.addTag("naughty");
+            player.removeTag("nice");
+        }
+        else {
+            player.addTag("nice");
+            player.removeTag("naughty");
+        }
+
+        addLists(player, listType);
+        livesManager.applyCorrectTeam(player);
+
+        if (notify) {
+            String listName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
+            player.sendSystemMessage(Component.literal("§6[NOTICE] You were added to the " + listName + " list."));
+        }
+    }
+
+    public Optional<Lists.ListType> getPlayerListType(ServerPlayer player) {
+        Lists entry = getListEntry(player);
+        if (entry == null) {
+            return Optional.empty();
+        }
+        return Optional.of(entry.listType);
     }
 
     private void clearListTags(ServerPlayer player, boolean notify) {
