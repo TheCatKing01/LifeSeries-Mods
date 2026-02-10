@@ -228,9 +228,11 @@ public class ListsManager {
     }
 
     public void resetLists() {
-        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            clearListTags(player, true);
-		}
+        if (server != null) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                clearListTags(player, true);
+            }
+        }
         lists.clear();
         rolledPlayers.clear();
         listsChosen = false;
@@ -239,30 +241,8 @@ public class ListsManager {
     public void onPlayerJoin(ServerPlayer player) {
         if (!isListsActive()) {
             removePlayerFromLists(player, true);
-            return;
         }
 
-        Lists entry = getListEntry(player);
-        if (entry == null) {
-            clearListTags(player, false);
-            return;
-        }
-
-        if (entry.listType == Lists.ListType.NICE) {
-            player.addTag("nice");
-            player.removeTag("naughty");
-        }
-        else {
-            player.removeTag("nice");
-            if (entry.cured) {
-                player.removeTag("naughty");
-            }
-            else {
-                player.addTag("naughty");
-            }
-        }
-
-        livesManager.applyCorrectTeam(player);
     }
 
     public boolean isListsActive() {
