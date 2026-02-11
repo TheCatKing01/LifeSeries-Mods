@@ -69,14 +69,14 @@ public class ListsCommand extends Command {
 			.then(literal("add")
 				.requires(PermissionManager::isAdmin)
 				.then(argument("player", EntityArgument.player())
-					.then(literal("naughty")
+					.then(literal("naughty_list")
 						.executes(context -> addPlayerToList(
 							context.getSource(),
 							EntityArgument.getPlayer(context, "player"),
 							Lists.ListType.NAUGHTY
 						))
 					)
-					.then(literal("nice")
+					.then(literal("nice_list")
 						.executes(context -> addPlayerToList(
 							context.getSource(),
 							EntityArgument.getPlayer(context, "player"),

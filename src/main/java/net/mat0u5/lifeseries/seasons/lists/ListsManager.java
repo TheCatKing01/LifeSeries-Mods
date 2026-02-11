@@ -291,6 +291,7 @@ public class ListsManager {
         lists.removeIf(listEntry -> listEntry.uuid.equals(player.getUUID()));
         rolledPlayers.remove(player.getUUID());
         clearListTags(player, notify);
+        livesManager.applyCorrectTeam(player);
         if (entry == null) {
             return Optional.empty();
         }
