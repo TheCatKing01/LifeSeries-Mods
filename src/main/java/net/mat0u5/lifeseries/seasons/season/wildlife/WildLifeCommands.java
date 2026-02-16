@@ -327,6 +327,34 @@ public class WildLifeCommands extends Command {
             for (ServerPlayer player : targets) {
                 SuperpowersWildcard.assignedSuperpowers.remove(player.getUUID());
             }
+			
+			if (targets.size() == 1) {
+    OtherUtils.sendCommandFeedback(source,
+        TextUtils.format(
+            "Forced one of {}'s superpowers to be {} when the next superpower randomization happens",
+            targets.iterator().next(),
+            name
+        )
+    );
+} else {
+    OtherUtils.sendCommandFeedback(source,
+        TextUtils.format(
+            "Forced one of the superpowers of {} targets to be {} when the next superpower randomization happens",
+            targets.size(),
+            name
+        )
+    );
+} // ✅ Properly close the real else block
+
+/*
+OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_SINGLE.get(targets.iterator().next(), name));
+else {
+    OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_MULTIPLE.get(targets.size(), name));
+}
+*/
+
+return 1;
+			
             if (targets.size() == 1) {
                 OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_RESET_SINGLE.get(targets.iterator().next()));
             }
