@@ -407,58 +407,38 @@ return 1;
         return 1;
     }
 	
-	public int setRandomSuperpowers(CommandSourceStack source) {
+	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
 		if (checkBanned(source)) return -1;
-		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
-		SuperpowersWildcard.rollRandomSuperpowers(players);
+		SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
 		int count = SuperpowersWildcard.POWERS_PER_ROLL;
-		if (count == 1) {
-			OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
+
+		if (targets.size() == 1) {
+			if (count == 1) {
+				OtherUtils.sendCommandFeedback(source,
+					TextUtils.format("Added a random superpower to {}", targets.iterator().next()));
+			} else {
+				OtherUtils.sendCommandFeedback(source,
+					TextUtils.format("Added {} random superpowers to {}", count, targets.iterator().next()));
+			}
+		} else {
+			if (count == 1) {
+				OtherUtils.sendCommandFeedback(source,
+					TextUtils.format("Added a random superpower to {} targets", targets.size()));
+			} else {
+				OtherUtils.sendCommandFeedback(source,
+					TextUtils.format("Added {} random superpowers to {} targets", count, targets.size()));
+			}
 		}
+
+		/*
+		OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
 		else {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to all players", count));
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(targets.size()));
 		}
-/*
-    public int setRandomSuperpowers(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
-        SuperpowersWildcard.rollRandomSuperpowers();
-        OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
-        return 1;
-    }
-*/
+		*/
 
 		return 1;
 	}
-
-	
-	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
-        SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
-		int count = SuperpowersWildcard.POWERS_PER_ROLL;
-        if (targets.size() == 1) {
-			if (count == 1) {
-				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {}", targets.iterator().next()));
-			}
-			else {
-				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to {}", count, targets.iterator().next()));
-			}
-        }
-        else {
-			if (count == 1) {
-				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added a random superpower to {} targets", targets.size()));
-			}
-			else {
-				OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to {} targets", count, targets.size()));
-
-			}
-/*
-            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(targets.size()));
-*/        }
-        return 1;
-    }
 	
 	public int getSuperpowerCount(CommandSourceStack source, ServerPlayer player) {
 	    if (checkBanned(source))return -1;
