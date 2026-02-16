@@ -95,9 +95,9 @@ public class NiceLife extends Season {
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
         if (server == null) return;
-        //? if <= 1.21.9 {
-        /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT_CYCLE, true);
-        *///?} else {
+		//? if <= 1.21.9 {
+		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
+		//?} else {
         OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
          //?}
         NiceLifeTriviaManager.killAllSnowmen();
