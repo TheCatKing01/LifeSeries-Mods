@@ -18,16 +18,16 @@ public class DefaultConfigValues {
             "creative_ignore_blacklist", true, "global.blacklist",
             "Creative Ignore Blacklist", "Controls whether players in creative mode are able to bypass the blacklists."
     );
+    public final ConfigFileEntry<Object> WORLDBORDER_GROUP = new ConfigFileEntry<>(
+            "worldborder_sizes", null, ConfigTypes.TEXT, "{global.worldborder}",
+            "Worldborder Settings", ""
+    );
     //? if < 1.21.9 {
-    public final ConfigFileEntry<Integer> WORLDBORDER_SIZE = new ConfigFileEntry<>(
+    /*public final ConfigFileEntry<Integer> WORLDBORDER_SIZE = new ConfigFileEntry<>(
             "worldborder_size", 500, "global",
             "Worldborder Size", "Sets the worldborder size."
     );
-    //?} else {
-    /*public final ConfigFileEntry<Object> WORLDBORDER_GROUP = new ConfigFileEntry<>(
-            "worldborder_sizes", null, ConfigTypes.TEXT, "{global.worldborder}",
-            "Worldborder Sizes", ""
-    );
+    *///?} else {
     public final ConfigFileEntry<Integer> WORLDBORDER_SIZE = new ConfigFileEntry<>(
             "worldborder_size", 500, "global.worldborder",
             "Worldborder Size", "Sets the worldborder size in the overworld."
@@ -40,7 +40,7 @@ public class DefaultConfigValues {
             "worldborder_end_size", 500, "global.worldborder",
             "Worldborder End Size", "Sets the worldborder size in the end."
     );
-    *///?}
+    //?}
     public final ConfigFileEntry<Boolean> KEEP_INVENTORY = new ConfigFileEntry<>(
             "keep_inventory", true, "global",
             "Keep Inventory", "Decides whether players drop their items when they die."
@@ -113,21 +113,30 @@ public class DefaultConfigValues {
             "blacklist_blocks", "[]", ConfigTypes.BLOCK_LIST, "global.blacklist",
             "Blacklisted Blocks", "List of banned blocks."
     );
-    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS = new ConfigFileEntry<>(
-            "blacklist_clamped_enchants", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist",
-            "Clamped Enchants", "List of enchantments clamped to level 1 (any higher levels will be set to lvl1)."
+    public final ConfigFileEntry<Object> GROUP_CLAMPED_ENCHANTS = new ConfigFileEntry<>(
+            "group_clamped_enchants", null, ConfigTypes.TEXT, "{global.blacklist.enchants}[new]",
+            "Clamped Enchantments", ""
     );
+    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1 = new ConfigFileEntry<>(
+            "blacklist_clamped_enchants_level_1", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist.enchants[new]",
+            "Clamped To Level 1", "List of enchantments clamped to level 1 (any higher levels will be set to lvl1)."
+    );
+    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS_LEVEL_2 = new ConfigFileEntry<>(
+            "blacklist_clamped_enchants_level_2", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist.enchants[new]",
+            "Clamped To Level 2", "List of enchantments clamped to level 2 (any higher levels will be set to lvl2)."
+    );
+    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS_LEVEL_3 = new ConfigFileEntry<>(
+            "blacklist_clamped_enchants_level_3", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist.enchants[new]",
+            "Clamped To Level 3", "List of enchantments clamped to level 3 (any higher levels will be set to lvl3)."
+    );
+    public final ConfigFileEntry<String> BLACKLIST_CLAMPED_ENCHANTS_LEVEL_4 = new ConfigFileEntry<>(
+            "blacklist_clamped_enchants_level_4", "[]", ConfigTypes.ENCHANT_LIST, "global.blacklist.enchants[new]",
+            "Clamped To Level 4", "List of enchantments clamped to level 4 (any higher levels will be set to lvl4)."
+    );
+
     public final ConfigFileEntry<String> BLACKLIST_RECIPES = new ConfigFileEntry<>(
             "blacklist_recipes", "[]", ConfigTypes.ITEM_LIST, "global.blacklist",
             "Blacklisted Recipes", "List of banned recipes - items you can't craft."
-    );
-    public final ConfigFileEntry<String> FINAL_DEATH_TITLE_SUBTITLE = new ConfigFileEntry<>(
-            "final_death_title_subtitle", "ran out of lives!", "global.finaldeath",
-            "Death Subtitle", "The subtitle that shows when a player dies (requires Show Death Title on Final Death to be set to true)."
-    );
-    public final ConfigFileEntry<String> FINAL_DEATH_MESSAGE = new ConfigFileEntry<>(
-            "final_death_message", "${player} ran out of lives.", "global.finaldeath",
-            "Final Death Message", "The message that gets shown in chat when a player fully dies."
     );
     public final ConfigFileEntry<Boolean> FINAL_DEATH_LIGHTNING = new ConfigFileEntry<>(
             "final_death_lightning", true, "global.finaldeath",
@@ -193,9 +202,6 @@ public class DefaultConfigValues {
             "boogeyman_force", "[]", "global.boogeyman",
             "Boogeyman Force List", "A list of players that are forced to become the boogeyman."
     );
-    public final ConfigFileEntry<String> BOOGEYMAN_MESSAGE = new ConfigFileEntry<>(
-            "boogeyman_message", "§7You are the Boogeyman. You must by any means necessary kill a §2dark green§7, §agreen§7 or §eyellow§7 name by direct action to be cured of the curse. If you fail, you will become a §cred name§7. All loyalties and friendships are removed while you are the Boogeyman.", "global.boogeyman", "Boogeyman Message", "The message that shows up when you become a Boogeyman."
-    );
     public final ConfigFileEntry<Double> BOOGEYMAN_CHANCE_MULTIPLIER = new ConfigFileEntry<>(
             "boogeyman_chance_multiplier", 0.5, ConfigTypes.PERCENTAGE, "global.boogeyman",
             "Boogeyman Chance Multiplier", "Controls how likely it is to get one extra boogeyman."
@@ -231,6 +237,10 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Boolean> BOOGEYMAN_STEAL_LIFE = new ConfigFileEntry<>(
             "boogeyman_steal_life", false, "global.boogeyman",
             "Boogeyman Steal Life", "When a boogeyman gets cured, they gain a life for completing their task."
+    );
+    public final ConfigFileEntry<Boolean> BOOGEYMAN_LOCATOR_BAR = new ConfigFileEntry<>(
+            "boogeyman_locator_bar", false, "global.boogeyman[new]",
+            "Boogeyman Locator Bar", "Controls whether the Boogeyman can see all other players on the locator bar."
     );
 
     public final ConfigFileEntry<Boolean> SECRET_SOCIETY = new ConfigFileEntry<>(
@@ -306,6 +316,34 @@ public class DefaultConfigValues {
             "additional_wither_skull_rate", 0.05, ConfigTypes.PERCENTAGE, "global",
             "Additional Wither Skull Rate", "Controls the additional chance for wither skeletons to drop skulls."
     );
+    public final ConfigFileEntry<Boolean> SUBIN_CHANGE_SKIN = new ConfigFileEntry<>(
+            "subin_change_skin", true, "global.subin[new]",
+            "Sub-in Change Skin", "Controls whether the player subbing in will get the skin of the player they are subbing in for."
+    );
+    public final ConfigFileEntry<Boolean> SUBIN_CHANGE_USERNAME = new ConfigFileEntry<>(
+            "subin_change_username", true, "global.subin[new]",
+            "Sub-in Change Username", "Controls whether the player subbing in will get the username of the player they are subbing in for."
+    );
+    public final ConfigFileEntry<Boolean> WORLDBORDER_OUTSIDE_TELEPORT = new ConfigFileEntry<>(
+            "worldborder_outside_teleport", true, "global.worldborder[new]",
+            "Worldborder Outside Teleport", "Controls whether players that get outside the worldborder get teleported back inside."
+    );
+    public final ConfigFileEntry<Boolean> SESSION_START_COUNTDOWN = new ConfigFileEntry<>(
+            "session_start_countdown", false, "global[new]",
+            "Session Start Countdown", "Shows a countdown when the session is starting.."
+    );
+    public final ConfigFileEntry<Boolean> LIVES_RANDOMIZE = new ConfigFileEntry<>(
+            "lives_randomize", false, "{global.lives.random}[new]",
+            "Randomize Lives", "Makes every player get a random amount of lives."
+    );
+    public final ConfigFileEntry<Integer> LIVES_RANDOMIZE_MIN = new ConfigFileEntry<>(
+            "lives_randomize_min", 2, "global.lives.random[new]",
+            "Minimum Lives", "The minimum number of lives any player can have after randomization."
+    );
+    public final ConfigFileEntry<Integer> LIVES_RANDOMIZE_MAX = new ConfigFileEntry<>(
+            "lives_randomize_max", 6, "global.lives.random[new]",
+            "Maximum Lives", "The maximum number of lives any player can have after randomization."
+    );
 
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(
             "simple_life", false, "{lifeseries_plus.simplelife}",
@@ -359,6 +397,10 @@ public class DefaultConfigValues {
             "group_watchers", null, ConfigTypes.TEXT, "{global.watchers}",
             "Watchers §7('/watcher' command)", ""
     );
+    public final ConfigFileEntry<Object> GROUP_SUBIN = new ConfigFileEntry<>(
+            "group_subin", null, ConfigTypes.TEXT, "{global.subin}",
+            "Sub-in Settings", ""
+    );
 
     public final ConfigFileEntry<Object> GROUP_LIVES = new ConfigFileEntry<>(
             "group_lives", null, ConfigTypes.TEXT, "{lives}",
@@ -371,6 +413,10 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Object> GROUP_EVENTS = new ConfigFileEntry<>(
             "group_events", null, ConfigTypes.TEXT, "{events}",
             "Events", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_TEXTS = new ConfigFileEntry<>(
+            "group_texts", null, ConfigTypes.TEXT, "{text}[new]",
+            "Modifiable Texts", ""
     );
 
 

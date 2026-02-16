@@ -7,14 +7,14 @@ import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.interfaces.IEntryGroupHeader;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-*///?}
+//?}
 
 public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends EmptyConfigEntry {
     private static final int CHILD_INDENT = 20;
@@ -65,6 +65,7 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     @Override
     public void render(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        renderTicks++;
         this.y = y;
         renderEntry(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
     }
@@ -95,8 +96,10 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
             mainEntry.render(context, x, y, width, entryHeight, mouseX, mouseY, entryHovered, tickDelta);
             currentY += entryHeight + ConfigListWidget.ENTRY_GAP;
 
-            String expandText = !mainEntry.shouldExpand() ? "Click to expand" : "Click to collapse";
-            RenderUtils.text(expandText, mainEntry.expandTextX(x, width), y + LABEL_OFFSET_Y).anchorRight().colored(TextColors.LIGHT_GRAY_A128).render(context, textRenderer);
+            if (showExpandText()) {
+                String expandText = !mainEntry.isExpanded() ? "Click to expand" : "Click to collapse";
+                RenderUtils.text(expandText, mainEntry.expandTextX(x, width), y + LABEL_OFFSET_Y).anchorRight().colored(TextColors.LIGHT_GRAY_A128).render(context, textRenderer);
+            }
         }
 
 
@@ -122,7 +125,9 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     private void renderExpandIcon(GuiGraphics context, int x, int y, boolean expanded, int endY, int width) {
         String text = expanded ? "- " : "+ ";
-        RenderUtils.text(text, x + EXPAND_TEXT_OFFSET_X, y + EXPAND_TEXT_OFFSET_Y).anchorRight().colored(TextColors.WHITE).render(context, textRenderer);
+        if (showExpandIcon()) {
+            RenderUtils.text(text, x + EXPAND_TEXT_OFFSET_X, y + EXPAND_TEXT_OFFSET_Y).anchorRight().colored(TextColors.WHITE).render(context, textRenderer);
+        }
         if (showSidebar) {
             context.fill(x+EXPAND_SIDEBAR_OFFSET_X, y, x+EXPAND_SIDEBAR_OFFSET_X+EXPAND_SIDEBAR_THICKNESS, endY - ConfigListWidget.ENTRY_GAP, TextColors.WHITE_A128);
         }
@@ -132,7 +137,15 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
     }
 
     private boolean shouldExpand() {
-        return mainEntry.shouldExpand();
+        return mainEntry.isExpanded();
+    }
+
+    private boolean showExpandIcon() {
+        return mainEntry.showExpandIcon();
+    }
+
+    private boolean showExpandText() {
+        return mainEntry.showExpandText();
     }
 
     private boolean hasExpandingChild() {
@@ -152,12 +165,12 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     @Override
     //? if <= 1.21.6 {
-    protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
-    //?} else {
-    /*protected boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled) {
+    /*protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
+    *///?} else {
+    protected boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled) {
         int mouseX = (int) click.x();
         int mouseY = (int) click.y();
-    *///?}
+    //?}
         int currentY = (int) mouseY - this.y;
 
         if (currentY < 0 || mainEntry == null) return false;
@@ -165,10 +178,10 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
         if (currentY <= mainEntry.getPreferredHeight()) {
             mainEntry.setFocused(true);
             //? if <= 1.21.6 {
-            if (mainEntry.mouseClicked(mouseX, mouseY, button)) return true;
-            //?} else {
-            /*if (mainEntry.mouseClicked(click, doubled)) return true;
-            *///?}
+            /*if (mainEntry.mouseClicked(mouseX, mouseY, button)) return true;
+            *///?} else {
+            if (mainEntry.mouseClicked(click, doubled)) return true;
+            //?}
         }
 
         if (isExpanded) {
@@ -179,10 +192,10 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
                     if (currentY >= childY && currentY < childY + childHeight) {
                         child.setFocused(true);
                         //? if <= 1.21.6 {
-                        if (child.mouseClicked(mouseX, mouseY, button)) return true;
-                        //?} else {
-                        /*if (child.mouseClicked(click, doubled)) return true;
-                        *///?}
+                        /*if (child.mouseClicked(mouseX, mouseY, button)) return true;
+                        *///?} else {
+                        if (child.mouseClicked(click, doubled)) return true;
+                        //?}
                     }
                 }
                 childY += childHeight;
@@ -194,16 +207,16 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     @Override
     //? if <= 1.21.6 {
-    protected boolean keyPressedEntry(int keyCode, int scanCode, int modifiers) {
-    //?} else {
-    /*protected boolean keyPressedEntry(KeyEvent input) {
-    *///?}
+    /*protected boolean keyPressedEntry(int keyCode, int scanCode, int modifiers) {
+    *///?} else {
+    protected boolean keyPressedEntry(KeyEvent input) {
+    //?}
         if (mainEntry != null && mainEntry.isFocused()) {
             //? if <= 1.21.6 {
-            if (mainEntry.keyPressed(keyCode, scanCode, modifiers)) {
-            //?} else {
-            /*if (mainEntry.keyPressed(input)) {
-            *///?}
+            /*if (mainEntry.keyPressed(keyCode, scanCode, modifiers)) {
+            *///?} else {
+            if (mainEntry.keyPressed(input)) {
+            //?}
                 return true;
             }
         }
@@ -212,10 +225,10 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
             for (ConfigEntry child : childEntries) {
                 if (!child.isFocused()) continue;
                 //? if <= 1.21.6 {
-                if (child.keyPressed(keyCode, scanCode, modifiers)) {
-                //?} else {
-                /*if (child.keyPressed(input)) {
-                *///?}
+                /*if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                *///?} else {
+                if (child.keyPressed(input)) {
+                //?}
                     return true;
                 }
             }
@@ -226,16 +239,16 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     @Override
     //? if <= 1.21.6 {
-    protected boolean charTypedEntry(char chr, int modifiers) {
-    //?} else {
-    /*protected boolean charTypedEntry(CharacterEvent input) {
-    *///?}
+    /*protected boolean charTypedEntry(char chr, int modifiers) {
+    *///?} else {
+    protected boolean charTypedEntry(CharacterEvent input) {
+    //?}
         if (mainEntry != null && mainEntry.isFocused()) {
             //? if <= 1.21.6 {
-            if (mainEntry.charTyped(chr, modifiers)) {
-            //?} else {
-            /*if (mainEntry.charTyped(input)) {
-            *///?}
+            /*if (mainEntry.charTyped(chr, modifiers)) {
+            *///?} else {
+            if (mainEntry.charTyped(input)) {
+            //?}
                 return true;
             }
         }
@@ -244,10 +257,10 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
             for (ConfigEntry child : childEntries) {
                 if (!child.isFocused()) continue;
                 //? if <= 1.21.6 {
-                if (child.charTyped(chr, modifiers)) {
-                //?} else {
-                /*if (child.charTyped(input)) {
-                *///?}
+                /*if (child.charTyped(chr, modifiers)) {
+                *///?} else {
+                if (child.charTyped(input)) {
+                //?}
                     return true;
                 }
             }
@@ -348,6 +361,11 @@ public class GroupConfigEntry<T extends ConfigEntry & IEntryGroupHeader> extends
 
     @Override
     public boolean sendToServer() {
+        return false;
+    }
+
+    @Override
+    public boolean canLoseFocusEasily() {
         return false;
     }
 }

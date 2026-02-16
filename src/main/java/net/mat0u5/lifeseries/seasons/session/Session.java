@@ -1,13 +1,15 @@
 package net.mat0u5.lifeseries.seasons.session;
 
 import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.mixin.MobEffectInstanceAccessor;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -33,6 +35,8 @@ public class Session {
     public static final Time DISPLAY_TIMER_INTERVAL = Time.ticks(5);
     public static final Time TAB_LIST_INTERVAL = Time.ticks(20);
     public static boolean TICK_FREEZE_NOT_IN_SESSION = false;
+    public static boolean WORLDBORDER_OUTSIDE_TELEPORT = true;
+    public static boolean SESSION_START_COUNTDOWN = false;
 
     private Time timer = Time.zero();
     private Time sessionLength = Time.nullTime();
@@ -41,17 +45,18 @@ public class Session {
     public List<Time[]> sessionPauses = new ArrayList<>();
 
     private SessionStatus status = SessionStatus.NOT_STARTED;
+    private int sessionStartInProgress = 0;
 
     SessionAction endWarning1 = new SessionAction(Time.minutes(-5)) {
         @Override
         public void trigger() {
-            PlayerUtils.broadcastMessage(Component.literal("Session ends in 5 minutes!").withStyle(ChatFormatting.GOLD));
+            PlayerUtils.broadcastMessage(ModifiableText.SESSION_WARNING_5MIN.get());
         }
     };
     SessionAction endWarning2 = new SessionAction(Time.minutes(-30)) {
         @Override
         public void trigger() {
-            PlayerUtils.broadcastMessage(Component.literal("Session ends in 30 minutes!").withStyle(ChatFormatting.GOLD));
+            PlayerUtils.broadcastMessage(ModifiableText.SESSION_WARNING_30MIN.get());
         }
     };
     SessionAction actionInfoAction = new SessionAction(Time.seconds(7)) {
@@ -65,14 +70,33 @@ public class Session {
         if (!canStartSession()) return false;
         clearSessionActions();
         if (!currentSeason.sessionStart()) return false;
+        if (sessionStartInProgress > 0) return false;
+        if (!SESSION_START_COUNTDOWN) {
+            startSession();
+        }
+        else {
+            sessionStartInProgress = 150;
+            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.COUNTDOWN_COLOR_3.get(), 15, 35, 15);
+            TaskScheduler.schedulePriorityTask(50, () -> {
+                PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.COUNTDOWN_COLOR_2.get(), 15, 35, 15);
+            });
+            TaskScheduler.schedulePriorityTask(100, () -> {
+                PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.COUNTDOWN_COLOR_1.get(), 15, 35, 15);
+            });
+            TaskScheduler.schedulePriorityTask(150, () -> {
+                PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.SESSION_START_TITLE.get(), 15, 35, 15);
+                startSession();
+            });
+        }
+        return true;
+    }
+
+    private void startSession() {
         changeStatus(SessionStatus.STARTED);
         passedTime = Time.zero();
         fullPassedTime = Time.zero();
         DatapackIntegration.setSessionTimePassed(getPassedTime());
-        Component line1 = TextUtils.formatLoosely("§6Session started! §7[{}]", sessionLength.formatLong());
-        Component line2 = Component.literal("§f/session timer showDisplay§7 - toggles a session timer on your screen.");
-        PlayerUtils.broadcastMessage(line1);
-        PlayerUtils.broadcastMessage(line2);
+        PlayerUtils.broadcastMessage(ModifiableText.SESSION_STARTED.get(sessionLength.formatLong()));
 
         addSessionActionIfTime(endWarning1);
         addSessionActionIfTime(endWarning2);
@@ -80,7 +104,6 @@ public class Session {
 
         SessionTranscript.sessionStart();
         SessionTranscript.logPlayers();
-        return true;
     }
 
     public void clearSessionActions() {
@@ -104,7 +127,7 @@ public class Session {
         SessionTranscript.sessionEnd();
         if (status != SessionStatus.FINISHED && status != SessionStatus.NOT_STARTED) {
             SessionTranscript.onSessionEnd();
-            PlayerUtils.broadcastMessage(Component.literal("The session has ended!").withStyle(ChatFormatting.GOLD));
+            PlayerUtils.broadcastMessage(ModifiableText.SESSION_ENDED.get());
         }
         changeStatus(SessionStatus.FINISHED);
         passedTime = Time.zero();
@@ -116,14 +139,14 @@ public class Session {
 
     public void sessionPause() {
         if (statusPaused()) {
-            PlayerUtils.broadcastMessage(Component.literal("Session unpaused!").withStyle(ChatFormatting.GOLD));
+            PlayerUtils.broadcastMessage(ModifiableText.SESSION_UNPAUSING.get());
             changeStatus(SessionStatus.STARTED);
             if (isInQueuedPause()) {
                 discardCurrentQueuedPause();
             }
         }
         else {
-            PlayerUtils.broadcastMessage(Component.literal("Session paused!").withStyle(ChatFormatting.GOLD));
+            PlayerUtils.broadcastMessage(ModifiableText.SESSION_PAUSED.get());
             changeStatus(SessionStatus.PAUSED);
         }
     }
@@ -245,6 +268,8 @@ public class Session {
     }
 
     public void tick(MinecraftServer server) {
+        if (sessionStartInProgress > 0) sessionStartInProgress--;
+
         if (statusPaused()) {
             //? if < 1.20.3 {
             /*float tickRate = 20;
@@ -269,7 +294,7 @@ public class Session {
         if (timer.isMultipleOf(DISPLAY_TIMER_INTERVAL)) {
             displayTimers(server);
             for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-                NetworkHandlerServer.sendStringPacket(player, PacketNames.SESSION_STATUS, status.getName());
+                SimplePackets.SESSION_STATUS.target(player).sendToClient(status.getName());
             }
             //? if <= 1.20.3 {
             /*for (MobEffect effect : blacklist.getBannedEffects()) {
@@ -368,6 +393,7 @@ public class Session {
 
     private Map<UUID, Vec3> lastNonBorderPositions = new HashMap<>();
     public void checkPlayerPosition(ServerPlayer player) {
+        if (!WORLDBORDER_OUTSIDE_TELEPORT) return;
         WorldBorder border = player.ls$getServerLevel().getWorldBorder();
         double playerSize = player.getBoundingBox().getXsize()/2;
         double minX = Math.floor(border.getMinX()) + playerSize;
@@ -408,18 +434,18 @@ public class Session {
             return;
         }
 
-        String message = "";
+        Component message = Component.empty();
         if (statusNotStarted()) {
-            message = "Session has not started";
+            message = ModifiableText.SESSION_TIMER_DISPLAY_NOTSTARTED.get();
         }
         else if (statusStarted()) {
-            message = getRemainingTimeStr();
+            message = ModifiableText.SESSION_TIMER_DISPLAY.get(getRemainingTimeStr());
         }
         else if (statusPaused()) {
-            message = "Session has been paused";
+            message = ModifiableText.SESSION_TIMER_DISPLAY_PAUSE.get();
         }
         else if (statusFinished()) {
-            message = "Session has ended";
+            message = ModifiableText.SESSION_TIMER_DISPLAY_END.get();
         }
 
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
@@ -434,7 +460,7 @@ public class Session {
                 }
 
                 if (!NetworkHandlerServer.wasHandshakeSuccessful(player)) {
-                    player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.GRAY), true);
+                    player.ls$message(message, true);
                 }
             }
             if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
@@ -447,7 +473,7 @@ public class Session {
                     timestamp = Time.now().add(remainingTime).getMillis();
                 }
                 if (timestamp != SessionTimerStates.OFF.getValue()) {
-                    NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, timestamp);
+                    SimplePackets.SESSION_TIMER.target(player).sendToClient(timestamp);
                 }
             }
         }
@@ -463,13 +489,13 @@ public class Session {
             if (actionMessage == null) continue;
             if (actionMessage.isEmpty()) continue;
             if (messages.isEmpty()) {
-                messages.add(Component.nullToEmpty("§7Queued session actions:"));
+                messages.add(ModifiableText.SESSION_ACTIONS.get());
             }
             if (action.showTime) {
-                messages.add(TextUtils.formatLoosely("§7- {} §f[{}]", actionMessage, action.getTriggerTime().formatLong()));
+                messages.add(ModifiableText.SESSION_ACTION_ENTRY_LONG.get(actionMessage, action.getTriggerTime().formatLong()));
             }
             else {
-                messages.add(TextUtils.formatLoosely("§7- {}", actionMessage));
+                messages.add(ModifiableText.SESSION_ACTION_ENTRY.get(actionMessage));
             }
         }
 

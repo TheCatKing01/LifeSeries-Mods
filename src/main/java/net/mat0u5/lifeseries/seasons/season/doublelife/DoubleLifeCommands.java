@@ -2,9 +2,9 @@ package net.mat0u5.lifeseries.seasons.season.doublelife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
@@ -106,7 +106,7 @@ public class DoubleLifeCommands extends Command {
         if (checkBanned(source)) return -1;
 
         if (player == null && soulmate == null) {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Soulmate prevent entries were reset"));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_PREVENT_RESET.get());
             return 1;
         }
 
@@ -115,22 +115,22 @@ public class DoubleLifeCommands extends Command {
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (season.hasSoulmate(player)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
 
         if (season.hasSoulmate(soulmate)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
         if (player.getUUID() == soulmate.getUUID()) {
-            source.sendFailure(Component.nullToEmpty("You cannot specify the same player twice"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_DUPLICATE.get());
             return -1;
         }
 
         season.preventSoulmates(player,soulmate);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate now cannot be {} when the next randomization happens.", player, soulmate));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_PREVENT.get(player, soulmate));
         return 1;
     }
 
@@ -138,7 +138,7 @@ public class DoubleLifeCommands extends Command {
         if (checkBanned(source)) return -1;
 
         if (player == null && soulmate == null) {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Soulmate force entries were reset"));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_FORCE_RESET.get());
             return 1;
         }
 
@@ -147,32 +147,32 @@ public class DoubleLifeCommands extends Command {
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (season.hasSoulmate(player)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
 
         if (season.hasSoulmate(soulmate)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
         if (player.getUUID() == soulmate.getUUID()) {
-            source.sendFailure(Component.nullToEmpty("You cannot specify the same player twice"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_DUPLICATE.get());
             return -1;
         }
 
         if (DoubleLife.soulmatesForce.containsKey(player.getUUID()) || DoubleLife.soulmatesForce.containsValue(player.getUUID())) {
-            source.sendFailure(TextUtils.formatPlain("{} is already forced with someone", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_FORCE_EXISTS.get(player));
             return -1;
         }
 
         if (DoubleLife.soulmatesForce.containsKey(soulmate.getUUID()) || DoubleLife.soulmatesForce.containsValue(soulmate.getUUID())) {
-            source.sendFailure(TextUtils.formatPlain("{} is already forced with someone", soulmate));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_FORCE_EXISTS.get(player));
             return -1;
         }
 
         season.forceSoulmates(player,soulmate);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate will be {} when the next randomization happens.", player, soulmate));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_FORCE.get(player, soulmate));
         return 1;
     }
 
@@ -183,19 +183,19 @@ public class DoubleLifeCommands extends Command {
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (season.hasSoulmate(player)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
 
         if (season.hasSoulmate(soulmate)) {
-            source.sendFailure(TextUtils.formatPlain("{} already has a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_EXISTS.get(player));
             return -1;
         }
 
         season.setSoulmate(player,soulmate);
         season.saveSoulmates();
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate is now {}", player, soulmate));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_SET.get(player, soulmate));
         return 1;
     }
 
@@ -206,18 +206,18 @@ public class DoubleLifeCommands extends Command {
         DoubleLife season = ((DoubleLife) currentSeason);
 
         if (!season.hasSoulmate(player)) {
-            source.sendFailure(TextUtils.formatPlain("{} does not have a soulmate", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_MISSING.get(player));
             return -1;
         }
         if (!season.isSoulmateOnline(player)) {
-            source.sendFailure(TextUtils.formatPlain("{} 's soulmate is not online right now", player));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_ERROR_OFFLINE.get(player));
             return -1;
         }
 
         ServerPlayer soulmate = season.getSoulmate(player);
         if (soulmate == null) return -1;
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate is {}", player, soulmate));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_GET.get(player, soulmate));
         return 1;
     }
 
@@ -238,14 +238,14 @@ public class DoubleLifeCommands extends Command {
         }
 
         if (affected.isEmpty()) {
-            source.sendFailure(Component.nullToEmpty("No target was found"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.TARGET_ERROR_MISSING.get());
             return -1;
         }
         if (affected.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("{}'s soulmate was reset", affected.get(0)));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_RESET_SINGLE.get(affected.get(0)));
             return 1;
         }
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Soulmate was reset for {} targets", affected.size()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_RESET_MULTIPLE.get(affected.size()));
         return 1;
     }
 
@@ -256,7 +256,7 @@ public class DoubleLifeCommands extends Command {
 
         season.resetAllSoulmates();
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("All soulmate entries were reset"));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_RESET.get());
         return 1;
     }
 
@@ -275,11 +275,11 @@ public class DoubleLifeCommands extends Command {
             if (player != null) text1 = player;
             if (soulmate != null) text2 = soulmate;
 
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s soulmate is {}", text1, text2));
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.DOUBLELIFE_SOULMATE_GET.get(text1, text2));
         }
 
         if (noSoulmates) {
-            source.sendFailure(Component.nullToEmpty("There are no soulmates currently assigned"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.DOUBLELIFE_SOULMATE_NONE.get());
         }
         return 1;
     }
@@ -287,7 +287,7 @@ public class DoubleLifeCommands extends Command {
     public int rollSoulmates(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         DoubleLife season = ((DoubleLife) currentSeason);
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Rolling soulmates..."));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_ROLLING.get());
         season.rollSoulmates();
         return 1;
     }

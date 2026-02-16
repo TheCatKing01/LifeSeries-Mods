@@ -25,7 +25,7 @@ public class DoubleLifeConfig extends ConfigManager {
             "netherite_helmet",
             "turtle_helmet",
             //? if >= 1.21.9
-            /*"copper_helmet",*/
+            "copper_helmet",
             "elytra"
     );
 
@@ -130,8 +130,8 @@ public class DoubleLifeConfig extends ConfigManager {
                 ,SOULMATES_PVP_ALLOWED
         ));
         //? if >= 1.21.6 {
-        /*result.add(SOULMATE_LOCATOR_BAR);
-        *///?}
+        result.add(SOULMATE_LOCATOR_BAR);
+        //?}
         return result;
     }
 
@@ -140,7 +140,7 @@ public class DoubleLifeConfig extends ConfigManager {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         super.instantiateProperties();
     }
 }

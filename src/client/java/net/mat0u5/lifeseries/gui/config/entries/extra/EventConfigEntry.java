@@ -11,14 +11,14 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Objects;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-*///?}
+import net.minecraft.client.input.MouseButtonEvent;
+//?}
 
 //? if <= 1.21.9 {
-import net.minecraft.Util;
-//?} else {
-/*import net.minecraft.util.Util;
- *///?}
+/*import net.minecraft.Util;
+*///?} else {
+import net.minecraft.util.Util;
+ //?}
 
 public class EventConfigEntry extends StringConfigEntry {
     Boolean canceled;
@@ -60,6 +60,11 @@ public class EventConfigEntry extends StringConfigEntry {
             RenderUtils.text(part2, x+widthText+openTutorialButton.getWidth()+20, y+6).render(context, textRenderer);
         }
         super.renderEntry(context, x, y + (isFirst?PREFFERED_HEIGHT:0), width, height, mouseX, mouseY, hovered, tickDelta);
+    }
+
+    @Override
+    protected int getTextFieldPosY(int y, int height) {
+        return y+1;
     }
 
     @Override
@@ -140,21 +145,21 @@ public class EventConfigEntry extends StringConfigEntry {
 
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
         if (canceledButton.mouseClicked(mouseX, mouseY, button) || openTutorialButton.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         return super.mouseClickedEntry(mouseX, mouseY, button);
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     protected boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled) {
         if (canceledButton.mouseClicked(click, doubled) || openTutorialButton.mouseClicked(click, doubled)) {
             return true;
         }
         return super.mouseClickedEntry(click, doubled);
     }
-    *///?}
+    //?}
 
 }

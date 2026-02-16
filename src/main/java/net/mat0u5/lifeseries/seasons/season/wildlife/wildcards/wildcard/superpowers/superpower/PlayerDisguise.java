@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.ToggleableSuperpower;
@@ -14,9 +15,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 //? if >= 1.21.9 {
-/*import net.mat0u5.lifeseries.mixin.MannequinAccessor;
+import net.mat0u5.lifeseries.mixin.MannequinAccessor;
 import net.minecraft.world.entity.decoration.Mannequin;
-*///?}
+//?}
 
 public class PlayerDisguise extends ToggleableSuperpower {
 
@@ -44,27 +45,27 @@ public class PlayerDisguise extends ToggleableSuperpower {
         Entity lookingAt = PlayerUtils.getEntityLookingAt(player, 50);
         if (lookingAt != null)  {
             //? if >= 1.21.9 {
-            /*if (lookingAt instanceof Mannequin mannequin && mannequin instanceof MannequinAccessor mannequinAccessor && mannequin.tickCount < 0) {
+            if (lookingAt instanceof Mannequin mannequin && mannequin instanceof MannequinAccessor mannequinAccessor && mannequin.tickCount < 0) {
                 ServerPlayer lookingAtPlayer = PlayerUtils.getPlayer(mannequinAccessor.ls$getMannequinProfile().partialProfile().id());
                 if (lookingAtPlayer != null) {
                     lookingAt = lookingAtPlayer;
                 }
             }
-            *///?}
+            //?}
             if (lookingAt instanceof ServerPlayer lookingAtPlayer) {
                 lookingAtPlayer = PlayerUtils.getPlayerOrProjection(lookingAtPlayer);
                 if (!PlayerUtils.isFakePlayer(lookingAtPlayer)) {
                     copiedPlayerUUID = lookingAtPlayer.getStringUUID();
                     copiedPlayerName = TextUtils.textToLegacyString(lookingAtPlayer.getDisplayName());
                     player.ls$playNotifySound(SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.MASTER, 0.3f, 1);
-                    PlayerUtils.displayMessageToPlayer(player, TextUtils.format("Copied DNA of {}", lookingAtPlayer).append(Component.nullToEmpty(" — Press again to disguise")), 65);
+                    PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_PLAYERDISGUISE.get(lookingAtPlayer), 65);
                     return;
                 }
             }
         }
 
         if (copiedPlayerName.isEmpty() || copiedPlayerUUID.isEmpty()) {
-            PlayerUtils.displayMessageToPlayer(player, Component.nullToEmpty("You are not looking at a player."), 65);
+            PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_PLAYERDISGUISE_ERROR.get(), 65);
             return;
         }
 

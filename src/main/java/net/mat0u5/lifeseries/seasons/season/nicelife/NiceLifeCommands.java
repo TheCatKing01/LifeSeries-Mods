@@ -3,19 +3,19 @@ package net.mat0u5.lifeseries.seasons.season.nicelife;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
+import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
@@ -31,7 +31,7 @@ public class NiceLifeCommands extends Command {
     }
 
     public List<String> getAdminCommands() {
-        return List.of("vote", "nicelife");
+        return List.of("vote", "nicelife", "nicelist", "naughtylist");
     }
     public List<String> getNonAdminCommands() {
         return List.of("vote");
@@ -64,6 +64,190 @@ public class NiceLifeCommands extends Command {
                                         .executes(context -> skipNight(context.getSource()))
                         )
         );
+        dispatcher.register(
+                literal("nicelist")
+                        .requires(PermissionManager::isAdmin)
+                        .then(literal("end")
+                                .executes(context -> niceListEnd(
+                                        context.getSource()
+                                ))
+                        )
+                        .then(literal("list")
+                                .executes(context -> niceList(
+                                        context.getSource()
+                                ))
+                        )
+                        .then(literal("add")
+                                .then(argument("player", EntityArgument.players())
+                                        .executes(context -> niceListAdd(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                                )
+                        )
+                        .then(literal("remove")
+                                .then(argument("player", EntityArgument.players())
+                                        .executes(context -> niceListRemove(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                                )
+                        )
+        );
+        dispatcher.register(
+                literal("naughtylist")
+                        .requires(PermissionManager::isAdmin)
+                        .then(literal("end")
+                                .executes(context -> naughtyListEnd(
+                                        context.getSource()
+                                ))
+                        )
+                        .then(literal("list")
+                                .executes(context -> naughtyList(
+                                        context.getSource()
+                                ))
+                        )
+                        .then(literal("add")
+                                .then(argument("player", EntityArgument.players())
+                                        .executes(context -> naughtyListAdd(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                                )
+                        )
+                        .then(literal("remove")
+                                .then(argument("player", EntityArgument.players())
+                                        .executes(context -> naughtyListRemove(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                                )
+                        )
+        );
+
+    }
+
+    private int niceListEnd(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NICELIST_ERROR.get());
+            return -1;
+        }
+        NiceLifeVotingManager.endNiceList();
+        return 1;
+    }
+
+    private int niceList(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+
+        if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NICELIST_ERROR.get());
+            return -1;
+        }
+
+        List<ServerPlayer> niceListPlayers = new ArrayList<>();
+        for (UUID uuid : NiceLifeVotingManager.niceListMembers) {
+            ServerPlayer player = PlayerUtils.getPlayer(uuid);
+            if (player != null) {
+                niceListPlayers.add(player);
+            }
+        }
+        if (niceListPlayers.isEmpty()) {
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.NICELIFE_NICELIST_EMPTY.get());
+            return 1;
+        }
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.NICELIFE_NICELIST_LIST.get(niceListPlayers));
+        return 1;
+    }
+
+    private int niceListAdd(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+
+        if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NICELIST_ERROR.get());
+            return -1;
+        }
+
+        for (ServerPlayer player : targets) {
+            NiceLifeVotingManager.manuallyAddNiceListMember(player);
+        }
+
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NICELIST_ADD_SINGLE.get(targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NICELIST_ADD_MULTIPLE.get(targets.size()));
+        }
+
+        return 1;
+    }
+
+    private int niceListRemove(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+
+        if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NICELIST_ERROR.get());
+            return -1;
+        }
+
+        for (ServerPlayer player : targets) {
+            NiceLifeVotingManager.manuallyRemoveNiceListMember(player);
+        }
+
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NICELIST_REMOVE_SINGLE.get(targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NICELIST_REMOVE_MULTIPLE.get(targets.size()));
+        }
+
+        return 1;
+    }
+
+    private int naughtyListEnd(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        NiceLifeVotingManager.endNaughtyList();
+        return 1;
+    }
+
+    private int naughtyList(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+
+        List<ServerPlayer> naughtyListPlayers = new ArrayList<>();
+        for (UUID uuid : NiceLifeVotingManager.naughtyListMembers) {
+            ServerPlayer player = PlayerUtils.getPlayer(uuid);
+            if (player != null) {
+                naughtyListPlayers.add(player);
+            }
+        }
+        if (naughtyListPlayers.isEmpty()) {
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.NICELIFE_NAUGHTYLIST_EMPTY.get());
+            return 1;
+        }
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.NICELIFE_NAUGHTYLIST_LIST.get(naughtyListPlayers));
+        return 1;
+    }
+
+    private int naughtyListAdd(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+
+        for (ServerPlayer player : targets) {
+            NiceLifeVotingManager.manuallyAddNaughtyListMember(player);
+        }
+
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NAUGHTYLIST_ADD_SINGLE.get(targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NAUGHTYLIST_ADD_MULTIPLE.get(targets.size()));
+        }
+
+        return 1;
+    }
+
+    private int naughtyListRemove(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+
+        for (ServerPlayer player : targets) {
+            NiceLifeVotingManager.manuallyRemoveNaughtyListMember(player);
+        }
+
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NAUGHTYLIST_REMOVE_SINGLE.get(targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_NAUGHTYLIST_REMOVE_MULTIPLE.get(targets.size()));
+        }
+
+        return 1;
     }
 
     private int forceNextVote(CommandSourceStack source, String type) {
@@ -80,11 +264,11 @@ public class NiceLifeCommands extends Command {
                 NiceLifeVotingManager.forcedTriviaVote = Optional.of(NiceLifeVotingManager.VoteType.NAUGHTY_LIST);
                 break;
             default:
-                source.sendFailure(Component.nullToEmpty("Vote type not found"));
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_UNKNOWN.get());
                 return -1;
         }
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Next midnight vote will be '{}'", type));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_VOTE_SET.get(type));
         return 1;
     }
 
@@ -95,12 +279,13 @@ public class NiceLifeCommands extends Command {
 
         if (self.isSleeping()) {
             self.stopSleepInBed(false, true);
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Woke up {}", self));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_WAKEUP_SINGLE.get(self));
         }
         else {
-            source.sendFailure(Component.nullToEmpty("You are not sleeping"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NOTSLEEPING.get());
             return -1;
         }
+        SimplePackets.REMOVE_SLEEP_SCREENS.target(self).sendToClient();
 
         return 1;
     }
@@ -111,14 +296,15 @@ public class NiceLifeCommands extends Command {
             if (player.isSleeping()) {
                 player.stopSleepInBed(false, true);
             }
+            SimplePackets.REMOVE_SLEEP_SCREENS.target(player).sendToClient();
         }
 
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Woke up {}", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_WAKEUP_SINGLE.get(targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Woke up {} players", targets.size()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.NICELIFE_WAKEUP_MULTIPLE.get(targets.size()));
         }
 
         return 1;
@@ -128,11 +314,11 @@ public class NiceLifeCommands extends Command {
         if (checkBanned(source)) return -1;
         if (currentSeason instanceof NiceLife niceLife) {
             //? if <= 1.21.4 {
-            if (!source.getServer().overworld().isNight()) {
-            //?} else {
-            /*if (!source.getServer().overworld().isDarkOutside()) {
-            *///?}
-                source.sendFailure(Component.nullToEmpty("It is not night time"));
+            /*if (!source.getServer().overworld().isNight()) {
+            *///?} else {
+            if (!source.getServer().overworld().isDarkOutside()) {
+            //?}
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_NOT_NIGHT.get());
                 return -1;
             }
             niceLife.sleepThroughNight();
@@ -146,26 +332,26 @@ public class NiceLifeCommands extends Command {
         if (self == null) return -1;
 
         if (!NiceLifeVotingManager.niceListMembers.contains(self.getUUID())) {
-            source.sendFailure(Component.literal("You are not on the nice list"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_MISSING.get());
             return -1;
         }
         if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
-            source.sendFailure(Component.literal("Nice list voting is not in progress"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_PROGRESS.get());
             return -1;
         }
         if (self.ls$isDead()) {
-            source.sendFailure(Component.literal("Dead players cannot vote"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_DEAD.get());
             return -1;
         }
         if (self.ls$isWatcher()) {
-            source.sendFailure(Component.literal("Watchers cannot vote"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_WATCHER.get());
             return -1;
         }
 
         boolean success = NiceLifeVotingManager.openNiceListLifeVote(self);
 
         if (!success) {
-            source.sendFailure(Component.literal("There are no players to vote for"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_TARGET.get());
             return -1;
         }
 

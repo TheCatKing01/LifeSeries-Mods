@@ -6,8 +6,12 @@ import net.mat0u5.lifeseries.MainClient;
 import net.mat0u5.lifeseries.config.ClientConfigNetwork;
 import net.mat0u5.lifeseries.gui.config.entries.ConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.GroupConfigEntry;
+import net.mat0u5.lifeseries.gui.config.entries.TextFieldConfigEntry;
+import net.mat0u5.lifeseries.gui.config.entries.extra.TriviaQuestionConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.main.TextConfigEntry;
+import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
+import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -22,10 +26,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-*///?}
+//?}
 
 public class ConfigScreen extends Screen {
     private static int HEADER_HEIGHT_SMALL = 55;
@@ -78,6 +82,11 @@ public class ConfigScreen extends Screen {
                 entry.setScreen(this);
             }
         }
+        for (ConfigEntry entry : getAllEntries()) {
+            if (entry.screen == null) {
+                entry.setScreen(this);
+            }
+        }
     }
 
     @Override
@@ -99,7 +108,7 @@ public class ConfigScreen extends Screen {
         this.addWidget(this.searchField);
 
         //? if <= 1.20.2 {
-        /*this.listWidget = new ConfigListWidget(this.minecraft, this.width, this.height, listTop, this.height - FOOTER_HEIGHT, ConfigEntry.PREFFERED_HEIGHT);
+        /*this.listWidget = new ConfigListWidget(this.minecraft, this.width, this.height - listTop - FOOTER_HEIGHT, listTop, this.height - FOOTER_HEIGHT, ConfigEntry.PREFFERED_HEIGHT);
         *///?} else {
         this.listWidget = new ConfigListWidget(this.minecraft, this.width, this.height - listTop - FOOTER_HEIGHT, listTop, ConfigEntry.PREFFERED_HEIGHT);
         //?}
@@ -173,6 +182,12 @@ public class ConfigScreen extends Screen {
             return true;
         }
 
+        if (entry instanceof TextFieldConfigEntry textFieldConfigEntry) {
+            if (textFieldConfigEntry.textField != null && textFieldConfigEntry.textField.getValue().toLowerCase(Locale.ROOT).contains(lowerQuery)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -229,7 +244,12 @@ public class ConfigScreen extends Screen {
     public List<ConfigEntry> getAllEntries(List<ConfigEntry> currentEntries) {
         List<ConfigEntry> allEntries = new ArrayList<>();
         for (ConfigEntry entry : currentEntries) {
-            if (entry instanceof GroupConfigEntry<?> groupEntry) {
+            if (entry instanceof TriviaQuestionConfigEntry triviaQuestionConfigEntry) {
+                allEntries.add(triviaQuestionConfigEntry);
+                allEntries.addAll(getAllEntries(triviaQuestionConfigEntry.renderAsGroup.getChildEntries()));
+                allEntries.addAll(getAllEntries(List.of(triviaQuestionConfigEntry.renderAsGroup.getMainEntry())));
+            }
+            else if (entry instanceof GroupConfigEntry<?> groupEntry) {
                 allEntries.addAll(getAllEntries(groupEntry.getChildEntries()));
                 allEntries.addAll(getAllEntries(List.of(groupEntry.getMainEntry())));
             }
@@ -313,6 +333,15 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        //?if <= 1.20.2 {
+        /*//?if <= 1.20 {
+        /^context.setColor(0.25F, 0.25F, 0.25F, 1.0F);
+        ^///?} else {
+        context.setColor(0.85F, 0.85F, 0.85F, 1.0F);
+        //?}
+        RenderUtils.texture(Screen.BACKGROUND_LOCATION, 0, this.height - FOOTER_HEIGHT, this.width, FOOTER_HEIGHT).textureSize(32, 32).render(context);
+        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        *///?}
         super.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredString(this.font, this.title, this.width / 2, HEADER_TITLE_Y, TextColors.WHITE);
@@ -351,19 +380,19 @@ public class ConfigScreen extends Screen {
     }
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean leftClick = button == 0;
         if (this.searchField.mouseClicked(mouseX, mouseY, button)) {
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         int mouseX = (int) click.x();
         int mouseY = (int) click.y();
         boolean leftClick = click.button() == 0;
 
         if (this.searchField.mouseClicked(click, doubled)) {
-    *///?}
+    //?}
             focusSearch();
             return true;
         }
@@ -388,24 +417,25 @@ public class ConfigScreen extends Screen {
             }
         }
         //? if <= 1.21.6 {
-        return super.mouseClicked(mouseX, mouseY, button);
-        //?} else {
-        /*return super.mouseClicked(click, doubled);
-        *///?}
+        /*return super.mouseClicked(mouseX, mouseY, button);
+        *///?} else {
+        return super.mouseClicked(click, doubled);
+        //?}
     }
 
     //? if <= 1.21.6 {
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.searchField.isFocused() && this.searchField.keyPressed(keyCode, scanCode, modifiers)) {
-    //?} else {
     /*@Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.searchField.isFocused()) {
+            return this.searchField.keyPressed(keyCode, scanCode, modifiers);
+    *///?} else {
+    @Override
     public boolean keyPressed(KeyEvent keyInput) {
         int keyCode = keyInput.input();
         int modifiers = keyInput.modifiers();
-        if (this.searchField.isFocused() && this.searchField.keyPressed(keyInput)) {
-    *///?}
-            return true;
+        if (this.searchField.isFocused()) {
+            return this.searchField.keyPressed(keyInput);
+    //?}
         }
 
         // Ctrl+F to focus search
@@ -415,29 +445,29 @@ public class ConfigScreen extends Screen {
         }
 
         //? if <= 1.21.6 {
-        return super.keyPressed(keyCode, scanCode, modifiers);
-        //?} else {
-        /*return super.keyPressed(keyInput);
-        *///?}
+        /*return super.keyPressed(keyCode, scanCode, modifiers);
+        *///?} else {
+        return super.keyPressed(keyInput);
+        //?}
     }
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     public boolean charTyped(char chr, int modifiers) {
         if (this.searchField.isFocused() && this.searchField.charTyped(chr, modifiers)) {
             return true;
         }
         return super.charTyped(chr, modifiers);
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     public boolean charTyped(CharacterEvent charInput) {
         if (this.searchField.isFocused() && this.searchField.charTyped(charInput)) {
             return true;
         }
         return super.charTyped(charInput);
     }
-    *///?}
+    //?}
 
     public void focusSearch() {
         if (focusedEntry != null) {
@@ -456,7 +486,7 @@ public class ConfigScreen extends Screen {
     }
 
     public void setFocusedEntry(ConfigEntry entry) {
-        if (entry instanceof GroupConfigEntry) return;
+        if (!entry.canLoseFocusEasily()) return;
         if (focusedEntry == entry) return;
         searchField.setFocused(false);
 

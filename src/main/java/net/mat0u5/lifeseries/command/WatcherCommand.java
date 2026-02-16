@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
@@ -64,19 +65,17 @@ public class WatcherCommand extends Command {
 
     public int info(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7Watchers are players that are online, but are not affected by most season mechanics. They can only observe."));
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7This is very useful for spectators and for admins."));
-        //OtherUtils.sendCommandFeedbackQuiet(source, Text.of("§8§oNOTE: This is an experimental feature, report any bugs you find!"));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WATCHER_INFO.get());
         return 1;
     }
 
     public int listWatchers(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         if (WatcherManager.getWatchers().isEmpty()) {
-            source.sendFailure(Component.nullToEmpty("There are no Watchers right now"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.WATCHER_ERROR_NONE.get());
             return -1;
         }
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.formatLoosely("Current Watchers: §7{}", WatcherManager.getWatchers()));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WATCHER_LIST.get(WatcherManager.getWatchers()));
         return 1;
     }
 
@@ -88,10 +87,10 @@ public class WatcherCommand extends Command {
         WatcherManager.reloadWatchers();
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("{} is now a Watcher", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WATCHER_ADD_SINGLE.get(targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("{} targets are now Watchers", targets.size()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WATCHER_ADD_MULTIPLE.get(targets.size()));
         }
 
         return 1;
@@ -105,10 +104,10 @@ public class WatcherCommand extends Command {
         WatcherManager.reloadWatchers();
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("{} is no longer a Watcher", targets.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WATCHER_REMOVE_SINGLE.get(targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("{} targets are no longer Watchers", targets.size()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WATCHER_REMOVE_MULTIPLE.get(targets.size()));
         }
 
         return 1;

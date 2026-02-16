@@ -1,14 +1,14 @@
 package net.mat0u5.lifeseries.mixin;
 //? if < 1.21.6 {
-import net.minecraft.server.MinecraftServer;
+/*import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = MinecraftServer.class)
 public class WaypointTransmitterMixin {
     //Empty class to avoid mixin errors
 }
-//?} else {
-/*import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
+*///?} else {
+import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.waypoints.WaypointTransmitter;
@@ -26,19 +26,24 @@ import static net.mat0u5.lifeseries.Main.currentSeason;
 public interface WaypointTransmitterMixin {
 
     @Inject(method = "doesSourceIgnoreReceiver", at = @At("HEAD"), cancellable = true)
-    private static void cannotReceive(LivingEntity source, ServerPlayer receiver, CallbackInfoReturnable<Boolean> cir) {
+    private static void cannotReceive(LivingEntity sourceEntity, ServerPlayer receiver, CallbackInfoReturnable<Boolean> cir) {
         if (Main.modDisabled()) return;
-        if (source instanceof ServerPlayer sender) {
+        if (sourceEntity instanceof ServerPlayer source) {
+            boolean showLocatorBar = false;
             if (currentSeason instanceof DoubleLife doubleLife && DoubleLife.SOULMATE_LOCATOR_BAR) {
                 UUID receiverSoulmateUUID = doubleLife.getSoulmateUUID(receiver.getUUID());
-                if (sender.getUUID().equals(receiverSoulmateUUID)) {
-                    cir.setReturnValue(false);
-                }
-                else {
-                    cir.setReturnValue(true);
-                }
+                showLocatorBar = source.getUUID().equals(receiverSoulmateUUID);
             }
+
+            if (!showLocatorBar && currentSeason.boogeymanManager.BOOGEYMAN_ENABLED && currentSeason.boogeymanManager.BOOGEYMAN_LOCATOR_BAR && currentSeason.boogeymanManager.isBoogeyman(receiver)) {
+                showLocatorBar = true;
+            }
+
+            if (!showLocatorBar) {
+                cir.setReturnValue(true);
+            }
+            // Else do vanilla logic
         }
     }
 }
-*///?}
+//?}

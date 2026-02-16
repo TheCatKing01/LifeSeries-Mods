@@ -9,19 +9,17 @@ import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.MainConfig;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.registries.ModRegistries;
 import net.mat0u5.lifeseries.resources.datapack.DatapackManager;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
-import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
-import net.mat0u5.lifeseries.seasons.season.secretlife.TaskManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.SnailSkins;
 import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.HandshakeStatus;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.interfaces.IClientHelper;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
@@ -41,7 +39,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Main implements ModInitializer {
-	public static final String MOD_VERSION = "1.5.0";
+	public static final String MOD_VERSION = "1.5.1";
 	public static final String MOD_ID = "lifeseries";
 	public static final String UPDATES_URL = "https://api.github.com/repos/Mat0u5/LifeSeries/releases";
 	public static final boolean DEBUG = false;
@@ -73,10 +71,11 @@ public class Main implements ModInitializer {
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("nicelife"), container, Component.nullToEmpty("Nice Life Resourcepack"), ResourcePackActivationType.NORMAL);
 		});
 
+		config = new MainConfig();
+		NetworkHandlerServer.reload();
 		ConfigManager.moveOldMainFileIfExists();
 		SnailSkins.createConfig();
 
-		config = new MainConfig();
 		MOD_DISABLED = config.getOrCreateProperty("modDisabled", "false").equalsIgnoreCase("true");
 		String season = config.getOrCreateProperty("currentSeries", DEFAULT_SEASON.getId());
 
@@ -90,12 +89,14 @@ public class Main implements ModInitializer {
 
 		NetworkHandlerServer.registerPackets();
 		NetworkHandlerServer.registerServerReceiver();
+		NetworkHandlerServer.initializeSimplePacketReceivers();
 	}
 
 	public static boolean modDisabled() {
 		if (clientHelper != null) {
 			if (clientHelper.isReplay()) return true;
 			if (clientHelper.serverHandshake() == HandshakeStatus.NOT_RECEIVED) return true;
+			return clientHelper.isDisabledServerSide();
 		}
 		return MOD_DISABLED;
 	}
@@ -116,6 +117,7 @@ public class Main implements ModInitializer {
 		if (!modDisabled()) {
 			fullReload();
 		}
+		SimplePackets.MOD_DISABLED.sendToClient(Main.MOD_DISABLED);
 	}
 
 	public static void fullReload() {
@@ -123,7 +125,7 @@ public class Main implements ModInitializer {
 		changeSeasonTo(season);
 	}
 
-	public static boolean isClient() {
+	public static boolean hasClient() {
 		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
 	}
 
@@ -132,12 +134,12 @@ public class Main implements ModInitializer {
 	}
 
 	public static boolean isLogicalSide() {
-		if (!isClient()) return true;
+		if (!hasClient()) return true;
 		return clientHelper != null && clientHelper.isRunningIntegratedServer();
 	}
 
 	public static boolean isClientPlayer(UUID uuid) {
-		if (!isClient()) return false;
+		if (!hasClient()) return false;
 		return clientHelper != null && clientHelper.isMainClientPlayer(uuid);
 	}
 
@@ -163,6 +165,7 @@ public class Main implements ModInitializer {
 	public static void softReloadStart() {
 		currentSeason.reloadStart();
 		seasonConfig.loadProperties();
+		config.loadProperties();
 		blacklist.reloadBlacklist();
 		currentSeason.reload();
 		NetworkHandlerServer.sendUpdatePackets();
@@ -192,7 +195,7 @@ public class Main implements ModInitializer {
 			NetworkHandlerServer.tryKickFailedHandshake(player);
 			if (!modDisabled()) {
 				currentSeason.sendSetSeasonPacket(player);
-				NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, SessionTimerStates.NOT_STARTED.getValue());
+				SimplePackets.SESSION_TIMER.target(player).sendToClient(SessionTimerStates.NOT_STARTED.getValue());
 			}
 		}
 		SessionTranscript.resetStats();

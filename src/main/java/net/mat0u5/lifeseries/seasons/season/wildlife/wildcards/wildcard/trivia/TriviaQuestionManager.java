@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TriviaQuestionManager {
@@ -40,7 +41,7 @@ public class TriviaQuestionManager {
         }
     }
 
-    private void setFileContent(String content) {
+    public void setFileContent(String content) {
         FileWriter myWriter;
         try {
             myWriter = new FileWriter(file, false);
@@ -55,5 +56,12 @@ public class TriviaQuestionManager {
         String content = new String(Files.readAllBytes(file.toPath()));
         Gson gson = new Gson();
         return gson.fromJson(content, new TypeToken<List<TriviaQuestion>>() {}.getType());
+    }
+
+    public List<TriviaQuestion> tryGetTriviaQuestions() {
+        try {
+            return getTriviaQuestions();
+        }catch(Exception e) {}
+        return new ArrayList<>();
     }
 }

@@ -21,6 +21,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.S
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.player.ProfileManager;
 import net.mat0u5.lifeseries.utils.versions.UpdateChecker;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.core.BlockPos;
@@ -46,11 +47,11 @@ import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.utils.player.PlayerUtils.isFakePlayer;
 
 //? if >= 1.21.2 {
-/*import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
+import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
 import net.fabricmc.fabric.api.event.player.*;
-*///?}
+//?}
 
 public class Events {
     public static boolean skipNextTickReload = false;
@@ -73,8 +74,8 @@ public class Events {
         });
         UseBlockCallback.EVENT.register(Events::onBlockUse);
         //? if >= 1.21.2 {
-        /*UseItemCallback.EVENT.register(Events::onItemUse);
-        *///?}
+        UseItemCallback.EVENT.register(Events::onItemUse);
+        //?}
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> onPlayerJoin(handler.getPlayer()));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> onPlayerDisconnect(handler.getPlayer()));
         ServerTickEvents.END_SERVER_TICK.register(Events::onServerTickEnd);
@@ -129,6 +130,7 @@ public class Events {
     }
 
     private static void onPlayerDisconnect(ServerPlayer player) {
+        ProfileManager.onPlayerDisconnect(player);
         if (Main.modDisabled()) return;
         if (isFakePlayer(player)) return;
 
@@ -142,6 +144,7 @@ public class Events {
 
     private static void onServerStopping(MinecraftServer server) {
         try {
+            //ProfileManager.resetAll();
             UpdateChecker.shutdownExecutor();
             if (Main.modDisabled()) return;
             currentSession.sessionEnd();
@@ -252,7 +255,7 @@ public class Events {
             try {
                 ItemStack itemStack = player.getItemInHand(hand);
                 //? if >= 1.21.2 {
-                /*if (itemStack.is(Items.FIREWORK_ROCKET)) {
+                if (itemStack.is(Items.FIREWORK_ROCKET)) {
                     if (ItemStackUtils.hasCustomComponentEntry(PlayerUtils.getEquipmentSlot(serverPlayer, 3), "FlightSuperpower")) {
                         if (!(LivingEntity.canGlideUsing(serverPlayer.getItemBySlot(EquipmentSlot.CHEST), EquipmentSlot.CHEST) ||
                                 LivingEntity.canGlideUsing(serverPlayer.getItemBySlot(EquipmentSlot.LEGS), EquipmentSlot.LEGS) ||
@@ -261,7 +264,7 @@ public class Events {
                         }
                     }
                 }
-                *///?}
+                //?}
             } catch(Exception e) {
                 e.printStackTrace();
                 return InteractionResult.PASS;

@@ -6,7 +6,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePacket;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.network.packets.simple.instances.SimpleNumberPacket;
+import net.mat0u5.lifeseries.network.packets.simple.instances.SimpleStringPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
@@ -15,8 +18,13 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+//? if <= 1.21.11 {
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+//?} else {
+/*import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
+*///?}
 
 public class ClientCommands {
     public static Minecraft client = Minecraft.getInstance();
@@ -74,9 +82,19 @@ public class ClientCommands {
                                             )
                                     )
                             )
+                            .then(literal("test")
+                                    .executes(context -> test(
+                                            context.getSource())
+                                    )
+                            )
             );
         }
     }
+
+    public static int test(FabricClientCommandSource source)  {
+        return 1;
+    }
+
     public static int execute(FabricClientCommandSource source)  {
         source.sendFeedback(Component.nullToEmpty("Life Series client command text."));
         return 1;
@@ -84,22 +102,40 @@ public class ClientCommands {
 
     public static int sendStringPacket(FabricClientCommandSource source, String name, String value)  {
         final Player self = source.getPlayer();
-        NetworkHandlerClient.sendStringPacket(PacketNames.fromName(name), value);
+        SimplePacket<?, ?> packet = SimplePackets.registeredPackets.get(name);
+        if (packet == null) return -1;
+        if (!(packet instanceof SimpleStringPacket simpleStringPacket)) return -1;
+        simpleStringPacket.sendToServer(value);
+        //? if <= 1.21.11 {
         self.displayClientMessage(Component.nullToEmpty("String packet sent."), false);
+        //?} else {
+        /*self.sendSystemMessage(Component.nullToEmpty("String packet sent."));
+        *///?}
         return 1;
     }
 
     public static int sendNumberPacket(FabricClientCommandSource source, String name, double value)  {
         final Player self = source.getPlayer();
-        NetworkHandlerClient.sendNumberPacket(PacketNames.fromName(name), value);
+        SimplePacket<?, ?> packet = SimplePackets.registeredPackets.get(name);
+        if (packet == null) return -1;
+        if (!(packet instanceof SimpleNumberPacket simpleNumberPacket)) return -1;
+        simpleNumberPacket.sendToServer(value);
+        //? if <= 1.21.11 {
         self.displayClientMessage(Component.nullToEmpty("Number packet sent."), false);
+        //?} else {
+        /*self.sendSystemMessage(Component.nullToEmpty("Number packet sent."));
+        *///?}
         return 1;
     }
 
     public static int sendHandshakePacket(FabricClientCommandSource source)  {
         final Player self = source.getPlayer();
         NetworkHandlerClient.sendHandshake();
+        //? if <= 1.21.11 {
         self.displayClientMessage(Component.nullToEmpty("Handshake packet sent."), false);
+        //?} else {
+        /*self.sendSystemMessage(Component.nullToEmpty("Handshake packet sent."));
+        *///?}
         return 1;
     }
 
@@ -118,7 +154,11 @@ public class ClientCommands {
         }
 
         NetworkHandlerClient.sendConfigUpdate(configType, id, args);
+        //? if <= 1.21.11 {
         self.displayClientMessage(Component.nullToEmpty("Config packet sent."), false);
+        //?} else {
+        /*self.sendSystemMessage(Component.nullToEmpty("Config packet sent."));
+        *///?}
         return 1;
     }
 

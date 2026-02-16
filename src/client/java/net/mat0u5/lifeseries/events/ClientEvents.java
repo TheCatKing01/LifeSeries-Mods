@@ -9,20 +9,22 @@ import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.MainClient;
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.FlashbackCompatibility;
+import net.mat0u5.lifeseries.compatibilities.ReplayModCompatibility;
 import net.mat0u5.lifeseries.compatibilities.VoicechatClient;
 import net.mat0u5.lifeseries.gui.EmptySleepScreen;
 import net.mat0u5.lifeseries.gui.other.UpdateInfoScreen;
 import net.mat0u5.lifeseries.gui.trivia.NewQuizScreen;
 import net.mat0u5.lifeseries.gui.trivia.VotingScreen;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.TextHud;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
 import net.mat0u5.lifeseries.utils.ClientSounds;
 import net.mat0u5.lifeseries.utils.ClientTaskScheduler;
 import net.mat0u5.lifeseries.utils.ClientUtils;
 import net.mat0u5.lifeseries.utils.enums.HandshakeStatus;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.versions.UpdateChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -68,6 +70,10 @@ public class ClientEvents {
     }
 
     private static void onServerStart(MinecraftServer server) {
+        checkReplayServer(server);
+    }
+
+    private static void checkReplayServer(MinecraftServer server) {
         boolean isReplay = false;
         if (CompatibilityManager.flashbackLoaded()) {
             if (FlashbackCompatibility.isReplayServer(server)) {
@@ -75,11 +81,17 @@ public class ClientEvents {
                 isReplay = true;
             }
         }
+        if (CompatibilityManager.replayModLoaded()) {
+            if (ReplayModCompatibility.isReplayServer()) {
+                Main.LOGGER.info("Detected ReplayMod Replay");
+                isReplay = true;
+            }
+        }
         MainClient.isReplay = isReplay;
-        if (Main.modDisabled()) return;
     }
 
     public static void onClientJoin(ClientPacketListener handler, PacketSender sender, Minecraft client) {
+        checkReplayServer(null);
         ClientTaskScheduler.schedulePriorityTask(20, () -> {
             if (MainClient.serverHandshake == HandshakeStatus.WAITING) {
                 Main.LOGGER.info("Disabling the Life Series on the client.");
@@ -90,6 +102,7 @@ public class ClientEvents {
     }
 
     public static void onClientDisconnect(ClientPacketListener handler, Minecraft client) {
+        checkReplayServer(null);
         Main.LOGGER.info("Client disconnected from server, clearing some client data.");
         MainClient.resetClientData();
         if (Main.modDisabled()) return;
@@ -164,7 +177,7 @@ public class ClientEvents {
         //? if <= 1.20.3 {
         /*if (client.level.random.nextInt(30) != 0) return;
         *///?} else {
-        if (client.level.random.nextInt(15) != 0) return;
+        if (client.level.getRandom().nextInt(15) != 0) return;
         //?}
         for (Player player : client.level.players()) {
             if (MainClient.invisiblePlayers.containsKey(player.getUUID())) {
@@ -195,10 +208,10 @@ public class ClientEvents {
         //? if > 1.20.3 {
         if (MainClient.clientCurrentSeason == Seasons.WILD_LIFE && MainClient.clientActiveWildcards.contains(Wildcards.SIZE_SHIFTING)) {
             //? if <= 1.21 {
-            boolean jumping = player.input.jumping;
-            //?} else {
-            /*boolean jumping = player.input.keyPresses.jump();
-             *///?}
+            /*boolean jumping = player.input.jumping;
+            *///?} else {
+            boolean jumping = player.input.keyPresses.jump();
+             //?}
             if (jumping) {
 
                 if (MainClient.FIX_SIZECHANGING_BUGS) {
@@ -253,10 +266,10 @@ public class ClientEvents {
 
         boolean shouldJump = false;
         //? if <= 1.21 {
-        boolean holdingJump = player.input.jumping;
-        //?} else {
-        /*boolean holdingJump = player.input.keyPresses.jump();
-        *///?}
+        /*boolean holdingJump = player.input.jumping;
+        *///?} else {
+        boolean holdingJump = player.input.keyPresses.jump();
+        //?}
 
         if (!lastJumping && holdingJump) {
             shouldJump = true;
@@ -266,6 +279,7 @@ public class ClientEvents {
         if (jumpCooldown > 0) return;
 
         if (!hasTripleJumpEffect(player)) return;
+        if (!MainClient.tripleJumpActive) return;
         jumpedInAir++;
         player.jumpFromGround();
         //? if < 1.21 {
@@ -273,7 +287,7 @@ public class ClientEvents {
         *///?} else {
         player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.MASTER, 0.25f, 1f, false);
         //?}
-        NetworkHandlerClient.sendStringPacket(PacketNames.TRIPLE_JUMP,"");
+        SimplePackets.TRIPLE_JUMP.sendToServer(true);
     }
 
     private static boolean hasTripleJumpEffect(LocalPlayer player) {
@@ -283,10 +297,10 @@ public class ClientEvents {
         for (Map.Entry<Holder<MobEffect>, MobEffectInstance> entry : player.getActiveEffectsMap().entrySet()) {
         //?}
             //? if <= 1.21.4 {
-            if (entry.getKey() != MobEffects.JUMP) continue;
-            //?} else {
-            /*if (entry.getKey() != MobEffects.JUMP_BOOST) continue;
-            *///?}
+            /*if (entry.getKey() != MobEffects.JUMP) continue;
+            *///?} else {
+            if (entry.getKey() != MobEffects.JUMP_BOOST) continue;
+            //?}
             MobEffectInstance jumpBoost = entry.getValue();
             if (jumpBoost.getAmplifier() != 2) continue;
             if (jumpBoost.getDuration() > 220 || jumpBoost.getDuration() < 200) continue;

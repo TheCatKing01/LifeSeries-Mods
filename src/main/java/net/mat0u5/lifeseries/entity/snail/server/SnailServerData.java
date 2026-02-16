@@ -1,9 +1,11 @@
 package net.mat0u5.lifeseries.entity.snail.server;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.PlayerBoundEntity;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
@@ -12,9 +14,10 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
+import net.mat0u5.lifeseries.utils.world.LevelUtils;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -179,10 +182,10 @@ public class SnailServerData implements PlayerBoundEntity {
     public void chunkLoading() {
         if (snail.level() instanceof ServerLevel level) {
             //? if <= 1.21.4 {
-            level.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(snail.blockPosition()), 2, snail.blockPosition());
-            //?} else {
-            /*level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, new ChunkPos(snail.blockPosition()), 2);
-             *///?}
+            /*level.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(snail.blockPosition()), 2, snail.blockPosition());
+            *///?} else if <= 1.21.11 {
+            level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, LevelUtils.chunkPosFromBlockPos(snail.blockPosition()), 2);
+            //?}
         }
     }
 
@@ -195,10 +198,10 @@ public class SnailServerData implements PlayerBoundEntity {
 
         if (snail.level() instanceof ServerLevel level) {
             //? if <= 1.21 {
-            snail.kill();
-            //?} else {
-            /*snail.kill(level);
-             *///?}
+            /*snail.kill();
+            *///?} else {
+            snail.kill(level);
+             //?}
         }
         snail.discard();
     }
@@ -211,7 +214,7 @@ public class SnailServerData implements PlayerBoundEntity {
     }
 
     public void sendAirPacket(ServerPlayer player, int amount) {
-        NetworkHandlerServer.sendNumberPacket(player, PacketNames.SNAIL_AIR, amount);
+        SimplePackets.SNAIL_AIR.target(player).sendToClient(amount);
     }
 
     public void handleHighVelocity() {
@@ -231,14 +234,14 @@ public class SnailServerData implements PlayerBoundEntity {
                 player.setLastHurtByMob(snail);
             }
             //? if <=1.21 {
-            DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
+            /*DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
                     .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SNAIL_DAMAGE));
             entity.hurt(damageSource, 1000);
-            //?} else {
-            /*DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
+            *///?} else {
+            DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
                     .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SNAIL_DAMAGE));
             entity.hurtServer(serverLevel, damageSource, 1000);
-            *///?}
+            //?}
         }
     }
 
@@ -250,14 +253,14 @@ public class SnailServerData implements PlayerBoundEntity {
                 player.setLastHurtByMob(snail);
             }
             //? if <=1.21 {
-            DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
+            /*DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
                     .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.DROWN));
             entity.hurt(damageSource, 2);
-            //?} else {
-            /*DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
+            *///?} else {
+            DamageSource damageSource = new DamageSource(serverLevel.registryAccess()
                     .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.DROWN));
             entity.hurtServer(serverLevel, damageSource, 2);
-            *///?}
+            //?}
             if (!entity.isAlive() && entity instanceof ServerPlayer) {
                 despawn();
             }
@@ -265,7 +268,7 @@ public class SnailServerData implements PlayerBoundEntity {
     }
 
     public Component getDefaultName() {
-        if (snail.isFromTrivia()) return Component.nullToEmpty("VHSnail");
+        if (snail.isFromTrivia()) return ModifiableText.WILDLIFE_SNAIL_TRIVIA_SNAIL_NAME.get();
         if (snailName == null) return snail.getType().getDescription();
         if (snailName.getString().isEmpty()) return snail.getType().getDescription();
         return snailName;

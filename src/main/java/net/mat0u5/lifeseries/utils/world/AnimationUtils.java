@@ -1,7 +1,8 @@
 package net.mat0u5.lifeseries.utils.world;
 
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -21,10 +22,10 @@ import org.joml.Vector3f;
 //? if >= 1.20.5
 import net.minecraft.core.component.DataComponents;
 //? if <= 1.21 && > 1.20.3
-import net.minecraft.world.item.component.CustomModelData;
+//import net.minecraft.world.item.component.CustomModelData;
 //? if >= 1.21.2 {
-/*import java.awt.Color;
-*///?}
+import java.awt.Color;
+//?}
 
 public class AnimationUtils {
     private static int spiralDuration = 175;
@@ -40,7 +41,7 @@ public class AnimationUtils {
 
     public static void playSecretLifeTotemAnimation(ServerPlayer player, boolean red) {
         if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
-            NetworkHandlerServer.sendStringPacket(player, PacketNames.SHOW_TOTEM, red ? "task_red" : "task");
+            SimplePackets.SHOW_TOTEM.target(player).sendToClient(red ? "task_red" : "task");
             PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.parse("secretlife_task_totem")));
             return;
         }
@@ -63,12 +64,12 @@ public class AnimationUtils {
         //? if <= 1.20.3 {
         /*ItemStackUtils.setCustomComponentInt(totemItem, "CustomModelData", red ? 2 : 1);
         *///?} else if <= 1.21 {
-        totemItem.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(red ? 2 : 1));
-        //?} else {
-        /*totemItem.set(DataComponents.ITEM_MODEL, IdentifierHelper.mod(red ? "task_red_totem" : "task_totem"));
+        /*totemItem.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(red ? 2 : 1));
+        *///?} else {
+        totemItem.set(DataComponents.ITEM_MODEL, IdentifierHelper.mod(red ? "task_red_totem" : "task_totem"));
         //PlaySoundConsumeEffect playSoundEvent = new PlaySoundConsumeEffect(RegistryEntry.of(SoundEvent.of(Identifier.of("secretlife_task_totem"))));
         //totemItem.set(DataComponentTypes.DEATH_PROTECTION, new DeathProtectionComponent(List.of(playSoundEvent)));
-        *///?}
+        //?}
         return totemItem;
     }
 
@@ -185,9 +186,9 @@ public class AnimationUtils {
 
                     // Create the particle effect with the generated color and size
                     //? if <= 1.21 {
-                    DustParticleOptions particleEffect = new DustParticleOptions(color, 1.0f);
-                    //?} else
-                    /*DustParticleOptions particleEffect = new DustParticleOptions(new Color(color.x, color.y, color.z).getRGB(), 1.0f);*/
+                    /*DustParticleOptions particleEffect = new DustParticleOptions(color, 1.0f);
+                    *///?} else
+                    DustParticleOptions particleEffect = new DustParticleOptions(new Color(color.x, color.y, color.z).getRGB(), 1.0f);
 
                     // Spawn particle with random offset
                     level.sendParticles(

@@ -1,14 +1,15 @@
 package net.mat0u5.lifeseries.seasons.season.limitedlife;
 
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -21,6 +22,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import java.util.Collection;
+
+import java.util.List;
+
+//? if <= 1.20.2
+//import net.minecraft.world.scores.Score;
+//? if > 1.20.2
+import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.Team;
 
 //? if < 1.20.3 {
@@ -71,15 +79,18 @@ public class LimitedLife extends Season {
     }
 
     public void displayTimers(MinecraftServer server) {
-        String message = "";
+        Component message = Component.empty();
         if (currentSession.statusNotStarted()) {
-            message = "Session has not started";
-        } else if (currentSession.statusStarted()) {
-            message = currentSession.getRemainingTimeStr();
-        } else if (currentSession.statusPaused()) {
-            message = "Session has been paused";
-        } else if (currentSession.statusFinished()) {
-            message = "Session has ended";
+            message = ModifiableText.SESSION_TIMER_DISPLAY_NOTSTARTED.get();
+        }
+        else if (currentSession.statusStarted()) {
+            message = ModifiableText.SESSION_TIMER_DISPLAY.get(currentSession.getRemainingTimeStr());
+        }
+        else if (currentSession.statusPaused()) {
+            message = ModifiableText.SESSION_TIMER_DISPLAY_PAUSE.get();
+        }
+        else if (currentSession.statusFinished()) {
+            message = ModifiableText.SESSION_TIMER_DISPLAY_END.get();
         }
 
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
@@ -94,7 +105,7 @@ public class LimitedLife extends Season {
                     timestamp = Time.now().add(remainingTime).getMillis();
                 }
                 if (timestamp != SessionTimerStates.OFF.getValue()) {
-                    NetworkHandlerServer.sendLongPacket(player, PacketNames.SESSION_TIMER, timestamp);
+                    SimplePackets.SESSION_TIMER.target(player).sendToClient(timestamp);
                 }
 
                 if (player.ls$hasAssignedLives() && player.ls$getLives() != null) {
@@ -106,18 +117,18 @@ public class LimitedLife extends Season {
                         playerLives = -1;
                     }
                     String livesColor = livesManager.getColorForLives(player).toString();
-                    NetworkHandlerServer.sendLongPacket(player, PacketNames.fromName(PacketNames.LIMITED_LIFE_TIMER.getName() + livesColor), playerLives);
+                    SimplePackets.LIMITED_LIFE_TIMER.target(player).sendToClient(List.of(livesColor, String.valueOf(playerLives)));
                 }
             } else {
                 MutableComponent fullMessage = Component.empty();
                 if (currentSession.displayTimer.contains(player.getUUID())) {
-                    fullMessage.append(Component.literal(message).withStyle(ChatFormatting.GRAY));
+                    fullMessage.append(message);
                 }
                 if (player.ls$hasAssignedLives()) {
-                    if (!fullMessage.getString().isEmpty()) fullMessage.append(Component.nullToEmpty("  |  "));
+                    if (!fullMessage.getString().isEmpty()) fullMessage.append(ModifiableText.LIMITEDLIFE_SESSION_DISPLAY_DIVIDER.get());
                     fullMessage.append(livesManager.getFormattedLives(player));
                 }
-                player.displayClientMessage(fullMessage, true);
+                player.ls$message(fullMessage, true);
             }
         }
     }
@@ -244,23 +255,27 @@ public class LimitedLife extends Season {
 
     @Override
     public void reload() {
-        SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get(seasonConfig);
+        SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
         super.reload();
-        LimitedLifeLivesManager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get(seasonConfig);
-        LimitedLifeLivesManager.YELLOW_TIME = LimitedLifeConfig.TIME_YELLOW.get(seasonConfig);
-        LimitedLifeLivesManager.RED_TIME = LimitedLifeConfig.TIME_RED.get(seasonConfig);
-        NEW_DEATH_NORMAL = Time.seconds(LimitedLifeConfig.TIME_DEATH.get(seasonConfig));
-        NEW_DEATH_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_DEATH_BOOGEYMAN.get(seasonConfig));
-        NEW_KILL_NORMAL = Time.seconds(LimitedLifeConfig.TIME_KILL.get(seasonConfig));
-        NEW_KILL_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get(seasonConfig));
-        TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get(seasonConfig);
-        TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get(seasonConfig);
-        NetworkHandlerServer.sendNumberPackets(PacketNames.TICKS_PER_SECOND, TICKS_PER_SECOND);
-        LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get(seasonConfig);
+
+        LimitedLifeLivesManager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
+        LimitedLifeLivesManager.YELLOW_TIME = LimitedLifeConfig.TIME_YELLOW.get();
+        LimitedLifeLivesManager.RED_TIME = LimitedLifeConfig.TIME_RED.get();
+        NEW_DEATH_NORMAL = Time.seconds(LimitedLifeConfig.TIME_DEATH.get());
+        NEW_DEATH_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_DEATH_BOOGEYMAN.get());
+        NEW_KILL_NORMAL = Time.seconds(LimitedLifeConfig.TIME_KILL.get());
+        NEW_KILL_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get());
+        TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get();
+        LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get();
+        TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get();
+        NetworkHandlerServer.sendNumberPackets(SimplePackets.TICKS_PER_SECOND, TICKS_PER_SECOND);
     }
 
     @Override
     public Integer getDefaultLives() {
+        if (livesManager.ROLL_LIVES) {
+            return null;
+        }
         return LimitedLifeLivesManager.DEFAULT_TIME;
     }
 

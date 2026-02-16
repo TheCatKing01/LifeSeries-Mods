@@ -1,10 +1,13 @@
 package net.mat0u5.lifeseries.seasons.season.secretlife;
 
 import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.config.StringListConfig;
 import net.mat0u5.lifeseries.config.StringListManager;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.utils.enums.Formatted;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
@@ -28,7 +31,6 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static net.mat0u5.lifeseries.Main.*;
 //? if <= 1.20.3 {
@@ -41,6 +43,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.component.WrittenBookContent;
 //?}
+//? if < 1.20.5
+//import java.util.stream.Stream;
 
 public class TaskManager {
     public static int EASY_SUCCESS = 20;
@@ -72,29 +76,29 @@ public class TaskManager {
     public static List<String> easyTasks;
     public static List<String> hardTasks;
     public static List<String> redTasks;
+    public static List<String> easyTasks_all;
+    public static List<String> hardTasks_all;
+    public static List<String> redTasks_all;
     public static final Random rnd = new Random();
     public static List<UUID> pendingConfirmationTasks = new ArrayList<>();
-
-    public static SessionAction getActionChooseTasks() {
-        return new SessionAction(Time.minutes(ASSIGN_TASKS_MINUTE), "Assign Tasks") {
-            @Override
-            public void trigger() {
-                chooseTasks(livesManager.getAlivePlayers(), null);
-                tasksChosen = true;
-            }
-        };
-    }
 
     public static void initialize() {
         usedTasksConfig = new StringListConfig("./config/lifeseries/main", "DO_NOT_MODIFY_secretlife_used_tasks.properties");
         locationsConfig = new SecretLifeLocationConfig();
         locationsConfig.loadLocations();
+        reloadTasks();
+    }
+
+    public static void reloadTasks() {
         StringListManager configEasyTasks = new StringListManager("./config/lifeseries/secretlife","easy-tasks.json");
         StringListManager configHardTasks = new StringListManager("./config/lifeseries/secretlife","hard-tasks.json");
         StringListManager configRedTasks = new StringListManager("./config/lifeseries/secretlife","red-tasks.json");
         easyTasks = configEasyTasks.loadStrings();
         hardTasks = configHardTasks.loadStrings();
         redTasks = configRedTasks.loadStrings();
+        easyTasks_all = configEasyTasks.loadStrings();
+        hardTasks_all = configHardTasks.loadStrings();
+        redTasks_all = configRedTasks.loadStrings();
         List<String> alreadySelected = SecretLifeUsedTasks.getUsedTasks(usedTasksConfig);
         for (String selected : alreadySelected) {
             easyTasks.remove(selected);
@@ -166,8 +170,8 @@ public class TaskManager {
         ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
         //? if < 1.20.5 {
         /*List<FilteredText> lines = task.getBookLines(player);
-        book.addTagElement("author", StringTag.valueOf("Secret Keeper"));
-        book.addTagElement("title", StringTag.valueOf(TextUtils.formatString("§c{}'s Secret Task", player)));
+        book.addTagElement("author", StringTag.valueOf(ModifiableText.SECRETLIFE_TASK_AUTHOR.getString()));
+        book.addTagElement("title", StringTag.valueOf(ModifiableText.SECRETLIFE_TASK_NAME.getString(player)));
         ListTag listTag = new ListTag();
         Stream<StringTag> stream = lines.stream().map((filteredTextx) -> StringTag.valueOf(filteredTextx.filteredOrEmpty()));
         Objects.requireNonNull(listTag);
@@ -180,8 +184,8 @@ public class TaskManager {
         *///?} else {
         List<Filterable<Component>> lines = task.getBookLines(player);
         WrittenBookContent bookContent = new WrittenBookContent(
-                Filterable.passThrough(TextUtils.formatString("§c{}'s Secret Task", player)),
-                "Secret Keeper",
+                Filterable.passThrough(ModifiableText.SECRETLIFE_TASK_NAME.getString(player)),
+                ModifiableText.SECRETLIFE_TASK_AUTHOR.getString(),
                 0,
                 lines,
                 true
@@ -242,18 +246,18 @@ public class TaskManager {
                 tasksChosenFor.add(player.getUUID());
             }
         }
-        PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("Your secret is...").withStyle(ChatFormatting.RED),20,35,0);
+        PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.SECRETLIFE_TASK_TITLE.get(),20,35,0);
 
         TaskScheduler.scheduleTask(40, () -> {
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("3").withStyle(ChatFormatting.RED),0,35,0);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_3.get(),0,35,0);
         });
         TaskScheduler.scheduleTask(70, () -> {
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("2").withStyle(ChatFormatting.RED),0,35,0);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_2.get(),0,35,0);
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
         });
         TaskScheduler.scheduleTask(105, () -> {
-            PlayerUtils.sendTitleToPlayers(allowedPlayers, Component.literal("1").withStyle(ChatFormatting.RED),0,35,0);
+            PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_1.get(),0,35,0);
         });
         TaskScheduler.scheduleTask(130, () -> {
             for (ServerPlayer player : allowedPlayers) {
@@ -378,7 +382,7 @@ public class TaskManager {
 
     public static boolean hasSessionStarted(ServerPlayer player) {
         if (currentSession.statusNotStarted()) {
-            player.sendSystemMessage(Component.nullToEmpty("§cThe session has not started yet."));
+            player.ls$message(ModifiableText.SESSION_ERROR_START.get());
             return false;
         }
         return true;
@@ -386,7 +390,7 @@ public class TaskManager {
 
     public static boolean isBeingUsed(ServerPlayer player) {
         if (!secretKeeperBeingUsed) return false;
-        player.sendSystemMessage(Component.nullToEmpty("§cSomeone else is using the Secret Keeper right now."));
+        player.ls$message(ModifiableText.SECRETLIFE_SECRETKEEPER_INUSE.get());
         return true;
     }
 
@@ -394,7 +398,7 @@ public class TaskManager {
         TaskTypes type = getPlayersTaskType(player);
         if (type != null) return true;
         if (sendMessage) {
-            player.sendSystemMessage(Component.nullToEmpty("§cYou do not have a secret task book in your inventory."));
+            player.ls$message(ModifiableText.SECRETLIFE_TASK_MISSING.get());
         }
         return false;
     }
@@ -420,7 +424,7 @@ public class TaskManager {
             rawTask = task.rawTask;
         }
 
-        return TextUtils.format("§7Click {}§7 to see what {}§7's task was.", TextUtils.selfMessageText(rawTask), player);
+        return ModifiableText.SECRETLIFE_TASK_SHOW_PAST.get(TextUtils.selfMessageText(rawTask), player);
     }
 
     public static void succeedTask(ServerPlayer player, boolean fromCommand) {
@@ -435,17 +439,17 @@ public class TaskManager {
             if (TASKS_NEED_CONFIRMATION) {
                 if (!pendingConfirmationTasks.contains(player.getUUID())) {
                     pendingConfirmationTasks.add(player.getUUID());
-                    PlayerUtils.broadcastMessageToAdmins(TextUtils.format("{} wants to succeed their task.", player));
+                    PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_TASK_PENDING.get(player));
                     PlayerUtils.broadcastMessageToAdmins(getShowTaskMessage(player));
-                    PlayerUtils.broadcastMessageToAdmins(TextUtils.format("§7Click {}§7 to confirm this action.", TextUtils.runCommandText("/task succeed "+player.getScoreboardName())));
+                    PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_TASK_PENDING_ACCEPT.get(TextUtils.runCommandText("/task succeed "+player.getScoreboardName())));
                 }
-                player.sendSystemMessage(Component.nullToEmpty("§cYour task confirmation needs to be approved by an admin."));
+                player.ls$message(ModifiableText.SECRETLIFE_TASK_PENDING_NOTIFICATION.get());
                 return;
             }
         }
         pendingConfirmationTasks.remove(player.getUUID());
         if (BROADCAST_SECRET_KEEPER) {
-            PlayerUtils.broadcastMessage(TextUtils.format("{}§a succeeded their task.", player));
+            PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_SUCCEED.get(player));
         }
         if (PUBLIC_TASKS_ON_SUBMIT) {
             PlayerUtils.broadcastMessage(getShowTaskMessage(player));
@@ -496,7 +500,7 @@ public class TaskManager {
         if (type == TaskTypes.EASY) {
             removePlayersTaskBook(player);
             if (BROADCAST_SECRET_KEEPER) {
-                PlayerUtils.broadcastMessage(TextUtils.format("{}§7 re-rolled their easy task.", player));
+                PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_REROLL.get(player));
             }
             if (PUBLIC_TASKS_ON_SUBMIT) {
                 PlayerUtils.broadcastMessage(getShowTaskMessage(player));
@@ -510,19 +514,19 @@ public class TaskManager {
             }
 
             PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitle(player, Component.literal("The reward is more").withStyle(ChatFormatting.DARK_GREEN).withStyle(ChatFormatting.BOLD),20,35,0);
+            PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT1.get(),20,35,0);
 
             TaskScheduler.scheduleTask(50, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-                PlayerUtils.sendTitle(player, Component.literal("The risk is great").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD),20,35,0);
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT2.get(),20,35,0);
             });
             TaskScheduler.scheduleTask(100, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-                PlayerUtils.sendTitle(player, Component.literal("Let me open the door").withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.BOLD),20,35,0);
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT3.get(),20,35,0);
             });
             TaskScheduler.scheduleTask(150, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-                PlayerUtils.sendTitle(player, Component.literal("Accept your fate").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD),20,30,0);
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT4.get(),20,30,0);
             });
             TaskScheduler.scheduleTask(200, () -> AnimationUtils.playSecretLifeTotemAnimation(player, false));
             TaskScheduler.scheduleTask(240, () -> {
@@ -534,10 +538,10 @@ public class TaskManager {
         }
         if (type == TaskTypes.HARD) {
             if (!player.ls$isOnLastLife(true)) {
-                player.sendSystemMessage(Component.nullToEmpty("§cYou cannot re-roll a Hard task."));
+                player.ls$message(ModifiableText.SECRETLIFE_TASK_REROLL_HARD_FAIL.get());
             }
             else {
-                player.sendSystemMessage(Component.nullToEmpty("§cYou cannot re-roll a Hard task. If you want your red task instead, click the Fail button."));
+                player.ls$message(ModifiableText.SECRETLIFE_TASK_REROLL_HARD_FAIL_RED.get());
             }
         }
     }
@@ -552,7 +556,7 @@ public class TaskManager {
         TaskTypes type = getPlayersTaskType(player);
         if (!hasTaskBookCheck(player, !fromCommand)) return;
         if (BROADCAST_SECRET_KEEPER) {
-            PlayerUtils.broadcastMessage(TextUtils.format("{}§c failed their task.", player));
+            PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_FAIL.get(player));
         }
         if (PUBLIC_TASKS_ON_SUBMIT) {
             PlayerUtils.broadcastMessage(getShowTaskMessage(player));
@@ -625,8 +629,8 @@ public class TaskManager {
 
         ChatFormatting formatting = ChatFormatting.GREEN;
         if (finalAmount < 0) formatting = ChatFormatting.RED;
-        else finalStr = "+"+finalStr;
-        PlayerUtils.sendTitle(player, TextUtils.format("{} Hearts", finalStr).withStyle(formatting), 20, 40, 20);
+        else finalStr = finalStr;
+        PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_GAIN.get(finalStr, "Hearts").copy().withStyle(formatting), 20, 40, 20);
     }
 
     public static boolean alreadyHasPos(BlockPos pos) {
@@ -658,9 +662,7 @@ public class TaskManager {
             if (successButtonPos != null && rerollButtonPos != null && failButtonPos != null) {
                 itemSpawnerPos = pos;
                 PlayerUtils.broadcastMessage(Component.literal("§a[SecretLife] All locations have been set. If you wish to change them in the future, use §2'/task changeLocations'\n"));
-
-                PlayerUtils.broadcastMessage(Component.nullToEmpty("\nUse §b'/session timer set <time>'§f to set the desired session time."));
-                PlayerUtils.broadcastMessage(Component.nullToEmpty("After that, use §b'/session start'§f to start the session."));
+                PlayerUtils.broadcastMessage(ModifiableText.SESSION_START_PROMPT.get());
             }
         }
         locationsConfig.saveLocations();

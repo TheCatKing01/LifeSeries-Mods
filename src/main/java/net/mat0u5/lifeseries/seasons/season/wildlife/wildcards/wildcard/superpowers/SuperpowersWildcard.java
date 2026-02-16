@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpo
 
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Mimicry;
@@ -350,9 +351,12 @@ public class SuperpowersWildcard extends Wildcard {
 	
     public static void pressedSuperpowerKey(ServerPlayer player) {
         if (!playerSuperpowers.containsKey(player.getUUID())) return;
-        if (!player.ls$isAlive()) {
-            PlayerUtils.displayMessageToPlayer(player, Component.literal("Dead players can't use superpowers!"), 60);
-            return;
+			if (!player.ls$isAlive()) {
+                playerSuperpowers.get(player.getUUID()).onKeyPressed();
+            }
+            else {
+                PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_SUPERPOWES_DEAD.get(), 60);
+            }
         }
         playerSuperpowers.get(player.getUUID()).forEach(Superpower::onKeyPressed);
     }

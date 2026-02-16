@@ -3,8 +3,7 @@ package net.mat0u5.lifeseries.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
-import net.mat0u5.lifeseries.network.NetworkHandlerServer;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.WeightedRandomizer;
@@ -17,8 +16,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
-
-import static net.mat0u5.lifeseries.Main.server;
 
 public class TestingCommands extends Command {
 
@@ -36,7 +33,7 @@ public class TestingCommands extends Command {
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (VersionControl.isDevVersion()) {
             dispatcher.register(
-                literal("ls")
+                literal("lsdev")
                     .requires(PermissionManager::isAdmin)
                     .then(literal("test")
                         .executes(context -> test(context.getSource()))
@@ -65,7 +62,6 @@ public class TestingCommands extends Command {
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
-        NetworkHandlerServer.sendStringPackets(PacketNames.TRIVIA_ALL_WRONG, "");
 
         return 1;
     }

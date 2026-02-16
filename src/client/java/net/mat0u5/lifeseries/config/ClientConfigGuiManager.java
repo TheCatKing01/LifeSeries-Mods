@@ -180,6 +180,9 @@ public class ClientConfigGuiManager {
                     return new EventConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue, args.get(3));
                 }
             }
+            else if (stringObject.configType == ConfigTypes.MODIFIABLE_TEXT) {
+                return new ModifiableTextConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue);
+            }
             return new StringConfigEntry(stringObject.id, stringObject.name, stringObject.description, stringObject.stringValue, stringObject.defaultValue);
         }
         else if (object instanceof IntegerObject intObject) {
@@ -209,6 +212,20 @@ public class ClientConfigGuiManager {
         else if (object instanceof TextObject textObject) {
             if (textObject.configType == ConfigTypes.TEAM_ENTRY) {
                 return new TeamConfigEntry(textObject.id, textObject.args);
+            }
+            if (textObject.configType == ConfigTypes.SECRET_TASK) {
+                return new SecretLifeTaskConfigEntry(textObject.id, textObject.args);
+            }
+            if (textObject.configType == ConfigTypes.TRIVIA_QUESTION) {
+                try {
+                    textObject.args.remove(0);
+                    textObject.args.remove(0);
+                    textObject.args.remove(0);
+                    String triviaType = textObject.args.remove(0);
+                    String question = textObject.args.remove(0);
+                    int correctAnswerIndex = Integer.parseInt(textObject.args.remove(0));
+                    return TriviaQuestionConfigEntry.getEntry(triviaType, question, correctAnswerIndex, textObject.args);
+                }catch(Exception e) {}
             }
             return new TextConfigEntry(textObject.id, textObject.name, textObject.description, textObject.clickable);
         }

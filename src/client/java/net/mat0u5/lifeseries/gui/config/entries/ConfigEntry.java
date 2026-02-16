@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-*///?}
+//?}
 
 public abstract class ConfigEntry {
     public static final int PREFFERED_HEIGHT = 20;
@@ -41,8 +41,9 @@ public abstract class ConfigEntry {
 
     public static final int MAX_DESCRIPTION_WIDTH = 250;
 
+    protected long renderTicks = 0;
     protected Font textRenderer;
-    protected ConfigScreen screen;
+    public ConfigScreen screen;
     protected final String fieldName;
     protected final String displayName;
     protected final String description;
@@ -53,7 +54,7 @@ public abstract class ConfigEntry {
     public float highlightAlpha = 0.0f;
     protected boolean isHovered = false;
     private boolean isFocused = false;
-    protected GroupConfigEntry<?> parentGroup;
+    public GroupConfigEntry<?> parentGroup;
     protected List<GroupConfigEntry<?>> groupTopology = new ArrayList<>();
     private boolean isNew = false;
     public boolean changedForever = false;
@@ -75,8 +76,12 @@ public abstract class ConfigEntry {
             return;
         }
         resetButton = Button.builder(Component.nullToEmpty("Reset"), this::onResetClicked)
-                .bounds(0, 0, RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT)
+                .bounds(0, 0, RESET_BUTTON_WIDTH, getResetButtonHeight())
                 .build();
+    }
+
+    public int getResetButtonHeight() {
+        return RESET_BUTTON_HEIGHT;
     }
 
     private void onResetClicked(Button button) {
@@ -96,6 +101,7 @@ public abstract class ConfigEntry {
     }
 
     public void render(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        renderTicks++;
         isHovered = hovered;
         updateHighlightAnimation(tickDelta);
 
@@ -122,10 +128,10 @@ public abstract class ConfigEntry {
             if (isHovered) {
                 Component errorText = TextUtils.format("§cERROR:\n{}",getErrorMessage());
                 //? if <= 1.21.5 {
-                context.renderTooltip(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
-                 //?} else {
-                /*context.setTooltipForNextFrame(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
-                *///?}
+                /*context.renderTooltip(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
+                 *///?} else {
+                context.setTooltipForNextFrame(textRenderer, textRenderer.split(errorText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+                //?}
             }
         }
         else if (description != null && !description.isEmpty()) {
@@ -133,10 +139,10 @@ public abstract class ConfigEntry {
                 mouseY >= labelY && mouseY <= labelY + textRenderer.lineHeight) {
                 Component descriptionText = getDisplayName().withStyle(ChatFormatting.UNDERLINE).append("§r\n"+description);
                 //? if <= 1.21.5 {
-                context.renderTooltip(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
-                 //?} else {
-                /*context.setTooltipForNextFrame(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
-                *///?}
+                /*context.renderTooltip(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
+                 *///?} else {
+                context.setTooltipForNextFrame(textRenderer, textRenderer.split(descriptionText, MAX_DESCRIPTION_WIDTH), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+                //?}
             }
         }
 
@@ -161,7 +167,7 @@ public abstract class ConfigEntry {
     }
 
     //? if <= 1.21.6 {
-    protected abstract boolean mouseClickedEntry(double mouseX, double mouseY, int button);
+    /*protected abstract boolean mouseClickedEntry(double mouseX, double mouseY, int button);
     protected abstract boolean keyPressedEntry(int keyCode, int scanCode, int modifiers);
     protected abstract boolean charTypedEntry(char chr, int modifiers);
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -178,8 +184,8 @@ public abstract class ConfigEntry {
     public boolean charTyped(char chr, int modifiers) {
         return charTypedEntry(chr, modifiers);
     }
-    //?} else {
-    /*protected abstract boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled);
+    *///?} else {
+    protected abstract boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled);
     protected abstract boolean keyPressedEntry(KeyEvent keyInput);
     protected abstract boolean charTypedEntry(CharacterEvent charInput);
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
@@ -196,7 +202,7 @@ public abstract class ConfigEntry {
     public boolean charTyped(CharacterEvent charInput) {
         return charTypedEntry(charInput);
     }
-    *///?}
+    //?}
 
     public void setFocused(boolean focused) {
         setActualFocused(focused);
@@ -211,6 +217,10 @@ public abstract class ConfigEntry {
 
     public boolean isFocused() {
         return isFocused;
+    }
+
+    public boolean canLoseFocusEasily() {
+        return true;
     }
 
     public boolean isTopologyFocused() {

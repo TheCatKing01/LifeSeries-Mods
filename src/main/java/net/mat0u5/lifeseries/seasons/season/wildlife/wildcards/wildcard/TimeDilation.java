@@ -1,10 +1,10 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard;
 
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
@@ -20,9 +20,11 @@ import static net.mat0u5.lifeseries.Main.server;
 //? if >= 1.20.3
 import net.minecraft.server.ServerTickRateManager;
 //? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.GameRules;
 //? if > 1.21.9
-/*import net.minecraft.world.level.gamerules.GameRules;*/
+import net.minecraft.world.level.gamerules.GameRules;
+//? if >= 26.1
+//import net.minecraft.world.clock.WorldClocks;
 
 public class TimeDilation extends Wildcard {
     public static float MIN_TICK_RATE = 1;
@@ -58,16 +60,25 @@ public class TimeDilation extends Wildcard {
             int weatherTicks = (int) weatherTicksBacklog;
             if (weatherTicks >= 1) {
                 weatherTicksBacklog -= weatherTicks;
-                for (ServerLevel serverLevelorld : server.getAllLevels()) {
-                    long newTicks = serverLevelorld.getDayTime() + weatherTicks;
-                    serverLevelorld.setDayTime(newTicks);
-                    for (ServerPlayer player : serverLevelorld.players()) {
+                for (ServerLevel serverLevel : server.getAllLevels()) {
+                    //? if <= 1.21.11 {
+                    long newTicks = serverLevel.getDayTime() + weatherTicks;
+                    serverLevel.setDayTime(newTicks);
+                    //?} else {
+                    /*long newTicks = serverLevel.getOverworldClockTime() + weatherTicks;
+                    serverLevel.clockManager().setTotalTicks(serverLevel.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTicks);
+                    *///?}
+                    for (ServerPlayer player : serverLevel.players()) {
                         //? if <= 1.21.9 {
-                        boolean daylightCycle = OtherUtils.getBooleanGameRule(serverLevelorld, GameRules.RULE_DAYLIGHT);
+                        /*boolean daylightCycle = OtherUtils.getBooleanGameRule(serverLevel, GameRules.RULE_DAYLIGHT);
+                        *///?} else {
+                        boolean daylightCycle = OtherUtils.getBooleanGameRule(serverLevel, GameRules.ADVANCE_TIME);
+                         //?}
+                        //? if <= 1.21.11 {
+                        player.connection.send(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), daylightCycle));
                         //?} else {
-                        /*boolean daylightCycle = OtherUtils.getBooleanGameRule(serverLevelorld, GameRules.ADVANCE_TIME);
-                         *///?}
-                        player.connection.send(new ClientboundSetTimePacket(serverLevelorld.getGameTime(), serverLevelorld.getDayTime(), daylightCycle));
+                        /*player.connection.send(serverLevel.clockManager().createFullSyncPacket());
+                        *///?}
                     }
                 }
             }
@@ -132,7 +143,7 @@ public class TimeDilation extends Wildcard {
             lastDiv = -1;
             PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("wildlife_time_slow_down")));
             slowlySetWorldSpeed(getMinTickRate(), 18);
-            if (!isFinale() && getMinTickRate() <= 4) TaskScheduler.scheduleTask(18, () -> NetworkHandlerServer.sendLongPackets(PacketNames.TIME_DILATION, System.currentTimeMillis()));
+            if (!isFinale() && getMinTickRate() <= 4) TaskScheduler.scheduleTask(18, () -> SimplePackets.TIME_DILATION.sendToClient(System.currentTimeMillis()));
             TaskScheduler.scheduleTask(19, super::activate);
         });
     }

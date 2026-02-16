@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLifeConfig;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -23,8 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static net.mat0u5.lifeseries.Main.livesManager;
-import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.Main.*;
 
 public class Necromancy extends Superpower {
     private static final List<UUID> ressurectedPlayers = new ArrayList<>();
@@ -52,7 +52,7 @@ public class Necromancy extends Superpower {
         if (player == null) return;
 
         if (getDeadSpectatorPlayers().isEmpty()) {
-            PlayerUtils.displayMessageToPlayer(player, Component.nullToEmpty("There are no dead players."), 80);
+            PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_NECROMANCY_ERROR.get(), 80);
             return;
         }
 
@@ -78,11 +78,9 @@ public class Necromancy extends Superpower {
                     BlockPos tpTo = LevelUtils.getCloseBlockPos(updatedPlayerLevel, updatedPlayer.blockPosition(), 3, 2, true);
                     LevelUtils.teleport(deadPlayer, updatedPlayerLevel, tpTo);
                     deadPlayer.setGameMode(GameType.SURVIVAL);
-                    if (seasonConfig instanceof WildLifeConfig config) {
-                        if (WildLifeConfig.WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS.get(config) && !clearedPlayers.contains(deadPlayer.getUUID())) {
-                            clearedPlayers.add(deadPlayer.getUUID());
-                            deadPlayer.getInventory().clearContent();
-                        }
+                    if (WildLifeConfig.WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS.get() && !clearedPlayers.contains(deadPlayer.getUUID())) {
+                        clearedPlayers.add(deadPlayer.getUUID());
+                        deadPlayer.getInventory().clearContent();
                     }
                     AttributeUtils.setMaxPlayerHealth(deadPlayer, SuperpowersWildcard.ZOMBIES_HEALTH);
                     deadPlayer.setHealth(SuperpowersWildcard.ZOMBIES_HEALTH);
@@ -90,6 +88,7 @@ public class Necromancy extends Superpower {
                     ressurectedPlayers.add(deadPlayer.getUUID());
                     perPlayerRessurections.add(deadPlayer.getUUID());
                     queuedRessurectedPlayers.remove(deadPlayer.getUUID());
+                    currentSeason.reloadPlayerTeam(deadPlayer);
                 }
             }
         });

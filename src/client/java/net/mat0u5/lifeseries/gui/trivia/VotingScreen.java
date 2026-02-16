@@ -1,11 +1,10 @@
 package net.mat0u5.lifeseries.gui.trivia;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.mat0u5.lifeseries.gui.EmptySleepScreen;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.client.Minecraft;
@@ -21,16 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-*///?}
+//?}
 
 //? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
-//?} else {
-/*import net.minecraft.resources.Identifier;
- *///?}
+/*import net.minecraft.resources.ResourceLocation;
+*///?} else {
+import net.minecraft.resources.Identifier;
+ //?}
 
 public class VotingScreen extends Screen {
     private static final int PLAYER_ENTRY_HEIGHT = 32;
@@ -48,17 +47,19 @@ public class VotingScreen extends Screen {
     private String selectedPlayer = null;
     private final List<String> availablePlayers;
     public int timerSeconds = 60;
-    public boolean requiresSleep = false;
+    public boolean requiresSleep;
+    public boolean closesWithEsc;
+    public boolean showTimer;
 
     private int listLeft;
     private int listRight;
     private int listWidth;
 
-    public VotingScreen(String name, List<String> availablePlayers) {
+    public VotingScreen(String name, boolean requiresSleep, boolean closesWithEsc, boolean showTimer, List<String> availablePlayers) {
         super(Component.literal(name));
-        if (name.endsWith("nice") || name.endsWith("naughty")) {
-            requiresSleep = true;
-        }
+        this.requiresSleep = requiresSleep;
+        this.closesWithEsc = closesWithEsc;
+        this.showTimer = showTimer;
         this.availablePlayers = availablePlayers;
     }
 
@@ -86,10 +87,10 @@ public class VotingScreen extends Screen {
                 //? if <= 1.20 {
                 /*ResourceLocation skin = playerInfo.getSkinLocation();
                 *///?} else if <= 1.21.6 {
-                ResourceLocation skin = playerInfo.getSkin().texture();
-                //?} else {
-                /*var skin = playerInfo.getSkin().body().texturePath();
-                *///?}
+                /*ResourceLocation skin = playerInfo.getSkin().texture();
+                *///?} else {
+                var skin = playerInfo.getSkin().body().texturePath();
+                //?}
                 if (!availablePlayers.contains(name)) continue;
                 players.add(new PlayerEntry(name, skin));
                 filteredPlayers.add(new PlayerEntry(name, skin));
@@ -144,7 +145,7 @@ public class VotingScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return !requiresSleep;
+        return closesWithEsc;
     }
 
     @Override
@@ -162,7 +163,7 @@ public class VotingScreen extends Screen {
         submitButton.active = selectedPlayer != null && !selectedPlayer.isEmpty();
 
         // Timer
-        if (requiresSleep) {
+        if (showTimer) {
             long minutes = timerSeconds / 60;
             long seconds = timerSeconds - minutes * 60;
             String secondsStr = String.valueOf(seconds);
@@ -245,14 +246,14 @@ public class VotingScreen extends Screen {
 
     @Override
     //? if <= 1.21.6 {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (searchBox.mouseClicked(mouseX, mouseY, button)) {
-    //?} else {
-    /*public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    *///?} else {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         int mouseX = (int) click.x();
         int mouseY = (int) click.y();
         if (searchBox.mouseClicked(click, doubled)) {
-    *///?}
+    //?}
             searchBox.setFocused(true);
             return true;
         }
@@ -271,14 +272,14 @@ public class VotingScreen extends Screen {
         }
 
         //? if <= 1.21.6 {
-        return super.mouseClicked(mouseX, mouseY, button);
-        //?} else {
-        /*return super.mouseClicked(click, doubled);
-        *///?}
+        /*return super.mouseClicked(mouseX, mouseY, button);
+        *///?} else {
+        return super.mouseClicked(click, doubled);
+        //?}
     }
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (searchBox.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
@@ -293,8 +294,8 @@ public class VotingScreen extends Screen {
         }
         return super.charTyped(codePoint, modifiers);
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     public boolean keyPressed(KeyEvent input) {
         if (searchBox.keyPressed(input)) {
             return true;
@@ -309,7 +310,7 @@ public class VotingScreen extends Screen {
         }
         return super.charTyped(input);
     }
-    *///?}
+    //?}
 
     private void onSubmitVote() {
         if (selectedPlayer != null) {
@@ -319,7 +320,7 @@ public class VotingScreen extends Screen {
             else {
                 Minecraft.getInstance().setScreen(null);
             }
-            NetworkHandlerClient.sendStringPacket(PacketNames.SUBMIT_VOTE, selectedPlayer);
+            SimplePackets.SUBMIT_VOTE.sendToServer(selectedPlayer);
         }
     }
 
@@ -331,18 +332,18 @@ public class VotingScreen extends Screen {
     private static class PlayerEntry {
         final String name;
         //? if <= 1.21.9 {
-        final ResourceLocation skin;
+        /*final ResourceLocation skin;
         PlayerEntry(String name, ResourceLocation skin) {
             this.name = name;
             this.skin = skin;
         }
-        //?} else {
-        /*final Identifier skin;
+        *///?} else {
+        final Identifier skin;
         PlayerEntry(String name, Identifier skin) {
             this.name = name;
             this.skin = skin;
         }
-        *///?}
+        //?}
 
     }
 }

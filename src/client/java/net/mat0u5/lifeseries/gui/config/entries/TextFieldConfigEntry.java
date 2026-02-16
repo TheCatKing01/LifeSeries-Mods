@@ -6,13 +6,13 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import java.util.Objects;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-*///?}
+//?}
 
 public abstract class TextFieldConfigEntry extends ConfigEntry {
-    protected final EditBox textField;
+    public final EditBox textField;
     private static final int DEFAULT_TEXT_FIELD_WIDTH = 100;
     protected static final int DEFAULT_TEXT_FIELD_HEIGHT = 18;
     private static final int TEXT_FIELD_OFFSET_X = -5;
@@ -81,7 +81,7 @@ public abstract class TextFieldConfigEntry extends ConfigEntry {
 
     protected int getTextFieldPosY(int y, int height) {
         //return y + (height - textField.getHeight()) / 2; CENTER
-        return y+TEXT_FIELD_OFFSET_Y;
+        return y+(height-textField.getHeight())/2;
     }
 
     @Override
@@ -91,7 +91,7 @@ public abstract class TextFieldConfigEntry extends ConfigEntry {
     }
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
         if (!textField.mouseClicked(mouseX, mouseY, button)) {
             clicked = !clicked;
@@ -108,8 +108,8 @@ public abstract class TextFieldConfigEntry extends ConfigEntry {
     protected boolean charTypedEntry(char chr, int modifiers) {
         return textField.charTyped(chr, modifiers);
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     protected boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled) {
         if (!textField.mouseClicked(click, doubled)) {
             clicked = !clicked;
@@ -126,7 +126,7 @@ public abstract class TextFieldConfigEntry extends ConfigEntry {
     protected boolean charTypedEntry(CharacterEvent input) {
         return textField.charTyped(input);
     }
-    *///?}
+    //?}
 
     @Override
     public void resetToDefault() {

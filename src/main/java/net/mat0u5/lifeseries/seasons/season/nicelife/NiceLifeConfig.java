@@ -119,6 +119,10 @@ public class NiceLifeConfig extends ConfigManager {
             "group_voting", null, ConfigTypes.TEXT, "{season.voting}",
             "Voting", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
+            "group_trivia_questions", null, ConfigTypes.TEXT, "{season.trivia.questions}",
+            "Trivia Questions", ""
+    );
 
     public NiceLifeConfig() {
         super("./config/"+ Main.MOD_ID,"nicelife.properties");
@@ -155,6 +159,7 @@ public class NiceLifeConfig extends ConfigManager {
                 ,NAUGHTY_LIST_PLAYERS
                 ,NICE_LIST_PLAYERS
                 ,NICE_LIST_CHANCE
+                ,GROUP_TRIVIA_QUESTIONS
         ));
     }
 
@@ -162,8 +167,8 @@ public class NiceLifeConfig extends ConfigManager {
     public void instantiateProperties() {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         MIDNIGHT_CHIMES.defaultValue = true;
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         super.instantiateProperties();
     }
 }

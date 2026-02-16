@@ -45,22 +45,22 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 //?}
 
 //? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
- //?} else {
-/*import net.minecraft.resources.Identifier;
-*///?}
+/*import net.minecraft.resources.ResourceLocation;
+ *///?} else {
+import net.minecraft.resources.Identifier;
+//?}
 
 public class Blacklist {
     //? if <= 1.21.9 {
-    public List<ResourceLocation> loadedListItemIdentifier;
+    /*public List<ResourceLocation> loadedListItemIdentifier;
     public List<ResourceLocation> loadedRecipeBlacklist;
-    //?} else {
-    /*public List<Identifier> loadedListItemIdentifier;
+    *///?} else {
+    public List<Identifier> loadedListItemIdentifier;
     public List<Identifier> loadedRecipeBlacklist;
-    *///?}
+    //?}
     private List<Item> loadedListItem;
     private List<Block> loadedListBlock;
-    private List<ResourceKey<Enchantment>> loadedListEnchants;
+    private Map<Integer, List<ResourceKey<Enchantment>>> loadedListEnchants;
     private List<ResourceKey<Enchantment>> loadedBannedEnchants;
 
     //? if <= 1.20.3 {
@@ -75,7 +75,7 @@ public class Blacklist {
 
     public List<String> loadItemBlacklist() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_ITEMS.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_ITEMS.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -83,7 +83,7 @@ public class Blacklist {
 
     public List<String> loadRecipeBlacklist() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_RECIPES.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_RECIPES.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -91,23 +91,36 @@ public class Blacklist {
 
     public List<String> loadBlockBlacklist() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_BLOCKS.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_BLOCKS.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
     }
 
-    public List<String> loadClampedEnchants() {
-        if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_CLAMPED_ENCHANTS.get(seasonConfig);
-        raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
-        if (raw.isEmpty()) return new ArrayList<>();
-        return new ArrayList<>(Arrays.asList(raw.split(",")));
+    public Map<Integer, List<String>> loadClampedEnchants() {
+        Map<Integer, List<String>> result = new HashMap<>();
+        result.put(1, new ArrayList<>());
+        result.put(2, new ArrayList<>());
+        result.put(3, new ArrayList<>());
+        result.put(4, new ArrayList<>());
+        if (seasonConfig == null) return result;
+
+        String raw_level_1 = seasonConfig.BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.get().replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
+        String raw_level_2 = seasonConfig.BLACKLIST_CLAMPED_ENCHANTS_LEVEL_2.get().replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
+        String raw_level_3 = seasonConfig.BLACKLIST_CLAMPED_ENCHANTS_LEVEL_3.get().replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
+        String raw_level_4 = seasonConfig.BLACKLIST_CLAMPED_ENCHANTS_LEVEL_4.get().replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
+
+        if (!raw_level_1.isEmpty()) result.get(1).addAll(Arrays.asList(raw_level_1.split(",")));
+        if (!raw_level_2.isEmpty()) result.get(2).addAll(Arrays.asList(raw_level_2.split(",")));
+        if (!raw_level_3.isEmpty()) result.get(3).addAll(Arrays.asList(raw_level_3.split(",")));
+        if (!raw_level_4.isEmpty()) result.get(4).addAll(Arrays.asList(raw_level_4.split(",")));
+
+        return result;
     }
 
     public List<String> loadBlacklistedEnchants() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_BANNED_ENCHANTS.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_BANNED_ENCHANTS.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -115,7 +128,7 @@ public class Blacklist {
 
     public List<String> loadBannedPotions() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_BANNED_POTION_EFFECTS.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_BANNED_POTION_EFFECTS.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -123,7 +136,7 @@ public class Blacklist {
 
     public List<String> loadClampedPotions() {
         if (seasonConfig == null) return new ArrayList<>();
-        String raw = seasonConfig.BLACKLIST_CLAMPED_POTION_EFFECTS.get(seasonConfig);
+        String raw = seasonConfig.BLACKLIST_CLAMPED_POTION_EFFECTS.get();
         raw = raw.replaceAll("\\[","").replaceAll("]","").replaceAll(" ", "");
         if (raw.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(raw.split(",")));
@@ -133,10 +146,10 @@ public class Blacklist {
         if (loadedListItem != null) return loadedListItem;
         List<Item> newList = new ArrayList<>();
         //? if <= 1.21.9 {
-        List<ResourceLocation> newListIdentifier = new ArrayList<>();
-        //?} else {
-        /*List<Identifier> newListIdentifier = new ArrayList<>();
-        *///?}
+        /*List<ResourceLocation> newListIdentifier = new ArrayList<>();
+        *///?} else {
+        List<Identifier> newListIdentifier = new ArrayList<>();
+        //?}
 
         for (String itemId : loadItemBlacklist()) {
             if (!itemId.contains(":")) itemId = "minecraft:" + itemId;
@@ -147,10 +160,10 @@ public class Blacklist {
 
                 // Check if the block exists in the registry
                 //? if <= 1.21 {
-                Item item = BuiltInRegistries.ITEM.get(key);
-                //?} else {
-                /*Item item = BuiltInRegistries.ITEM.getValue(key);
-                *///?}
+                /*Item item = BuiltInRegistries.ITEM.get(key);
+                *///?} else {
+                Item item = BuiltInRegistries.ITEM.getValue(key);
+                //?}
                 if (item != null) {
                     newListIdentifier.add(id);
                     newList.add(item);
@@ -168,19 +181,19 @@ public class Blacklist {
     }
 
     //? if <= 1.21.9 {
-    public List<ResourceLocation> getRecipeBlacklist() {
-    //?} else {
-    /*public List<Identifier> getRecipeBlacklist() {
-    *///?}
+    /*public List<ResourceLocation> getRecipeBlacklist() {
+    *///?} else {
+    public List<Identifier> getRecipeBlacklist() {
+    //?}
         if (loadedRecipeBlacklist != null) return loadedRecipeBlacklist;
         //? if <= 1.21.9 {
-        List<ResourceLocation> newList = new ArrayList<>();
-        //?} else {
-        /*List<Identifier> newList = new ArrayList<>();
-         *///?}
+        /*List<ResourceLocation> newList = new ArrayList<>();
+        *///?} else {
+        List<Identifier> newList = new ArrayList<>();
+         //?}
 
         if (seasonConfig != null) {
-            if (!seasonConfig.SPAWNER_RECIPE.get(seasonConfig)) {
+            if (!seasonConfig.SPAWNER_RECIPE.get()) {
                 newList.add(IdentifierHelper.mod("spawner_recipe"));
             }
         }
@@ -193,10 +206,10 @@ public class Blacklist {
                 ResourceKey<Item> key = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
 
                 //? if <= 1.21 {
-                Item item = BuiltInRegistries.ITEM.get(key);
-                //?} else {
-                /*Item item = BuiltInRegistries.ITEM.getValue(key);
-                 *///?}
+                /*Item item = BuiltInRegistries.ITEM.get(key);
+                *///?} else {
+                Item item = BuiltInRegistries.ITEM.getValue(key);
+                 //?}
                 if (item != null) {
                     newList.add(id);
                 } else {
@@ -224,10 +237,10 @@ public class Blacklist {
 
                 // Check if the block exists in the registry
                 //? if <= 1.21 {
-                Block block = BuiltInRegistries.BLOCK.get(key);
-                //?} else {
-                /*Block block = BuiltInRegistries.BLOCK.getValue(key);
-                *///?}
+                /*Block block = BuiltInRegistries.BLOCK.get(key);
+                *///?} else {
+                Block block = BuiltInRegistries.BLOCK.getValue(key);
+                //?}
                 if (block != null) {
                     newList.add(block);
                 } else {
@@ -242,43 +255,49 @@ public class Blacklist {
         return newList;
     }
 
-    public List<ResourceKey<Enchantment>> getClampedEnchants() {
-        if (server == null) return new ArrayList<>();
-
+    public Map<Integer, List<ResourceKey<Enchantment>>> getClampedEnchants() {
+        Map<Integer, List<ResourceKey<Enchantment>>> result = new HashMap<>();
+        result.put(1, new ArrayList<>());
+        result.put(2, new ArrayList<>());
+        result.put(3, new ArrayList<>());
+        result.put(4, new ArrayList<>());
+        if (server == null) return result;
         if (loadedListEnchants != null) return loadedListEnchants;
-        List<ResourceKey<Enchantment>> newList = new ArrayList<>();
 
         Registry<Enchantment> enchantmentRegistry = server.registryAccess()
-
                 //? if <=1.21 {
-                .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
-                 //?} else
-                /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));*/
+                /*.registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
+                 *///?} else
+                .lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
 
+        Map<Integer, List<String>> loadedRaw = loadClampedEnchants();
+        for (int level = 1; level <= 4; level++) {
+            List<String> enchants = loadedRaw.get(level);
+            if (enchants == null) continue;
+            for (String enchantmentId : enchants) {
+                if (!enchantmentId.contains(":")) enchantmentId = "minecraft:" + enchantmentId;
 
-        for (String enchantmentId : loadClampedEnchants()) {
-            if (!enchantmentId.contains(":")) enchantmentId = "minecraft:" + enchantmentId;
+                try {
+                    var id = IdentifierHelper.parse(enchantmentId);
+                    //? if <= 1.21 {
+                    /*Enchantment enchantment = enchantmentRegistry.get(id);
+                     *///?} else {
+                    Enchantment enchantment = enchantmentRegistry.getValue(id);
+                    //?}
 
-            try {
-                var id = IdentifierHelper.parse(enchantmentId);
-                //? if <= 1.21 {
-                Enchantment enchantment = enchantmentRegistry.get(id);
-                //?} else {
-                /*Enchantment enchantment = enchantmentRegistry.getValue(id);
-                *///?}
-
-                if (enchantment != null) {
-                    newList.add(enchantmentRegistry.getResourceKey(enchantment).orElseThrow());
-                } else {
-                    OtherUtils.throwError("[CONFIG] Invalid enchantment: " + enchantmentId);
+                    if (enchantment != null) {
+                        result.get(level).add(enchantmentRegistry.getResourceKey(enchantment).orElseThrow());
+                    } else {
+                        OtherUtils.throwError("[CONFIG] Invalid enchantment: " + enchantmentId);
+                    }
+                } catch (Exception e) {
+                    OtherUtils.throwError("[CONFIG] Error parsing enchantment ID: " + enchantmentId);
                 }
-            } catch (Exception e) {
-                OtherUtils.throwError("[CONFIG] Error parsing enchantment ID: " + enchantmentId);
             }
         }
 
-        loadedListEnchants = newList;
-        return newList;
+        loadedListEnchants = result;
+        return result;
     }
 
     public List<ResourceKey<Enchantment>> getBannedEnchants() {
@@ -290,9 +309,9 @@ public class Blacklist {
         Registry<Enchantment> enchantmentRegistry = server.registryAccess()
 
                 //? if <=1.21 {
-                .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
-        //?} else
-        /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));*/
+                /*.registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
+        *///?} else
+        .lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("enchantment")));
 
 
         for (String enchantmentId : loadBlacklistedEnchants()) {
@@ -301,10 +320,10 @@ public class Blacklist {
             try {
                 var id = IdentifierHelper.parse(enchantmentId);
                 //? if <= 1.21 {
-                Enchantment enchantment = enchantmentRegistry.get(id);
-                //?} else {
-                /*Enchantment enchantment = enchantmentRegistry.getValue(id);
-                *///?}
+                /*Enchantment enchantment = enchantmentRegistry.get(id);
+                *///?} else {
+                Enchantment enchantment = enchantmentRegistry.getValue(id);
+                //?}
 
                 if (enchantment != null) {
                     newList.add(enchantmentRegistry.getResourceKey(enchantment).orElseThrow());
@@ -336,9 +355,9 @@ public class Blacklist {
 
         Registry<MobEffect> effectsRegistry = server.registryAccess()
         //? if <=1.21 {
-        .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
-        //?} else
-        /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));*/
+        /*.registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
+        *///?} else
+        .lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
 
         for (String potionId : loadBannedPotions()) {
             if (!potionId.contains(":")) potionId = "minecraft:" + potionId;
@@ -346,10 +365,10 @@ public class Blacklist {
             try {
                 var id = IdentifierHelper.parse(potionId);
                 //? if <= 1.21 {
-                MobEffect enchantment = effectsRegistry.get(id);
-                //?} else {
-                /*MobEffect enchantment = effectsRegistry.getValue(id);
-                *///?}
+                /*MobEffect enchantment = effectsRegistry.get(id);
+                *///?} else {
+                MobEffect enchantment = effectsRegistry.getValue(id);
+                //?}
 
                 if (enchantment != null) {
                     //? if <= 1.20.3 {
@@ -385,9 +404,9 @@ public class Blacklist {
 
         Registry<MobEffect> effectsRegistry = server.registryAccess()
         //? if <=1.21 {
-        .registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
-        //?} else
-        /*.lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));*/
+        /*.registryOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
+        *///?} else
+        .lookupOrThrow(ResourceKey.createRegistryKey(IdentifierHelper.vanilla("mob_effect")));
 
         for (String potionId : loadClampedPotions()) {
             if (!potionId.contains(":")) potionId = "minecraft:" + potionId;
@@ -395,10 +414,10 @@ public class Blacklist {
             try {
                 var id = IdentifierHelper.parse(potionId);
                 //? if <= 1.21 {
-                MobEffect enchantment = effectsRegistry.get(id);
-                //?} else {
-                /*MobEffect enchantment = effectsRegistry.getValue(id);
-                 *///?}
+                /*MobEffect enchantment = effectsRegistry.get(id);
+                *///?} else {
+                MobEffect enchantment = effectsRegistry.getValue(id);
+                 //?}
 
                 if (enchantment != null) {
                     //? if <= 1.20.3 {
@@ -421,7 +440,7 @@ public class Blacklist {
     public void reloadBlacklist() {
         if (Main.server == null) return;
 
-        CREATIVE_IGNORE_BLACKLIST = seasonConfig.CREATIVE_IGNORE_BLACKLIST.get(seasonConfig);
+        CREATIVE_IGNORE_BLACKLIST = seasonConfig.CREATIVE_IGNORE_BLACKLIST.get();
 
         loadedListItem = null;
         loadedListBlock = null;
@@ -521,12 +540,12 @@ public class Blacklist {
                 }
             }
             //? if >= 1.21.2 {
-            /*if (ItemStackUtils.hasCustomComponentEntry(itemStack, "FlightSuperpower")) {
+            if (ItemStackUtils.hasCustomComponentEntry(itemStack, "FlightSuperpower")) {
                 if (SuperpowersWildcard.hasActivePower(player, Superpowers.FLIGHT)) {
                     remove = false;
                 }
             }
-            *///?}
+            //?}
             if (remove) {
                 itemStack.setCount(0);
                 player.getInventory().tick();
@@ -579,14 +598,17 @@ public class Blacklist {
     }
 
     public void clampEnchantments(Map<Enchantment, Integer>  enchants) {
-        List<ResourceKey<Enchantment>> clamp = getClampedEnchants();
-
-        for (Map.Entry<Enchantment, Integer> enchant : enchants.entrySet()) {
-            Enchantment actualEnchant = enchant.getKey();
-            Optional<ResourceKey<Enchantment>> key = BuiltInRegistries.ENCHANTMENT.getResourceKey(actualEnchant);
-            if (key.isEmpty()) continue;
-            if (clamp.contains(key.get())) {
-                enchant.setValue(1);
+        var clamped = getClampedEnchants();
+        for (int level = 1; level <= 4; level++) {
+        List<ResourceKey<Enchantment>> clamp = clamped.get(level);
+            if (clamp == null) continue;
+            for (Map.Entry<Enchantment, Integer> enchant : enchants.entrySet()) {
+                Enchantment actualEnchant = enchant.getKey();
+                Optional<ResourceKey<Enchantment>> key = BuiltInRegistries.ENCHANTMENT.getResourceKey(actualEnchant);
+                if (key.isEmpty()) continue;
+                if (enchant.getValue() > level && clamp.contains(key.get())) {
+                    enchant.setValue(level);
+                }
             }
         }
     }
@@ -625,12 +647,16 @@ public class Blacklist {
     }
 
     public void clampEnchantments(ItemEnchantments enchants) {
-        List<ResourceKey<Enchantment>> clamp = getClampedEnchants();
-        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
-            Optional<ResourceKey<Enchantment>> enchantRegistry = enchant.getKey().unwrapKey();
-            if (enchantRegistry.isEmpty()) continue;
-            if (clamp.contains(enchantRegistry.get())) {
-                enchant.setValue(1);
+        var clamped = getClampedEnchants();
+        for (int level = 1; level <= 4; level++) {
+            List<ResourceKey<Enchantment>> clamp = clamped.get(level);
+            if (clamp == null) continue;
+            for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
+                Optional<ResourceKey<Enchantment>> enchantRegistry = enchant.getKey().unwrapKey();
+                if (enchantRegistry.isEmpty()) continue;
+                if (enchant.getValue() > level && clamp.contains(enchantRegistry.get())) {
+                    enchant.setValue(level);
+                }
             }
         }
     }

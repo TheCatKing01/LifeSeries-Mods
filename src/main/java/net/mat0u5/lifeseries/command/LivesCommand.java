@@ -4,10 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
-import net.mat0u5.lifeseries.seasons.season.lastlife.LastLifeLivesManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
@@ -21,7 +21,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.scores.Score;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +29,8 @@ import java.util.List;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 import static net.mat0u5.lifeseries.Main.livesManager;
 
+//? if <= 1.20.2
+//import net.minecraft.world.scores.Score;
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
 
@@ -45,10 +46,6 @@ public class LivesCommand extends Command {
 
     public boolean isNormalLife() {
         return currentSeason.getSeason() != Seasons.LIMITED_LIFE;
-    }
-
-    public boolean isLastLife() {
-        return currentSeason.getSeason() == Seasons.LAST_LIFE;
     }
 
     @Override
@@ -171,7 +168,7 @@ public class LivesCommand extends Command {
                     )
             )
             .then(literal("rollLives")
-                    .requires(source -> isLastLife() && PermissionManager.isAdmin(source))
+                    .requires(PermissionManager::isAdmin)
                     .executes(context -> assignRandomLives(
                             context.getSource(), PlayerUtils.getAllPlayers()
                     ))
@@ -186,28 +183,20 @@ public class LivesCommand extends Command {
 
     public int showLives(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        boolean normalLife = isNormalLife();
-
         ServerPlayer self = source.getPlayer();
 
         if (self == null) return -1;
         if (!self.ls$hasAssignedLives()) {
-            String timeOrLives = normalLife ? "lives" : "time";
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("You have not been assigned any {} yet", timeOrLives));
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIVES_UNASSIGNED.get());
             return 1;
         }
 
         Integer playerLives = self.ls$getLives();
-        
-        if (normalLife) {
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("You have {} {}", livesManager.getFormattedLives(playerLives), TextUtils.pluralize("life", "lives", playerLives)));
-        }
-        else {
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("You have {} left", livesManager.getFormattedLives(playerLives)));
-        }
+
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIVES_GET_SELF.get(livesManager.getFormattedLives(playerLives), TextUtils.pluralize("life", "lives", playerLives)));
 
         if (playerLives == null || playerLives <= 0) {
-            OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("Womp womp."));
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIVES_GET_SELF_NONE.get());
         }
 
         return 1;
@@ -215,11 +204,9 @@ public class LivesCommand extends Command {
 
     public int getAllLives(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "time";
 
         if (!ScoreboardUtils.existsObjective(LivesManager.SCOREBOARD_NAME)) {
-            source.sendFailure(TextUtils.format("Nobody has been assigned {} yet", timeOrLives));
+            OtherUtils.sendCommandFailure(source, ModifiableText.LIVES_UNASSIGNED_ALL.get());
             return -1;
         }
 
@@ -229,12 +216,11 @@ public class LivesCommand extends Command {
         Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
         //?}
         if (entries.isEmpty()) {
-            source.sendFailure(TextUtils.format("Nobody has been assigned {} yet", timeOrLives));
+            OtherUtils.sendCommandFailure(source, ModifiableText.LIVES_UNASSIGNED_ALL.get());
             return -1;
         }
-        String timeOrLives2 = normalLife ? "Lives" : "Times";
 
-        MutableComponent text = TextUtils.format("Assigned {}: \n", timeOrLives2);
+        MutableComponent text = ModifiableText.LIVES_ASSIGNED_LIST.get().copy();
         //? if <= 1.20.2 {
         /*for (Score entry : entries) {
             String name = entry.getOwner();
@@ -246,12 +232,7 @@ public class LivesCommand extends Command {
         //?}
             if (name.startsWith("`")) continue;
             ChatFormatting color = livesManager.getColorForLives(lives);
-            if (normalLife) {
-                text.append(TextUtils.format("{} has {} {}\n", Component.literal(name).withStyle(color), livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives)));
-            }
-            else {
-                text.append(TextUtils.format("{} has {} left\n", Component.literal(name).withStyle(color), livesManager.getFormattedLives(lives)));
-            }
+            text.append(ModifiableText.LIVES_ASSIGNED_LIST_ENTRY.get(Component.literal(name).withStyle(color), livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives)));
         }
 
         OtherUtils.sendCommandFeedbackQuiet(source, text);
@@ -261,29 +242,20 @@ public class LivesCommand extends Command {
     public int getLivesFor(CommandSourceStack source, ServerPlayer target) {
         if (checkBanned(source)) return -1;
         if (target == null) return -1;
-        boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "time";
 
         if (!target.ls$hasAssignedLives()) {
-            source.sendFailure(TextUtils.formatPlain("{} has not been assigned any {}", target, timeOrLives));
+            OtherUtils.sendCommandFailure(source, ModifiableText.LIVES_UNASSIGNED_OTHER.get(target));
             return -1;
         }
         Integer lives = target.ls$getLives();
-        if (normalLife) {
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} {}", target, livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives)));
-        }
-        else {
-            OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} left", target,livesManager.getFormattedLives(lives)));
-        }
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIVES_ASSIGNED_LIST_ENTRY.get(target, livesManager.getFormattedLives(lives), TextUtils.pluralize("life", "lives", lives)));
         return 1;
     }
 
     public int reloadLives(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "times";
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.formatLoosely("§7Reloading {}...", timeOrLives));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RELOADING.get());
         currentSeason.reloadAllPlayerTeams();
         return 1;
     }
@@ -292,7 +264,7 @@ public class LivesCommand extends Command {
 
         Time amount = OtherUtils.parseTimeFromArgument(timeArgument);
         if (amount == null || !amount.isPresent()) {
-            source.sendFailure(Component.literal(SessionCommand.INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(SessionCommand.INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
         if (reverse) amount.multiply(-1);
@@ -304,15 +276,14 @@ public class LivesCommand extends Command {
         if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
         boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "time";
 
         if (setNotGive) {
 
             if (targets.size() == 1) {
-                OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {}'s {} to {}", targets.iterator().next(), timeOrLives, livesManager.getFormattedLives(amount)));
+                OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_SET_SINGLE.get(targets.iterator().next(), livesManager.getFormattedLives(amount)));
             }
             else {
-                OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {} to {} for {} targets", timeOrLives, livesManager.getFormattedLives(amount), targets.size()));
+                OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_SET_MULTIPLE.get(livesManager.getFormattedLives(amount), targets.size()));
             }
 
             for (ServerPlayer player : targets) {
@@ -330,18 +301,18 @@ public class LivesCommand extends Command {
 
             if (targets.size() == 1) {
                 if (normalLife) {
-                    OtherUtils.sendCommandFeedback(source, TextUtils.format("{} {} {} {} {}", addOrRemove, Math.abs(amount), timeOrLives2, toOrFrom, targets.iterator().next()));
+                    OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_CHANGE_SINGLE.get(addOrRemove, Math.abs(amount), timeOrLives2, toOrFrom, targets.iterator().next()));
                 }
                 else {
-                    OtherUtils.sendCommandFeedback(source, TextUtils.format("{} {} {} {}", addOrRemove, timeOrLives2, toOrFrom, targets.iterator().next()));
+                    OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_CHANGE_SINGLE.get(addOrRemove, timeOrLives2, toOrFrom, targets.iterator().next()));
                 }
             }
             else {
                 if (normalLife) {
-                    OtherUtils.sendCommandFeedback(source, TextUtils.format("{} {} {} {} {} targets", addOrRemove, Math.abs(amount), timeOrLives2, toOrFrom, targets.size()));
+                    OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_CHANGE_MULTIPLE.get(addOrRemove, Math.abs(amount), timeOrLives2, toOrFrom, targets.size()));
                 }
                 else {
-                    OtherUtils.sendCommandFeedback(source, TextUtils.format("{} {} {} {} targets", addOrRemove, timeOrLives2, toOrFrom, targets.size()));
+                    OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_CHANGE_MULTIPLE.get(addOrRemove, timeOrLives2, toOrFrom, targets.size()));
                 }
             }
 
@@ -358,16 +329,14 @@ public class LivesCommand extends Command {
     public int resetLives(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
-        boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "time";
 
         targets.forEach(livesManager::resetPlayerLife);
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {}'s {}", targets.iterator().next(), timeOrLives));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RESET_SINGLE.get(targets.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset {} of {} targets", timeOrLives, targets.size()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RESET_MULTIPLE.get(targets.size()));
         }
 
         return 1;
@@ -375,11 +344,9 @@ public class LivesCommand extends Command {
 
     public int resetAllLives(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        boolean normalLife = isNormalLife();
-        String timeOrLives = normalLife ? "lives" : "times";
 
         livesManager.resetAllPlayerLives();
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Reset everyone's {}", timeOrLives));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RESET_EVERYONE.get());
         return 1;
     }
 
@@ -388,14 +355,14 @@ public class LivesCommand extends Command {
         if (players == null || players.isEmpty()) return -1;
 
         if (players.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Assigning random lives to {}§7...", players.iterator().next()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RANDOMIZE_SINGLE.get(players.iterator().next()));
         }
         else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Assigning random lives to {}§7 targets...", players.size()));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.LIVES_RANDOMIZE_MULTIPLE.get(players.size()));
         }
-        if (livesManager instanceof LastLifeLivesManager lastLifeLivesManager) {
-            lastLifeLivesManager.assignRandomLives(new ArrayList<>(players));
-        }
+
+        livesManager.assignRandomLives(new ArrayList<>(players));
+
         return 1;
     }
 }

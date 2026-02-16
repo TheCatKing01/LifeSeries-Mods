@@ -27,7 +27,7 @@ public class WildLifeConfig extends ConfigManager {
             "netherite_helmet",
             "turtle_helmet",
             //? if >= 1.21.9
-            /*"copper_helmet",*/
+            "copper_helmet",
             "elytra"
     );
 
@@ -186,9 +186,13 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_superpowers_windcharge_max_mace_damage", 2, "season.superpowers",
             "Wind Charge: Max Mace Damage", "The max amount of damage you can deal with a mace while using the Wind Charge superpower."
     );
-    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS = new ConfigFileEntry<>(
-            "wildcard_superpowers_zombies_lose_items", true, "season.superpowers",
-            "Necromancy: Zombies Lose Items", "Controls whether zombies keep their items when they first get respawned."
+    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS = new ConfigFileEntry<>(
+            "wildcard_superpowers_zombies_first_spawn_clear_items", true, "season.superpowers",
+            "Necromancy: Zombies First Spawn Clear Items", "Controls whether zombies get cleared when they first get respawned."
+    );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_KEEP_INVENTORY = new ConfigFileEntry<>(
+            "wildcard_superpowers_zombies_keep_inventory", true, "season.superpowers",
+            "Necromancy: Zombies Keep Inventory", "Controls whether zombies keep their items when they die."
     );
     public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_REVIVE_BY_KILLING_DARK_GREEN = new ConfigFileEntry<>(
             "wildcard_superpowers_zombies_revive_by_killing_dark_green", false, "season.superpowers",
@@ -282,6 +286,22 @@ public class WildLifeConfig extends ConfigManager {
             "group_trivia", null, ConfigTypes.TEXT, "{season.trivia}",
             "Trivia", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
+            "group_trivia_questions", null, ConfigTypes.TEXT, "{season.trivia.questions}",
+            "Trivia Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_EASY = new ConfigFileEntry<>(
+            "group_trivia_questions_easy", null, ConfigTypes.TEXT, "{season.trivia.questions.easy}",
+            "Easy Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_NORMAL = new ConfigFileEntry<>(
+            "group_trivia_questions_normal", null, ConfigTypes.TEXT, "{season.trivia.questions.normal}",
+            "Normal Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_HARD = new ConfigFileEntry<>(
+            "group_trivia_questions_hard", null, ConfigTypes.TEXT, "{season.trivia.questions.hard}",
+            "Hard Questions", ""
+    );
     public static final ConfigFileEntry<Object> GROUP_MOBSWAP = new ConfigFileEntry<>(
             "group_mobswap", null, ConfigTypes.TEXT, "{season.mobswap}",
             "Mob Swap", ""
@@ -358,6 +378,10 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_TRIVIA_SECONDS_EASY
                 ,WILDCARD_TRIVIA_SECONDS_NORMAL
                 ,WILDCARD_TRIVIA_SECONDS_HARD
+                ,GROUP_TRIVIA_QUESTIONS
+                    ,GROUP_TRIVIA_QUESTIONS_EASY
+                    ,GROUP_TRIVIA_QUESTIONS_NORMAL
+                    ,GROUP_TRIVIA_QUESTIONS_HARD
 
                 ,WILDCARD_MOBSWAP_START_SPAWN_DELAY
                 ,WILDCARD_MOBSWAP_END_SPAWN_DELAY
@@ -370,7 +394,8 @@ public class WildLifeConfig extends ConfigManager {
 		,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE			
                 ,WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME
                 ,WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE
-                ,WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS
+                ,WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS
+                ,WILDCARD_SUPERPOWERS_ZOMBIES_KEEP_INVENTORY
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_REVIVE_BY_KILLING_DARK_GREEN
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_HEALTH
                 //? if > 1.20.3 {
@@ -401,7 +426,7 @@ public class WildLifeConfig extends ConfigManager {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         DEFAULT_LIVES.defaultValue = 6;
         SPAWN_EGG_ALLOW_ON_SPAWNER.defaultValue = true;
         SPAWNER_RECIPE.defaultValue = true;

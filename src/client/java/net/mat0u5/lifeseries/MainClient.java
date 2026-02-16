@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.mat0u5.lifeseries.config.ClientConfig;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.registries.ClientRegistries;
@@ -17,6 +18,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
+
+//? if <= 1.20.3 {
+/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+*///?} else {
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+ //?}
 
 public class MainClient implements ClientModInitializer, IClientHelper {
 
@@ -51,6 +58,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static boolean cloudColorSetMode = false;
     public static Vec3 cachedFogRenderColor = null;
     public static boolean isAdmin = false;
+    public static boolean tripleJumpActive = false;
+    public static boolean modDisabledServerSide = false;
 
     public static ClientConfig clientConfig;
 
@@ -76,6 +85,7 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public void onInitializeClient() {
         ClientRegistries.registerModStuff();
         NetworkHandlerClient.registerClientReceiver();
+        NetworkHandlerClient.initializeSimplePacketReceivers();
         ClientRenderer.onInitialize();
         Main.setClientHelper(this);
 
@@ -120,6 +130,20 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     @Override
     public List<Wildcards> getActiveWildcards() {
         return clientActiveWildcards;
+    }
+
+    @Override
+    //? if <= 1.20.3 {
+    /*public void sendPacket(FabricPacket payload) {
+    *///?} else {
+    public void sendPacket(CustomPacketPayload payload) {
+    //?}
+        ClientPlayNetworking.send(payload);
+    }
+
+    @Override
+    public boolean isDisabledServerSide() {
+        return modDisabledServerSide;
     }
 
     public static void reloadConfig() {
@@ -171,6 +195,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         cloudColor = null;
         cloudColorSetMode = false;
         isAdmin = false;
+        tripleJumpActive = false;
+        modDisabledServerSide = false;
 
         MorphManager.resetMorphs();
     }
