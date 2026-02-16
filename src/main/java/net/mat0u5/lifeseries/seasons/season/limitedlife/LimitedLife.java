@@ -255,10 +255,9 @@ public class LimitedLife extends Season {
 
     @Override
     public void reload() {
-        SHOW_TIME_BELOW_NAM
-        LimitedLifeLivesManE = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
+		SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
         super.reload();
-ager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
+        LimitedLifeLivesManager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
         LimitedLifeLivesManager.YELLOW_TIME = LimitedLifeConfig.TIME_YELLOW.get();
         LimitedLifeLivesManager.RED_TIME = LimitedLifeConfig.TIME_RED.get();
         NEW_DEATH_NORMAL = Time.seconds(LimitedLifeConfig.TIME_DEATH.get());
