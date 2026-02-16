@@ -5,7 +5,7 @@ name: build
 on:
   push:
     branches:
-      - life-series-plus
+      - 1.0.2
 
 jobs:
   build:
