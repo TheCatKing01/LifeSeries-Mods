@@ -51,7 +51,8 @@ public abstract class TriviaHandler {
             setTimeBasedOnDifficulty(difficulty);
         }
         sendTimeUpdatePacket();
-        NetworkHandlerServer.sendTriviaPacket(boundPlayer, question.getQuestion(), difficulty, System.currentTimeMillis(), timeToComplete, question.getAnswers());
+        boolean niceLifeStyle = this instanceof NiceLifeTriviaHandler;
+        NetworkHandlerServer.sendTriviaPacket(boundPlayer, question.getQuestion(), difficulty, System.currentTimeMillis(), timeToComplete, question.getAnswers(), niceLifeStyle);
         bot.setInteractedWith(true);
     }
 

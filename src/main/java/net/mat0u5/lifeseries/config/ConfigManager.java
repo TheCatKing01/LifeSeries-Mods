@@ -101,6 +101,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SUBIN // Group
 
                 ,SIMPLE_LIFE //Group
+				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES
 
                 //Group stuff
@@ -161,15 +162,21 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,WATCHERS_IN_TAB
                 ,WATCHERS_MUTED
-
-                ,TRADERS_MAX_AMOUNT
-                ,COMPLEX_LIFE_TRADES
 				
-                ,SUBIN_CHANGE_SKIN
+				,SUBIN_CHANGE_SKIN
                 ,SUBIN_CHANGE_USERNAME
                 ,LIVES_RANDOMIZE
                 ,LIVES_RANDOMIZE_MIN
                 ,LIVES_RANDOMIZE_MAX
+
+                ,TRADERS_MAX_AMOUNT
+                ,COMPLEX_LIFE_TRADES
+
+                ,WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS
+                ,WILDCARD_TRIVIA_BOTS_PER_PLAYER
+                ,WILDCARD_TRIVIA_SECONDS_EASY
+                ,WILDCARD_TRIVIA_SECONDS_NORMAL
+                ,WILDCARD_TRIVIA_SECONDS_HARD
         ));
     }
 

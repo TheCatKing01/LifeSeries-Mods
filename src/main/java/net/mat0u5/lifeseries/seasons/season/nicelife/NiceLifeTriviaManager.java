@@ -208,7 +208,14 @@ public class NiceLifeTriviaManager {
         ServerPlayer player = PlayerUtils.getPlayer(triviaSpawnInfo.uuid());
         if (player == null) return;
         BlockPos spawnBotPos = triviaSpawnInfo.spawnPos().offset(0, botSpawnHeight, 0);
-        TriviaBot bot = LevelUtils.spawnEntity(MobRegistry.TRIVIA_BOT, player.ls$getServerLevel(), spawnBotPos);
+        TriviaBot.FORCE_SANTA_BOT_SPAWN = true;
+        TriviaBot bot;
+        try {
+            bot = LevelUtils.spawnEntity(MobRegistry.TRIVIA_BOT, player.ls$getServerLevel(), spawnBotPos);
+        }
+        finally {
+            TriviaBot.FORCE_SANTA_BOT_SPAWN = false;
+        }
         if (bot != null) {
             bot.sounds.delay = soundDelay;
             SessionTranscript.newTriviaBot(player);
@@ -264,6 +271,10 @@ public class NiceLifeTriviaManager {
         }
         toKill.forEach(Entity::discard);
         SimplePackets.RESET_TRIVIA.sendToClient();
+        bots.clear();
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            NetworkHandlerServer.sendStringPacket(player, PacketNames.RESET_TRIVIA, "true");
+        }
     }
     public static void killAllSnowmen() {
         if (server == null) return;
@@ -281,10 +292,13 @@ public class NiceLifeTriviaManager {
     public static void handleAnswer(ServerPlayer player, int answer) {
         if (bots.containsKey(player.getUUID())) {
             TriviaBot bot = bots.get(player.getUUID());
-            if (bot.isAlive()) {
+            if (bot != null && bot.isAlive()) {
                 bot.triviaHandler.handleAnswer(answer);
             }
         }
+		else {
+			bots.remove(player.getUUID());
+		}
     }
 
     public static Tuple<Integer, TriviaQuestion> getTriviaQuestion(ServerPlayer player) {

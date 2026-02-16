@@ -22,6 +22,7 @@ import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
@@ -444,6 +445,10 @@ public abstract class Season {
         boogeymanManager.sessionEnd();
         secretSociety.sessionEnd();
         livesManager.assignedLives = false;
+		
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            TriviaWildcard.resetPlayerPunishments(player);
+        }
     }
 
     public boolean sessionStart() {

@@ -1,7 +1,6 @@
 package net.mat0u5.lifeseries.features;
 
 import net.mat0u5.lifeseries.Main;
-import net.mat0u5.lifeseries.MainClient;
 import net.mat0u5.lifeseries.config.ClientConfig;
 import net.mat0u5.lifeseries.gui.EmptySleepScreen;
 import net.mat0u5.lifeseries.gui.trivia.ConfirmQuizAnswerScreen;
@@ -10,7 +9,6 @@ import net.mat0u5.lifeseries.gui.trivia.QuizScreen;
 import net.mat0u5.lifeseries.gui.trivia.VotingScreen;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.network.packets.TriviaQuestionPayload;
-import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.ClientSounds;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
@@ -25,6 +23,7 @@ public class Trivia {
     public static int difficulty = 0;
     public static int secondsToComplete = 0;
     public static long timestamp = 0;
+    public static boolean niceLifeStyle = false;
     public static int ticksPassed = 0;
     public static void receiveTrivia(TriviaQuestionPayload payload) {
         question = payload.question();
@@ -32,6 +31,7 @@ public class Trivia {
         difficulty = payload.difficulty();
         timestamp = payload.timestamp();
         secondsToComplete = payload.timeToComplete();
+        niceLifeStyle = payload.niceLifeStyle();
         if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_CLIENT] Received trivia question: {{}, {}, {}}", question, difficulty, answers));
         openGui();
     }
@@ -59,7 +59,7 @@ public class Trivia {
     public static void openGui() {
         if (Main.modDisabled()) return;
         if (question.isEmpty() || answers.isEmpty()) return;
-        if (MainClient.clientCurrentSeason == Seasons.NICE_LIFE) {
+        if (niceLifeStyle) {
             Minecraft.getInstance().setScreen(new NewQuizScreen());
         }
         else {
@@ -81,6 +81,7 @@ public class Trivia {
         secondsToComplete = 0;
         timestamp = 0;
         ticksPassed = 0;
+        niceLifeStyle = false;
         closeGui();
     }
 
