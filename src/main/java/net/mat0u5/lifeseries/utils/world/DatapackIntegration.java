@@ -236,7 +236,7 @@ public class DatapackIntegration {
         TRIVIA_SUCCEED("trivia_succeed", "Trivia Succeed", "Triggers when a player answers correctly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
         TRIVIA_FAIL("trivia_fail", "Trivia Fail", "Triggers when a player answers incorrectly in trivia.\nAvailable macros: $(Player), $(TriviaBot)", false),
         SUPERPOWER_TRIGGER("superpower_trigger", "Superpower Trigger", "Triggers when a player triggers their superpower.\nAvailable macros: $(Player), $(SuperpowerIndex)", false),
-        MIDNIGHT_CHIMES("midnight_chimes", "Chimes End", "Triggers after the midnight chimes play.", false);
+        MIDNIGHT_CHIMES("midnight_chimes", "Chimes End", "Triggers after the midnight chimes play.", false),
         NICE_LIST_ADD("nice_list_add", "Nice List Add Player", "Triggers when a player is added to the Nice List.\nAvailable macros: $(Player)", false),
         NICE_LIST_END("nice_list_end", "Nice List End", "Triggers when the Nice List ends and the voting results begin.", false),
         NAUGHTY_LIST_ADD("naughty_list_add", "Naughty List Add Player", "Triggers when a player is added to the Naughty List.\nAvailable macros: $(Player)", false),

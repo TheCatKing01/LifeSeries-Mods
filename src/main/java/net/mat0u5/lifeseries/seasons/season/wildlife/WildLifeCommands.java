@@ -58,58 +58,20 @@ public class WildLifeCommands extends Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            literal("wildcard")
-                .requires(PermissionManager::isAdmin)
-                .then(literal("list")
-                    .executes(context -> listWildcards(
-                        context.getSource())
-                    )
-                )
-                .then(literal("listActive")
-                    .executes(context -> listActiveWildcards(
-                        context.getSource())
-                    )
-                )
-                .then(literal("activate")
-                    .then(argument("wildcard", StringArgumentType.greedyString())
-                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(suggestionsActivateWildcard(), builder))
-                        .executes(context -> activateWildcard(
-                            context.getSource(), StringArgumentType.getString(context, "wildcard"))
-                        )
-                    )
-                )
-                .then(literal("deactivate")
-                    .then(argument("wildcard", StringArgumentType.greedyString())
-                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(suggestionsDeactivateWildcard(), builder))
-                        .executes(context -> deactivateWildcard(
-                            context.getSource(), StringArgumentType.getString(context, "wildcard"))
-                        )
-                    )
-                )
-                .then(literal("choose")
-                    .requires(source -> (NetworkHandlerServer.wasHandshakeSuccessful(source.getPlayer()) || (source.getEntity() == null)))
-                    .executes(context -> chooseWildcard(
-                        context.getSource())
-                    )
-                )
-                .then(literal("finale")
-                        .executes(context -> activateFinale(
-                                context.getSource())
-                        )
-                .then(literal("effect")
-                        .then(literal("dots")
-                                .executes(context -> effectDots(
-                                        context.getSource())
-                                )
-                        )
-                        .then(literal("makeItWild")
-                                .executes(context -> effectMakeItWild(
-                                        context.getSource())
-                                )
-                        )
-                )
-                )
-        );
+		
+			literal("wildcard")
+			.requires(PermissionManager::isAdmin)
+			.then(literal("list").executes(...))
+			.then(literal("listActive").executes(...))
+			.then(literal("activate").then(argument("wildcard", ...).executes(...)))
+			.then(literal("deactivate").then(argument("wildcard", ...).executes(...)))
+			.then(literal("choose").executes(...))
+			.then(literal("finale").executes(context -> activateFinale(context.getSource())))
+			.then(literal("effect")
+				.then(literal("dots").executes(context -> effectDots(context.getSource())))
+				.then(literal("makeItWild").executes(context -> effectMakeItWild(context.getSource())))
+		)
+
 		
         dispatcher.register(
             literal("snail")

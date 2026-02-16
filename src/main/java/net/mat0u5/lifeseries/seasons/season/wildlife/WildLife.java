@@ -48,6 +48,7 @@ import static net.mat0u5.lifeseries.Main.seasonConfig;
 import net.minecraft.server.level.ServerLevel;
 //?}
 
+
 public class WildLife extends Season {
 	
     private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
@@ -392,7 +393,7 @@ public class WildLife extends Season {
         super.onUpdatedInventory(player);
         Hunger.updateInventory(player);
     }
-}
+	
     @Override
     public void onPlayerRespawn(ServerPlayer player) {
         super.onPlayerRespawn(player);
