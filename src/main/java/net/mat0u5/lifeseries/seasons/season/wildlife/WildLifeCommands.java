@@ -109,6 +109,7 @@ public class WildLifeCommands extends Command {
 				.then(literal("makeItWild")
 					.executes(context -> effectMakeItWild(context.getSource()))
 				)
+			)
 		);
 	
         dispatcher.register(
