@@ -255,10 +255,10 @@ public class LimitedLife extends Season {
 
     @Override
     public void reload() {
-        SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
+        SHOW_TIME_BELOW_NAM
+        LimitedLifeLivesManE = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
         super.reload();
-
-        LimitedLifeLivesManager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
+ager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
         LimitedLifeLivesManager.YELLOW_TIME = LimitedLifeConfig.TIME_YELLOW.get();
         LimitedLifeLivesManager.RED_TIME = LimitedLifeConfig.TIME_RED.get();
         NEW_DEATH_NORMAL = Time.seconds(LimitedLifeConfig.TIME_DEATH.get());
@@ -268,7 +268,7 @@ public class LimitedLife extends Season {
         TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get();
         LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get();
         TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get();
-        NetworkHandlerServer.sendNumberPackets(SimplePackets.TICKS_PER_SECOND, TICKS_PER_SECOND);
+        NetworkHandlerServer.sendUpdatePackets();
     }
 
     @Override

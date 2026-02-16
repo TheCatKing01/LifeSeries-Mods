@@ -398,6 +398,28 @@ public class WildLifeCommands extends Command {
         return 1;
     }
 	
+	public int setRandomSuperpowers(CommandSourceStack source) {
+		if (checkBanned(source)) return -1;
+		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
+		SuperpowersWildcard.rollRandomSuperpowers(players);
+		int count = SuperpowersWildcard.POWERS_PER_ROLL;
+		if (count == 1) {
+			OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
+		}
+		else {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to all players", count));
+		}
+			/*
+				public int setRandomSuperpowers(CommandSourceStack source) {
+					if (checkBanned(source)) return -1;
+					SuperpowersWildcard.rollRandomSuperpowers();
+					OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
+					return 1;
+				}
+			*/
+		return 1;
+	}
+	
 	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
 		if (checkBanned(source)) return -1;
 		SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));

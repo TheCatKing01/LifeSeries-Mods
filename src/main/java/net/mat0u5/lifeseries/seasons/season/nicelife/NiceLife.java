@@ -12,7 +12,6 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.Session;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.core.BlockPos;

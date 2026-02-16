@@ -646,7 +646,7 @@ public class NetworkHandlerServer {
             SimplePackets.ACTIVE_WILDCARDS.target(player).sendToClient(activeWildcards);
         }
         if (currentSeason instanceof LimitedLife limitedLife) {
-			SimplePackets.TICKS_PER_SECOND.target(player).sendToClient(Season.TICKS_PER_SECOND);
+			SimplePackets.TICKS_PER_SECOND.target(player).sendToClient(limitedLife.getTicksPerSecond());
         }
         SimplePackets.CURRENT_SEASON.target(player).sendToClient(currentSeason.getSeason().getId());
         SimplePackets.TABLIST_SHOW_EXACT.target(player).sendToClient(Season.TAB_LIST_SHOW_EXACT_LIVES);
