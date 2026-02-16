@@ -61,15 +61,15 @@ public class WildLifeCommands extends Command {
 		
 		literal("wildcard")
 			.requires(PermissionManager::isAdmin)
-			
+
 			.then(literal("list")
 				.executes(context -> listWildcards(context.getSource()))
 			)
-			
+
 			.then(literal("listActive")
 				.executes(context -> listActiveWildcards(context.getSource()))
 			)
-			
+
 			.then(literal("activate")
 				.then(argument("wildcard", StringArgumentType.greedyString())
 					.suggests((context, builder) -> 
@@ -80,7 +80,7 @@ public class WildLifeCommands extends Command {
 					))
 				)
 			)
-			
+
 			.then(literal("deactivate")
 				.then(argument("wildcard", StringArgumentType.greedyString())
 					.suggests((context, builder) -> 
@@ -91,25 +91,25 @@ public class WildLifeCommands extends Command {
 					))
 				)
 			)
-			
+
 			.then(literal("choose")
 				.requires(source -> NetworkHandlerServer.wasHandshakeSuccessful(source.getPlayer()) 
 									|| source.getEntity() == null)
 				.executes(context -> chooseWildcard(context.getSource()))
 			)
-			
+
 			.then(literal("finale")
 				.executes(context -> activateFinale(context.getSource()))
 			)
-			
+
 			.then(literal("effect")
-				.then(literal("dots")
+				.th]en(literal("dots")
 					.executes(context -> effectDots(context.getSource()))
 				)
 				.then(literal("makeItWild")
 					.executes(context -> effectMakeItWild(context.getSource()))
 				)
-			);
+		);
 	
         dispatcher.register(
             literal("snail")
