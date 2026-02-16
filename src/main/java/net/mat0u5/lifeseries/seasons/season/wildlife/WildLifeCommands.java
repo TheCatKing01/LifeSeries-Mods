@@ -103,7 +103,7 @@ public class WildLifeCommands extends Command {
 			)
 
 			.then(literal("effect")
-				.th]en(literal("dots")
+				.then(literal("dots")
 					.executes(context -> effectDots(context.getSource()))
 				)
 				.then(literal("makeItWild")
