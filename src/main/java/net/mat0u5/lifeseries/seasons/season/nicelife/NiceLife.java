@@ -96,10 +96,10 @@ public class NiceLife extends Season {
     public void switchOutOfSeason(Seasons changedTo) {
         if (server == null) return;
 		//? if <= 1.21.9 {
-		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-		//?} else {
-        OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
-         //?}
+		ServerLevel overworld = server.overworld();
+		boolean advanceTime = true; // or whatever your intended default is
+		OtherUtils.setBooleanGameRule(overworld, GameRules.DO_DAYLIGHT_CYCLE, advanceTime);
+		//?}
         NiceLifeTriviaManager.killAllSnowmen();
         NiceLifeTriviaManager.killAllBots();
         Season.setSkyColor(null, false);
@@ -187,8 +187,8 @@ public class NiceLife extends Season {
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
                 && (!isMidnight() || !isTimeFreezeEnabled());
 		//? if <= 1.21.9 {
-        OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT_CYCLE, advanceTime);
-        //?} else {
+		OtherUtils.setBooleanGameRule(overworld, GameRules.DO_DAYLIGHT_CYCLE, advanceTime);
+		//?} else {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
          *///?}
 
