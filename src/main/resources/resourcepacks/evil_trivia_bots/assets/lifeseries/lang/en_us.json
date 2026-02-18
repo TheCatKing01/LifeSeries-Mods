@@ -1,0 +1,6 @@
+{
+  "death.attack.triviabot": "%1$s got their trivia question wrong",
+  "death.attack.triviabot.item": "%1$s got their trivia question wrong",
+  "death.attack.triviabot.player": "%1$s got their trivia question wrong",
+  "entity.lifeseries.triviabot": "Trivia Bot"
+}

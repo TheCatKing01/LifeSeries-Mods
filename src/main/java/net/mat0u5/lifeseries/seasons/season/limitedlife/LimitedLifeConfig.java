@@ -152,6 +152,11 @@ public class LimitedLifeConfig extends ConfigManager {
                 ,TIME_DEATH_BOOGEYMAN
                 ,TIME_KILL
                 ,TIME_KILL_BOOGEYMAN
+
+				,new ConfigFileEntry<>(
+				TICKS_PER_SECOND.key, TICKS_PER_SECOND.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus",
+				TICKS_PER_SECOND.displayName, TICKS_PER_SECOND.description
+                )
         ));
     }
 

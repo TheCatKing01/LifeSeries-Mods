@@ -347,6 +347,11 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_SUPERPOWERS //Group
                 ,GROUP_CALLBACK //Group
 				,WILD_MIDNIGHT_CHIMES //Group
+				
+				,new ConfigFileEntry<>(
+                    GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
+				)
 
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE
@@ -391,7 +396,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SUPERPOWERS_POWER_BLACKLIST
                 ,WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER
                 ,WILDCARD_SUPERPOWERS_POWERS_PER_ROLL	
-		,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE			
+				,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE			
                 ,WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME
                 ,WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS
@@ -403,14 +408,40 @@ public class WildLifeConfig extends ConfigManager {
                 //?}
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_ARMOR
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS
+				
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.key, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus",
+				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.key, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus",
+				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.key, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.displayName, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.description
+                )
 
                 ,WILDCARD_CALLBACK_WILDCARDS_BLACKLIST
                 ,WILDCARD_CALLBACK_TURN_OFF
                 ,WILDCARD_CALLBACK_NERFED_WILDCARDS
-		,WILDCARD_CALLBACK_POWER_STACKING
-		,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
-		,WILDCARD_CALLBACK_RESET_AT_MAX
+				,WILDCARD_CALLBACK_POWER_STACKING
+				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
+				,WILDCARD_CALLBACK_RESET_AT_MAX
                 ,SPAWN_BOTS_AT_MIDNIGHT
+				
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_POWER_STACKING.key, WILDCARD_CALLBACK_POWER_STACKING.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				"Callback Power Stacking", WILDCARD_CALLBACK_POWER_STACKING.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.key, WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.displayName, WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_RESET_AT_MAX.key, WILDCARD_CALLBACK_RESET_AT_MAX.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				WILDCARD_CALLBACK_RESET_AT_MAX.displayName, WILDCARD_CALLBACK_RESET_AT_MAX.description
+                )
         ));
     }
 

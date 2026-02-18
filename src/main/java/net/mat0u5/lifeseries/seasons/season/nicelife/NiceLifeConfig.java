@@ -143,8 +143,8 @@ public class NiceLifeConfig extends ConfigManager {
                         MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season",
                         MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
                 )
-		,ADVANCE_TIME_WHEN_NOT_IN_SESSION
-     		,FREEZE_TIME_AT_MIDNIGHT
+		`		,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+				,FREEZE_TIME_AT_MIDNIGHT
 
 
                 ,GROUP_TRIVIA
@@ -160,7 +160,14 @@ public class NiceLifeConfig extends ConfigManager {
                 ,NICE_LIST_PLAYERS
                 ,NICE_LIST_CHANCE
                 ,GROUP_TRIVIA_QUESTIONS
+				
+				
+				,new ConfigFileEntry<>(
+				FREEZE_TIME_AT_MIDNIGHT.key, FREEZE_TIME_AT_MIDNIGHT.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				FREEZE_TIME_AT_MIDNIGHT.displayName, FREEZE_TIME_AT_MIDNIGHT.description
+                )
         ));
+		
     }
 
     @Override
