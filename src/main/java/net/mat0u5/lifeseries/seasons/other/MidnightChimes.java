@@ -9,24 +9,29 @@ public class MidnightChimes {
     private static final String MIDNIGHT_CHIMES_SOUND = "nicelife_midnight_chimes";
     private boolean playedMidnightChimes = false;
 
-    public boolean tick(MinecraftServer server, boolean enabled, int minTime, int maxTime) {
-        if (!enabled || server == null) {
-            return false;
-        }
+		public boolean tick(MinecraftServer server, boolean enabled, int minTime, int maxTime) {
+			if (!enabled || server == null) {
+				return false;
+			}
 
-        long dayTime = server.overworld().getDayTime() % 24000L;
-        if (dayTime < minTime) {
-            playedMidnightChimes = false;
-        }
+			//? if <= 1.21.11 {
+			long dayTime = server.overworld().getDayTime() % 24000L;
+			//?} else {
+			/*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+			*///?}
 
-        if (!playedMidnightChimes && dayTime >= minTime && dayTime <= maxTime) {
-            playedMidnightChimes = true;
-            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(MIDNIGHT_CHIMES_SOUND)),
-                    1f, 1);
-            return true;
-        }
+			if (dayTime < minTime) {
+				playedMidnightChimes = false;
+			}
 
-        return false;
-    }
+			if (!playedMidnightChimes && dayTime >= minTime && dayTime <= maxTime) {
+				playedMidnightChimes = true;
+				PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
+						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(MIDNIGHT_CHIMES_SOUND)),
+						1f, 1);
+				return true;
+			}
+
+			return false;
+		}
 }
