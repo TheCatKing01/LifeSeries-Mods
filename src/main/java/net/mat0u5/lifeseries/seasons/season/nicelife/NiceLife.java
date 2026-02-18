@@ -40,11 +40,10 @@ import net.minecraft.world.level.material.Fluids;
 import static net.mat0u5.lifeseries.Main.*;
 
 //? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.GameRules;
+import net.minecraft.world.phys.Vec3;
 //? if > 1.21.9
 import net.minecraft.world.level.gamerules.GameRules;
-
-import net.minecraft.world.phys.Vec3;
 
 //? if >= 26.1 {
 /*import net.minecraft.world.clock.WorldClocks;
@@ -96,11 +95,11 @@ public class NiceLife extends Season {
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
         if (server == null) return;
-		//? if <= 1.21.9 {
-		ServerLevel overworld = server.overworld();
-		boolean advanceTime = true; // or whatever your intended default is
-		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-		//?}
+        //? if <= 1.21.9 {
+        /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT, true);
+        *///?} else {
+        OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
+         //?}
         NiceLifeTriviaManager.killAllSnowmen();
         NiceLifeTriviaManager.killAllBots();
         Season.setSkyColor(null, false);
@@ -188,8 +187,8 @@ public class NiceLife extends Season {
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
                 && (!isMidnight() || !isTimeFreezeEnabled());
 		//? if <= 1.21.9 {
-		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-		//?} else {
+        OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
+        //?} else {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
          *///?}
 
