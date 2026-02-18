@@ -11,11 +11,9 @@ import net.mat0u5.lifeseries.mixin.ServerLevelAccessor;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
-import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,23 +34,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-
-import static net.mat0u5.lifeseries.Main.*;
-
-//? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
-//? if > 1.21.9
 import net.minecraft.world.level.gamerules.GameRules;
-
 import net.minecraft.world.phys.Vec3;
-
-//? if >= 26.1 {
-/*import net.minecraft.world.clock.WorldClocks;
-*///?}
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static net.mat0u5.lifeseries.Main.*;
 
 public class NiceLife extends Season {
 
@@ -96,11 +85,8 @@ public class NiceLife extends Season {
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
         if (server == null) return;
-		//? if <= 1.21.9 {
-		ServerLevel overworld = server.overworld();
-		boolean advanceTime = true; // or whatever your intended default is
-		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-		//?}
+        ServerLevel overworld = server.overworld();
+        OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, true);
         NiceLifeTriviaManager.killAllSnowmen();
         NiceLifeTriviaManager.killAllBots();
         Season.setSkyColor(null, false);
@@ -118,8 +104,7 @@ public class NiceLife extends Season {
         SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(NiceLifeConfig.SNOW_LAYER_INCREMENT_DELAY.get());
         ADVANCE_TIME_WHEN_NOT_IN_SESSION = NiceLifeConfig.ADVANCE_TIME_WHEN_NOT_IN_SESSION.get();
         SNOWY_NETHER = NiceLifeConfig.SNOWY_NETHER.get();
-		
-		FREEZE_TIME_AT_MIDNIGHT = NiceLifeConfig.FREEZE_TIME_AT_MIDNIGHT.get();
+        FREEZE_TIME_AT_MIDNIGHT = NiceLifeConfig.FREEZE_TIME_AT_MIDNIGHT.get();
 
         snowLayerTickChance = 280.0 / Math.max(SNOW_LAYER_INCREASE_INTERVAL.getTicks(), 1);
         if (currentMaxSnowLayers == -1) {
@@ -141,12 +126,8 @@ public class NiceLife extends Season {
     public void updateSnowTick() {
         double chance = snowLayerTickChance;
 
-        if (redWinter) {
-            chance *= 5;
-        }
-        if (currentMaxSnowLayers >= 8) {
-            chance *= 3;
-        }
+        if (redWinter) chance *= 5;
+        if (currentMaxSnowLayers >= 8) chance *= 3;
 
         precipitationTicks = Math.max(1, (int) Math.ceil(chance));
         chancePerTick = chance / precipitationTicks;
@@ -157,191 +138,80 @@ public class NiceLife extends Season {
         super.tick(server);
         timePassed.tick();
         boolean freezeAtMidnight = shouldFreezeAtMidnight();
-        if (!freezeAtMidnight && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {		
-			snowTicks.tick();
+        if (!freezeAtMidnight && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {
+            snowTicks.tick();
             if (snowTicks.isLarger(SNOW_LAYER_INCREASE_INTERVAL)) {
                 snowTicks = Time.zero();
                 currentMaxSnowLayers++;
-                if (currentMaxSnowLayers > 8) {
-                    currentMaxSnowLayers = 1;
-                }
+                if (currentMaxSnowLayers > 8) currentMaxSnowLayers = 1;
                 updateSnowTick();
                 seasonConfig.setProperty("current_snow_layers", String.valueOf(currentMaxSnowLayers));
             }
         }
+
         ServerLevel overworld = server.overworld();
-        if (freezeAtMidnight) {
-			//? if <= 1.21.11 {
-			overworld.setWeatherParameters(0, 1000, false, false);
-			//?} else {
-			/*server.setWeatherParameters(0, 1000, false, false);
-			*///?}
-        }
-        else {
-			//? if <= 1.21.11 {
-			overworld.setWeatherParameters(0, 1000, true, false);
-			//?} else {
-			/*server.setWeatherParameters(0, 1000, true, false);
-			*///?}
-        }
-		
+        if (freezeAtMidnight) overworld.setWeatherParameters(0, 1000, false, false);
+        else overworld.setWeatherParameters(0, 1000, true, false);
+
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
                 && (!isMidnight() || !isTimeFreezeEnabled());
-		//? if <= 1.21.9 {
-		OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-		//?} else {
-        /*OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
-         *///?}
+        OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
 
         if (!isMidnight()) {
-            for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
-                if (serverPlayer.isSleeping()) {
-                    serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-                }
+            for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+                if (player.isSleeping()) player.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
             }
         }
 
         if (triviaCannotStartFor.isSmaller(Time.zero())) {
-            //? if <= 1.21.9 {
-            /*int percentage = overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
-             *///?} else {
             int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
-            //?}
             if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
                 if (!NiceLifeTriviaManager.triviaInProgress) {
                     List<ServerPlayer> triviaPlayers = new ArrayList<>();
-                    for(ServerPlayer player : livesManager.getAlivePlayers()) {
-                        if (player.isSpectator()) continue;
-                        if (!player.isSleeping()) continue;
-                        triviaPlayers.add(player);
+                    for (ServerPlayer player : livesManager.getAlivePlayers()) {
+                        if (!player.isSpectator() && player.isSleeping()) triviaPlayers.add(player);
                     }
-                    if (!triviaPlayers.isEmpty()) {
-                        NiceLifeTriviaManager.startTrivia(triviaPlayers);
-                    }
+                    if (!triviaPlayers.isEmpty()) NiceLifeTriviaManager.startTrivia(triviaPlayers);
                 }
             }
-        }
-        else {
-            triviaCannotStartFor.add(Time.ticks(-1));
-        }
+        } else triviaCannotStartFor.add(Time.ticks(-1));
 
         if (isMidnight() && NiceLifeTriviaManager.triviaInProgress && !NiceLifeTriviaManager.preparingForSpawn) {
-            List<ServerPlayer> remainingTriviaPlayers = new ArrayList<>();
-            for (UUID playerUUID : NiceLifeTriviaManager.triviaPlayersUUID) {
-                ServerPlayer player = PlayerUtils.getPlayer(playerUUID);
-                if (player == null) continue;
-                if (!player.isSleeping()) continue;
-                if (player.ls$isDead()) continue;
-                TriviaBot bot = NiceLifeTriviaManager.bots.get(playerUUID);
-                if (bot == null) continue;
-                if (!bot.isAlive()) continue;
-                if (!(bot.triviaHandler instanceof NiceLifeTriviaHandler triviaHandler)) continue;
-                if (triviaHandler.currentState == NiceLifeTriviaHandler.BotState.FINISHED) continue;
-                remainingTriviaPlayers.add(player);
+            List<ServerPlayer> remainingPlayers = new ArrayList<>();
+            for (UUID uuid : NiceLifeTriviaManager.triviaPlayersUUID) {
+                ServerPlayer player = PlayerUtils.getPlayer(uuid);
+                if (player == null || !player.isSleeping() || player.ls$isDead()) continue;
+                TriviaBot bot = NiceLifeTriviaManager.bots.get(uuid);
+                if (bot == null || !bot.isAlive() || !(bot.triviaHandler instanceof NiceLifeTriviaHandler triviaHandler) || triviaHandler.currentState == NiceLifeTriviaHandler.BotState.FINISHED)
+                    continue;
+                remainingPlayers.add(player);
             }
-            if (remainingTriviaPlayers.isEmpty()) {
-                sleepThroughNight();
-            }
+            if (remainingPlayers.isEmpty()) sleepThroughNight();
         }
-        if (!reachedPreSunset && isTimeBetween(11800, 13000)) {
-            if (!NiceLifeVotingManager.niceListMembers.isEmpty()) {
-                NiceLifeVotingManager.warnNiceListMembers();
-            }
+
+        if (!reachedPreSunset && isTimeBetween(11800, 13000) && !NiceLifeVotingManager.niceListMembers.isEmpty()) {
+            NiceLifeVotingManager.warnNiceListMembers();
         }
-        if (!reachedSunset && isSunset()) {
-            NiceLifeVotingManager.endListsIfNecessary();
-        }
+        if (!reachedSunset && isSunset()) NiceLifeVotingManager.endListsIfNecessary();
         reachedSunset = isSunset();
         reachedPreSunset = isTimeBetween(11800, 13000);
 
         boolean shouldRedWinter = shouldRedWinter();
         if (redWinter != shouldRedWinter) {
             redWinter = shouldRedWinter;
-            if (redWinter) {
-                triggerRedWinter();
-            }
+            if (redWinter) triggerRedWinter();
             else {
                 Season.setSkyColor(null, false);
                 Season.setFogColor(null, false);
                 Season.setCloudColor(null, false);
             }
         }
+
         if (timePassed.getTicks() % 20 == 0 && CompatibilityManager.voicechatLoaded()) {
             VoicechatMain.niceLifeTick();
         }
     }
 
-    public static boolean areEnoughSleeping(int percentage) {
-        List<ServerPlayer> players = Main.livesManager.getAlivePlayers();
-        int allPlayers = 0;
-        int sleepingPlayers = 0;
-        for (ServerPlayer player : players) {
-            if (player.isSpectator()) continue;
-            allPlayers++;
-            if (player.isSleeping()) {
-                sleepingPlayers++;
-            }
-        }
-        return sleepingPlayers >= Math.max(1, Mth.ceil((float)(allPlayers * percentage) / 100.0F));
-    }
-
-    public static void postponeTriviaStart(Time time) {
-        if (!triviaCannotStartFor.isLarger(time)) {
-            triviaCannotStartFor = time;
-        }
-    }
-	
-	@Override
-    protected int getMidnightChimesStartTime() {
-        return 18000 - 23 * 20;
-    }
-
-    @Override
-    protected void onMidnightChimes() {
-        postponeTriviaStart(Time.ticks(779));
-    }
-
-    @Override
-    public void tickSessionOn(MinecraftServer server) {
-        super.tickSessionOn(server);
-        if (timePassed.isMultipleOf(naughtyListGlowTimeInterval)) {
-            MobEffectInstance glowing = new MobEffectInstance(MobEffects.GLOWING, naughtyListGlowTime.getTicks(), 0);
-            for (UUID uuid : NiceLifeVotingManager.naughtyListMembers) {
-                ServerPlayer player = PlayerUtils.getPlayer(uuid);
-                if (player != null) {
-                    player.addEffect(glowing);
-                }
-            }
-        }
-    }
-
-    public void triggerRedWinter() {
-        TaskScheduler.scheduleTask(20, () -> {
-            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
-                    SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_red_winter")),
-                    1f, 1);
-        });
-        TaskScheduler.scheduleTask(20 + 12, () -> {
-            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.NICELIFE_REDWINTER_PT1.get(), 15, 65, 15);
-        });
-        TaskScheduler.scheduleTask(20 + 108, () -> {
-            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.NICELIFE_REDWINTER_PT2.get(), 15, 40, 15);
-        });
-        TaskScheduler.scheduleTask(20 + 215, () -> {
-            SimplePackets.FAKE_THUNDER.sendToClient(7);
-        });
-        TaskScheduler.scheduleTask(20 + 224, () -> {
-            Season.setSkyColor(new Vec3(15, -140, -255), false);
-            Season.setFogColor(new Vec3(40, -104, -163), false);
-            Season.setCloudColor(new Vec3(-255, -255, -255), true);
-        });
-    }
-
-    public boolean shouldRedWinter() {
-        if (currentSession.statusNotStarted()) return false;
-        List<ServerPlayer> nonRedPlayers = livesManager.getNonRedPlayers();
-        return nonRedPlayers.isEmpty();
-    }
 
     public void sleepThroughNight() {
         if (server == null) return;
