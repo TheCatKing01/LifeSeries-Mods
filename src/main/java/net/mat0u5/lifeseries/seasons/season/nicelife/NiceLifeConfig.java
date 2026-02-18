@@ -143,7 +143,7 @@ public class NiceLifeConfig extends ConfigManager {
                         MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season",
                         MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
                 )
-		`		,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+				,ADVANCE_TIME_WHEN_NOT_IN_SESSION
 				,FREEZE_TIME_AT_MIDNIGHT
 
 
