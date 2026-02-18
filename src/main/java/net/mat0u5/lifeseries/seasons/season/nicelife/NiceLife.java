@@ -39,9 +39,11 @@ import net.minecraft.world.level.material.Fluids;
 
 import static net.mat0u5.lifeseries.Main.*;
 
+//? if <= 1.21.9
+import net.minecraft.world.level.GameRules;
+//? if > 1.21.9
 import net.minecraft.world.level.gamerules.GameRules;
 
-//? if <= 1.21.9
 import net.minecraft.world.phys.Vec3;
 
 //? if >= 26.1 {
