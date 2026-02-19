@@ -681,7 +681,6 @@ public class NiceLife extends Season {
 		/*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
 		*///?}
 
-		return dayTime >= 18000;
-	}
-
+		return dayTime >= 13000 && dayTime <= 23000;
+		}
 }
