@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
-import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.utils.interfaces.IServerPlayer;
@@ -267,7 +267,12 @@ public class ServerPlayerMixin implements IServerPlayer {
 
     @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
     private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        if (!Main.modDisabled() && currentSeason.getSeason() == Seasons.NICE_LIFE) {
+        if (!Main.modDisabled() && currentSeason instanceof NiceLife niceLife) {
+            if (!NiceLife.SLEEP_BEFORE_MIDNIGHT && niceLife.isNight() && !niceLife.isAfterMidnight()) {
+                cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
+                ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
+                return;
+            }
             if (NiceLifeTriviaManager.triviaInProgress) {
                 cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
                 ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);

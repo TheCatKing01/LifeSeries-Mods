@@ -195,7 +195,7 @@ public class ServerGamePacketListenerImplMixin {
     @Inject(method = "handlePlayerCommand", at = @At("HEAD"), cancellable = true)
     private void cancelStopSleeping(ServerboundPlayerCommandPacket serverboundPlayerCommandPacket, CallbackInfo ci) {
         if (serverboundPlayerCommandPacket.getAction() == ServerboundPlayerCommandPacket.Action.STOP_SLEEPING) {
-            if (!Main.modDisabled() && currentSeason instanceof NiceLife niceLife && (niceLife.isMidnight() && NiceLifeTriviaManager.triviaInProgress)) {
+            if (!Main.modDisabled() && currentSeason instanceof NiceLife niceLife && niceLife.isSleepTriviaTime() && NiceLifeTriviaManager.triviaInProgress) {
                 ci.cancel();
             }
         }

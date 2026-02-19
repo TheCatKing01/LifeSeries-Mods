@@ -60,6 +60,8 @@ public class NiceLife extends Season {
     public boolean SNOW_WHEN_NOT_IN_SESSION = false;
     public static boolean ADVANCE_TIME_WHEN_NOT_IN_SESSION = false;
     public static boolean FREEZE_TIME_AT_MIDNIGHT = true;
+    public static boolean SLEEP_BEFORE_MIDNIGHT = false;
+    public static boolean FREEZE_TIME_WHILE_SLEEPING = false;
     public Time SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(600);
     public Time snowTicks = Time.zero();
     public double snowLayerTickChance = 1.0 / 43;
@@ -119,6 +121,8 @@ public class NiceLife extends Season {
         SNOWY_NETHER = NiceLifeConfig.SNOWY_NETHER.get();
 		
 		FREEZE_TIME_AT_MIDNIGHT = NiceLifeConfig.FREEZE_TIME_AT_MIDNIGHT.get();
+        SLEEP_BEFORE_MIDNIGHT = NiceLifeConfig.SLEEP_BEFORE_MIDNIGHT.get();
+        FREEZE_TIME_WHILE_SLEEPING = NiceLifeConfig.FREEZE_TIME_WHILE_SLEEPING.get();
 
         snowLayerTickChance = 280.0 / Math.max(SNOW_LAYER_INCREASE_INTERVAL.getTicks(), 1);
         if (currentMaxSnowLayers == -1) {
@@ -155,8 +159,14 @@ public class NiceLife extends Season {
     public void tick(MinecraftServer server) {
         super.tick(server);
         timePassed.tick();
-        boolean freezeAtMidnight = shouldFreezeAtMidnight();
-        if (!freezeAtMidnight && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {		
+        ServerLevel overworld = server.overworld();
+        //? if <= 1.21.9 {
+        /*int percentage = overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+         *///?} else {
+        int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
+        //?}
+        boolean freezeTime = shouldFreezeTime(percentage);
+        if (!freezeTime && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {				
 			snowTicks.tick();
             if (snowTicks.isLarger(SNOW_LAYER_INCREASE_INTERVAL)) {
                 snowTicks = Time.zero();
@@ -168,8 +178,7 @@ public class NiceLife extends Season {
                 seasonConfig.setProperty("current_snow_layers", String.valueOf(currentMaxSnowLayers));
             }
         }
-        ServerLevel overworld = server.overworld();
-        if (freezeAtMidnight) {
+        if (freezeTime) {
 			//? if <= 1.21.11 {
 			overworld.setWeatherParameters(0, 1000, false, false);
 			//?} else {
@@ -185,7 +194,7 @@ public class NiceLife extends Season {
         }
 		
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
-                && (!isMidnight() || !isTimeFreezeEnabled());
+				&& !freezeTime;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
         *///?} else {
@@ -214,13 +223,7 @@ public class NiceLife extends Season {
 		}
 
         if (triviaCannotStartFor.isSmaller(Time.zero())) {
-            //? if <= 1.21.9 {
-            /*int percentage = overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
-             *///?} else {
-            int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
-            //?}
-
-			if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
+			if (canStartTriviaBySleeping(percentage)) {
 				if (!NiceLifeTriviaManager.triviaInProgress) {
 					List<ServerPlayer> triviaPlayers = new ArrayList<>();
 					for (ServerPlayer player : livesManager.getAlivePlayers()) {
@@ -424,7 +427,7 @@ public class NiceLife extends Season {
     }
 
     public void tickChunk(ServerLevel level, ChunkPos chunkPos) {
-        if (shouldFreezeAtMidnight()) {
+        if (shouldFreezeTime(getSleepingPercentage())) {
             return;
         }
         if (level.dimension() != Level.OVERWORLD) {
@@ -561,12 +564,45 @@ public class NiceLife extends Season {
         return false;
     }
 	
-    private boolean shouldFreezeAtMidnight() {
+    private int getSleepingPercentage() {
+        if (server == null) return 100;
+        ServerLevel overworld = server.overworld();
+        //? if <= 1.21.9 {
+        /*return overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+         *///?} else {
+        return overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
+        //?}
+    }
+
+    private boolean shouldFreezeTime(int sleepingPercentage) {
+        if (FREEZE_TIME_WHILE_SLEEPING && canStartTriviaBySleeping(sleepingPercentage)) {
+            return true;
+        }
         return isTimeFreezeEnabled() && isMidnight();
     }
 
     private boolean isTimeFreezeEnabled() {
         return FREEZE_TIME_AT_MIDNIGHT;
+    }
+	
+	    public boolean canStartTriviaBySleeping(int sleepingPercentage) {
+        return currentSession.statusStarted() && isSleepTriviaTime() && areEnoughSleeping(sleepingPercentage);
+    }
+
+    public boolean isSleepTriviaTime() {
+        return SLEEP_BEFORE_MIDNIGHT ? isNight() : isAfterMidnight();
+    }
+
+    public boolean isAfterMidnight() {
+        if (server == null) return false;
+
+        //? if <= 1.21.11 {
+        long dayTime = server.overworld().getDayTime() % 24000L;
+        //?} else {
+        /*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+        *///?}
+
+        return dayTime >= 18000;
     }
 
     public static final BlockState blueIce = Blocks.BLUE_ICE.defaultBlockState();
