@@ -404,8 +404,15 @@ public class SuperpowersWildcard extends Wildcard {
 	}	
 
 	public static int getSuperpowerCount(ServerPlayer player) {
-    Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
-    return powers == null ? 0 : powers.size();
+		Set<Superpower> powers = playerSuperpowers.get(player.getUUID());
+		if (powers == null || powers.isEmpty()) return 0;
+
+		Set<Superpowers> uniquePowers = new HashSet<>();
+		for (Superpower power : powers) {
+			uniquePowers.add(power.getSuperpower());
+		}
+
+		return uniquePowers.size();
 	}
 
 }
