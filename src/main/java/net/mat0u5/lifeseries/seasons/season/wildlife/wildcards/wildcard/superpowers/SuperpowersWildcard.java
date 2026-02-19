@@ -250,11 +250,9 @@ public class SuperpowersWildcard extends Wildcard {
 			List<ServerPlayer> maxedPlayerList = allPlayers.stream()
 				.filter(player -> maxedPlayers.contains(player.getUUID()))
 				.toList();
-				
+
 			MutableComponent message;
-			
-			if (maxedPlayers.size() == 1) {
-				ServerPlayer player = maxedPlayers.get(0);
+
 			if (maxedPlayerList.size() == 1) {
 				ServerPlayer player = maxedPlayerList.get(0);
 				message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_ROLL_SINGLE
@@ -263,15 +261,15 @@ public class SuperpowersWildcard extends Wildcard {
 					.withStyle(ChatFormatting.RED);
 			} else {
 				message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_ROLL_MULTIPLE
-					.get(maxedPlayers.size())
+					.get(maxedPlayerList.size())
 					.copy()
 					.withStyle(ChatFormatting.RED);
 
-				for (int i = 0; i < maxedPlayers.size(); i++) {
-					var player = maxedPlayers.get(i);
+				for (int i = 0; i < maxedPlayerList.size(); i++) {
+					ServerPlayer player = maxedPlayerList.get(i);
 					ChatFormatting teamColor = getTeamColor(player);
 					message.append(Component.literal(player.getScoreboardName()).withStyle(teamColor));
-					if (i < maxedPlayers.size() - 1) {
+					if (i < maxedPlayerList.size() - 1) {
 						message.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
 					}
 				}
@@ -279,7 +277,6 @@ public class SuperpowersWildcard extends Wildcard {
 
 			PlayerUtils.broadcastMessageToAdmins(message);
 		}
-		return grantedPowers;
 	}
 
 	public static boolean setSuperpower(ServerPlayer player, Superpowers superpower) {
