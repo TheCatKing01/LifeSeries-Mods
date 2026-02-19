@@ -624,7 +624,14 @@ public class NiceLife extends Season {
 	
 	public boolean isNight() {
 		if (server == null) return false;
+
+		//? if <= 1.21.11 {
 		long dayTime = server.overworld().getDayTime() % 24000L;
-		return dayTime >= 18000 || dayTime < 0;
+		//?} else {
+		/*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+		*///?}
+
+		return dayTime >= 18000;
 	}
+
 }
