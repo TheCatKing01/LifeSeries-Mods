@@ -310,6 +310,10 @@ public class WildLifeConfig extends ConfigManager {
             "group_superpowers", null, ConfigTypes.TEXT, "{season.superpowers}",
             "Superpowers", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_POWERS = new ConfigFileEntry<>(
+            "group_powers", null, ConfigTypes.TEXT, "{lifeseries_plus.powers}",
+            "Superpowers", ""
+    );
     public static final ConfigFileEntry<Object> GROUP_CALLBACK = new ConfigFileEntry<>(
             "group_callback", null, ConfigTypes.TEXT, "{season.callback}",
             "Callback", ""
@@ -347,11 +351,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_SUPERPOWERS //Group
                 ,GROUP_CALLBACK //Group
 				,WILD_MIDNIGHT_CHIMES //Group
-				
-                ,new ConfigFileEntry<>(
-                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "lifeseries_plus",
-				GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
-				)
+				,GROUP_POWERS //Group
 
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE

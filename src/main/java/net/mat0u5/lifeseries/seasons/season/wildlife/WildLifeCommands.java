@@ -384,11 +384,10 @@ public class WildLifeCommands extends Command {
 	public int setRandomSuperpowers(CommandSourceStack source) {
 		if (checkBanned(source)) return -1;
 		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
-		SuperpowersWildcard.rollRandomSuperpowers(players);
+		int grantedPowers = SuperpowersWildcard.rollRandomSuperpowers(players);
+		if (grantedPowers <= 0) return 1;
 		int count = SuperpowersWildcard.POWERS_PER_ROLL;
 		
-
-
 		if (count == 1) {
 			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
 		}
@@ -401,7 +400,8 @@ public class WildLifeCommands extends Command {
 	
 	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
 		if (checkBanned(source)) return -1;
-		SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
+		int grantedPowers = SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
+		if (grantedPowers <= 0) return 1;
 		int count = SuperpowersWildcard.POWERS_PER_ROLL;
 
 		if (targets.size() == 1) {
@@ -516,18 +516,16 @@ public class WildLifeCommands extends Command {
             return -1;
         }
 
+		int successfullyAdded = 0;
 		for (ServerPlayer player : targets) {
-			SuperpowersWildcard.setSuperpower(player, superpower);
+			if (SuperpowersWildcard.setSuperpower(player, superpower)) {
+				successfullyAdded++;
+			}
 		}
 
+		if (successfullyAdded <= 0) return 1;
 		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(
-				source,
-				ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(
-					targets.iterator().next(),
-					name
-				)
-			);
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(name, targets.iterator().next()));
 		} else {
 			OtherUtils.sendCommandFeedback(
 				source,
