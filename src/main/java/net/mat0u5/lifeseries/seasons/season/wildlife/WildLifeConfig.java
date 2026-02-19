@@ -348,8 +348,8 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_CALLBACK //Group
 				,WILD_MIDNIGHT_CHIMES //Group
 				
-				,new ConfigFileEntry<>(
-                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "{lifeseries_plus.powers}",
+                ,new ConfigFileEntry<>(
+                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "lifeseries_plus.powers",
 				GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
 				)
 

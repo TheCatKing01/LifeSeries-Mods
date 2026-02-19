@@ -192,6 +192,19 @@ public class NiceLife extends Season {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
         //?}
 		
+		if (isNight()) {
+			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+				if (!player.isSleeping()) {
+				}
+			}
+		} else {
+			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+				if (player.isSleeping()) {
+					player.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
+				}
+			}
+		}
+		
 		if (!isNight()) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
 				if (serverPlayer.isSleeping()) {
@@ -206,19 +219,20 @@ public class NiceLife extends Season {
              *///?} else {
             int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
             //?}
-            if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
-                if (!NiceLifeTriviaManager.triviaInProgress) {
-                    List<ServerPlayer> triviaPlayers = new ArrayList<>();
-                    for(ServerPlayer player : livesManager.getAlivePlayers()) {
-                        if (player.isSpectator()) continue;
-                        if (!player.isSleeping()) continue;
-                        triviaPlayers.add(player);
-                    }
-                    if (!triviaPlayers.isEmpty()) {
-                        NiceLifeTriviaManager.startTrivia(triviaPlayers);
-                    }
-                }
-            }
+
+			if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
+				if (!NiceLifeTriviaManager.triviaInProgress) {
+					List<ServerPlayer> triviaPlayers = new ArrayList<>();
+					for (ServerPlayer player : livesManager.getAlivePlayers()) {
+						if (player.isSpectator()) continue;
+						if (!player.isSleeping()) continue;
+						triviaPlayers.add(player);
+					}
+					if (!triviaPlayers.isEmpty()) {
+						NiceLifeTriviaManager.startTrivia(triviaPlayers);
+					}
+				}
+			}
         }
         else {
             triviaCannotStartFor.add(Time.ticks(-1));

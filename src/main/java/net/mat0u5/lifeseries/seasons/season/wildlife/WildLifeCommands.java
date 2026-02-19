@@ -165,6 +165,14 @@ public class WildLifeCommands extends Command {
                         )
                     )
                 )
+                .then(literal("set")
+                    .then(argument("player", EntityArgument.players())
+                        .then(argument("superpower", StringArgumentType.string())
+                            .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
+                            .executes(context -> setOnlySuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), StringArgumentType.getString(context, "superpower")))
+                        )
+                    )
+                )
                 .then(literal("reset")
                         .then(argument("player", EntityArgument.players())
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
@@ -190,14 +198,11 @@ public class WildLifeCommands extends Command {
                         )
 					)
                 )
-				
-				// Removed for now due to bugs >:(
-				
-				// .then(literal("count")
-					// .then(argument("player", EntityArgument.players())
-						// .executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayer(context, "player")))
-					// )
-				// )
+                .then(literal("count")
+                    .then(argument("player", EntityArgument.players())
+                        .executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                    )
+                )
         );
                 
         dispatcher.register(
@@ -446,15 +451,60 @@ public class WildLifeCommands extends Command {
 		return 1;
 	}
 	
-	public int getSuperpowerCount(CommandSourceStack source, ServerPlayer player) {
-	    if (checkBanned(source))return -1;
-		    int count = SuperpowersWildcard.getSuperpowerCount(player);
+	public int getSuperpowerCount(CommandSourceStack source, Collection<ServerPlayer> targets) {
+		if (checkBanned(source)) return -1;
+		if (targets == null || targets.isEmpty()) return -1;
+
+		if (targets.size() == 1) {
+			ServerPlayer player = targets.iterator().next();
+			int count = SuperpowersWildcard.getSuperpowerCount(player);
 			if (count == 1) {
-				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpower", player, count));
+				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpower", player, count));			
+				}
+			else {
+				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpowers", player, count));			
+				}
+							return 1;
+		}
+
+		for (ServerPlayer player : targets) {
+			int count = SuperpowersWildcard.getSuperpowerCount(player);
+			if (count == 1) {
+				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpower", player, count));
 			}
 			else {
-				OtherUtils.sendCommandFeedbackQuiet(source,TextUtils.format("{} has {} superpowers", player, count));			
+				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpowers", player, count));
 			}
+		}
+		return 1;
+	}
+
+	public int setOnlySuperpower(CommandSourceStack source, Collection<ServerPlayer> targets, String name) {
+		if (checkBanned(source)) return -1;
+		if (targets == null || targets.isEmpty()) return -1;
+
+		if (!Superpowers.getImplementedStr().contains(name)) {
+			OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
+			return -1;
+		}
+
+		Superpowers superpower = Superpowers.fromString(name);
+		if (superpower == Superpowers.NULL) {
+			OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
+			return -1;
+		}
+
+		for (ServerPlayer player : targets) {
+			SuperpowersWildcard.resetSuperpower(player);
+			SuperpowersWildcard.setSuperpower(player, superpower);
+		}
+
+		if (targets.size() == 1) {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {}'s superpower to {}", targets.iterator().next(), name));
+		}
+		else {
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Set the superpower to {} for {} targets", name, targets.size()));
+		}
 		return 1;
 	}
 
