@@ -111,9 +111,13 @@ public class SuperpowersWildcard extends Wildcard {
 
 	private static final Set<UUID> pendingReset = new HashSet<>();
 
-	public static void rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
+	public static int rollRandomSuperpowers(List<ServerPlayer> allPlayers) {
 		allPlayers.removeIf(ServerPlayer::ls$isDead);
 		allPlayers.removeIf(ServerPlayer::ls$isWatcher);
+		
+		if (allPlayers.isEmpty()) return 0;
+
+		int grantedPowers = 0;
 
 		Collections.shuffle(allPlayers);
 
@@ -265,9 +269,10 @@ public class SuperpowersWildcard extends Wildcard {
 
 			PlayerUtils.broadcastMessageToAdmins(message);
 		}
+		return grantedPowers;
 	}
 
-	public static void setSuperpower(ServerPlayer player, Superpowers superpower) {
+	public static boolean setSuperpower(ServerPlayer player, Superpowers superpower) {
 		Set<Superpower> currentPowers = playerSuperpowers.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
 
 		boolean alreadyHas = currentPowers.stream()
@@ -279,7 +284,7 @@ public class SuperpowersWildcard extends Wildcard {
 					.copy()
 					.withStyle(ChatFormatting.RED);
 				PlayerUtils.broadcastMessageToAdmins(message);
-			return;
+			return false;
 		}
 
 		if (currentPowers.size() >= POWERS_PER_PLAYER) {
@@ -295,7 +300,7 @@ public class SuperpowersWildcard extends Wildcard {
 				pendingReset.add(player.getUUID());
 			}
 
-			return;
+			return false;
 		}
 
 		Superpower instance = superpower.getInstance(player);
