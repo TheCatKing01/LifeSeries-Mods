@@ -319,6 +319,8 @@ public class SuperpowersWildcard extends Wildcard {
 		}
 
 		Necromancy.checkRessurectedPlayersReset();
+		
+		return instance != null;
 	}
 
 	public static void rollRandomSuperpowerForPlayer(ServerPlayer player) {
