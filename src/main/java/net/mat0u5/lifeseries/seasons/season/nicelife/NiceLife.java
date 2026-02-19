@@ -191,14 +191,14 @@ public class NiceLife extends Season {
         *///?} else {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
         //?}
-
-        if (!isMidnight()) {
-            for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
-                if (serverPlayer.isSleeping()) {
-                    serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-                }
-            }
-        }
+		
+		if (!isNight()) {
+			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
+				if (serverPlayer.isSleeping()) {
+					serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
+				}
+			}
+		}
 
         if (triviaCannotStartFor.isSmaller(Time.zero())) {
             //? if <= 1.21.9 {
@@ -223,8 +223,8 @@ public class NiceLife extends Season {
         else {
             triviaCannotStartFor.add(Time.ticks(-1));
         }
-
-        if (isMidnight() && NiceLifeTriviaManager.triviaInProgress && !NiceLifeTriviaManager.preparingForSpawn) {
+		
+		if (isNight() && NiceLifeTriviaManager.triviaInProgress && !NiceLifeTriviaManager.preparingForSpawn) {
             List<ServerPlayer> remainingTriviaPlayers = new ArrayList<>();
             for (UUID playerUUID : NiceLifeTriviaManager.triviaPlayersUUID) {
                 ServerPlayer player = PlayerUtils.getPlayer(playerUUID);
@@ -621,4 +621,10 @@ public class NiceLife extends Season {
         }
         reloadPlayerTeam(player);
     }
+	
+	public boolean isNight() {
+		if (server == null) return false;
+		long dayTime = server.overworld().getDayTime() % 24000L;
+		return dayTime >= 18000 || dayTime < 0;
+	}
 }

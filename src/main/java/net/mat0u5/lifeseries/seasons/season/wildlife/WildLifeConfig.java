@@ -349,8 +349,8 @@ public class WildLifeConfig extends ConfigManager {
 				,WILD_MIDNIGHT_CHIMES //Group
 				
 				,new ConfigFileEntry<>(
-                    GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "{lifeseries_plus.superpowers}",
-                    GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
+                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "{lifeseries_plus.powers}",
+				GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
 				)
 
                 //Group stuff
@@ -410,15 +410,15 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS
 				
 				,new ConfigFileEntry<>(
-				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.key, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.superpowers",
+				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.key, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.powers",
 				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.description
                 )
 				,new ConfigFileEntry<>(
-				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.key, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.superpowers",
+				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.key, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.powers",
 				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.description
                 )
 				,new ConfigFileEntry<>(
-				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.key, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.superpowers",
+				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.key, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.powers",
 				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.displayName, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.description
                 )
 
