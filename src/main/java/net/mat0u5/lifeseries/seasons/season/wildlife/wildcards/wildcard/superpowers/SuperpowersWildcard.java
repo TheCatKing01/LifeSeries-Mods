@@ -276,7 +276,9 @@ public class SuperpowersWildcard extends Wildcard {
 			}
 
 			PlayerUtils.broadcastMessageToAdmins(message);
+			}
 		}
+		return grantedPowers;
 	}
 
 	public static boolean setSuperpower(ServerPlayer player, Superpowers superpower) {
