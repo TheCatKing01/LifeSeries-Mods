@@ -277,7 +277,6 @@ public class SuperpowersWildcard extends Wildcard {
 
 			PlayerUtils.broadcastMessageToAdmins(message);
 			}
-		}
 		return grantedPowers;
 	}
 
