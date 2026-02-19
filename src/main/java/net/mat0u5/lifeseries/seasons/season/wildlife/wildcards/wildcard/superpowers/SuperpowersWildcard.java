@@ -243,15 +243,14 @@ public class SuperpowersWildcard extends Wildcard {
 
 			if (maxedPlayers.size() == 1) {
 				ServerPlayer player = maxedPlayers.get(0);
-				ChatFormatting teamColor = getTeamColor(player);
-
-				message = Component.literal(player.getScoreboardName())
-					.withStyle(teamColor)
-					.append(Component.literal(" has reached max superpowers so didn't receive all of the rolled powers")
-					.withStyle(ChatFormatting.RED));
+				message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_ROLL_SINGLE
+					.get(Component.literal(player.getScoreboardName()).withStyle(getTeamColor(player)))
+					.copy()
+					.withStyle(ChatFormatting.RED);
 			} else {
-				message = Component.literal(maxedPlayers.size() +
-					" players have reached max superpowers so didn't receive all of the rolled powers: ")
+				message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_ROLL_MULTIPLE
+					.get(maxedPlayers.size())
+					.copy()
 					.withStyle(ChatFormatting.RED);
 
 				for (int i = 0; i < maxedPlayers.size(); i++) {
@@ -275,20 +274,20 @@ public class SuperpowersWildcard extends Wildcard {
 				.anyMatch(p -> p.getSuperpower() == superpower);
 
 		if (alreadyHas) {
-				MutableComponent message = Component.literal(player.getScoreboardName())
-					.withStyle(getTeamColor(player))
-					.append(Component.literal(" already has " + superpower.getString() + " and cannot receive it again")
-					.withStyle(ChatFormatting.RED));
+				MutableComponent message = ModifiableText.WILDLIFE_SUPERPOWER_ALREADY_HAS
+					.get(Component.literal(player.getScoreboardName()).withStyle(getTeamColor(player)), superpower.getString())
+					.copy()
+					.withStyle(ChatFormatting.RED);
 				PlayerUtils.broadcastMessageToAdmins(message);
 			return;
 		}
 
 		if (currentPowers.size() >= POWERS_PER_PLAYER) {
 			if (WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
-				MutableComponent message = Component.literal(player.getScoreboardName())
-					.withStyle(getTeamColor(player))
-					.append(Component.literal(" has reached max superpowers so didn't receive " + superpower.getString())
-					.withStyle(ChatFormatting.RED));
+				MutableComponent message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_SET_SINGLE
+					.get(Component.literal(player.getScoreboardName()).withStyle(getTeamColor(player)), superpower.getString())
+					.copy()
+					.withStyle(ChatFormatting.RED);
 				PlayerUtils.broadcastMessageToAdmins(message);
 			}
 

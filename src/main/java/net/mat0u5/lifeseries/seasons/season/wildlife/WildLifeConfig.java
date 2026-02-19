@@ -349,7 +349,7 @@ public class WildLifeConfig extends ConfigManager {
 				,WILD_MIDNIGHT_CHIMES //Group
 				
                 ,new ConfigFileEntry<>(
-                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "lifeseries_plus.powers",
+                GROUP_SUPERPOWERS.key, GROUP_SUPERPOWERS.defaultValue, ConfigTypes.GROUP, "lifeseries_plus",
 				GROUP_SUPERPOWERS.displayName, GROUP_SUPERPOWERS.description
 				)
 

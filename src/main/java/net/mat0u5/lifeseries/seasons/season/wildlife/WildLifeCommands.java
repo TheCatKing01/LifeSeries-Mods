@@ -342,13 +342,6 @@ public class WildLifeCommands extends Command {
 			return 1;
 		}
 
-			/*
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_SINGLE.get(targets.iterator().next(), name));
-			else {
-				OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_MULTIPLE.get(targets.size(), name));
-			}
-			*/
-
         if (!Superpowers.getImplementedStr().contains(name)) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
             return -1;
@@ -364,16 +357,11 @@ public class WildLifeCommands extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced one of {}'s superpowers to be {} when the next superpower randomization happens", targets.iterator().next(), name));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Forced one of the superpowers of {} targets to be {} when the next superpower randomization happens", targets.size(), name));
-        }
-		/*    OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_SINGLE.get(targets.iterator().next(), name));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_SINGLE.get(targets.iterator().next(), name));
         }
         else {
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_MULTIPLE.get(targets.size(), name));
-        }  */
+        }
         return 1;
     }
 
@@ -402,19 +390,12 @@ public class WildLifeCommands extends Command {
 
 
 		if (count == 1) {
-			OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Added a random superpower to all players"));
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
 		}
 		else {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} random superpowers to all players", count));
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(count));
 		}
-			/*
-				public int setRandomSuperpowers(CommandSourceStack source) {
-					if (checkBanned(source)) return -1;
-					SuperpowersWildcard.rollRandomSuperpowers();
-					OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
-					return 1;
-				}
-			*/
+
 		return 1;
 	}
 	
@@ -426,27 +407,20 @@ public class WildLifeCommands extends Command {
 		if (targets.size() == 1) {
 			if (count == 1) {
 				OtherUtils.sendCommandFeedback(source,
-					TextUtils.format("Added a random superpower to {}", targets.iterator().next()));
+					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
 			} else {
 				OtherUtils.sendCommandFeedback(source,
-					TextUtils.format("Added {} random superpowers to {}", count, targets.iterator().next()));
+					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE_MULTIPLE.get(count, targets.iterator().next()));
 			}
 		} else {
 			if (count == 1) {
 				OtherUtils.sendCommandFeedback(source,
-					TextUtils.format("Added a random superpower to {} targets", targets.size()));
+					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTIPLE.get(targets.size()));
 			} else {
 				OtherUtils.sendCommandFeedback(source,
-					TextUtils.format("Added {} random superpowers to {} targets", count, targets.size()));
+					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTI_MULTIPLE.get(count, targets.size()));
 			}
 		}
-
-		/*
-		OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
-		else {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(targets.size()));
-		}
-		*/
 
 		return 1;
 	}
@@ -459,10 +433,10 @@ public class WildLifeCommands extends Command {
 			ServerPlayer player = targets.iterator().next();
 			int count = SuperpowersWildcard.getSuperpowerCount(player);
 			if (count == 1) {
-				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpower", player, count));			
+				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_SINGLE.get(player, count));				
 				}
 			else {
-				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpowers", player, count));			
+				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_MULTIPLE.get(player, count));				
 				}
 							return 1;
 		}
@@ -470,11 +444,11 @@ public class WildLifeCommands extends Command {
 		for (ServerPlayer player : targets) {
 			int count = SuperpowersWildcard.getSuperpowerCount(player);
 			if (count == 1) {
-				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpower", player, count));
-			}
+				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_SINGLE.get(player, count));
+				}
 			else {
-				OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{} has {} superpowers", player, count));
-			}
+				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_MULTIPLE.get(player, count));
+				}
 		}
 		return 1;
 	}
@@ -500,11 +474,11 @@ public class WildLifeCommands extends Command {
 		}
 
 		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Set {}'s superpower to {}", targets.iterator().next(), name));
-		}
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE.get(targets.iterator().next(), name));
+			}
 		else {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Set the superpower to {} for {} targets", name, targets.size()));
-		}
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE.get(targets.iterator().next(), name));
+			}
 		return 1;
 	}
 
@@ -518,26 +492,19 @@ public class WildLifeCommands extends Command {
         }
 
         if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all of {}'s superpowers", targets.iterator().next()));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Deactivated all superpowers from {} targets", targets.size()));
-/*
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_DEACTIVATE_SINGLE.get(targets.iterator().next()));
         }
         else {
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_DEACTIVATE_MULTIPLE.get(targets.size()));
-*/        }
+		}
         return 1;
     }
 
     public int getSuperpower(CommandSourceStack source, ServerPlayer player) {
         if (checkBanned(source)) return -1;
         Superpowers superpower = SuperpowersWildcard.getSuperpower(player);
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("{}'s most recent superpower is: {}", player,  superpower.getString()));
-/*
         OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_GET.get(player, superpower.getString()));
-*/        return 1;
+        return 1;
     }
 
     public int setSuperpower(CommandSourceStack source, Collection<ServerPlayer> targets, String name) {
@@ -559,17 +526,11 @@ public class WildLifeCommands extends Command {
         for (ServerPlayer player : targets) {
             SuperpowersWildcard.setSuperpower(player, superpower);
         }
-        if (targets.size() == 1) {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {}", name, targets.iterator().next()));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, TextUtils.format("Added the {} superpower to {} targets", name, targets.size()));
-/*
+
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(targets.iterator().next(), name));
         }
         else {
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_MULTIPLE.get(name, targets.size()));
-*/
         }
         return 1;
     }
