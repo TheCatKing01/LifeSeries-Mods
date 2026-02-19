@@ -189,7 +189,7 @@ public class SuperpowersWildcard extends Wildcard {
 
 			for (int i = 0; i < POWERS_PER_ROLL; i++) {
 				if (currentPowers.size() >= POWERS_PER_PLAYER) {
-					maxedPlayers.add(player);
+					maxedPlayers.add(player.getUUID());
 					if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
 					break;
 				}
