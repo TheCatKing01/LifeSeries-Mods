@@ -477,7 +477,7 @@ public class WildLifeCommands extends Command {
 			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE.get(targets.iterator().next(), name));
 			}
 		else {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE.get(targets.iterator().next(), name));
+			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_MULTIPLE.get(targets.iterator().next(), name));
 			}
 		return 1;
 	}
@@ -516,16 +516,30 @@ public class WildLifeCommands extends Command {
             return -1;
         }
 
-        for (ServerPlayer player : targets) {
-            SuperpowersWildcard.setSuperpower(player, superpower);
-        }
+		for (ServerPlayer player : targets) {
+			SuperpowersWildcard.setSuperpower(player, superpower);
+		}
 
-            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(targets.iterator().next(), name));
-        }
-        else {
-            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_MULTIPLE.get(name, targets.size()));
-        }
-        return 1;
+		if (targets.size() == 1) {
+			OtherUtils.sendCommandFeedback(
+				source,
+				ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(
+					targets.iterator().next(),
+					name
+				)
+			);
+		} else {
+			OtherUtils.sendCommandFeedback(
+				source,
+				ModifiableText.WILDLIFE_SUPERPOWER_SET_MULTIPLE.get(
+					name,
+					targets.size()
+				)
+			);
+		}
+
+		return 1;
+
     }
 
     public int setSnailName(CommandSourceStack source, ServerPlayer player, String name) {
