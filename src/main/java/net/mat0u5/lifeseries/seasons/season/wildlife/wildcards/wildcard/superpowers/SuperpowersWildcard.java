@@ -147,7 +147,7 @@ public class SuperpowersWildcard extends Wildcard {
 
 		Collections.shuffle(implemented);
 
-		List<ServerPlayer> maxedPlayers = new ArrayList<>();
+		Set<UUID> maxedPlayers = new HashSet<>();
 
 		for (ServerPlayer player : allPlayers) {
 			playerSuperpowers.putIfAbsent(player.getUUID(), new HashSet<>());
@@ -180,8 +180,10 @@ public class SuperpowersWildcard extends Wildcard {
 					.toList();
 
 			if (availablePowers.isEmpty()) {
-				maxedPlayers.add(player);
-				if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+				if (currentPowers.size() >= POWERS_PER_PLAYER) {
+					maxedPlayers.add(player.getUUID());
+					if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+				}
 				continue;
 			}
 
@@ -212,8 +214,10 @@ public class SuperpowersWildcard extends Wildcard {
 							.toList();
 
 					if (remaining.isEmpty()) {
-						maxedPlayers.add(player);
-						if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+						if (currentPowers.size() >= POWERS_PER_PLAYER) {
+							maxedPlayers.add(player.getUUID());
+							if (WILDCARD_CALLBACK_RESET_AT_MAX) pendingReset.add(player.getUUID());
+						}
 						break;
 					}
 
@@ -243,10 +247,16 @@ public class SuperpowersWildcard extends Wildcard {
 		}
 
 		if (!maxedPlayers.isEmpty() && WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE) {
+			List<ServerPlayer> maxedPlayerList = allPlayers.stream()
+				.filter(player -> maxedPlayers.contains(player.getUUID()))
+				.toList();
+				
 			MutableComponent message;
-
+			
 			if (maxedPlayers.size() == 1) {
 				ServerPlayer player = maxedPlayers.get(0);
+			if (maxedPlayerList.size() == 1) {
+				ServerPlayer player = maxedPlayerList.get(0);
 				message = ModifiableText.WILDLIFE_SUPERPOWER_MAX_ROLL_SINGLE
 					.get(Component.literal(player.getScoreboardName()).withStyle(getTeamColor(player)))
 					.copy()
