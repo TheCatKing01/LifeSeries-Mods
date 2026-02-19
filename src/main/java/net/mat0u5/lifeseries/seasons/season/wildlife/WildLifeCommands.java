@@ -500,13 +500,6 @@ public class WildLifeCommands extends Command {
         return 1;
     }
 
-    public int getSuperpower(CommandSourceStack source, ServerPlayer player) {
-        if (checkBanned(source)) return -1;
-        Superpowers superpower = SuperpowersWildcard.getSuperpower(player);
-        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_GET.get(player, superpower.getString()));
-        return 1;
-    }
-
     public int setSuperpower(CommandSourceStack source, Collection<ServerPlayer> targets, String name) {
         if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
