@@ -88,31 +88,27 @@ public class NetworkHandlerServer {
     }
 
     public static void initializeSimplePacketReceivers() {
+		
+		SimplePackets.TRIVIA_ANSWER.setServerReceive((player, payload) -> {
+			if (VersionControl.isDevVersion())
+				Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, payload.number()));
 
-        SimplePackets.TRIVIA_ANSWER.setServerReceive((player, payload) -> {
-            if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, payload.number()));
-            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-                NiceLifeTriviaManager.handleAnswer(player, payload.number());
+			boolean hasNiceLifeBot = NiceLifeTriviaManager.bots.containsKey(player.getUUID());
+			boolean hasWildLifeBot = TriviaWildcard.bots.containsKey(player.getUUID());
 
-        int intValue = (int) value;
-        if (name == PacketNames.TRIVIA_ANSWER) {
-            if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, intValue));
-            boolean hasNiceLifeBot = NiceLifeTriviaManager.bots.containsKey(player.getUUID());
-            boolean hasWildLifeBot = TriviaWildcard.bots.containsKey(player.getUUID());
-
-            if (hasNiceLifeBot) {
-                NiceLifeTriviaManager.handleAnswer(player, intValue);
-            }
-            else if (hasWildLifeBot) {
-                TriviaWildcard.handleAnswer(player, intValue);
-            }
-            else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-                NiceLifeTriviaManager.handleAnswer(player, intValue);
-            }
-            else {
-                TriviaWildcard.handleAnswer(player, payload.number());
-            }
-        });
+			if (hasNiceLifeBot) {
+				NiceLifeTriviaManager.handleAnswer(player, payload.number());
+			}
+			else if (hasWildLifeBot) {
+				TriviaWildcard.handleAnswer(player, payload.number());
+			}
+			else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+				NiceLifeTriviaManager.handleAnswer(player, payload.number());
+			}
+			else {
+				TriviaWildcard.handleAnswer(player, payload.number());
+			}
+		});
 
         SimplePackets.HOLDING_JUMP.setServerReceive((player, payload) -> {
             if (currentSeason.getSeason() == Seasons.WILD_LIFE && WildcardManager.isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
