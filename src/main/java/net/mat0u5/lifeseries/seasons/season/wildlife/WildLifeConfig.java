@@ -263,23 +263,6 @@ public class WildLifeConfig extends ConfigManager {
             "Time Dilation", ""
     );
 
-    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
-            "group_trivia_questions", null, ConfigTypes.TEXT, "{season.trivia.questions}",
-            "Trivia Questions", ""
-    );
-    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_EASY = new ConfigFileEntry<>(
-            "group_trivia_questions_easy", null, ConfigTypes.TEXT, "{season.trivia.questions.easy}",
-            "Easy Questions", ""
-    );
-    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_NORMAL = new ConfigFileEntry<>(
-            "group_trivia_questions_normal", null, ConfigTypes.TEXT, "{season.trivia.questions.normal}",
-            "Normal Questions", ""
-    );
-    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_HARD = new ConfigFileEntry<>(
-            "group_trivia_questions_hard", null, ConfigTypes.TEXT, "{season.trivia.questions.hard}",
-            "Hard Questions", ""
-    );
-
     public static final ConfigFileEntry<Object> GROUP_MOBSWAP = new ConfigFileEntry<>(
             "group_mobswap", null, ConfigTypes.TEXT, "{season.mobswap}",
             "Mob Swap", ""
@@ -359,11 +342,6 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_TIMEDILATION_MAX_SPEED
                 ,WILDCARD_TIMEDILATION_PLAYER_MAX_SPEED
 				
-                ,GROUP_TRIVIA_QUESTIONS
-				,GROUP_TRIVIA_QUESTIONS_EASY
-				,GROUP_TRIVIA_QUESTIONS_NORMAL
-                ,GROUP_TRIVIA_QUESTIONS_HARD
-				
 				,new ConfigFileEntry<>(
                     WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.key, WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.defaultValue, ConfigTypes.BOOLEAN, "season",
                     WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.displayName, WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.description
@@ -383,6 +361,22 @@ public class WildLifeConfig extends ConfigManager {
 				,new ConfigFileEntry<>(
                     WILDCARD_TRIVIA_SECONDS_HARD.key, WILDCARD_TRIVIA_SECONDS_HARD.defaultValue, ConfigTypes.INTEGER, "season",
                     WILDCARD_TRIVIA_SECONDS_HARD.displayName, WILDCARD_TRIVIA_SECONDS_HARD.description
+					)
+				,new ConfigFileEntry<>(
+                    GROUP_TRIVIA_QUESTIONS.key, GROUP_TRIVIA_QUESTIONS.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS.displayName, GROUP_TRIVIA_QUESTIONS.description
+					)
+				,new ConfigFileEntry<>(
+                    GROUP_TRIVIA_QUESTIONS_EASY.key, GROUP_TRIVIA_QUESTIONS_EASY.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_EASY.displayName, GROUP_TRIVIA_QUESTIONS_EASY.description
+					)
+				,new ConfigFileEntry<>(
+                    GROUP_TRIVIA_QUESTIONS_NORMAL.key, GROUP_TRIVIA_QUESTIONS_NORMAL.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_NORMAL.displayName, GROUP_TRIVIA_QUESTIONS_NORMAL.description
+					)
+				,new ConfigFileEntry<>(
+                    GROUP_TRIVIA_QUESTIONS_HARD.key, GROUP_TRIVIA_QUESTIONS_HARD.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_HARD.displayName, GROUP_TRIVIA_QUESTIONS_HARD.description
 					)
 
                 ,WILDCARD_MOBSWAP_START_SPAWN_DELAY

@@ -382,6 +382,23 @@ public class DefaultConfigValues {
             "wildcard_trivia_seconds_hard", 300, ConfigTypes.SECONDS, "lifeseries_plus.trivia",
             "Hard Timer", "Hard question timer length, in seconds."
     );
+	
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
+            "group_trivia_questions", null, ConfigTypes.TEXT, "{lifeseries_plus.trivia.questions}",
+            "Trivia Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_EASY = new ConfigFileEntry<>(
+            "group_trivia_questions_easy", null, ConfigTypes.TEXT, "{lifeseries_plus.trivia.questions.easy}",
+            "Easy Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_NORMAL = new ConfigFileEntry<>(
+            "group_trivia_questions_normal", null, ConfigTypes.TEXT, "{lifeseries_plus.trivia.questions.normal}",
+            "Normal Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_HARD = new ConfigFileEntry<>(
+            "group_trivia_questions_hard", null, ConfigTypes.TEXT, "{lifeseries_plus.trivia.questions.hard}",
+            "Hard Questions", ""
+    );
 
     /*
      * Group Entries
@@ -443,7 +460,7 @@ public class DefaultConfigValues {
 
     public static final ConfigFileEntry<Object> GROUP_TRIVIA = new ConfigFileEntry<>(
             "group_trivia", null, ConfigTypes.TEXT, "{lifeseries_plus.trivia}",
-            "Trivia", ""
+            "Trivia Bots", ""
     );
 
     public final ConfigFileEntry<Object> NO_SEASON_SPECIFIC = new ConfigFileEntry<>(

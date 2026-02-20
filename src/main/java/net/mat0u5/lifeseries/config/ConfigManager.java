@@ -177,6 +177,10 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WILDCARD_TRIVIA_SECONDS_EASY
                 ,WILDCARD_TRIVIA_SECONDS_NORMAL
                 ,WILDCARD_TRIVIA_SECONDS_HARD
+                ,GROUP_TRIVIA_QUESTIONS
+				,GROUP_TRIVIA_QUESTIONS_EASY
+				,GROUP_TRIVIA_QUESTIONS_NORMAL
+                ,GROUP_TRIVIA_QUESTIONS_HARD
         ));
     }
 
