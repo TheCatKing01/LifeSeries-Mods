@@ -194,7 +194,7 @@ public class NiceLife extends Season {
         }
 
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
-				&& !freezeTime;
+				&& !freezeTime
                 && !NiceLifeTriviaManager.triviaInProgress;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
