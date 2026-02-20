@@ -215,7 +215,7 @@ public class NiceLife extends Season {
 			}
 		}
 		
-		if (!isNight()&& !NiceLifeTriviaManager.triviaInProgress) { {
+		if (!isNight()&& !NiceLifeTriviaManager.triviaInProgress) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
 				if (serverPlayer.isSleeping()) {
 					serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
