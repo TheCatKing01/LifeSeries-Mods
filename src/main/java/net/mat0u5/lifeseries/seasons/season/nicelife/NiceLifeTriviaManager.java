@@ -272,9 +272,6 @@ public class NiceLifeTriviaManager {
         toKill.forEach(Entity::discard);
         SimplePackets.RESET_TRIVIA.sendToClient();
         bots.clear();
-        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            NetworkHandlerServer.sendStringPacket(player, PacketNames.RESET_TRIVIA, "true");
-        }
     }
     public static void killAllSnowmen() {
         if (server == null) return;
