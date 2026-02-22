@@ -202,20 +202,7 @@ public class NiceLife extends Season {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
         //?}
 		
-		if (isNight()&& !NiceLifeTriviaManager.triviaInProgress) { 
-			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-				if (!player.isSleeping()) {
-				}
-			}
-		} else {
-			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-				if (player.isSleeping()) {
-					player.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-				}
-			}
-		}
-		
-		if (!isNight()&& !NiceLifeTriviaManager.triviaInProgress) {
+		if (!NiceLifeTriviaManager.triviaInProgress && (!isNight() || !isAfterMidnight())) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
 				if (serverPlayer.isSleeping()) {
 					serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
