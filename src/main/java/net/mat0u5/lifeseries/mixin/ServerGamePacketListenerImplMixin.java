@@ -147,13 +147,14 @@ public class ServerGamePacketListenerImplMixin {
         if (player == null || PermissionManager.isAdmin(player) || Main.modDisabled()) {
             return false;
         }
-        if (TriviaWildcard.bots.containsKey(player.getUUID())) {
-            TriviaBot bot = TriviaWildcard.bots.get(player.getUUID());
-            if (bot.interactedWith() && !bot.submittedAnswer()) {
-                player.ls$message(ModifiableText.MUTED_TRIVIABOT.get());
-                ci.cancel();
-                return true;
-            }
+        TriviaBot bot = TriviaWildcard.bots.get(player.getUUID());
+        if (bot == null) {
+            bot = NiceLifeTriviaManager.bots.get(player.getUUID());
+        }
+        if (bot != null && bot.interactedWith() && !bot.submittedAnswer()) {
+            player.ls$message(ModifiableText.MUTED_TRIVIABOT.get());
+            ci.cancel();
+            return true;
         }
 
         if (currentSeason.WATCHERS_MUTED && player.ls$isWatcher()) {

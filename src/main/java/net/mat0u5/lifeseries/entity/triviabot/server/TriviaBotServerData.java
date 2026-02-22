@@ -123,6 +123,7 @@ public class TriviaBotServerData implements PlayerBoundEntity {
     public void despawn() {
         if (getBoundPlayerUUID() != null) {
             TriviaWildcard.bots.remove(getBoundPlayerUUID());
+            NiceLifeTriviaManager.bots.remove(getBoundPlayerUUID());
         }
         if (!bot.level().isClientSide()) {
             //? if <= 1.21 {
