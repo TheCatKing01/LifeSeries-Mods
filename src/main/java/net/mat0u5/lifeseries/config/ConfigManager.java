@@ -335,9 +335,12 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
         }
         if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            if (NiceLifeTriviaManager.triviaQuestions == null) {
+                NiceLifeTriviaManager.initialize();
+            }
             for (TriviaQuestion question : NiceLifeTriviaManager.triviaQuestions.tryGetTriviaQuestions()) {
                 List<String> info = new ArrayList<>();
-                info.add("normal");
+                info.add("nicelife");
                 info.add(question.getQuestion());
                 info.add(String.valueOf(question.getCorrectAnswerIndex()));
                 info.addAll(question.getAnswers());

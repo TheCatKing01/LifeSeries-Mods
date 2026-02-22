@@ -246,12 +246,17 @@ public class NetworkHandlerServer {
                         String[] splitQuestion = questionStr.split("~~~");
                         if (splitQuestion.length < 3) continue;
                         String questionText = splitQuestion[0];
-                        int correctAnswerIndex = Integer.parseInt(splitQuestion[1]);
                         List<String> answers = new ArrayList<>();
                         for (int i = 2; i < splitQuestion.length; i++) {
                             answers.add(splitQuestion[i]);
                         }
-                        triviaQuestions.add(new TriviaQuestion(questionText, answers, correctAnswerIndex-1));
+                        int parsedCorrectAnswerIndex = Integer.parseInt(splitQuestion[1]);
+                        int correctAnswerIndex = parsedCorrectAnswerIndex;
+                        if (parsedCorrectAnswerIndex >= 1 && parsedCorrectAnswerIndex <= answers.size()) {
+                            correctAnswerIndex = parsedCorrectAnswerIndex - 1;
+                        }
+                        if (correctAnswerIndex < 0 || correctAnswerIndex >= answers.size()) continue;
+                        triviaQuestions.add(new TriviaQuestion(questionText, answers, correctAnswerIndex));
                     }catch(Exception e) {}
                 }
                 TriviaQuestionManager manager = null;
@@ -267,6 +272,9 @@ public class NetworkHandlerServer {
                     }
                 }
                 else {
+                    if (NiceLifeTriviaManager.triviaQuestions == null) {
+                        NiceLifeTriviaManager.initialize();
+                    }
                     manager = NiceLifeTriviaManager.triviaQuestions;
                 }
                 if (manager == null) return;

@@ -268,11 +268,6 @@ public class ServerPlayerMixin implements IServerPlayer {
     @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
     private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         if (!Main.modDisabled() && currentSeason instanceof NiceLife niceLife) {
-            if (!NiceLife.SLEEP_BEFORE_MIDNIGHT && niceLife.isNight() && !niceLife.isAfterMidnight()) {
-                cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
-                ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-                return;
-            }
             if (NiceLifeTriviaManager.triviaInProgress) {
                 cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
                 ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);

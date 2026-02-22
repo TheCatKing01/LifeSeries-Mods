@@ -106,6 +106,11 @@ public class NiceLifeTriviaManager {
             }
         }
 
+        if (triviaSpawns.isEmpty()) {
+            preparingForSpawn = false;
+            endTrivia();
+            return;
+        }
 
         preparingForSpawn = true;
         if (firstTriviaInSession) {
