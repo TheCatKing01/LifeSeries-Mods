@@ -39,7 +39,8 @@
       "generator": {
         "type": "minecraft:flat",
         "settings": {
-          "biome": "minecraft:the_end",
+          "biome": "minecraft:end_highlands",
+          "features": true,
           "layers": [
             {
               "height": 46,
@@ -50,7 +51,9 @@
               "block": "minecraft:end_stone"
             }
           ],
-          "structure_overrides": []
+          "structure_overrides": [
+            "minecraft:end_cities"
+          ]
         }
       }
     },

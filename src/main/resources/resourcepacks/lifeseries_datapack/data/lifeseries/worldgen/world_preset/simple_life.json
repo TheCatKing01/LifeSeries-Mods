@@ -45,7 +45,8 @@
               "block": "minecraft:end_stone"
             }
           ],
-          "structure_overrides": []
+          "structure_overrides": [],
+          "features": true
         }
       }
     },
