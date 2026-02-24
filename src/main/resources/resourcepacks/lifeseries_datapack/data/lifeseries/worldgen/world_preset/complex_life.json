@@ -29,7 +29,7 @@
           "structure_overrides": [
             "minecraft:strongholds",
             "minecraft:villages",
-          "features": true,
+            "minecraft:pillager_outposts"
           ]
         }
       }
