@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.seasons.season.limitedlastlife;
 
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLifeConfig;
@@ -18,6 +19,11 @@ public class LimitedLastLife extends LimitedLife {
         return new Config();
     }
 
+    @Override
+    public LivesManager createLivesManager() {
+        return new LimitedLastLifeLivesManager();
+    }
+
     public static class Config extends LimitedLifeConfig {
         public Config() {
             super("limitedlastlife.properties");
@@ -29,7 +35,7 @@ public class LimitedLastLife extends LimitedLife {
             LIVES_RANDOMIZE.defaultValue = true;
             LIVES_RANDOMIZE_MIN.defaultValue = Time.hours(12).getSeconds();
             LIVES_RANDOMIZE_MAX.defaultValue = Time.hours(36).getSeconds();
-            EXTRA_LIFE_COLORS.defaultValue = "0-3600:dark_red;115200-2147483647:blue";
+            EXTRA_LIFE_COLORS.defaultValue = "0-3600:dark_red;115201-2147483647:blue";
         }
     }
 }
