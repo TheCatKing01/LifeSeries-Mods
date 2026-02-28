@@ -214,7 +214,7 @@ public abstract class Season {
         }
 
         Objective currentBelowNameObjective = ScoreboardUtils.getObjectiveInSlot(belowNameSlot);
-        if (getSeason() == Seasons.LIMITED_LIFE && LimitedLife.SHOW_TIME_BELOW_NAME) {
+        if (getSeason().isLimitedLifeLike() && LimitedLife.SHOW_TIME_BELOW_NAME) {
             ScoreboardUtils.setObjectiveInSlot(belowNameSlot, LivesManager.SCOREBOARD_NAME);
         }
         else if (SHOW_HEALTH_BELOW_NAME) {

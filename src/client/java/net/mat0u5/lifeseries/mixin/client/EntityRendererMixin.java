@@ -112,7 +112,7 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> 
             if (objective != null) {
                 ReadOnlyScoreInfo scoreInfo = scoreboard.getPlayerScoreInfo(player, objective);
                 if (scoreInfo != null && objective.getName().equalsIgnoreCase(LivesManager.SCOREBOARD_NAME)) {
-                    if (MainClient.clientCurrentSeason == Seasons.LIMITED_LIFE) {
+                    if (MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                         return Component.literal(Time.seconds(scoreInfo.value()).formatLong()).setStyle(player.getDisplayName().getStyle());
                     }
                 }

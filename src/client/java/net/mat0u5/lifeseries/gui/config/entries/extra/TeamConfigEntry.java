@@ -183,7 +183,7 @@ public class TeamConfigEntry extends ModifiableListEntry {
     }
     public void renderLastEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         super.renderLastEntryExtras(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
-        addEntryButton.active = MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE;
+        addEntryButton.active = !MainClient.clientCurrentSeason.isLimitedLifeLike();
     }
     public void renderMiddleEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         super.renderMiddleEntryExtras(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
@@ -265,7 +265,7 @@ public class TeamConfigEntry extends ModifiableListEntry {
 
     @Override
     public boolean isLast() {
-        if (MainClient.clientCurrentSeason == Seasons.LIMITED_LIFE) return false;
+        if (MainClient.clientCurrentSeason.isLimitedLifeLike()) return false;
         return super.isLast();
     }
 

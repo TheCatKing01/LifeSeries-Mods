@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,6 +32,7 @@ public class LimitedLifeLivesManager extends LivesManager {
     public static boolean BROADCAST_COLOR_CHANGES = false;
     public static int TIME_RANDOMIZE_INTERVAL = Time.hours(1).getSeconds();
     public static List<CustomLifeColorRange> EXTRA_LIFE_COLORS = new ArrayList<>();
+    private static final int EXTRA_TEAM_START_INDEX = 5;
 
     public record CustomLifeColorRange(int min, int max, ChatFormatting color) {}
 
