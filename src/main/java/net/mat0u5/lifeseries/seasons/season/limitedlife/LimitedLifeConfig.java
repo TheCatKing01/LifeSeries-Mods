@@ -109,6 +109,10 @@ public class LimitedLifeConfig extends ConfigManager {
             "time_randomize_interval", Time.hours(1).getSeconds(), ConfigTypes.SECONDS, "global.lives.random",
             "Time Randomize Intervals", "The intervals on which the time randomize can land."
     );
+    public static final ConfigFileEntry<String> EXTRA_LIFE_COLORS = new ConfigFileEntry<>(
+            "extra_life_colors", "", ConfigTypes.TEXT, "season.time",
+            "Extra Life Colors", "Additional color ranges for time in the format 'min-max:color'. Separate multiple entries with ';' (example: 0-3600:dark_red;115200-2147483647:blue)."
+    );
 
     public static final ConfigFileEntry<Object> GROUP_TIME = new ConfigFileEntry<>(
             "group_time", null, ConfigTypes.TEXT, "{season.time}",
@@ -116,7 +120,11 @@ public class LimitedLifeConfig extends ConfigManager {
     );
 
     public LimitedLifeConfig() {
-        super("./config/"+ Main.MOD_ID,"limitedlife.properties");
+        this("limitedlife.properties");
+    }
+
+    protected LimitedLifeConfig(String fileName) {
+        super("./config/"+ Main.MOD_ID, fileName);
     }
 
     @Override
@@ -151,6 +159,11 @@ public class LimitedLifeConfig extends ConfigManager {
 
     @Override
     public void instantiateProperties() {
+        applyLimitedLifeDefaults();
+        super.instantiateProperties();
+    }
+
+    protected void applyLimitedLifeDefaults() {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
@@ -183,6 +196,5 @@ public class LimitedLifeConfig extends ConfigManager {
         LIVES_RANDOMIZE_MAX.type = ConfigTypes.SECONDS;
         LIVES_LIFE_DIFF_MESSAGE.displayName = "Show Time Diff In Death Message";
         LIVES_LIFE_DIFF_MESSAGE.description = "Shows an indicator of how much time was lost in the death messages.";
-        super.instantiateProperties();
     }
 }

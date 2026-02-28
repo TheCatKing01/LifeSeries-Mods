@@ -129,7 +129,7 @@ public class TextHud {
 
     private static long limitedLifeTime = -1;
     public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
-        if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
+        if (!MainClient.clientCurrentSeason.isLimitedLifeLike()) return 0;
         if (System.currentTimeMillis()-MainClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
         MutableComponent timerText = Component.empty();
