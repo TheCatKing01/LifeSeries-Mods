@@ -53,7 +53,7 @@ public class AdvancedDeathsManager {
             return;
         }
         int amountOfDeaths = currentLives - lives;
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason().isLimitedLifeLike()) {
             amountOfDeaths = (int) Math.ceil(((double) amountOfDeaths) / Math.abs(LimitedLife.NEW_DEATH_NORMAL.getSeconds()));
         }
 

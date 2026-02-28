@@ -40,7 +40,7 @@ public class PlayerTabOverlayMixin {
             int score = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
             if (objective.getName().equals(LivesManager.SCOREBOARD_NAME)) {
                 Component renderOverride = null;
-                if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) {
+                if (!MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                     if (score >= MainClient.TAB_LIST_LIVES_CUTOFF && !MainClient.TAB_LIST_SHOW_EXACT_LIVES && !Main.DEBUG) {
                         renderOverride = Component.literal(MainClient.TAB_LIST_LIVES_CUTOFF+"+").withStyle(ChatFormatting.YELLOW);
                     }
@@ -67,7 +67,7 @@ public class PlayerTabOverlayMixin {
 
         if (objective != null && objective.getName().equals(LivesManager.SCOREBOARD_NAME)) {
             int score = readableScoreboardScore.value();
-            if (MainClient.clientCurrentSeason != Seasons.LIMITED_LIFE) {
+            if (!MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                 if (score >= MainClient.TAB_LIST_LIVES_CUTOFF && !MainClient.TAB_LIST_SHOW_EXACT_LIVES && !Main.DEBUG) {
                     return Component.literal(MainClient.TAB_LIST_LIVES_CUTOFF+"+").setStyle(originalText.getStyle());
                 }

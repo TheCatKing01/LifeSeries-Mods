@@ -128,7 +128,7 @@ public class LivesManager {
                 return 3;
             }
         }
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason().isLimitedLifeLike()) {
             if (teamName.equals("lives_2")) {
                 return LimitedLifeLivesManager.YELLOW_TIME;
             }
@@ -145,7 +145,7 @@ public class LivesManager {
                 return 4;
             }
         }
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason().isLimitedLifeLike()) {
             if (teamName.equals("lives_1")) {
                 return 1;
             }

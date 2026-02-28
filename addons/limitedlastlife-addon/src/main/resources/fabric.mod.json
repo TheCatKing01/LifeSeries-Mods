@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "lifeseries_limitedlastlife_addon",
+  "version": "${version}",
+  "name": "LifeSeries Limited-Last Life Addon",
+  "description": "Adds the Limited-Last Life series to LifeSeries when installed together.",
+  "authors": [
+    "LifeSeriesPlus"
+  ],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.mat0u5.lifeseries.addon.limitedlastlife.LimitedLastLifeAddon"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "*",
+    "lifeseries": "*"
+  }
+}

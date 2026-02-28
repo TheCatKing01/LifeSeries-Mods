@@ -607,7 +607,7 @@ public class BoogeymanManager {
         if (!BOOGEYMAN_ADVANCED_DEATHS) {
             delay = 140;
         }
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason().isLimitedLifeLike()) {
             delay = 140;
         }
 

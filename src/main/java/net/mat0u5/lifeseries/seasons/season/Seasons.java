@@ -29,6 +29,7 @@ public enum Seasons {
     LAST_LIFE("Last Life", "lastlife"),
     DOUBLE_LIFE("Double Life", "doublelife"),
     LIMITED_LIFE("Limited Life", "limitedlife"),
+    LIMITED_LAST_LIFE("Limited-Last Life", "limitedlastlife"),
     SECRET_LIFE("Secret Life", "secretlife"),
     WILD_LIFE("Wild Life", "wildlife"),
     PAST_LIFE("Past Life", "pastlife"),
@@ -58,6 +59,9 @@ public enum Seasons {
         if (this == LAST_LIFE) return new LastLife();
         if (this == DOUBLE_LIFE) return new DoubleLife();
         if (this == LIMITED_LIFE) return new LimitedLife();
+        if (this == LIMITED_LAST_LIFE) {
+            return getSeasonFromClassName("net.mat0u5.lifeseries.seasons.season.limitedlastlife.LimitedLastLife", new LimitedLife());
+        }
         if (this == SECRET_LIFE) return new SecretLife();
         if (this == WILD_LIFE) return new WildLife();
         if (this == PAST_LIFE) return new PastLife();
@@ -97,6 +101,12 @@ public enum Seasons {
         return allSeasons;
     }
 
+    public static List<Seasons> getVisibleSeasonsInGui() {
+        List<Seasons> allSeasons = getSeasons();
+        allSeasons.remove(LIMITED_LAST_LIFE);
+        return allSeasons;
+    }
+
     public static List<Seasons> getAprilFoolsSeasons() {
         return new ArrayList<>(List.of(REAL_LIFE, SIMPLE_LIFE));
     }
@@ -107,5 +117,21 @@ public enum Seasons {
             seasonNames.add(season.getId());
         }
         return seasonNames;
+    }
+
+    public boolean isLimitedLifeLike() {
+        return this == LIMITED_LIFE || this == LIMITED_LAST_LIFE;
+    }
+
+    private Season getSeasonFromClassName(String className, Season fallback) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            if (instance instanceof Season season) {
+                return season;
+            }
+        }
+        catch (Exception ignored) {}
+        return fallback;
     }
 }

@@ -45,7 +45,7 @@ public class LivesCommand extends Command {
     }
 
     public boolean isNormalLife() {
-        return currentSeason.getSeason() != Seasons.LIMITED_LIFE;
+        return !currentSeason.getSeason().isLimitedLifeLike();
     }
 
     @Override

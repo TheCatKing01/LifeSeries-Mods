@@ -43,7 +43,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
 
     public void addSeasonRegions() {
         seasonRegions.clear();
-        List<Seasons> seasons = Seasons.getSeasons();
+        List<Seasons> seasons = Seasons.getVisibleSeasonsInGui();
         seasons.removeAll(Seasons.getAprilFoolsSeasons());
 
         List<List<Seasons>> rows = splitIntoRows(seasons, ROWS);
@@ -191,4 +191,3 @@ public class ChooseSeasonScreen extends DefaultScreen {
         RenderUtils.texture(seasonRegion.season.getLogo(), rect.x, rect.y, textureSize, textureSize).scaled(scale, scale).render(context);
     }
 }
-

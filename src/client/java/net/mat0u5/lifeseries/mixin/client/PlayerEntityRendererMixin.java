@@ -108,7 +108,7 @@ public abstract class PlayerEntityRendererMixin {
         if (objective != null) {
             Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
             if (objective.getName().equalsIgnoreCase(LivesManager.SCOREBOARD_NAME)) {
-                if (MainClient.clientCurrentSeason == Seasons.LIMITED_LIFE) {
+                if (MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                     Time timeLeft = Time.seconds(Math.max(0, score.getScore()));
                     return Component.literal(timeLeft.formatLong() + ";").setStyle(abstractClientPlayer.getDisplayName().getStyle());
                 }
@@ -136,7 +136,7 @@ public abstract class PlayerEntityRendererMixin {
         Objective objective = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
         if (objective != null && readOnlyScoreInfo != null) {
             if (objective.getName().equalsIgnoreCase(LivesManager.SCOREBOARD_NAME)) {
-                if (MainClient.clientCurrentSeason == Seasons.LIMITED_LIFE) {
+                if (MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                     Time timeLeft = Time.seconds(Math.max(0, readOnlyScoreInfo.value()));
                     return Component.literal(timeLeft.formatLong() + ";").setStyle(abstractClientPlayer.getDisplayName().getStyle());
                 }
@@ -175,7 +175,7 @@ public abstract class PlayerEntityRendererMixin {
             if (objective != null) {
                 ReadOnlyScoreInfo scoreInfo = scoreboard.getPlayerScoreInfo(player, objective);
                 if (scoreInfo != null && objective.getName().equalsIgnoreCase(LivesManager.SCOREBOARD_NAME)) {
-                    if (MainClient.clientCurrentSeason == Seasons.LIMITED_LIFE) {
+                    if (MainClient.clientCurrentSeason.isLimitedLifeLike()) {
                         return Component.literal(Time.seconds(scoreInfo.value()).formatLong()).setStyle(player.getDisplayName().getStyle());
                     }
                 }

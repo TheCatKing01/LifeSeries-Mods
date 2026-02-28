@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.player.TeamUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
@@ -28,9 +31,20 @@ public class LimitedLifeLivesManager extends LivesManager {
     public static int RED_TIME = 28800;
     public static boolean BROADCAST_COLOR_CHANGES = false;
     public static int TIME_RANDOMIZE_INTERVAL = Time.hours(1).getSeconds();
+    public static List<CustomLifeColorRange> EXTRA_LIFE_COLORS = new ArrayList<>();
+    private static final int EXTRA_TEAM_START_INDEX = 5;
+
+    public record CustomLifeColorRange(int min, int max, ChatFormatting color) {}
 
     @Override
     public ChatFormatting getColorForLives(Integer lives) {
+        if (lives != null) {
+            for (CustomLifeColorRange range : EXTRA_LIFE_COLORS) {
+                if (lives >= range.min() && lives <= range.max()) {
+                    return range.color();
+                }
+            }
+        }
         lives = getEquivalentLives(lives);
         if (lives == null) return ChatFormatting.GRAY;
         if (lives == 1) return ChatFormatting.RED;
@@ -49,6 +63,14 @@ public class LimitedLifeLivesManager extends LivesManager {
 
     @Override
     public String getTeamForLives(Integer lives) {
+        if (lives != null) {
+            for (int i = 0; i < EXTRA_LIFE_COLORS.size(); i++) {
+                CustomLifeColorRange range = EXTRA_LIFE_COLORS.get(i);
+                if (lives >= range.min() && lives <= range.max()) {
+                    return "lives_" + (EXTRA_TEAM_START_INDEX + i);
+                }
+            }
+        }
         lives = getEquivalentLives(lives);
         if (lives == null) return "lives_null";
         if (lives == 1) return "lives_1";
@@ -56,6 +78,51 @@ public class LimitedLifeLivesManager extends LivesManager {
         if (lives == 3) return "lives_3";
         if (lives >= 4) return "lives_4";
         return "lives_0";
+    }
+
+    @Override
+    public void createTeams() {
+        super.createTeams();
+        for (int i = 0; i < EXTRA_LIFE_COLORS.size(); i++) {
+            CustomLifeColorRange range = EXTRA_LIFE_COLORS.get(i);
+            int teamIndex = EXTRA_TEAM_START_INDEX + i;
+            TeamUtils.createTeam("lives_" + teamIndex, "Extra", range.color());
+        }
+    }
+
+    @Override
+    public int defaultTeamCanKill(String teamName) {
+        Integer equivalentLives = getEquivalentLivesFromExtraTeamName(teamName);
+        if (equivalentLives != null) {
+            if (equivalentLives <= 1) return 1;
+            if (equivalentLives == 2) return YELLOW_TIME;
+            return -1;
+        }
+        return super.defaultTeamCanKill(teamName);
+    }
+
+    @Override
+    public int defaultTeamGainLife(String teamName) {
+        Integer equivalentLives = getEquivalentLivesFromExtraTeamName(teamName);
+        if (equivalentLives != null) {
+            if (equivalentLives <= 1) return 1;
+            if (equivalentLives == 2) return YELLOW_TIME;
+            return -1;
+        }
+        return super.defaultTeamGainLife(teamName);
+    }
+
+    private Integer getEquivalentLivesFromExtraTeamName(String teamName) {
+        if (teamName == null || !teamName.startsWith("lives_")) return null;
+        try {
+            int teamIndex = Integer.parseInt(teamName.replace("lives_", ""));
+            int rangeIndex = teamIndex - EXTRA_TEAM_START_INDEX;
+            if (rangeIndex < 0 || rangeIndex >= EXTRA_LIFE_COLORS.size()) return null;
+            CustomLifeColorRange range = EXTRA_LIFE_COLORS.get(rangeIndex);
+            return getEquivalentLives(range.max());
+        }
+        catch (Exception ignored) {}
+        return null;
     }
 
     @Override
@@ -141,6 +208,38 @@ public class LimitedLifeLivesManager extends LivesManager {
     public void reload() {
         super.reload();
         TIME_RANDOMIZE_INTERVAL = LimitedLifeConfig.TIME_RANDOMIZE_INTERVAL.get();
+        EXTRA_LIFE_COLORS = parseExtraLifeColors(LimitedLifeConfig.EXTRA_LIFE_COLORS.get());
+        createTeams();
+        updateTeams();
+        currentSeason.reloadAllPlayerTeams();
+
+    }
+
+    public static List<CustomLifeColorRange> parseExtraLifeColors(String rawValue) {
+        List<CustomLifeColorRange> parsed = new ArrayList<>();
+        if (rawValue == null || rawValue.isBlank()) return parsed;
+
+        String[] entries = rawValue.split(";");
+        for (String entry : entries) {
+            String trimmedEntry = entry.trim();
+            if (trimmedEntry.isEmpty() || !trimmedEntry.contains(":")) continue;
+
+            String[] split = trimmedEntry.split(":", 2);
+            String range = split[0].trim();
+            String colorName = split[1].trim();
+            if (!range.contains("-")) continue;
+
+            String[] bounds = range.split("-", 2);
+            try {
+                int min = Integer.parseInt(bounds[0].trim());
+                int max = Integer.parseInt(bounds[1].trim());
+                ChatFormatting color = ChatFormatting.getByName(colorName);
+                if (color == null || max < min) continue;
+                parsed.add(new CustomLifeColorRange(min, max, color));
+            }
+            catch (Exception ignored) {}
+        }
+        return parsed;
 
     }
 
