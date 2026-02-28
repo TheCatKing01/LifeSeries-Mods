@@ -147,8 +147,8 @@ public class TextHud {
             }
             long remainingTime = currentSeconds * 1000;
 
-            if (remainingTime < 0) timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
-            else timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor+ Time.millis(remainingTime).formatLong()));
+            if (currentSeconds < 0) timerText = timerText.append(TextUtils.formatLoosely("{}0:00:00", MainClient.limitedLifeTimerColor));
+            else timerText = timerText.append(Component.nullToEmpty(MainClient.limitedLifeTimerColor + Time.seconds((int) currentSeconds).formatLong()));
         }
 
         return drawHudText(client, context, timerText, y);

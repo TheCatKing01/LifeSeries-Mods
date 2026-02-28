@@ -24,6 +24,11 @@ public class LimitedLastLife extends LimitedLife {
         return new LimitedLastLifeLivesManager();
     }
 
+    @Override
+    public void switchOutOfSeason(Seasons changedTo) {
+        LimitedLastLifeLivesManager.restoreTeamsFromBackup();
+    }
+
     public static class Config extends LimitedLifeConfig {
         public Config() {
             super("limitedlastlife.properties");
