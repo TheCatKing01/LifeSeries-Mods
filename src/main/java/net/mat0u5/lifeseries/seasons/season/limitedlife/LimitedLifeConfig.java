@@ -150,7 +150,6 @@ public class LimitedLifeConfig extends ConfigManager {
                 ,TIME_DEFAULT
                 ,TIME_YELLOW
                 ,TIME_RED
-                ,EXTRA_LIFE_COLORS
                 ,TIME_DEATH
                 ,TIME_DEATH_BOOGEYMAN
                 ,TIME_KILL

@@ -82,7 +82,7 @@ public class GivelifeCommand extends Command {
         }
 
         int giveAmount = 1;
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason.getSeason().isLimitedLifeLike()) {
             giveAmount = -LimitedLife.NEW_DEATH_NORMAL.getSeconds();
         }
 

@@ -117,4 +117,8 @@ public enum Seasons {
         }
         return seasonNames;
     }
+	
+    public boolean isLimitedLifeLike() {
+        return this == LIMITED_LIFE || this == LIMITED_LAST_LIFE;
+    }
 }

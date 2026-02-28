@@ -587,7 +587,7 @@ public enum ModifiableText {
     }
 
     public String getRegisterDefaultValue() {
-        if (currentSeason != null && currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason != null && currentSeason.getSeason().isLimitedLifeLike()) {
             String modified = null;
 
             if (this == GIVELIFE_RECEIVE_OTHER) modified = "{} received {} from {}";
@@ -628,7 +628,7 @@ public enum ModifiableText {
     }
 
     public List<String> getRegisterArgs() {
-        if (currentSeason != null && currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason != null && currentSeason.getSeason().isLimitedLifeLike()) {
 
             if (this == GIVELIFE_RECEIVE_OTHER) return List.of("Receiver", "time", "Giver");
             else if (this == GIVELIFE_RECEIVE_SELF) return List.of("time", "Player");
@@ -669,7 +669,15 @@ public enum ModifiableText {
             }
             */
 
-            if (modifiableText.requiredSeason != null && currentSeason != null && currentSeason.getSeason() != modifiableText.requiredSeason) continue;
+            if (modifiableText.requiredSeason != null && currentSeason != null) {
+                Seasons current = currentSeason.getSeason();
+                if (modifiableText.requiredSeason.isLimitedLifeLike()) {
+                    if (!current.isLimitedLifeLike()) continue;
+                }
+                else if (current != modifiableText.requiredSeason) {
+                    continue;
+                }
+            }
             ModifiableTextManager.register(modifiableText.name, defaultValue, modifiableText.getRegisterArgs());
         }
     }
