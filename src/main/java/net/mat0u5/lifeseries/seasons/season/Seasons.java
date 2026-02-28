@@ -5,6 +5,7 @@ import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.SimpleLife;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.lastlife.LastLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
+import net.mat0u5.lifeseries.seasons.season.limitedlastlife.LimitedLastLife;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
 import net.mat0u5.lifeseries.seasons.season.pastlife.PastLife;
 import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLife;
@@ -29,6 +30,7 @@ public enum Seasons {
     LAST_LIFE("Last Life", "lastlife"),
     DOUBLE_LIFE("Double Life", "doublelife"),
     LIMITED_LIFE("Limited Life", "limitedlife"),
+    LIMITED_LAST_LIFE("Limited-Last Life", "limitedlastlife"),
     SECRET_LIFE("Secret Life", "secretlife"),
     WILD_LIFE("Wild Life", "wildlife"),
     PAST_LIFE("Past Life", "pastlife"),
@@ -58,6 +60,7 @@ public enum Seasons {
         if (this == LAST_LIFE) return new LastLife();
         if (this == DOUBLE_LIFE) return new DoubleLife();
         if (this == LIMITED_LIFE) return new LimitedLife();
+        if (this == LIMITED_LAST_LIFE) return new LimitedLastLife();
         if (this == SECRET_LIFE) return new SecretLife();
         if (this == WILD_LIFE) return new WildLife();
         if (this == PAST_LIFE) return new PastLife();
@@ -94,6 +97,12 @@ public enum Seasons {
     public static List<Seasons> getSeasons() {
         List<Seasons> allSeasons = new ArrayList<>(List.of(Seasons.values()));
         allSeasons.remove(UNASSIGNED);
+        return allSeasons;
+    }
+	
+    public static List<Seasons> getVisibleSeasonsInGui() {
+        List<Seasons> allSeasons = getSeasons();
+        allSeasons.remove(LIMITED_LAST_LIFE);
         return allSeasons;
     }
 

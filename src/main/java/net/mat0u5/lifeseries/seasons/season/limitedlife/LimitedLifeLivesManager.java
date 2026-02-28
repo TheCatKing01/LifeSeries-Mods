@@ -17,6 +17,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
@@ -28,9 +30,19 @@ public class LimitedLifeLivesManager extends LivesManager {
     public static int RED_TIME = 28800;
     public static boolean BROADCAST_COLOR_CHANGES = false;
     public static int TIME_RANDOMIZE_INTERVAL = Time.hours(1).getSeconds();
+    public static List<CustomLifeColorRange> EXTRA_LIFE_COLORS = new ArrayList<>();
+
+    public record CustomLifeColorRange(int min, int max, ChatFormatting color) {}
 
     @Override
     public ChatFormatting getColorForLives(Integer lives) {
+        if (lives != null) {
+            for (CustomLifeColorRange range : EXTRA_LIFE_COLORS) {
+                if (lives >= range.min() && lives <= range.max()) {
+                    return range.color();
+                }
+            }
+        }
         lives = getEquivalentLives(lives);
         if (lives == null) return ChatFormatting.GRAY;
         if (lives == 1) return ChatFormatting.RED;
@@ -141,6 +153,35 @@ public class LimitedLifeLivesManager extends LivesManager {
     public void reload() {
         super.reload();
         TIME_RANDOMIZE_INTERVAL = LimitedLifeConfig.TIME_RANDOMIZE_INTERVAL.get();
+        EXTRA_LIFE_COLORS = parseExtraLifeColors(LimitedLifeConfig.EXTRA_LIFE_COLORS.get());
+
+    }
+
+    public static List<CustomLifeColorRange> parseExtraLifeColors(String rawValue) {
+        List<CustomLifeColorRange> parsed = new ArrayList<>();
+        if (rawValue == null || rawValue.isBlank()) return parsed;
+
+        String[] entries = rawValue.split(";");
+        for (String entry : entries) {
+            String trimmedEntry = entry.trim();
+            if (trimmedEntry.isEmpty() || !trimmedEntry.contains(":")) continue;
+
+            String[] split = trimmedEntry.split(":", 2);
+            String range = split[0].trim();
+            String colorName = split[1].trim();
+            if (!range.contains("-")) continue;
+
+            String[] bounds = range.split("-", 2);
+            try {
+                int min = Integer.parseInt(bounds[0].trim());
+                int max = Integer.parseInt(bounds[1].trim());
+                ChatFormatting color = ChatFormatting.getByName(colorName);
+                if (color == null || max < min) continue;
+                parsed.add(new CustomLifeColorRange(min, max, color));
+            }
+            catch (Exception ignored) {}
+        }
+        return parsed;
 
     }
 
