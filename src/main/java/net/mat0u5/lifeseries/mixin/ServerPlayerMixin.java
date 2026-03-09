@@ -267,21 +267,24 @@ public class ServerPlayerMixin implements IServerPlayer {
         ls$get().sendSystemMessage(component, aboveHotbar);
     }
 
+	@Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
+	private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+		if (Main.isLogicalNonDisabled() && seasonConfig != null && seasonConfig.NICE_LIFE.get(seasonConfig)) {
+			// Use NiceLife singleton if needed
+			NiceLife niceLife = NiceLife.getInstance();
 
-    @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
-    private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        if (Main.isLogicalNonDisabled() && currentSeason.getSeason() == Seasons.NICE_LIFE) {
-            if (!NiceLife.SLEEP_BEFORE_MIDNIGHT && niceLife.isNight() && !niceLife.isAfterMidnight()) {
-                cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
-                ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-                return;
-            }
-            if (NiceLifeTriviaManager.triviaInProgress) {
-                cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
-                ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);
-            }
-        }
-    }
+			if (!NiceLife.SLEEP_BEFORE_MIDNIGHT && niceLife.isNight() && !niceLife.isAfterMidnight()) {
+				cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
+				ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
+				return;
+			}
+
+			if (NiceLifeTriviaManager.triviaInProgress) {
+				cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
+				ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);
+			}
+		}
+	}
 
     @Inject(method = "getTabListDisplayName", at = @At("TAIL"), cancellable = true)
     private void customNickname(CallbackInfoReturnable<Component> cir) {

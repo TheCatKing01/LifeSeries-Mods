@@ -361,21 +361,17 @@ public class SuperpowersWildcard extends Wildcard {
 			);
 		}
 	}
-
+	
     public static void pressedSuperpowerKey(ServerPlayer player) {
-        if (!playerSuperpowers.containsKey(player.getUUID())) return;
-
-        if (!player.ls$isAlive()) {
-            PlayerUtils.displayMessageToPlayer(
-                player,
-                ModifiableText.WILDLIFE_SUPERPOWES_DEAD.get(),
-                60
-            );
-            return;
+        if (playerSuperpowers.containsKey(player.getUUID())) {
+            if (player.ls$isAlive()) {
+				playerSuperpowers.get(player.getUUID())
+					.forEach(Superpower::onKeyPressed);
+            }
+            else {
+                PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_SUPERPOWERS_DEAD.get(), 60);
+            }
         }
-
-        playerSuperpowers.get(player.getUUID())
-            .forEach(Superpower::onKeyPressed);
     }
 
     public static boolean hasPower(ServerPlayer player) {
