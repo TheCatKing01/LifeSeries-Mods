@@ -11,9 +11,7 @@ import net.mat0u5.lifeseries.utils.interfaces.IEntityDataSaver;
 import net.mat0u5.lifeseries.utils.interfaces.IMorph;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,8 +37,20 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.illager.Evoker;
 //?}
 
+//? if >= 26.1 {
+/*import org.spongepowered.asm.mixin.gen.Accessor;
+*///?}
+
 @Mixin(value = Entity.class, priority = 1)
 public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
+    //? if >= 26.1 {
+    /*@Accessor("fluidInteraction")
+    abstract EntityFluidInteraction ls$entityFluidInteraction();
+    @Override
+    public EntityFluidInteraction ls$getEntityFluidInteraction() {
+        return ls$entityFluidInteraction();
+    }
+    *///?}
     /*
     private NbtCompound persistentData;
     @Override
@@ -97,10 +107,10 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
 
     @Inject(method = "getAirSupply", at = @At("RETURN"), cancellable = true)
     public void getAir(CallbackInfoReturnable<Integer> cir) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (currentSeason instanceof WildLife) {
             if (!Snail.SHOULD_DROWN_PLAYER) return;
-            if (!WildcardManager.isActiveWildcard(Wildcards.SNAILS)) return;
+            if (Snails.snails.isEmpty()) return;
             Entity entity = (Entity) (Object) this;
             if (entity instanceof Player player && !player.hasEffect(MobEffects.WATER_BREATHING)) {
                 if (!Snails.snails.containsKey(player.getUUID())) return;
@@ -124,7 +134,7 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
             at = @At("HEAD"), cancellable = true)
     public void dropStack(ServerLevel level, ItemStack stack, float yOffset, CallbackInfoReturnable<ItemEntity> cir) {
         //?}
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (currentSeason instanceof WildLife) {
             Entity entity = (Entity) (Object) this;
             if (entity instanceof Evoker && stack.is(Items.TOTEM_OF_UNDYING)) {

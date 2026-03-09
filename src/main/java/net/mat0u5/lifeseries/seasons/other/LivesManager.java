@@ -4,13 +4,14 @@ import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
-import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLifeLivesManager;
+import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Necromancy;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.other.*;
+import net.mat0u5.lifeseries.utils.player.LifeSkinsManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.player.TeamUtils;
@@ -18,7 +19,9 @@ import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -33,7 +36,7 @@ import java.util.*;
 import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
-        //? if <= 1.20.2
+//? if <= 1.20.2
 //import net.minecraft.world.scores.Score;
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
@@ -50,6 +53,8 @@ public class LivesManager {
     public boolean ROLL_LIVES = false;
     public int ROLL_MIN_LIVES = 2;
     public int ROLL_MAX_LIVES = 6;
+    public double LIVES_RANDOMIZE_MINUTE = 1.0;
+    public boolean SHOW_LIFE_DIFF = false;
 
     public boolean assignedLives = false;
     public Random rnd = new Random();
@@ -61,6 +66,7 @@ public class LivesManager {
         ONLY_TAKE_LIVES_IN_SESSION = seasonConfig.ONLY_TAKE_LIVES_IN_SESSION.get();
         SEE_FRIENDLY_INVISIBLE_PLAYERS = seasonConfig.SEE_FRIENDLY_INVISIBLE_PLAYERS.get();
         LIVES_SYSTEM_DISABLED = seasonConfig.LIVES_SYSTEM_DISABLED.get();
+        LIVES_RANDOMIZE_MINUTE = seasonConfig.LIVES_RANDOMIZE_MINUTE.get();
         updateTeams();
 
         ROLL_LIVES = seasonConfig.LIVES_RANDOMIZE.get();
@@ -68,6 +74,7 @@ public class LivesManager {
         int maxLivesConfig = seasonConfig.LIVES_RANDOMIZE_MAX.get();
         ROLL_MIN_LIVES = Math.min(minLivesConfig, maxLivesConfig);
         ROLL_MAX_LIVES = Math.max(minLivesConfig, maxLivesConfig);
+        SHOW_LIFE_DIFF = seasonConfig.LIVES_LIFE_DIFF_MESSAGE.get();
     }
 
     public Map<Integer, PlayerTeam> getLivesTeams() {
@@ -269,11 +276,13 @@ public class LivesManager {
     }
 
     public void resetPlayerLife(ServerPlayer player) {
+        boolean livesChanged = player.ls$getLives() != null;
         ScoreboardUtils.resetScore(player, SCOREBOARD_NAME);
         currentSeason.reloadPlayerTeam(player);
         currentSeason.assignDefaultLives(player);
-        if (currentSeason instanceof DoubleLife doubleLife) {
-            doubleLife.syncSoulboundLives(player);
+
+        if (livesChanged) {
+            LifeSkinsManager.refreshLifeSkin(player);
         }
     }
 
@@ -316,6 +325,7 @@ public class LivesManager {
         if (currentLives == null) currentLives = 0;
         int lives = currentLives + amount;
         if (lives < 0) lives = 0;
+        SessionTranscript.addRecordIfMissing(player);
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
     }
 
@@ -329,9 +339,6 @@ public class LivesManager {
         AnimationUtils.createSpiral(target, 175);
         currentSeason.reloadPlayerTeam(target);
         SessionTranscript.givelife(playerName, target);
-        if (currentSeason instanceof DoubleLife doubleLife) {
-            doubleLife.syncSoulboundLives(target);
-        }
         if (isRevive && isAlive(target)) {
             PlayerUtils.safelyPutIntoSurvival(target);
         }
@@ -340,6 +347,8 @@ public class LivesManager {
     public void setPlayerLives(ServerPlayer player, int lives) {
         if (player == null || isWatcher(player)) return;
         Integer livesBefore = getPlayerLives(player);
+        boolean livesChanged = !Objects.equals(lives, livesBefore);
+        SessionTranscript.addRecordIfMissing(player);
         ScoreboardUtils.setScore(player, SCOREBOARD_NAME, lives);
         if (lives <= 0) {
             playerLostAllLives(player, livesBefore);
@@ -350,8 +359,11 @@ public class LivesManager {
         currentSeason.reloadPlayerTeam(player);
 
         if (SubInManager.isSubbingIn(player.getUUID())) {
-            String substitutedPlayerName =OtherUtils.profileName(SubInManager.getSubstitutedPlayer(player.getUUID()));
+            String substitutedPlayerName = OtherUtils.profileName(SubInManager.getSubstitutedPlayer(player.getUUID()));
             setScore(substitutedPlayerName, lives);
+        }
+        if (livesChanged) {
+            LifeSkinsManager.refreshLifeSkin(player);
         }
     }
 
@@ -437,7 +449,14 @@ public class LivesManager {
         }
         Component deathMessage = ModifiableText.FINAL_DEATH.get(player);
         if (!deathMessage.getString().isEmpty()) {
-            PlayerUtils.broadcastMessage(deathMessage);
+            if (SHOW_LIFE_DIFF) {
+                TaskScheduler.schedulePriorityTask(1, () -> {
+                    PlayerUtils.broadcastMessage(deathMessage);
+                });
+            }
+            else {
+                PlayerUtils.broadcastMessage(deathMessage);
+            }
         }
     }
 
@@ -501,7 +520,7 @@ public class LivesManager {
 
     public void addSessionActions() {
         if (ROLL_LIVES) {
-            currentSession.addSessionAction(new SessionAction(Time.minutes(1), ModifiableText.SESSION_ACTION_ASSIGN_LIVES.getString()) {
+            currentSession.addSessionAction(new SessionAction(Time.minutes(LIVES_RANDOMIZE_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_LIVES.getString()) {
                 @Override
                 public void trigger() {
                     assignRandomLivesToUnassignedPlayers();
@@ -528,10 +547,8 @@ public class LivesManager {
         TaskScheduler.scheduleTask(Time.seconds(3), ()-> rollLives(players));
     }
 
-    public void rollLives(List<ServerPlayer> players) {
-        int delay = showRandomNumbers(players) + 20;
-
-        HashMap<ServerPlayer, Integer> lives = new HashMap<>();
+    public Map<ServerPlayer, Integer> getFinalRandomLives(List<ServerPlayer> players) {
+        Map<ServerPlayer, Integer> lives = new HashMap<>();
 
         int totalSize = players.size();
         int chosenNotRandomly = ROLL_MIN_LIVES;
@@ -546,6 +563,13 @@ public class LivesManager {
             int randomLives = getRandomLife();
             lives.put(player, randomLives);
         }
+        return lives;
+    }
+
+    public void rollLives(List<ServerPlayer> players) {
+        int delay = showRandomNumbers(players) + 20;
+
+        Map<ServerPlayer, Integer> lives = getFinalRandomLives(players);
 
         TaskScheduler.scheduleTask(delay, () -> {
             //Show the actual amount of lives for one cycle
@@ -629,5 +653,64 @@ public class LivesManager {
         if (player.ls$isWatcher()) return;
         PlayerUtils.broadcastMessageToAdmins(ModifiableText.LIVES_RANDOMIZE_SINGLE.get(player));
         assignRandomLives(new ArrayList<>(List.of(player)));
+    }
+
+    public Map<UUID, Integer> lastPlayerLives = new HashMap<>();
+    public static Map<UUID, Double> lastPlayerHealth = new HashMap<>();
+    public void updateLastStats() {
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            lastPlayerLives.put(player.getUUID(), player.ls$getLives());
+            if (currentSeason instanceof SecretLife secretLife) {
+                lastPlayerHealth.put(player.getUUID(), secretLife.getPlayerHealth(player));
+            }
+        }
+
+    }
+
+    public Component modifyBroadcastDeathMessage(Component original) {
+        try {
+            MutableComponent result = Component.empty();
+            for (Component part : original.toFlatList()) {
+                result.append(part);
+                //? if <= 1.21.4 {
+                /*if (part.getStyle().getClickEvent() != null && part.getStyle().getClickEvent().getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
+                    String command = part.getStyle().getClickEvent().getValue();
+                *///?} else {
+                if (part.getStyle().getClickEvent() instanceof ClickEvent.SuggestCommand suggestCommandEvent) {
+                    String command = suggestCommandEvent.command();
+                //?}
+                    String playerName = command.replaceFirst("/tell ", "").strip();
+                     ServerPlayer player = PlayerUtils.getPlayer(playerName);
+                    if (player != null) {
+                        Component add = getDeathMessageAdd(player);
+                        if (add != null) result.append(add);
+                    }
+                }
+            }
+            return result;
+        }catch(Exception ignored) {}
+        return original;
+    }
+
+    public Component getDeathMessageAdd(ServerPlayer player) {
+        Integer lastLives = lastPlayerLives.get(player.getUUID());
+        Integer currentLives = player.ls$getLives();
+
+        if (lastLives == null || currentLives == null) return null;
+        int livesDiff = currentLives - lastLives;
+        String message = livesManager.getFormattedLives(Math.abs(livesDiff)).getString();
+        if (livesDiff == 0 && currentSeason instanceof SecretLife secretLife && lastPlayerHealth.containsKey(player.getUUID())) {
+            double healthDiff = secretLife.getPlayerHealth(player) - lastPlayerHealth.get(player.getUUID());
+            livesDiff = (int)(healthDiff/2.0);
+            message = livesManager.getFormattedLives(Math.abs(livesDiff)).getString() + "❤";
+        }
+
+        if (livesDiff == 0) return null;
+        if (livesDiff > 0) {
+            return ModifiableText.LIVES_SHOW_DIFF_GAIN.get(message);
+        }
+        else {
+            return ModifiableText.LIVES_SHOW_DIFF_LOSS.get(message);
+        }
     }
 }

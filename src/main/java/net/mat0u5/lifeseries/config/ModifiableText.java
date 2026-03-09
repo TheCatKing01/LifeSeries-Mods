@@ -1,13 +1,11 @@
 package net.mat0u5.lifeseries.config;
 
-import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.enums.Formatted;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
@@ -22,6 +20,7 @@ public enum ModifiableText {
     ,TRANSCRIPT_COPY("§7Click {}§7 to copy the session transcript.", List.of("ClickHere"))
     ,CONFIG_UPDATED("§7Config has been successfully updated.")
     ,CONFIG_GUI_OPENING("§7Opening the config GUI...")
+    ,CONFIG_SET("Updated '{}' in the config.", List.of("key"))
     ,COUNTDOWN_COLOR_3("§a3")
     ,COUNTDOWN_COLOR_2("§e2")
     ,COUNTDOWN_COLOR_1("§c1")
@@ -106,6 +105,8 @@ public enum ModifiableText {
     ,LIVES_RANDOMIZE_MULTIPLE("§7Assigning random lives to {}§7 targets...", List.of("number of targets"))
     ,LIVES_RANDOMIZE_RESULT("{}§a {}.", List.of("amount", "life/lives"))
     ,LIVES_RANDOMIZE_TITLE("§7You will have...")
+    ,LIVES_SHOW_DIFF_GAIN(Formatted.LOOSELY_STYLED, " §a[+{}]", List.of("amount"))
+    ,LIVES_SHOW_DIFF_LOSS(Formatted.LOOSELY_STYLED, " §c[-{}]", List.of("amount"))
     ,FINAL_DEATH("{} ran out of lives.", List.of("Player"))
     ,FINAL_DEATH_TITLE("{}", List.of("Player"))
     ,FINAL_DEATH_TITLE_SUBTITLE("ran out of lives!")
@@ -209,9 +210,16 @@ public enum ModifiableText {
     ,GIVELIFE_ERROR_SOULMATE("You cannot give lives to your soulmate")
 
     ,LIFESKINS_SKIN_SET("Set {}'s skin to {}", List.of("Player", "username"))
+    ,LIFESKINS_SKIN_RESET("Reset {}'s skin", List.of("Player"))
     ,LIFESKINS_USERNAME_SET("Set {}'s username to {}", List.of("Player", "username"))
+    ,LIFESKINS_USERNAME_RESET("Reset {}'s username", List.of("Player"))
     ,LIFESKINS_NICKNAME_SET("Set {}'s nickname to {}", List.of("Player", "nickname"))
     ,LIFESKINS_NICKNAME_RESET("Reset {}'s nickname", List.of("Player"))
+    ,LIFESKINS_RELOAD("§7Reloading Life Skins...")
+    ,LIFESKINS_LIST_EMPTY("There are no Life Skins currently loaded")
+    ,LIFESKINS_LIST("§7Loaded Life Skins for life boundaries:")
+    ,LIFESKINS_LIST_PERSON(Formatted.LOOSELY_STYLED, "§f {}: §7{}", List.of("Holder", "skins"))
+    ,LIFESKINS_INFO("§fClick {}§f to open the Life Skins info page on the Wiki.", List.of("ClickHere"))
 
     ,SIDETITLE_SINGLE("Showing new side title for {}", List.of("Player"))
     ,SIDETITLE_MULTIPLE("Showing new side title for {} players", List.of("number of targets"))
@@ -224,7 +232,7 @@ public enum ModifiableText {
     ,BOOGEYMAN_LATEJOIN("§cSince you were not present when the Boogeyman was being chosen, your chance to become the Boogeyman is now. Good luck!")
     ,BOOGEYMAN_LIST("Current Boogeymen: {}", List.of("list"))
     ,BOOGEYMAN_FAIL_NOTICE("§cYou only have 5 minutes left to kill someone as the Boogeyman before you fail!")
-    ,BOOGEYMAN_FAIL_SELF("{}§7 voulentarily failed themselves as the Boogeyman. They have been consumed by the curse.", List.of("Player"))
+    ,BOOGEYMAN_FAIL_SELFFAIL("{}§7 voluntarily failed themselves as the Boogeyman. They have been consumed by the curse.", List.of("Player"))
     ,BOOGEYMAN_FAIL_OTHER_SINGLE("§7Failing Boogeyman for {}§7...", List.of("Player"))
     ,BOOGEYMAN_FAIL_OTHER_MULTIPLE("§7Failing Boogeyman for {} targets§7...", List.of("number of targets"))
     ,BOOGEYMAN_RESET_SINGLE("§7Resetting Boogeyman cure/failure for {}§7...", List.of("Player"))
@@ -294,6 +302,8 @@ public enum ModifiableText {
     ,DOUBLELIFE_LASTPAIR_PT1_SUBTITLE(Seasons.DOUBLE_LIFE, "§aYour fate is your own...")
     ,DOUBLELIFE_LASTPAIR_PT2_TITLE(Seasons.DOUBLE_LIFE, "")
     ,DOUBLELIFE_LASTPAIR_PT2_SUBTITLE(Seasons.DOUBLE_LIFE, "§cThere can only be one winner.")
+    ,DOUBLELIFE_SOULMATE_DEATH_MSG("{} couldn't live without {}", List.of("Victim", "Killer"))
+    ,DOUBLELIFE_SOULMATE_DEATH_MSG_SOLO("{} couldn't live without their soulmate", List.of("Victim"))
 
     ,LIMITEDLIFE_CHANGE_COLOR(Seasons.LIMITED_LIFE, "{}§7 is now a {} name§7.", List.of("Player", "color"))
     ,LIMITEDLIFE_SESSION_DISPLAY_DIVIDER(Seasons.LIMITED_LIFE, "  |  ")
@@ -359,7 +369,7 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_REROLL_PT3(Seasons.SECRET_LIFE, "§e§lLet me open the door")
     ,SECRETLIFE_TASK_REROLL_PT4(Seasons.SECRET_LIFE, "§c§lAccept your fate")
 
-    ,WILDLIFE_SNAIL_TEXTURE_INFO(Seasons.WILD_LIFE, Formatted.LOOSELY_STYLED,"§fClick {}§f to open the Snail Textures info page in the Wiki.", List.of("ClickHere"))
+    ,WILDLIFE_SNAIL_TEXTURE_INFO(Seasons.WILD_LIFE,"§fClick {}§f to open the Snail Textures info page on the Wiki.", List.of("ClickHere"))
     ,WILDLIFE_SNAIL_DEFAULT_NAME(Seasons.WILD_LIFE, Formatted.PLAIN,"{}'s Snail", List.of("Player"))
     ,WILDLIFE_SNAIL_NAME_REQUEST(Seasons.WILD_LIFE, "{}§7 requests their snail name to be §f{}§7", List.of("Player", "name"))
     ,WILDLIFE_SNAIL_NAME_REQUEST_PROMPT(Seasons.WILD_LIFE, "§7Click {}§7 to accept.", List.of("ClickHere"))
@@ -430,8 +440,8 @@ public enum ModifiableText {
     ,WILDLIFE_WILDCARD_ACTIVATED_NONE(Seasons.WILD_LIFE, "§7There are no active Wildcards right now. \nYou will be able to select a Wildcard when you start a session, or you can use '§f/wildcard activate <wildcard>§7' to activate a specific Wildcard right now.")
     ,WILDLIFE_TRIVIA_QUESTION_INVALID(Seasons.WILD_LIFE, "Could not find trivia with that question.")
     ,WILDLIFE_SNAIL_INFO(Seasons.WILD_LIFE, "§7Use the §f'/snail ...'§7 command to modify snail names and to get info on how to change snail textures.")
-    ,WILDLIFE_TRIVIA_NOTICE_START(Seasons.DOUBLE_LIFE, "§7You must start a session for trivia bots to spawn!")
-    ,WILDLIFE_TRIVIA_NOTICE(Seasons.DOUBLE_LIFE, "§7You can modify the trivia questions in the config files (./config/lifeseries/wildlife/*-trivia)")
+    ,WILDLIFE_TRIVIA_NOTICE_START(Seasons.WILD_LIFE, "§7You must start a session for trivia bots to spawn!")
+    ,WILDLIFE_TRIVIA_NOTICE(Seasons.WILD_LIFE, "§7You can modify the trivia questions in the config files (./config/lifeseries/wildlife/*-trivia)")
     ,WILDLIFE_WILDCARD_WARNING_2MIN(Seasons.WILD_LIFE, "§7A Wildcard will be activated in 2 minutes!")
     ,WILDLIFE_WILDCARD_FADED(Seasons.WILD_LIFE, "§7A Wildcard has faded...")
     ,WILDLIFE_WILDCARD_DOTS_1(Seasons.WILD_LIFE, "§a§l,")
@@ -441,7 +451,7 @@ public enum ModifiableText {
     ,WILDLIFE_MAKEITWILD_PT2(Seasons.WILD_LIFE, "§cMake")
     ,WILDLIFE_MAKEITWILD_PT3(Seasons.WILD_LIFE, "§cMake §eit")
     ,WILDLIFE_MAKEITWILD_PT4(Seasons.WILD_LIFE, "§cMake §eit §a§lWILD")
-    ,WILDLIFE_SUPERPOWES_DEAD(Seasons.WILD_LIFE, "Dead players can't use superpowers!")
+    ,WILDLIFE_SUPERPOWERS_DEAD(Seasons.WILD_LIFE, "Dead players can't use superpowers!")
     ,WILDLIFE_POWER_MIMIC_ERROR(Seasons.WILD_LIFE, "You cannot mimic that power.")
     ,WILDLIFE_POWER_MIMIC_NOPLAYER(Seasons.WILD_LIFE, "You are not looking at a player.")
     ,WILDLIFE_POWER_MIMIC_NOPOWER(Seasons.WILD_LIFE, "That player does not have a superpower.")
@@ -449,6 +459,14 @@ public enum ModifiableText {
     ,WILDLIFE_POWER_PLAYERDISGUISE_ERROR(Seasons.WILD_LIFE, "You are not looking at a player.")
     ,WILDLIFE_POWER_TELEPORTATION_ERROR(Seasons.WILD_LIFE, "There is nothing to teleport to.")
     ,WILDLIFE_SNAIL_TRIVIA_SNAIL_NAME(Seasons.WILD_LIFE, "VHSnail")
+
+    ,WILDLIFE_SNAIL_SPAWN_SINGLE(Seasons.WILD_LIFE, "Spawned {}'s snail", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_MULTIPLE(Seasons.WILD_LIFE, "Spawned snail of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SNAIL_DESPAWN_SINGLE(Seasons.WILD_LIFE, "Despawned {}'s snail", List.of("Player"))
+    ,WILDLIFE_SNAIL_DESPAWN_MULTIPLE(Seasons.WILD_LIFE, "Despawned snail of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SNAIL_SPAWN_PREVENT(Seasons.WILD_LIFE, "Prevented {}'s snail from spawning", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_ALLOW(Seasons.WILD_LIFE, "Allowed {}'s snail to spawn", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_TOGGLE_MULTIPLE(Seasons.WILD_LIFE, "Toggled snail spawn state for {} targets", List.of("number of targets"))
 
     ,PASTLIFE_SESSION_START(Seasons.PAST_LIFE, "§7Past Life session started:\n§7 Type §f\"/pastlife boogeyman\"§7 to have the Boogeyman in this session.\n§7 Type §f\"/pastlife society\"§7 to have the Secret Society in this session.\n§7 Or type §f\"/pastlife pickRandom\"§7 if you want the game to pick randomly.\n")
     ,BOOGEYMAN_PASTLIFE_MESSAGE_PT1(Seasons.PAST_LIFE, "§7You are the boogeyman.")

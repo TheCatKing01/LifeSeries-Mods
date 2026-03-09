@@ -142,6 +142,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,SECRET_SOCIETY_PUNISHMENT_LIVES
                 ,SECRET_SOCIETY_KILLS_REQUIRED
                 ,SECRET_SOCIETY_SOUND_ONLY_MEMBERS
+                ,SECRET_SOCIETY_ADVANCED_DEATHS
 
                 ,PLAYERS_DROP_ITEMS_ON_FINAL_DEATH
                 ,FINAL_DEATH_TITLE_SHOW
@@ -167,9 +168,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
 				
                 ,SUBIN_CHANGE_SKIN
                 ,SUBIN_CHANGE_USERNAME
+                ,LIVES_LIFE_DIFF_MESSAGE
                 ,LIVES_RANDOMIZE
                 ,LIVES_RANDOMIZE_MIN
                 ,LIVES_RANDOMIZE_MAX
+                , LIVES_RANDOMIZE_MINUTE
         ));
     }
 
@@ -198,6 +201,20 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 getOrCreateProperty(entry.key, stringValue);
             }
         }
+    }
+
+    public List<String> getAvailableConfigKeys() {
+        List<String> result = new ArrayList<>();
+        for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.TEXT) continue;
+            if (entry.type == ConfigTypes.GROUP) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            result.add(entry.key);
+        }
+        return result;
     }
 
     public void sendConfigTo(ServerPlayer player) {
@@ -394,6 +411,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
         renamedProperty("wildcard_superpowers_zombies_lose_items", "wildcard_superpowers_zombies_first_spawn_clear_items");
         renamedProperty("boogeyman_message", "text.boogeyman.message");
         renamedProperty("final_death_title_subtitle", "text.final.death.title.subtitle");
+        renamedProperty("text.wildlife.superpowes.dead", "text.wildlife.superpowers.dead");
     }
 
     private void renamedProperty(String from, String to) {
@@ -406,6 +424,15 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
             removeProperty(from);
         }
+    }
+
+    public static void onUpdatedUnknown(String id, String value) {
+        try {
+            onUpdatedBoolean(id, Boolean.parseBoolean(value));
+        }catch(Exception e) {}
+        try {
+            onUpdatedInteger(id, Integer.parseInt(value));
+        }catch(Exception e) {}
     }
 
     public static void onUpdatedBoolean(String id, boolean value) {

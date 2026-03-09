@@ -4,11 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.DefaultConfigValues;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.Session;
+import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
@@ -21,8 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
-import static net.mat0u5.lifeseries.Main.ALLOWED_SEASON_NAMES;
-import static net.mat0u5.lifeseries.Main.currentSeason;
+import static net.mat0u5.lifeseries.Main.*;
 
 public class LifeSeriesCommand extends Command {
 
@@ -66,6 +68,15 @@ public class LifeSeriesCommand extends Command {
                 )
                 .then(literal("config")
                         .executes(context -> config(context.getSource()))
+                        .then(literal("set")
+                                .requires(PermissionManager::isAdmin)
+                                .then(argument("key", StringArgumentType.string())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(seasonConfig.getAvailableConfigKeys(), builder))
+                                        .then(argument("value", StringArgumentType.greedyString())
+                                                .executes(context -> configSet(context.getSource(), StringArgumentType.getString(context, "key"), StringArgumentType.getString(context, "value")))
+                                        )
+                                )
+                        )
                 )
                 .then(literal("wiki")
                         .executes(context -> wiki(context.getSource()))
@@ -185,6 +196,21 @@ public class LifeSeriesCommand extends Command {
         return 1;
     }
 
+    public int configSet(CommandSourceStack source, String key, String value) {
+        if (checkBanned(source)) return -1;
+
+        seasonConfig.setProperty(key, value);
+        ConfigManager.onUpdatedUnknown(key, value);
+
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.CONFIG_SET.get(key));
+
+        NetworkHandlerServer.updatedConfigThisTick = true;
+        if (DefaultConfigValues.RELOAD_NEEDED.contains(key)) {
+            NetworkHandlerServer.configNeedsReload = true;
+        }
+        return 1;
+    }
+
     public int getWorlds(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
         Component worldSavesText = TextUtils.format("§7If you want to play on the exact same world seeds as Grian did, click {}§7 to open a dropbox where you can download the pre-made worlds.", TextUtils.openURLText("https://www.dropbox.com/scl/fo/jk9fhqx0jjbgeo2qa6v5i/AOZZxMx6S7MlS9HrIRJkkX4?rlkey=2khwcnf2zhgi6s4ik01e3z9d0&st=ghw1d8k6&dl=0"));
@@ -236,9 +262,8 @@ public class LifeSeriesCommand extends Command {
 
     public int getCredits(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7The Life Series was originally created by §fGrian§7" +
-                ", and this mod, created by §fMat0u5§7, aims to recreate every single season one-to-one."));
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7This mod uses sounds created by §fOli (TheOrionSound)§7, and uses recreated snail model (first created by §fDanny§7), and a recreated trivia bot model (first created by §fHoffen§7)."));
+        Component text = TextUtils.format("§7Click {}§7 to open the full Life Series Mod Credits", TextUtils.openURLText("https://mat0u5.github.io/LifeSeries-docs/other/credits"));
+        OtherUtils.sendCommandFeedbackQuiet(source, text);
         return 1;
     }
 }

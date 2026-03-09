@@ -106,7 +106,7 @@ public class LimitedLifeConfig extends ConfigManager {
             "Show Time Below Name", "Show the time a player has left below their username."
     );
     public static final ConfigFileEntry<Integer> TIME_RANDOMIZE_INTERVAL = new ConfigFileEntry<>(
-            "time_randomize_interval", Time.hours(1).getSeconds(), ConfigTypes.SECONDS, "global.lives.random[new]",
+            "time_randomize_interval", Time.hours(1).getSeconds(), ConfigTypes.SECONDS, "global.lives.random",
             "Time Randomize Intervals", "The intervals on which the time randomize can land."
     );
 
@@ -192,6 +192,8 @@ public class LimitedLifeConfig extends ConfigManager {
         LIVES_RANDOMIZE_MAX.description = "The minimum number of time any player can have after randomization, in seconds.";
         LIVES_RANDOMIZE_MIN.type = ConfigTypes.SECONDS;
         LIVES_RANDOMIZE_MAX.type = ConfigTypes.SECONDS;
+        LIVES_LIFE_DIFF_MESSAGE.displayName = "Show Time Diff In Death Message";
+        LIVES_LIFE_DIFF_MESSAGE.description = "Shows an indicator of how much time was lost in the death messages.";
         super.instantiateProperties();
     }
 }

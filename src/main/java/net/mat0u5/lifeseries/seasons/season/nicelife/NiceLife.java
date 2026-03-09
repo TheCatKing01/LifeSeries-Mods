@@ -15,7 +15,6 @@ import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -107,6 +106,12 @@ public class NiceLife extends Season {
         Season.setSkyColor(null, false);
         Season.setFogColor(null, false);
         Season.setCloudColor(null, false);
+        ServerLevel overworld = server.overworld();
+        //? if <= 1.21.11 {
+        overworld.setWeatherParameters(96000, 0, false, false);
+        //?} else {
+        /*server.setWeatherParameters(96000, 0, false, false);
+         *///?}
     }
 
     @Override
@@ -355,8 +360,10 @@ public class NiceLife extends Season {
 
     public boolean shouldRedWinter() {
         if (currentSession.statusNotStarted()) return false;
+        List<ServerPlayer> assignedPlayers = PlayerUtils.getAllFunctioningPlayers();
+        assignedPlayers.removeIf(player -> !player.ls$hasAssignedLives());
         List<ServerPlayer> nonRedPlayers = livesManager.getNonRedPlayers();
-        return nonRedPlayers.isEmpty();
+        return !assignedPlayers.isEmpty() && nonRedPlayers.isEmpty();
     }
 
     public void sleepThroughNight() {
@@ -521,6 +528,55 @@ public class NiceLife extends Season {
         return false;
     }
 
+    private static final List<Block> snowReplacableBlocks = List.of(
+        Blocks.SNOW
+        //? if <= 1.20.2 {
+        /*,Blocks.GRASS
+        *///?} else {
+        ,Blocks.SHORT_GRASS
+        //?}
+        ,Blocks.TALL_GRASS
+        ,Blocks.DANDELION
+        ,Blocks.TORCHFLOWER
+        ,Blocks.POPPY
+        ,Blocks.BLUE_ORCHID
+        ,Blocks.ALLIUM
+        ,Blocks.AZURE_BLUET
+        ,Blocks.RED_TULIP
+        ,Blocks.ORANGE_TULIP
+        ,Blocks.WHITE_TULIP
+        ,Blocks.PINK_TULIP
+        ,Blocks.OXEYE_DAISY
+        ,Blocks.CORNFLOWER
+        ,Blocks.WITHER_ROSE
+        ,Blocks.LILY_OF_THE_VALLEY
+
+        ,Blocks.FERN
+        ,Blocks.LARGE_FERN
+        ,Blocks.PINK_PETALS
+        ,Blocks.DEAD_BUSH
+        ,Blocks.SUNFLOWER
+        ,Blocks.ROSE_BUSH
+        ,Blocks.LILAC
+        ,Blocks.PEONY
+        ,Blocks.PITCHER_PLANT
+        ,Blocks.BROWN_MUSHROOM
+        ,Blocks.RED_MUSHROOM
+
+        //? if >= 1.21.5 {
+        ,Blocks.LEAF_LITTER
+        ,Blocks.BUSH
+        ,Blocks.SHORT_DRY_GRASS
+        ,Blocks.TALL_DRY_GRASS
+        ,Blocks.FIREFLY_BUSH
+        ,Blocks.WILDFLOWERS
+        //?}
+        //? if >= 1.21.4 {
+        ,Blocks.CLOSED_EYEBLOSSOM
+        ,Blocks.OPEN_EYEBLOSSOM
+        //?}
+    );
+
     private boolean shouldSnow(ServerLevel level, BlockPos blockPos) {
         boolean darkEnough = level.getBrightness(LightLayer.BLOCK, blockPos) < 10 || !LIGHT_MELTS_SNOW;
         //? if <= 1.21 {
@@ -532,31 +588,7 @@ public class NiceLife extends Season {
         //?}
         if (blockPos.getY() >= minY && blockPos.getY() < maxY && darkEnough) {
             BlockState blockState = level.getBlockState(blockPos);
-            boolean canSnowOverride = blockState.isAir() ||
-                    blockState.is(Blocks.SNOW) ||
-                    //? if <= 1.20.2 {
-                    /*blockState.is(Blocks.GRASS) ||
-                    *///?} else {
-                    blockState.is(Blocks.SHORT_GRASS) ||
-                    //?}
-                    //? if >= 1.21.5 {
-                    blockState.is(Blocks.LEAF_LITTER) ||
-                    //?}
-                    blockState.is(Blocks.TALL_GRASS) ||
-                    blockState.is(Blocks.DANDELION) ||
-                    blockState.is(Blocks.TORCHFLOWER) ||
-                    blockState.is(Blocks.POPPY) ||
-                    blockState.is(Blocks.BLUE_ORCHID) ||
-                    blockState.is(Blocks.ALLIUM) ||
-                    blockState.is(Blocks.AZURE_BLUET) ||
-                    blockState.is(Blocks.RED_TULIP) ||
-                    blockState.is(Blocks.ORANGE_TULIP) ||
-                    blockState.is(Blocks.WHITE_TULIP) ||
-                    blockState.is(Blocks.PINK_TULIP) ||
-                    blockState.is(Blocks.OXEYE_DAISY) ||
-                    blockState.is(Blocks.CORNFLOWER) ||
-                    blockState.is(Blocks.WITHER_ROSE) ||
-                    blockState.is(Blocks.LILY_OF_THE_VALLEY);
+            boolean canSnowOverride = blockState.isAir() ||snowReplacableBlocks.contains(blockState.getBlock());
             if (canSnowOverride && Blocks.SNOW.defaultBlockState().canSurvive(level, blockPos)) {
                 return true;
             }

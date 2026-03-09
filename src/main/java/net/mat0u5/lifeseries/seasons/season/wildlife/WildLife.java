@@ -23,6 +23,7 @@ import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
+import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.minecraft.server.MinecraftServer;
@@ -122,6 +123,20 @@ public class WildLife extends Season {
             }
         }
     }
+
+    @Override
+    public boolean shouldBeInSpectator(ServerPlayer player) {
+        if (!PermissionManager.isAdmin(player)) {
+            if (player.ls$hasAssignedLives() && player.ls$isDead() && !Necromancy.isRessurectedPlayer(player)) {
+                return true;
+            }
+            if (player.ls$isWatcher()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     @Override
@@ -244,8 +259,7 @@ public class WildLife extends Season {
 
         Snails.loadConfig();
         Snails.loadSnailNames();
-        Snails.reloadSnailNames();
-        Snails.reloadSnailSkins();
+        Snails.reloadSnails();
         TriviaWildcard.reload();
     }
 
@@ -397,12 +411,17 @@ public class WildLife extends Season {
     @Override
     public void onPlayerRespawn(ServerPlayer player) {
         super.onPlayerRespawn(player);
-        if (WildcardManager.isActiveWildcard(Wildcards.SNAILS)) {
+        if (!Snails.snails.isEmpty() && Snails.canHaveSnail(player)) {
             Snail snail = Snails.snails.get(player.getUUID());
             if (snail != null && player.distanceTo(snail) <= 15) {
                 snail.serverData.despawn();
                 Snails.spawnSnailFor(player);
             }
         }
+    }
+
+    @Override
+    public void usernameChanged(ServerPlayer player) {
+        Snails.reloadSnails();
     }
 }

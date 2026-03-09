@@ -24,7 +24,7 @@ public class WanderingTraderSpawnerMixin {
     //? if <= 1.21.4 {
     /*public void spawn(ServerLevel level, boolean spawnMonsters, boolean spawnAnimals, CallbackInfoReturnable<Integer> cir) {
         if (!Main.isLogicalSide() || Main.modDisabled()) return;
-        if (seasonConfig != null && seasonConfig.SIMPLE_LIFE.get(seasonConfig)) {
+        if (currentSeason.getSeason() == Seasons.SIMPLE_LIFE) {
             cir.setReturnValue(0);
         }
     }
@@ -34,7 +34,7 @@ public class WanderingTraderSpawnerMixin {
     *///?} else {
     public void spawn(ServerLevel level, boolean spawnMonsters, CallbackInfo ci) {
     //?}
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (seasonConfig != null && seasonConfig.SIMPLE_LIFE.get(seasonConfig)) {
             ci.cancel();
         }

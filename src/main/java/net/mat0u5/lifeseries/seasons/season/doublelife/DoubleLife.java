@@ -1,10 +1,10 @@
 package net.mat0u5.lifeseries.seasons.season.doublelife;
 
-import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.config.StringListConfig;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
+import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
@@ -14,7 +14,6 @@ import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -41,17 +40,20 @@ import static net.mat0u5.lifeseries.Main.*;
 import net.minecraft.world.level.gamerules.GameRules;
 
 public class DoubleLife extends Season {
-    public static final ResourceKey<DamageType> SOULMATE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,  IdentifierHelper.mod("soulmate"));
+    public static final String SOULMATE_DAMAGE_IDENTIFIER_NAME = "soulmate";
+    public static final ResourceKey<DamageType> SOULMATE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,  IdentifierHelper.mod(SOULMATE_DAMAGE_IDENTIFIER_NAME));
     StringListConfig soulmateConfig;
     public boolean ANNOUNCE_SOULMATES = false;
     public boolean SOULBOUND_FOOD = false;
     public boolean SOULBOUND_EFFECTS = false;
     public boolean SOULBOUND_INVENTORIES = false;
+    public boolean SOULBOUND_LIVES = true;
     public static boolean SOULBOUND_BOOGEYMAN = false;
     public boolean BREAKUP_LAST_PAIR_STANDING = false;
     public boolean DISABLE_START_TELEPORT = false;
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
+    public double SOULMATES_ASSIGN_MINUTE = 1;
 
     public Map<UUID, UUID> soulmates = new TreeMap<>();
     public Map<UUID, UUID> soulmatesOrdered = new TreeMap<>();
@@ -62,6 +64,11 @@ public class DoubleLife extends Season {
     public void initialize() {
         super.initialize();
         soulmateConfig = getSoulmateConfig();
+    }
+
+    @Override
+    public LivesManager createLivesManager() {
+        return new DoubleLifeLivesManager();
     }
 
     public StringListConfig getSoulmateConfig() {
@@ -93,7 +100,10 @@ public class DoubleLife extends Season {
     public void onPlayerJoin(ServerPlayer player) {
         super.onPlayerJoin(player);
 
-        if (player == null) return;
+        if (player.ls$isWatcher()) {
+            resetSoulmate(player);
+        }
+
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
 
@@ -103,7 +113,7 @@ public class DoubleLife extends Season {
     @Override
     public void addSessionActions() {
         super.addSessionActions();
-        currentSession.addSessionAction(new SessionAction(Time.minutes(1), ModifiableText.SESSION_ACTION_ASSIGN_SOULMATES.getString()) {
+        currentSession.addSessionAction(new SessionAction(Time.minutes(SOULMATES_ASSIGN_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_SOULMATES.getString()) {
             @Override
             public void trigger() {
                 rollSoulmates();
@@ -144,6 +154,8 @@ public class DoubleLife extends Season {
         DISABLE_START_TELEPORT = DoubleLifeConfig.DISABLE_START_TELEPORT.get();
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get();
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get();
+        SOULMATES_ASSIGN_MINUTE = DoubleLifeConfig.SOULMATES_ASSIGN_MINUTE.get();
+        SOULBOUND_LIVES = DoubleLifeConfig.SOULBOUND_LIVES.get();
         syncAllPlayers();
     }
 
@@ -334,7 +346,7 @@ public class DoubleLife extends Season {
     public List<ServerPlayer> getNonAssignedPlayers() {
         List<ServerPlayer> playersToRoll = new ArrayList<>();
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
-            if (player.ls$isDead()) continue;
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) continue;
             if (hasSoulmate(player)) continue;
             playersToRoll.add(player);
         }
@@ -534,14 +546,16 @@ public class DoubleLife extends Season {
                 soulmate.setHealth(sharedHealth);
             }
         }
-        
-        Integer soulmateLives = soulmate.ls$getLives();
-        Integer playerLives = player.ls$getLives();
-        if (soulmateLives != null && playerLives != null)  {
-            if (!Objects.equals(soulmateLives, playerLives)) {
-                int minLives = Math.min(soulmateLives,playerLives);
-                player.ls$setLives(minLives);
-                soulmate.ls$setLives(minLives);
+
+        if (SOULBOUND_LIVES) {
+            Integer soulmateLives = soulmate.ls$getLives();
+            Integer playerLives = player.ls$getLives();
+            if (soulmateLives != null && playerLives != null)  {
+                if (!Objects.equals(soulmateLives, playerLives)) {
+                    int minLives = Math.min(soulmateLives,playerLives);
+                    player.ls$setLives(minLives);
+                    soulmate.ls$setLives(minLives);
+                }
             }
         }
 
@@ -550,6 +564,7 @@ public class DoubleLife extends Season {
     }
 
     public void syncSoulboundLives(ServerPlayer player) {
+        if (!SOULBOUND_LIVES) return;
         if (player == null) return;
         Integer lives = player.ls$getLives();
         ServerPlayer soulmate = getSoulmate(player);

@@ -279,6 +279,7 @@ public abstract class Season {
         DatapackIntegration.reload();
         PlayerUtils.resendCommandTrees();
         SubInManager.reload();
+        LifeSkinsManager.reloadSkinsCache();
     }
 
     public static void setSkyColor(Vec3 color, boolean setMode) {
@@ -304,6 +305,7 @@ public abstract class Season {
         for (Command command : CommandManager.commands) {
             if (!command.isAllowed()) continue;
             for (String commandStr : command.getAdminCommands()) {
+                if (commandStr.isEmpty()) continue;
                 allCommands.add("/"+commandStr);
             }
         }
@@ -639,7 +641,18 @@ public abstract class Season {
         boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
 
         if (!isAllowedToAttack(killer, victim) && !HIDE_UNJUSTIFIED_KILL_MESSAGES) {
-            PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
+            if (livesManager.SHOW_LIFE_DIFF) {
+                TaskScheduler.schedulePriorityTask(1, () -> {
+                    PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
+                });
+            }
+            else {
+                PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
+            }
+            DatapackIntegration.EVENT_UNJUSTIFIED_KILL.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+            ));
         }
 
         if (isBoogeyCure) {
@@ -729,14 +742,8 @@ public abstract class Season {
         if (!player.ls$hasAssignedLives()) {
             assignDefaultLives(player);
         }
-        if (player.ls$hasAssignedLives() && player.ls$isDead() && !PermissionManager.isAdmin(player)) {
+        if (shouldBeInSpectator(player)) {
             player.setGameMode(GameType.SPECTATOR);
-        }
-
-        if (player.ls$isWatcher()) {
-            if (this instanceof DoubleLife doubleLife) {
-                doubleLife.resetSoulmate(player);
-            }
         }
 
         TaskScheduler.scheduleTask(1, () -> {
@@ -747,6 +754,18 @@ public abstract class Season {
                 SubInManager.reloadPlayerProfile(player);
             }
         });
+    }
+
+    public boolean shouldBeInSpectator(ServerPlayer player) {
+        if (!PermissionManager.isAdmin(player)) {
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) {
+                return true;
+            }
+            if (player.ls$isWatcher()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void assignDefaultLives(ServerPlayer player) {
@@ -787,5 +806,9 @@ public abstract class Season {
         if (blacklist != null) {
             blacklist.onInventoryUpdated(player);
         }
+    }
+
+    public void usernameChanged(ServerPlayer player) {
+
     }
 }
