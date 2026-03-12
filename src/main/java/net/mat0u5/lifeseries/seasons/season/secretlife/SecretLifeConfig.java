@@ -23,7 +23,7 @@ public class SecretLifeConfig extends ConfigManager {
             "netherite_helmet",
             "turtle_helmet",
             //? if >= 1.21.9
-            /*"copper_helmet",*/
+            "copper_helmet",
             "elytra"
     );
 
@@ -121,6 +121,22 @@ public class SecretLifeConfig extends ConfigManager {
             "group_health", null, ConfigTypes.TEXT, "{season.health}",
             "Health Rewards / Punishments", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_TASKS = new ConfigFileEntry<>(
+            "group_tasks", null, ConfigTypes.TEXT, "{season.tasks}",
+            "Tasks", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TASKS_EASY = new ConfigFileEntry<>(
+            "group_tasks_easy", null, ConfigTypes.TEXT, "{season.tasks.easy}",
+            "Easy Tasks", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TASKS_HARD = new ConfigFileEntry<>(
+            "group_tasks_hard", null, ConfigTypes.TEXT, "{season.tasks.hard}",
+            "Hard Tasks", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TASKS_RED = new ConfigFileEntry<>(
+            "group_tasks_red", null, ConfigTypes.TEXT, "{season.tasks.red}",
+            "Red Tasks", ""
+    );
 
 
     public SecretLifeConfig() {
@@ -139,6 +155,10 @@ public class SecretLifeConfig extends ConfigManager {
                 ,TASKS_NEED_CONFIRMATION
 
                 ,GROUP_HEALTH //Group
+                ,GROUP_TASKS
+                    ,GROUP_TASKS_EASY
+                    ,GROUP_TASKS_HARD
+                    ,GROUP_TASKS_RED
 
                 //Group stuff
                 ,ONLY_LOSE_HEARTS_IN_SESSION
@@ -155,7 +175,7 @@ public class SecretLifeConfig extends ConfigManager {
     public void instantiateProperties() {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         MAX_PLAYER_HEALTH.defaultValue = 60;
         SPAWN_EGG_ALLOW_ON_SPAWNER.defaultValue = true;
         SPAWNER_RECIPE.defaultValue = true;

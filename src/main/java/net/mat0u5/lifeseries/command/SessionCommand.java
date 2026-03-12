@@ -3,9 +3,10 @@ package net.mat0u5.lifeseries.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
@@ -135,23 +136,23 @@ public class SessionCommand extends Command {
 
         Time pauseAt = OtherUtils.parseTimeFromArgument(timeArgument1);
         if (pauseAt == null || !pauseAt.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
         Time pauseFor = OtherUtils.parseTimeFromArgument(timeArgument2);
         if (pauseFor == null || !pauseFor.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("The session will pause at {} for {}", pauseAt.formatLong(), pauseFor.formatLong()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_PAUSE_QUEUE.get(pauseAt.formatLong(), pauseFor.formatLong()));
         currentSession.queuePause(pauseAt, pauseFor);
         return 1;
     }
 
     public int pauseQueueReset(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Reset all queued pauses"));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_PAUSE_QUEUE_RESET.get());
 
         currentSession.discardAllQueuedPauses();
         return 1;
@@ -161,10 +162,10 @@ public class SessionCommand extends Command {
         if (checkBanned(source)) return -1;
 
         if (!currentSession.validTime()) {
-            source.sendFailure(Component.nullToEmpty("The session time has not been set yet"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_ERROR_TIME_UNSET.get());
             return -1;
         }
-        OtherUtils.sendCommandFeedbackQuiet(source, TextUtils.format("The session ends in {}",currentSession.getRemainingTimeStr()));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.SESSION_END_INFO.get(currentSession.getRemainingTimeStr()));
         return 1;
     }
 
@@ -174,7 +175,7 @@ public class SessionCommand extends Command {
 
         if (self == null) return -1;
         if (NetworkHandlerServer.wasHandshakeSuccessful(self)) {
-            NetworkHandlerServer.sendStringPacket(self, PacketNames.TOGGLE_TIMER, "");
+            SimplePackets.TOGGLE_TIMER.target(self).sendToClient();
         }
 
         boolean isInDisplayTimer = currentSession.isInDisplayTimer(self);
@@ -187,22 +188,22 @@ public class SessionCommand extends Command {
         if (checkBanned(source)) return -1;
 
         if (!currentSession.validTime()) {
-            source.sendFailure(Component.nullToEmpty("The session time is not set! Use '/session timer set <time>' to set the session time."));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_ERROR_TIME_UNSET.get());
             return -1;
         }
         if (currentSession.statusStarted()) {
-            source.sendFailure(Component.nullToEmpty("The session has already started"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_ERROR_STARTED.get());
             return -1;
         }
         if (currentSession.statusPaused()) {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Unpausing session..."));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_UNPAUSING.get());
             currentSession.sessionPause();
             return 1;
         }
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Starting session..."));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_STARTING.get());
         if (!currentSession.sessionStart()) {
-            source.sendFailure(Component.nullToEmpty("Could not start session"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_START_FAIL.get());
             return -1;
         }
 
@@ -213,11 +214,11 @@ public class SessionCommand extends Command {
         if (checkBanned(source)) return -1;
 
         if (currentSession.statusNotStarted() || currentSession.statusFinished()) {
-            source.sendFailure(Component.nullToEmpty("The session has not yet started"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_ERROR_NOTSTARTED.get());
             return -1;
         }
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Stopping session..."));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_STOPPING.get());
         currentSession.sessionEnd();
         return 1;
     }
@@ -226,16 +227,16 @@ public class SessionCommand extends Command {
         if (checkBanned(source)) return -1;
 
         if (currentSession.statusNotStarted() || currentSession.statusFinished()) {
-            source.sendFailure(Component.nullToEmpty("The session has not yet started"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.SESSION_ERROR_NOTSTARTED.get());
             return -1;
         }
 
         if (currentSession.statusPaused()) {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Unpausing session..."));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_UNPAUSING.get());
             currentSession.sessionPause();
         }
         else {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Pausing session..."));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_PAUSING.get());
             currentSession.queuePause(currentSession.getPassedTime(), Time.hours(10_000));
         }
 
@@ -247,10 +248,10 @@ public class SessionCommand extends Command {
 
         Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
         if (timeTotal == null || !timeTotal.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Skipped {} in the session length", timeTotal.formatLong()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_SKIP.get(timeTotal.formatLong()));
         currentSession.passTime(timeTotal);
         return 1;
     }
@@ -260,12 +261,12 @@ public class SessionCommand extends Command {
 
         Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
         if (timeTotal == null || !timeTotal.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
         currentSession.setSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("The session length has been set to {}", timeTotal.formatLong()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_LENGTH_SET.get(timeTotal.formatLong()));
         return 1;
     }
 
@@ -274,12 +275,12 @@ public class SessionCommand extends Command {
 
         Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
         if (timeTotal == null || !timeTotal.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
         currentSession.addSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {} to the session length", timeTotal.formatLong()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_LENGTH_ADD.get(timeTotal.formatLong()));
         return 1;
     }
 
@@ -288,12 +289,12 @@ public class SessionCommand extends Command {
 
         Time timeTotal = OtherUtils.parseTimeFromArgument(timeArgument);
         if (timeTotal == null || !timeTotal.isPresent()) {
-            source.sendFailure(Component.literal(INVALID_TIME_FORMAT_ERROR));
+            OtherUtils.sendCommandFailure(source, Component.literal(INVALID_TIME_FORMAT_ERROR));
             return -1;
         }
         currentSession.removeSessionLength(timeTotal);
 
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {} from the session length", timeTotal.formatLong()));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.SESSION_LENGTH_REMOVE.get(timeTotal.formatLong()));
         return 1;
     }
 }

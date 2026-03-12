@@ -1,9 +1,10 @@
 package net.mat0u5.lifeseries.seasons.season.doublelife;
 
-import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.config.StringListConfig;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
+import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
@@ -13,7 +14,6 @@ import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -35,18 +35,20 @@ import java.util.*;
 import static net.mat0u5.lifeseries.Main.*;
 
 //? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.GameRules;
 //? if > 1.21.9
-/*import net.minecraft.world.level.gamerules.GameRules;*/
+import net.minecraft.world.level.gamerules.GameRules;
 
 public class DoubleLife extends Season {
-    public static final ResourceKey<DamageType> SOULMATE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,  IdentifierHelper.mod("soulmate"));
+    public static final String SOULMATE_DAMAGE_IDENTIFIER_NAME = "soulmate";
+    public static final ResourceKey<DamageType> SOULMATE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,  IdentifierHelper.mod(SOULMATE_DAMAGE_IDENTIFIER_NAME));
     StringListConfig soulmateConfig;
     public boolean ANNOUNCE_SOULMATES = false;
     public boolean SOULBOUND_FOOD = false;
     public boolean SOULBOUND_EFFECTS = false;
     public boolean SOULBOUND_INVENTORIES = false;
     public boolean SPLIT_SOULMATES_WHEN_RED = false;
+    public boolean SOULBOUND_LIVES = true;
     public static boolean SOULBOUND_BOOGEYMAN = false;
     public boolean BREAKUP_LAST_PAIR_STANDING = false;
     public boolean DISABLE_START_TELEPORT = false;
@@ -80,6 +82,7 @@ public class DoubleLife extends Season {
             distributePlayers();
         }
     };
+    public double SOULMATES_ASSIGN_MINUTE = 1;
 
     public Map<UUID, UUID> soulmates = new TreeMap<>();
     public Map<UUID, UUID> soulmatesOrdered = new TreeMap<>();
@@ -91,6 +94,11 @@ public class DoubleLife extends Season {
     public void initialize() {
         super.initialize();
         soulmateConfig = getSoulmateConfig();
+    }
+
+    @Override
+    public LivesManager createLivesManager() {
+        return new DoubleLifeLivesManager();
     }
 
     public StringListConfig getSoulmateConfig() {
@@ -122,7 +130,10 @@ public class DoubleLife extends Season {
     public void onPlayerJoin(ServerPlayer player) {
         super.onPlayerJoin(player);
 
-        if (player == null) return;
+        if (player.ls$isWatcher()) {
+            resetSoulmate(player);
+        }
+
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
 
@@ -132,9 +143,19 @@ public class DoubleLife extends Season {
     @Override
     public void addSessionActions() {
         super.addSessionActions();
-        currentSession.addSessionAction(actionChooseSoulmates);
+        currentSession.addSessionAction(new SessionAction(Time.minutes(SOULMATES_ASSIGN_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_SOULMATES.getString()) {
+            @Override
+            public void trigger() {
+                rollSoulmates();
+            }
+        });
         if (!DISABLE_START_TELEPORT) {
-            currentSession.addSessionAction(actionRandomTP);
+            currentSession.addSessionAction(new SessionAction(Time.ticks(5), ModifiableText.SESSION_ACTION_RANDOM_TP.getString()) {
+                @Override
+                public void trigger() {
+                    distributePlayers();
+                }
+            });
         }
     }
 
@@ -153,7 +174,7 @@ public class DoubleLife extends Season {
 
     @Override
     public void reload() {
-        SOULMATE_LOCATOR_BAR = DoubleLifeConfig.SOULMATE_LOCATOR_BAR.get(seasonConfig);
+        SOULMATE_LOCATOR_BAR = DoubleLifeConfig.SOULMATE_LOCATOR_BAR.get();
         super.reload();
         ANNOUNCE_SOULMATES = DoubleLifeConfig.ANNOUNCE_SOULMATES.get(seasonConfig);
         SOULBOUND_FOOD = DoubleLifeConfig.SOULBOUND_FOOD.get(seasonConfig);
@@ -217,7 +238,11 @@ public class DoubleLife extends Season {
 
     public void removeSoulmateTags() {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            //? if <= 1.21.11 {
             List<String> tagsCopy = new ArrayList<>(player.getTags());
+            //?} else {
+            /*List<String> tagsCopy = new ArrayList<>(player.entityTags());
+            *///?}
             for (String tag : tagsCopy) {
                 if (tag.startsWith("soulmate_")) {
                     player.removeTag(tag);
@@ -337,17 +362,17 @@ public class DoubleLife extends Season {
     public void rollSoulmates() {
         List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("3").withStyle(ChatFormatting.GREEN),5,20,5);
+        PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(),5,20,5);
         TaskScheduler.scheduleTask(25, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("2").withStyle(ChatFormatting.GREEN),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_2.get(),5,20,5);
         });
         TaskScheduler.scheduleTask(50, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("1").withStyle(ChatFormatting.GREEN),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_1.get(),5,20,5);
         });
         TaskScheduler.scheduleTask(75, () -> {
-            PlayerUtils.sendTitleToPlayers(playersToRoll, Component.literal("Your soulmate is...").withStyle(ChatFormatting.GREEN),10,50,20);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(),10,50,20);
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
 		TaskScheduler.scheduleTask(165, () -> {
@@ -390,6 +415,18 @@ public class DoubleLife extends Season {
                 ServerPlayer player = playerEntry.getKey();
                 Component textLives = livesManager.getFormattedLives(livesNum);
                 PlayerUtils.sendTitle(player, textLives, 0, 25, 0);
+        TaskScheduler.scheduleTask(165, () -> {
+            chooseRandomSoulmates();
+            for (ServerPlayer player : playersToRoll) {
+                Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
+                if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
+                    ServerPlayer soulmate = getSoulmate(player);
+                    if (soulmate != null) {
+                        text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_PLAYER.get(soulmate);
+                    }
+                }
+                PlayerUtils.sendTitle(player, text,20,60,20);
+                PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
             PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
         });
@@ -427,6 +464,12 @@ public class DoubleLife extends Season {
                 PlayerUtils.sendTitleToPlayers(players, livesManager.getFormattedLives(lives), 0, 25, 0);
                 PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
             });
+    public List<ServerPlayer> getNonAssignedPlayers() {
+        List<ServerPlayer> playersToRoll = new ArrayList<>();
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) continue;
+            if (hasSoulmate(player)) continue;
+            playersToRoll.add(player);
         }
 
         return currentDelay;
@@ -554,11 +597,11 @@ public class DoubleLife extends Season {
 
         for (ServerPlayer player : players) {
             player.addTag("randomTeleport");
-            player.sendSystemMessage(Component.nullToEmpty("§6Woosh!"));
+            player.ls$message(ModifiableText.DOUBLELIFE_TELEPORT.get());
         }
         WorldBorder border = server.overworld().getWorldBorder();
         OtherUtils.executeCommand(TextUtils.formatString("spreadplayers {} {} 0 {} false @a[tag=randomTeleport]", border.getCenterX(), border.getCenterZ(), (border.getSize()/2)));
-        PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("Randomly distributed players."));
+        PlayerUtils.broadcastMessageToAdmins(ModifiableText.DOUBLELIFE_TELEPORT_SUCCESS.get());
 
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
             player.removeTag("randomTeleport");
@@ -606,7 +649,7 @@ public class DoubleLife extends Season {
         saveSoulmates();
 
         for (ServerPlayer remaining : getNonAssignedPlayers()) {
-            PlayerUtils.broadcastMessageToAdmins(Component.literal("[Double Life] ").append(remaining.getDisplayName()).append(" was not paired with anyone."));
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.DOUBLELIFE_UNPAIRED.get(remaining.getDisplayName()));
         }
         soulmatesForce.clear();
         soulmatesPrevent.clear();
@@ -657,14 +700,14 @@ public class DoubleLife extends Season {
 
         if (soulmate.hurtTime == 0) {
             //? if <=1.21 {
-            DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
+            /*DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
                     .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
             soulmate.hurt(damageSource, 0.0000001F);
-            //?} else {
-            /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
+            *///?} else {
+            DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
                     .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
             soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 0.0000001F);
-            *///?}
+            //?}
         }
 
         float newHealth = player.getHealth();
@@ -779,6 +822,37 @@ public class DoubleLife extends Season {
         } finally {
             processingLinkedDeath.remove(playerId);
         }
+        if (soulmate == null) return;
+        if (!soulmate.isAlive()) return;
+        //? if <= 1.21.9 {
+        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+        *///?} else {
+        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+        //?}
+        if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
+            soulmate.getInventory().clearContent();
+        }
+
+        //? if <=1.21 {
+        /*DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
+                .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
+        soulmate.setLastHurtByMob(player);
+        soulmate.setLastHurtByPlayer(player);
+        soulmate.hurt(damageSource, 1000);
+         *///?} else {
+        DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
+                .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
+        soulmate.setLastHurtByMob(player);
+        //? if <= 1.21.4 {
+        /*soulmate.setLastHurtByPlayer(player);
+        *///?} else {
+        soulmate.setLastHurtByPlayer(player, 100);
+        //?}
+        soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
+        //?}
+
+
+        TaskScheduler.scheduleTask(1, this::checkForEnding);
     }
 
     public void syncAllPlayers() {
@@ -804,6 +878,7 @@ public class DoubleLife extends Season {
         }
 
         if (SOULMATES_SHARE_LIVES) {
+        if (SOULBOUND_LIVES) {
             Integer soulmateLives = soulmate.ls$getLives();
             Integer playerLives = player.ls$getLives();
             if (soulmateLives != null && playerLives != null)  {
@@ -839,6 +914,16 @@ public class DoubleLife extends Season {
 			lastKnownLives.put(player.getUUID(), now);
 		}
 	}
+    public void syncSoulboundLives(ServerPlayer player) {
+        if (!SOULBOUND_LIVES) return;
+        if (player == null) return;
+        Integer lives = player.ls$getLives();
+        ServerPlayer soulmate = getSoulmate(player);
+        if (lives == null) return;
+        if (soulmate == null) return;
+        if (!player.isAlive() || !soulmate.isAlive()) return;
+        soulmate.ls$setLives(lives);
+    }
 
     public void canFoodHeal(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         boolean orig =  player.getHealth() > 0.0F && player.getHealth() < player.getMaxHealth();
@@ -960,15 +1045,15 @@ public class DoubleLife extends Season {
 
     public List<ItemStack> getPlayerInventory(Inventory inventory) {
         //? if <= 1.21.4 {
-        List<ItemStack> result = new ArrayList<>(inventory.items);
+        /*List<ItemStack> result = new ArrayList<>(inventory.items);
         result.addAll(inventory.armor);
         result.addAll(inventory.offhand);
-        //?} else {
-        /*List<ItemStack> result = new ArrayList<>(inventory.getNonEquipmentItems());
+        *///?} else {
+        List<ItemStack> result = new ArrayList<>(inventory.getNonEquipmentItems());
         for (int i = result.size(); i < inventory.getContainerSize(); i++) {
             result.add(inventory.getItem(i));
         }
-        *///?}
+        //?}
         return result;
     }
 
@@ -1061,10 +1146,10 @@ public class DoubleLife extends Season {
 					resetSoulmatePair(player1);
                     List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
                     TaskScheduler.scheduleTask(Time.seconds(10), () -> {
-                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§aYour fate is your own..."), 20, 40, 20);
+                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, ModifiableText.DOUBLELIFE_LASTPAIR_PT1_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT1_SUBTITLE.get(), 20, 40, 20);
                     });
                     TaskScheduler.scheduleTask(Time.seconds(15), () -> {
-                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, Component.empty(), Component.nullToEmpty("§cThere can only be one winner."), 20, 40, 20);
+                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, ModifiableText.DOUBLELIFE_LASTPAIR_PT2_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT2_SUBTITLE.get(), 20, 40, 20);
                     });
                     TaskScheduler.scheduleTask(Time.seconds(19), () -> {
                         LevelUtils.summonHarmlessLightning(player1);
@@ -1135,4 +1220,10 @@ public class DoubleLife extends Season {
 		}
 	}
 
+}
+    @Override
+    public void tryKillLifeGain(ServerPlayer killer, ServerPlayer victim) {
+        super.tryKillLifeGain(killer, victim);
+        syncSoulboundLives(killer);
+    }
 }

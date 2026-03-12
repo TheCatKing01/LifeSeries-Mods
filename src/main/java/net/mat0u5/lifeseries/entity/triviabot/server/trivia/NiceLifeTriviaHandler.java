@@ -1,11 +1,13 @@
 package net.mat0u5.lifeseries.entity.triviabot.server.trivia;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeVotingManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestion;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
@@ -46,9 +48,9 @@ import net.minecraft.world.item.component.CustomData;
 //?}
 
 //? if >= 1.21.9 {
-/*import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.TypedEntityData;
-*///?}
+//?}
 
 public class NiceLifeTriviaHandler extends TriviaHandler {
     public static ItemSpawner itemSpawner;
@@ -142,7 +144,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
             if (bot.interactedWith() && getRemainingTicks() <= 0) {
                 if (!bot.ranOutOfTime()) {
                     if (boundPlayer != null) {
-                        NetworkHandlerServer.sendStringPacket(boundPlayer, PacketNames.RESET_TRIVIA, "true");
+                        SimplePackets.RESET_TRIVIA.target(boundPlayer).sendToClient();
                     }
                     TaskScheduler.scheduleTask(40, () -> {
                         bot.setSubmittedAnswer(true);
@@ -280,7 +282,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         sameStateTime.tick();
         bot.setDeltaMovement(0, 0, 0);
         turnToBed(20);
-        if (sameStateTime.isLarger(NiceLifeVotingManager.VOTING_TIME.copy().add(Time.seconds(35)))) {
+        if (sameStateTime.getSeconds() >= NiceLifeTriviaManager.QUESTION_TIME + 35) {
             changeStateTo(BotState.LEAVING);
         }
     }
@@ -339,9 +341,9 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         turnToBed(20);
         bot.setDeltaMovement(0, 0, 0);
         Time remainingVotingTime = NiceLifeVotingManager.VOTING_TIME.diff(sameStateTime);
-        NetworkHandlerServer.sendNumberPacket(bot.serverData.getBoundPlayer(), PacketNames.VOTING_TIME, remainingVotingTime.getSeconds());
+        SimplePackets.VOTING_TIME.target(bot.serverData.getBoundPlayer()).sendToClient(remainingVotingTime.getSeconds());
         if (sameStateTime.isLarger(NiceLifeVotingManager.VOTING_TIME)) {
-            NetworkHandlerServer.sendNumberPacket(bot.serverData.getBoundPlayer(), PacketNames.VOTING_TIME, 0);
+            SimplePackets.VOTING_TIME.target(bot.serverData.getBoundPlayer()).sendToClient(0);
             changeStateTo(BotState.LEAVING);
         }
     }
@@ -366,7 +368,7 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
             });
         }
         if (newState == BotState.FLYING_UP) {
-            NetworkHandlerServer.sendStringPacket(bot.serverData.getBoundPlayer(), PacketNames.HIDE_SLEEP_DARKNESS, "false");
+            SimplePackets.HIDE_SLEEP_DARKNESS.target(bot.serverData.getBoundPlayer()).sendToClient(false);
             SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_away"));
             PlayerUtils.playSoundToPlayer(bot.serverData.getBoundPlayer(), sound, 0.65f, 1);
         }
@@ -412,13 +414,6 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         if (voteType != NiceLifeVotingManager.VoteType.NICE_LIST && voteType != NiceLifeVotingManager.VoteType.NAUGHTY_LIST) return false;
         List<String> availableForVoting = new ArrayList<>();
 
-        // The first element of the list is the voting name.
-        if (voteType == NiceLifeVotingManager.VoteType.NICE_LIST) {
-            availableForVoting.add("Vote for who's been nice");
-        }
-        else {
-            availableForVoting.add("Vote for who's been naughty");
-        }
 
         for (ServerPlayer player : livesManager.getAlivePlayers()) {
             if (voteType == NiceLifeVotingManager.VoteType.NICE_LIST) {
@@ -432,9 +427,10 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
                 }
             }
         }
-        if (availableForVoting.size() <= 1) return false;
+        if (availableForVoting.isEmpty()) return false;
 
-        NetworkHandlerServer.sendStringListPacket(boundPlayer, PacketNames.VOTING_SCREEN, availableForVoting);
+        String screenName = (voteType == NiceLifeVotingManager.VoteType.NICE_LIST) ? ModifiableText.NICELIFE_TRIVIA_VOTE_NICELIST.getString() : ModifiableText.NICELIFE_TRIVIA_VOTE_NAUGHTYLIST.getString();
+        NetworkHandlerServer.sendVoteScreenPacket(boundPlayer, screenName, true, false, true, availableForVoting);
         NiceLifeVotingManager.allowedToVote.add(boundPlayer.getUUID());
         //TODO add the voting sound - "nicelife_santabot_vote"
         SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_santabot_suspense"));
@@ -466,10 +462,10 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         if (bot.serverData.getBoundPlayer() == null) return;
         Vec3 pos = bot.position().add(0,1,0);
         //? if <= 1.21 {
-        Vec3 towardsArm = Vec3.atLowerCornerOf(spawnInfo.bedDirection().getCounterClockWise().getNormal());
-        //?} else {
-        /*Vec3 towardsArm = spawnInfo.bedDirection().getCounterClockWise().getUnitVec3();
-        *///?}
+        /*Vec3 towardsArm = Vec3.atLowerCornerOf(spawnInfo.bedDirection().getCounterClockWise().getNormal());
+        *///?} else {
+        Vec3 towardsArm = spawnInfo.bedDirection().getCounterClockWise().getUnitVec3();
+        //?}
         pos = pos.add(towardsArm.scale(0.6));
         Vec3 playerPos = bot.serverData.getBoundPlayer().position().add(towardsArm.scale(0.3));
 
@@ -576,8 +572,8 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         itemSpawner.addItem(mace, 5);
         //?}
         //? if >= 1.21.6 {
-        /*itemSpawner.addItem(new ItemStack(Items.DRIED_GHAST, 1), 10);
-        *///?}
+        itemSpawner.addItem(new ItemStack(Items.DRIED_GHAST, 1), 10);
+        //?}
 
         ItemStack endCrystal = new ItemStack(Items.END_CRYSTAL);
         ItemStackUtils.setCustomComponentBoolean(endCrystal, "IgnoreBlacklist", true);
@@ -602,17 +598,17 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         nbtCompCamel.putString("id", "camel");
 
         //? if <= 1.21.4 {
-        CompoundTag saddleItemComp = new CompoundTag();
+        /*CompoundTag saddleItemComp = new CompoundTag();
         saddleItemComp.putInt("Count", 1);
         saddleItemComp.putString("id", "saddle");
         nbtCompCamel.put("SaddleItem", saddleItemComp);
-        //?} else {
-        /*CompoundTag equipmentItemComp = new CompoundTag();
+        *///?} else {
+        CompoundTag equipmentItemComp = new CompoundTag();
         CompoundTag saddleItemComp = new CompoundTag();
         saddleItemComp.putString("id", "saddle");
         equipmentItemComp.put("saddle", saddleItemComp);
         nbtCompCamel.put("equipment", equipmentItemComp);
-        *///?}
+        //?}
 
 
         //? if < 1.20.5 {
@@ -622,10 +618,10 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
         //?}
 
         //? if >=1.20.5 && <= 1.21.6 {
-        camel.set(DataComponents.ENTITY_DATA, nbtCamel);
-        //?} else if > 1.21.6 {
-        /*camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.CAMEL, nbtCamel.copyTag()));
-        *///?}
+        /*camel.set(DataComponents.ENTITY_DATA, nbtCamel);
+        *///?} else if > 1.21.6 {
+        camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.CAMEL, nbtCamel.copyTag()));
+        //?}
         itemSpawner.addItem(camel, 10);
     }
 }

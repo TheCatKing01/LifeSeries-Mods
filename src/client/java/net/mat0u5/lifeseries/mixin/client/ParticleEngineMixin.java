@@ -1,23 +1,22 @@
 package net.mat0u5.lifeseries.mixin.client;
 
 //? if < 1.21.9 {
-import net.minecraft.server.MinecraftServer;
+/*import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = MinecraftServer.class)
 public class ParticleEngineMixin {
     //Empty class to avoid mixin errors
 }
-//?} else {
+*///?} else {
 
-/*import net.mat0u5.lifeseries.particle.TriviaSpiritParticle;
+import net.mat0u5.lifeseries.particle.TriviaSpiritParticle;
 import net.mat0u5.lifeseries.particle.TriviaSpiritParticleGroup;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.state.ParticlesRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,6 +25,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
+
+//? if <= 1.21.11 {
+import net.minecraft.client.renderer.state.ParticlesRenderState;
+//?} else {
+/*import net.minecraft.client.renderer.state.level.ParticlesRenderState;
+*///?}
 
 @Mixin(value = ParticleEngine.class)
 public abstract class ParticleEngineMixin {
@@ -48,4 +53,4 @@ public abstract class ParticleEngineMixin {
         }
     }
 }
-*///?}
+//?}

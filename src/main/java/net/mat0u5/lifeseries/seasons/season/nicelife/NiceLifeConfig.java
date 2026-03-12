@@ -73,6 +73,14 @@ public class NiceLifeConfig extends ConfigManager {
             "freeze_time_at_midnight", true, "season",
             "Freeze Time At Midnight", "Controls whether time freezes at midnight."
     );
+    public static final ConfigFileEntry<Boolean> SLEEP_BEFORE_MIDNIGHT = new ConfigFileEntry<>(
+            "sleep_before_midnight", false, "season",
+            "Allow Sleeping Before Midnight", "Controls whether players can sleep before midnight."
+    );
+    public static final ConfigFileEntry<Boolean> FREEZE_TIME_WHILE_SLEEPING = new ConfigFileEntry<>(
+            "freeze_time_while_sleeping", false, "season",
+            "Freeze Time While Sleeping", "Controls whether sleeping freezes time."
+    );
 
     public static final ConfigFileEntry<Boolean> SNOWY_NETHER = new ConfigFileEntry<>(
             "snowy_nether", true, "season",
@@ -119,6 +127,10 @@ public class NiceLifeConfig extends ConfigManager {
             "group_voting", null, ConfigTypes.TEXT, "{season.voting}",
             "Voting", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
+            "group_trivia_questions", null, ConfigTypes.TEXT, "{season.trivia.questions}",
+            "Trivia Questions", ""
+    );
 
     public NiceLifeConfig() {
         super("./config/"+ Main.MOD_ID,"nicelife.properties");
@@ -139,9 +151,10 @@ public class NiceLifeConfig extends ConfigManager {
                         MIDNIGHT_CHIMES.key, MIDNIGHT_CHIMES.defaultValue, ConfigTypes.BOOLEAN, "season",
                         MIDNIGHT_CHIMES.displayName, MIDNIGHT_CHIMES.description
                 )
-		,ADVANCE_TIME_WHEN_NOT_IN_SESSION
-     		,FREEZE_TIME_AT_MIDNIGHT
-
+				,ADVANCE_TIME_WHEN_NOT_IN_SESSION
+				,SLEEP_BEFORE_MIDNIGHT
+				,FREEZE_TIME_AT_MIDNIGHT
+				,FREEZE_TIME_WHILE_SLEEPING
 
                 ,GROUP_TRIVIA
                 ,GROUP_VOTING
@@ -155,15 +168,31 @@ public class NiceLifeConfig extends ConfigManager {
                 ,NAUGHTY_LIST_PLAYERS
                 ,NICE_LIST_PLAYERS
                 ,NICE_LIST_CHANCE
+                ,GROUP_TRIVIA_QUESTIONS
+				
+				
+				,new ConfigFileEntry<>(
+				SLEEP_BEFORE_MIDNIGHT.key, SLEEP_BEFORE_MIDNIGHT.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				SLEEP_BEFORE_MIDNIGHT.displayName, SLEEP_BEFORE_MIDNIGHT.description
+                )
+				,new ConfigFileEntry<>(
+				FREEZE_TIME_AT_MIDNIGHT.key, FREEZE_TIME_AT_MIDNIGHT.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				FREEZE_TIME_AT_MIDNIGHT.displayName, FREEZE_TIME_AT_MIDNIGHT.description
+                )
+				,new ConfigFileEntry<>(
+				FREEZE_TIME_WHILE_SLEEPING.key, FREEZE_TIME_WHILE_SLEEPING.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+				FREEZE_TIME_WHILE_SLEEPING.displayName, FREEZE_TIME_WHILE_SLEEPING.description
+                )
         ));
+		
     }
 
     @Override
     public void instantiateProperties() {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         MIDNIGHT_CHIMES.defaultValue = true;
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         super.instantiateProperties();
     }
 }

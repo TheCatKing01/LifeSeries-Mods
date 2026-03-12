@@ -27,7 +27,7 @@ public class WildLifeConfig extends ConfigManager {
             "netherite_helmet",
             "turtle_helmet",
             //? if >= 1.21.9
-            /*"copper_helmet",*/
+            "copper_helmet",
             "elytra"
     );
 
@@ -186,9 +186,13 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_superpowers_windcharge_max_mace_damage", 2, "season.superpowers",
             "Wind Charge: Max Mace Damage", "The max amount of damage you can deal with a mace while using the Wind Charge superpower."
     );
-    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS = new ConfigFileEntry<>(
-            "wildcard_superpowers_zombies_lose_items", true, "season.superpowers",
-            "Necromancy: Zombies Lose Items", "Controls whether zombies keep their items when they first get respawned."
+    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS = new ConfigFileEntry<>(
+            "wildcard_superpowers_zombies_first_spawn_clear_items", true, "season.superpowers",
+            "Necromancy: Zombies First Spawn Clear Items", "Controls whether zombies get cleared when they first get respawned."
+    );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_KEEP_INVENTORY = new ConfigFileEntry<>(
+            "wildcard_superpowers_zombies_keep_inventory", true, "season.superpowers",
+            "Necromancy: Zombies Keep Inventory", "Controls whether zombies keep their items when they die."
     );
     public static final ConfigFileEntry<Boolean> WILDCARD_SUPERPOWERS_ZOMBIES_REVIVE_BY_KILLING_DARK_GREEN = new ConfigFileEntry<>(
             "wildcard_superpowers_zombies_revive_by_killing_dark_green", false, "season.superpowers",
@@ -282,12 +286,32 @@ public class WildLifeConfig extends ConfigManager {
             "group_trivia", null, ConfigTypes.TEXT, "{season.trivia}",
             "Trivia", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS = new ConfigFileEntry<>(
+            "group_trivia_questions", null, ConfigTypes.TEXT, "{season.trivia.questions}",
+            "Trivia Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_EASY = new ConfigFileEntry<>(
+            "group_trivia_questions_easy", null, ConfigTypes.TEXT, "{season.trivia.questions.easy}",
+            "Easy Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_NORMAL = new ConfigFileEntry<>(
+            "group_trivia_questions_normal", null, ConfigTypes.TEXT, "{season.trivia.questions.normal}",
+            "Normal Questions", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_HARD = new ConfigFileEntry<>(
+            "group_trivia_questions_hard", null, ConfigTypes.TEXT, "{season.trivia.questions.hard}",
+            "Hard Questions", ""
+    );
     public static final ConfigFileEntry<Object> GROUP_MOBSWAP = new ConfigFileEntry<>(
             "group_mobswap", null, ConfigTypes.TEXT, "{season.mobswap}",
             "Mob Swap", ""
     );
     public static final ConfigFileEntry<Object> GROUP_SUPERPOWERS = new ConfigFileEntry<>(
             "group_superpowers", null, ConfigTypes.TEXT, "{season.superpowers}",
+            "Superpowers", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_POWERS = new ConfigFileEntry<>(
+            "group_powers", null, ConfigTypes.TEXT, "{lifeseries_plus.powers}",
             "Superpowers", ""
     );
     public static final ConfigFileEntry<Object> GROUP_CALLBACK = new ConfigFileEntry<>(
@@ -327,6 +351,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,GROUP_SUPERPOWERS //Group
                 ,GROUP_CALLBACK //Group
 				,WILD_MIDNIGHT_CHIMES //Group
+				,GROUP_POWERS //Group
 
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE
@@ -358,6 +383,10 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_TRIVIA_SECONDS_EASY
                 ,WILDCARD_TRIVIA_SECONDS_NORMAL
                 ,WILDCARD_TRIVIA_SECONDS_HARD
+                ,GROUP_TRIVIA_QUESTIONS
+                    ,GROUP_TRIVIA_QUESTIONS_EASY
+                    ,GROUP_TRIVIA_QUESTIONS_NORMAL
+                    ,GROUP_TRIVIA_QUESTIONS_HARD
 
                 ,WILDCARD_MOBSWAP_START_SPAWN_DELAY
                 ,WILDCARD_MOBSWAP_END_SPAWN_DELAY
@@ -367,10 +396,11 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SUPERPOWERS_POWER_BLACKLIST
                 ,WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER
                 ,WILDCARD_SUPERPOWERS_POWERS_PER_ROLL	
-		,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE			
+				,WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE			
                 ,WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME
                 ,WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE
-                ,WILDCARD_SUPERPOWERS_ZOMBIES_LOSE_ITEMS
+                ,WILDCARD_SUPERPOWERS_ZOMBIES_FIRST_SPAWN_CLEAR_ITEMS
+                ,WILDCARD_SUPERPOWERS_ZOMBIES_KEEP_INVENTORY
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_REVIVE_BY_KILLING_DARK_GREEN
                 ,WILDCARD_SUPERPOWERS_ZOMBIES_HEALTH
                 //? if > 1.20.3 {
@@ -378,14 +408,40 @@ public class WildLifeConfig extends ConfigManager {
                 //?}
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_ARMOR
                 ,WILDCARD_SUPERPOWERS_ANIMALDISGUISE_HANDS
+				
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.key, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.powers",
+				WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_PLAYER.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.key, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.defaultValue, ConfigTypes.INTEGER, "lifeseries_plus.powers",
+				WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.displayName, WILDCARD_SUPERPOWERS_POWERS_PER_ROLL.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.key, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.powers",
+				WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.displayName, WILDCARD_SUPERPOWERS_MAX_POWERS_MESSAGE.description
+                )
 
                 ,WILDCARD_CALLBACK_WILDCARDS_BLACKLIST
                 ,WILDCARD_CALLBACK_TURN_OFF
                 ,WILDCARD_CALLBACK_NERFED_WILDCARDS
-		,WILDCARD_CALLBACK_POWER_STACKING
-		,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
-		,WILDCARD_CALLBACK_RESET_AT_MAX
+				,WILDCARD_CALLBACK_POWER_STACKING
+				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
+				,WILDCARD_CALLBACK_RESET_AT_MAX
                 ,SPAWN_BOTS_AT_MIDNIGHT
+				
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_POWER_STACKING.key, WILDCARD_CALLBACK_POWER_STACKING.defaultValue, ConfigTypes.BOOLEAN, "{lifeseries_plus.power_stacking}",
+				"Callback Power Stacking", WILDCARD_CALLBACK_POWER_STACKING.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.key, WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.power_stacking",
+				WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.displayName, WILDCARD_CALLBACK_OVERRIDE_TURN_OFF.description
+                )
+				,new ConfigFileEntry<>(
+				WILDCARD_CALLBACK_RESET_AT_MAX.key, WILDCARD_CALLBACK_RESET_AT_MAX.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.power_stacking",
+				WILDCARD_CALLBACK_RESET_AT_MAX.displayName, WILDCARD_CALLBACK_RESET_AT_MAX.description
+                )
         ));
     }
 
@@ -401,7 +457,7 @@ public class WildLifeConfig extends ConfigManager {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         DEFAULT_LIVES.defaultValue = 6;
         SPAWN_EGG_ALLOW_ON_SPAWNER.defaultValue = true;
         SPAWNER_RECIPE.defaultValue = true;

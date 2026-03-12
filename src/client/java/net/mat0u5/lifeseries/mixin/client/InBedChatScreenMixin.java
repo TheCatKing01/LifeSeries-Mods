@@ -9,24 +9,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.CharacterEvent;
-*///?}
+import net.minecraft.client.input.CharacterEvent;
+//?}
 
 @Mixin(value = InBedChatScreen.class, priority = 1)
 public abstract class InBedChatScreenMixin {
-    @Accessor("leaveBedButton")
-    abstract Button ls$leaveBedButton();
-
+    //26.1+ logic is in ChatScreenMixin
+    //?if <= 1.21.11 {
     @Inject(method = "charTyped", at = @At("HEAD"))
     //? if <= 1.21.6 {
-    private void unfocusButton(char c, int i, CallbackInfoReturnable<Boolean> cir) {
-    //?} else {
-    /*private void unfocusButton(CharacterEvent input, CallbackInfoReturnable<Boolean> cir) {
-    *///?}
+    /*private void unfocusButton(char c, int i, CallbackInfoReturnable<Boolean> cir) {
+     *///?} else {
+    private void unfocusButton(CharacterEvent input, CallbackInfoReturnable<Boolean> cir) {
+        //?}
         InBedChatScreen chatScreen = (InBedChatScreen) (Object) this;
-        ls$leaveBedButton().setFocused(false);
+        if (chatScreen instanceof InBedChatScreenAccessor accessor) {
+            accessor.ls$leaveBedButton().setFocused(false);
+        }
         if (chatScreen instanceof ChatScreenAccessor accessor) {
             chatScreen.setFocused(accessor.ls$input());
         }
     }
+    //?}
 }

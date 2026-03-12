@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.entity.snail.goal.*;
 import net.mat0u5.lifeseries.entity.snail.server.SnailPathfinding;
 import net.mat0u5.lifeseries.entity.snail.server.SnailServerData;
 import net.mat0u5.lifeseries.entity.snail.server.SnailSounds;
+import net.mat0u5.lifeseries.utils.interfaces.IEntity;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -38,23 +39,23 @@ import org.jetbrains.annotations.Nullable;
 import static net.mat0u5.lifeseries.Main.currentSession;
 
 //? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
- //?} else {
-/*import net.minecraft.resources.Identifier;
-*///?}
+/*import net.minecraft.resources.ResourceLocation;
+ *///?} else {
+import net.minecraft.resources.Identifier;
+//?}
 
 public class Snail extends Monster {
     //? if <= 1.21.9 {
-    public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
+    /*public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
     public static final ResourceLocation TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
     public static final ResourceLocation ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
     public static final ResourceLocation ID = IdentifierHelper.mod("snail");
-    //?} else {
-    /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
+    *///?} else {
+    public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
     public static final Identifier TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
     public static final Identifier ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
     public static final Identifier ID = IdentifierHelper.mod("snail");
-    *///?}
+    //?}
     public static double GLOBAL_SPEED_MULTIPLIER = 1;
     public static boolean SHOULD_DROWN_PLAYER = true;
     public static boolean ALLOW_POTION_EFFECTS = false;
@@ -157,14 +158,14 @@ public class Snail extends Monster {
 
     @Override
     //? if <= 1.21.4 {
-    protected boolean isAffectedByFluids() {
+    /*protected boolean isAffectedByFluids() {
         return false;
     }
-    //?} else {
-    /*public boolean isAffectedByFluids() {
+    *///?} else {
+    public boolean isAffectedByFluids() {
         return false;
     }
-    *///?}
+    //?}
 
     @Override
     public boolean isInWater() {
@@ -177,11 +178,22 @@ public class Snail extends Monster {
     }
 
     public boolean isInLavaLocal = false;
+    //?if <= 1.21.11 {
     @Override
     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
         if (FluidTags.LAVA != tag) {
             return false;
         }
+    //?} else {
+    /*@Override
+    public boolean updateFluidInteraction() {
+        TagKey<Fluid> tag = FluidTags.LAVA;
+        if (this instanceof IEntity accessor) {
+            if (!accessor.ls$getEntityFluidInteraction().isInFluid(tag)) {
+                return false;
+            }
+        }
+    *///?}
 
         if (this.touchingUnloadedChunk()) {
             return false;
@@ -273,16 +285,16 @@ public class Snail extends Monster {
         return this.getBoundingBox().intersects(target.getBoundingBox());
     }
     *///?} else if <= 1.21.9 {
-    @Override
+    /*@Override
     protected AABB getAttackBoundingBox() {
         return this.getBoundingBox();
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     protected AABB getAttackBoundingBox(final double horizontalExpansion) {
         return this.getBoundingBox();
     }
-    *///?}
+    //?}
 
     public float soundVolume() {
         return getSoundVolume();

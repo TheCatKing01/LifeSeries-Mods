@@ -2,18 +2,18 @@ package net.mat0u5.lifeseries.gui.seasons;
 
 import net.mat0u5.lifeseries.gui.DefaultScreen;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-*///?}
+import net.minecraft.client.input.MouseButtonEvent;
+//?}
 
 public class ChooseExtraSeasonScreen extends DefaultScreen {
 
@@ -79,14 +79,14 @@ public class ChooseExtraSeasonScreen extends DefaultScreen {
 
     @Override
     //? if <= 1.21.6 {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) { // Left-click
-    //?} else {
-    /*public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    *///?} else {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         double mouseX = click.x();
         double mouseY = click.y();
         if (click.button() == 0) { // Left-click
-    *///?}
+    //?}
             int region = getRegion((int) mouseX, (int) mouseY);
             if (region == -1 && this.minecraft != null) {
                 this.minecraft.setScreen(new ChooseSeasonScreen(hasSelectedBefore));
@@ -98,10 +98,10 @@ public class ChooseExtraSeasonScreen extends DefaultScreen {
             }
         }
         //? if <= 1.21.6 {
-        return super.mouseClicked(mouseX, mouseY, button);
-        //?} else {
-        /*return super.mouseClicked(click, doubled);
-        *///?}
+        /*return super.mouseClicked(mouseX, mouseY, button);
+        *///?} else {
+        return super.mouseClicked(click, doubled);
+        //?}
     }
 
     public void handleSeasonRegionClick(int region) {
@@ -111,7 +111,7 @@ public class ChooseExtraSeasonScreen extends DefaultScreen {
                     this.minecraft.setScreen(new ConfirmSeasonAnswerScreen(this, seasonRegion.season()));
                 }
                 else {
-                    NetworkHandlerClient.sendStringPacket(PacketNames.SET_SEASON, seasonRegion.season().getName());
+                    SimplePackets.SET_SEASON.sendToServer(seasonRegion.season().getName());
                     this.onClose();
                 }
             }

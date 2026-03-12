@@ -1,11 +1,10 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
-import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,9 +13,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 
 //? if >= 1.21.9 {
-/*import net.mat0u5.lifeseries.mixin.MannequinAccessor;
+import net.mat0u5.lifeseries.mixin.MannequinAccessor;
 import net.minecraft.world.entity.decoration.Mannequin;
-*///?}
+//?}
 
 public class Mimicry extends Superpower {
 
@@ -45,13 +44,13 @@ public class Mimicry extends Superpower {
         boolean successfullyMimicked = false;
         if (lookingAt != null)  {
             //? if >= 1.21.9 {
-            /*if (lookingAt instanceof Mannequin mannequin && mannequin instanceof MannequinAccessor mannequinAccessor && mannequin.tickCount < 0) {
+            if (lookingAt instanceof Mannequin mannequin && mannequin instanceof MannequinAccessor mannequinAccessor && mannequin.tickCount < 0) {
                 ServerPlayer lookingAtPlayer = PlayerUtils.getPlayer(mannequinAccessor.ls$getMannequinProfile().partialProfile().id());
                 if (lookingAtPlayer != null) {
                     lookingAt = lookingAtPlayer;
                 }
             }
-            *///?}
+            //?}
             if (lookingAt instanceof ServerPlayer lookingAtPlayer) {
                 lookingAtPlayer = PlayerUtils.getPlayerOrProjection(lookingAtPlayer);
                 isLookingAtPlayer = true;
@@ -60,11 +59,11 @@ public class Mimicry extends Superpower {
                     if (mimicPower != Superpowers.NULL && mimicPower != Superpowers.MIMICRY) {
                         mimic = mimicPower.getInstance(player);
                         successfullyMimicked = true;
-                        PlayerUtils.displayMessageToPlayer(player, TextUtils.format("Mimicked superpower of {}", lookingAtPlayer), 65);
+                        PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_MIMIC.get(lookingAtPlayer), 65);
                         player.ls$playNotifySound(SoundEvents.CHICKEN_EGG, SoundSource.MASTER, 0.3f, 1);
                     }
                     if (mimicPower == Superpowers.MIMICRY) {
-                        PlayerUtils.displayMessageToPlayer(player, Component.literal("You cannot mimic that power."), 65);
+                        PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_MIMIC_ERROR.get(), 65);
                         return;
                     }
                 }
@@ -72,11 +71,11 @@ public class Mimicry extends Superpower {
         }
 
         if (!isLookingAtPlayer) {
-            PlayerUtils.displayMessageToPlayer(player, Component.nullToEmpty("You are not looking at a player."), 65);
+            PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_MIMIC_NOPLAYER.get(), 65);
             return;
         }
         if (!successfullyMimicked) {
-            PlayerUtils.displayMessageToPlayer(player, Component.nullToEmpty("That player does not have a superpower."), 65);
+            PlayerUtils.displayMessageToPlayer(player, ModifiableText.WILDLIFE_POWER_MIMIC_NOPOWER.get(), 65);
             return;
         }
         super.activate();
@@ -104,7 +103,7 @@ public class Mimicry extends Superpower {
         if (mimic == null) return;
         if (System.currentTimeMillis() >= cooldown) {
             mimic.turnOff();
-            NetworkHandlerServer.sendLongPacket(getPlayer(), PacketNames.SUPERPOWER_COOLDOWN, System.currentTimeMillis()-1000);
+            SimplePackets.MIMICRY_COOLDOWN.target(getPlayer()).sendToClient(System.currentTimeMillis()-1000);
             mimic = null;
         }
         if (mimic == null) return;
@@ -114,7 +113,7 @@ public class Mimicry extends Superpower {
     @Override
     public void turnOff() {
         super.turnOff();
-        NetworkHandlerServer.sendLongPacket(getPlayer(), PacketNames.MIMICRY_COOLDOWN, System.currentTimeMillis()-1000);
+        SimplePackets.MIMICRY_COOLDOWN.target(getPlayer()).sendToClient(System.currentTimeMillis()-1000);
     }
 
     public Superpower getMimickedPower() {
@@ -124,6 +123,6 @@ public class Mimicry extends Superpower {
 
     @Override
     public void sendCooldownPacket() {
-        NetworkHandlerServer.sendLongPacket(getPlayer(), PacketNames.MIMICRY_COOLDOWN, cooldown);
+        SimplePackets.MIMICRY_COOLDOWN.target(getPlayer()).sendToClient(cooldown);
     }
 }

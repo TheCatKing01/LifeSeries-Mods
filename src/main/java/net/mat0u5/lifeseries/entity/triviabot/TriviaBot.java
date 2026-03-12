@@ -35,21 +35,21 @@ import net.minecraft.world.phys.Vec3;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
 //? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
- //?} else {
-/*import net.minecraft.resources.Identifier;
-*///?}
+/*import net.minecraft.resources.ResourceLocation;
+ *///?} else {
+import net.minecraft.resources.Identifier;
+//?}
 
 public class TriviaBot extends AmbientCreature {
     //? if <= 1.21.9 {
-    public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    /*public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
     public static final ResourceLocation SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
     public static final ResourceLocation ID = IdentifierHelper.mod("triviabot");
-    //?} else {
-    /*public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
+    *///?} else {
+    public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
     public static final Identifier SANTABOT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/santabot.png");
     public static final Identifier ID = IdentifierHelper.mod("triviabot");
-    *///?}
+    //?}
 
     public static final int STATIONARY_TP_COOLDOWN = 400; // No movement for 20 seconds teleports the bot
     public static final float MOVEMENT_SPEED = 0.45f;
@@ -60,7 +60,7 @@ public class TriviaBot extends AmbientCreature {
     public TriviaBotServerData serverData = new TriviaBotServerData(this);
     public TriviaBotSounds sounds = new TriviaBotSounds(this);
     public TriviaBotPathfinding pathfinding = new TriviaBotPathfinding(this);
-    public final TriviaHandler triviaHandler;
+    public TriviaHandler triviaHandler = new WildLifeTriviaHandler(this);
 
     private static final EntityDataAccessor<Boolean> submittedAnswer = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ranOutOfTime = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
@@ -75,17 +75,20 @@ public class TriviaBot extends AmbientCreature {
 
     public TriviaBot(EntityType<? extends AmbientCreature> entityType, Level level) {
         super(entityType, level);
-        setInvulnerable(true);
-        setPersistenceRequired();
-        //? if <= 1.20.3 {
-        /*this.setMaxUpStep(1.0F);
-        *///?}
-        if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-            triviaHandler = new NiceLifeTriviaHandler(this);
-            setSantaBot(true);
-        }
-        else {
-            triviaHandler = new WildLifeTriviaHandler(this);
+        if (!level.isClientSide()) {
+            setInvulnerable(true);
+            setPersistenceRequired();
+            //? if <= 1.20.3 {
+            /*this.setMaxUpStep(1.0F);
+             *///?}
+            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+                triviaHandler = new NiceLifeTriviaHandler(this);
+                setSantaBot(true);
+            }
+            else {
+                triviaHandler = new WildLifeTriviaHandler(this);
+                setSantaBot(false);
+            }
         }
     }
 
@@ -139,14 +142,14 @@ public class TriviaBot extends AmbientCreature {
 
     @Override
     //? if <= 1.21.4 {
-    protected boolean isAffectedByFluids() {
+    /*protected boolean isAffectedByFluids() {
         return false;
     }
-    //?} else {
-    /*public boolean isAffectedByFluids() {
+    *///?} else {
+    public boolean isAffectedByFluids() {
         return false;
     }
-    *///?}
+    //?}
 
     @Override
     public boolean isInWater() {
@@ -159,7 +162,11 @@ public class TriviaBot extends AmbientCreature {
     }
 
     @Override
+    //?if <= 1.21.11 {
     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
+    //?} else {
+    /*public boolean updateFluidInteraction() {
+    *///?}
         return false;
     }
 
@@ -224,7 +231,7 @@ public class TriviaBot extends AmbientCreature {
         this.entityData.define(interactedWith, false);
         this.entityData.define(gliding, false);
         this.entityData.define(analyzing, -1);
-        this.entityData.define(santaBot, false);
+        this.entityData.define(santaBot, currentSeason.getSeason() == Seasons.NICE_LIFE);
         this.entityData.define(waving, 0);
         this.entityData.define(leaving, false);
     }
@@ -238,7 +245,7 @@ public class TriviaBot extends AmbientCreature {
         builder.define(interactedWith, false);
         builder.define(gliding, false);
         builder.define(analyzing, -1);
-        builder.define(santaBot, false);
+        builder.define(santaBot, currentSeason.getSeason() == Seasons.NICE_LIFE);
         builder.define(waving, -1);
         builder.define(leaving, false);
     }

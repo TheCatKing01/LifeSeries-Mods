@@ -79,12 +79,12 @@ public class CustomTextRenderer {
     public int render(GuiGraphics context, Font textRenderer) {
         if (isScaled()) {
             //? if <= 1.21.5 {
-            context.pose().pushPose();
+            /*context.pose().pushPose();
             context.pose().scale(scaleX, scaleY, 1.0f);
-            //?} else {
-            /*context.pose().pushMatrix();
+            *///?} else {
+            context.pose().pushMatrix();
             context.pose().scale(scaleX, scaleY);
-            *///?}
+            //?}
         }
 
         int renderedTextHeight = textRenderer.lineHeight;
@@ -93,14 +93,17 @@ public class CustomTextRenderer {
         if (this.text != null) textWidth = textRenderer.width(text);
         if (this.orderedText != null) textWidth = textRenderer.width(orderedText);
 
-        if (anchor == Anchor.CENTER) offsetX -= textWidth/2.0;
-        if (anchor == Anchor.RIGHT) offsetX -= textWidth;
+        if (anchor == Anchor.CENTER) offsetX = -textWidth/2.0;
+        if (anchor == Anchor.RIGHT) offsetX = -textWidth;
 
         if (this.orderedText != null) {
             if (wrapLines) {
                 List<FormattedCharSequence> wrappedText = textRenderer.split(text, wrapMaxWidth);
                 int offsetY = 0;
                 for (FormattedCharSequence line : wrappedText) {
+                    textWidth = textRenderer.width(line);
+                    if (anchor == Anchor.CENTER) offsetX = -textWidth/2.0;
+                    if (anchor == Anchor.RIGHT) offsetX = -textWidth;
                     context.drawString(textRenderer, line, (int) (x / scaleX + offsetX), (int) (y / scaleY + offsetY), textColor, shadow);
                     offsetY += textRenderer.lineHeight + wrapGapY;
                 }
@@ -116,10 +119,10 @@ public class CustomTextRenderer {
 
         if (isScaled()) {
             //? if <= 1.21.5 {
-            context.pose().popPose();
-            //?} else {
-            /*context.pose().popMatrix();
-            *///?}
+            /*context.pose().popPose();
+            *///?} else {
+            context.pose().popMatrix();
+            //?}
         }
         return renderedTextHeight;
     }

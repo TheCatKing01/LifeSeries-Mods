@@ -1,16 +1,17 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.entity.triviabot.server.TriviaBotPathfinding;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.SizeShifting;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.other.Tuple;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
@@ -87,9 +88,9 @@ public class TriviaWildcard extends Wildcard {
         WildLifeTriviaHandler.cursedHeartPlayers.clear();
         WildLifeTriviaHandler.cursedMoonJumpPlayers.clear();
         if (!currentSession.statusStarted()) {
-            PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7You must start a session for trivia bots to spawn!"));
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_TRIVIA_NOTICE_START.get());
         }
-        PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7You can modify the trivia questions in the config files (./config/lifeseries/wildlife/*-trivia)"));
+        PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_TRIVIA_NOTICE.get());
         super.activate();
     }
 
@@ -219,7 +220,7 @@ public class TriviaWildcard extends Wildcard {
             bot.serverData.setBoundPlayer(player);
             bots.put(player.getUUID(), bot);
             player.ls$playNotifySound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 0.5f, 1);
-            NetworkHandlerServer.sendNumberPacket(player, PacketNames.FAKE_THUNDER, 7);
+            SimplePackets.FAKE_THUNDER.target(player).sendToClient(7);
             DatapackIntegration.EVENT_TRIVIA_BOT_SPAWN.trigger(List.of(
                     new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()),
                     new DatapackIntegration.Events.MacroEntry("TriviaBot", bot.getStringUUID())
@@ -238,7 +239,7 @@ public class TriviaWildcard extends Wildcard {
 
         resetPlayerPunishments(player);
 
-        NetworkHandlerServer.sendStringPacket(player, PacketNames.RESET_TRIVIA, "true");
+        SimplePackets.RESET_TRIVIA.target(player).sendToClient();
     }
 
     public static void resetPlayerPunishments(ServerPlayer player) {
@@ -259,7 +260,7 @@ public class TriviaWildcard extends Wildcard {
 
         WildLifeTriviaHandler.cursedSliding.remove(player.getUUID());
         WildLifeTriviaHandler.cursedRoboticVoicePlayers.remove(player.getUUID());
-        NetworkHandlerServer.sendLongPacket(player, PacketNames.CURSE_SLIDING, 0);
+        SimplePackets.CURSE_SLIDING.target(player).sendToClient(0);
     }
 
     public static void killAllBots() {
@@ -273,9 +274,7 @@ public class TriviaWildcard extends Wildcard {
             }
         }
         toKill.forEach(Entity::discard);
-        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            NetworkHandlerServer.sendStringPacket(player, PacketNames.RESET_TRIVIA, "true");
-        }
+        SimplePackets.RESET_TRIVIA.sendToClient();
     }
 
     public static void killAllTriviaSnails() {

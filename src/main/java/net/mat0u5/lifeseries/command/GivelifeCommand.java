@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
@@ -29,7 +30,7 @@ public class GivelifeCommand extends Command {
 
     @Override
     public boolean isAllowed() {
-        return seasonConfig.GIVELIFE_COMMAND_ENABLED.get(seasonConfig);
+        return seasonConfig.GIVELIFE_COMMAND_ENABLED.get();
     }
 
     @Override
@@ -62,19 +63,21 @@ public class GivelifeCommand extends Command {
         if (self == null) return -1;
         if (target == null) return -1;
 
-        String livesOrTime = currentSeason.getSeason() != Seasons.LIMITED_LIFE ? "lives" : "time";
-
         if (self.ls$isDead()) {
-            source.sendFailure(TextUtils.format("You do not have any {} to give", livesOrTime));
+            OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_NONE.get());
             return -1;
         }
         boolean isRevive = target.ls$isDead();
+        if (target.ls$isWatcher()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.PLAYER_ERROR_WATCHER.get());
+            return -1;
+        }
         if (!Season.GIVELIFE_CAN_REVIVE && isRevive) {
-            source.sendFailure(Component.nullToEmpty("That player is not alive"));
+            OtherUtils.sendCommandFailure(source, ModifiableText.PLAYER_ERROR_DEAD.get());
             return -1;
         }
         if (target == self) {
-            source.sendFailure(TextUtils.format("You cannot give {} to yourself", livesOrTime));
+            OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SELF.get());
             return -1;
         }
 
@@ -85,17 +88,27 @@ public class GivelifeCommand extends Command {
 
         Integer currentLives = self.ls$getLives();
         if (currentLives == null || currentLives <= giveAmount) {
-            source.sendFailure(TextUtils.format("You cannot give away any more {}", livesOrTime));
+            OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_NOT_ENOUGH.get());
             return -1;
         }
         Integer targetLives = target.ls$getLives();
         if (targetLives == null || targetLives >= currentSeason.GIVELIFE_MAX_LIVES) {
-            source.sendFailure(TextUtils.format("That player cannot receive any more {}", livesOrTime));
+            OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_TOO_MANY.get());
             return -1;
         }
-				
-		if (currentSeason instanceof DoubleLife doubleLife) {
-			ServerPlayer soulmate = doubleLife.getSoulmate(self);
+        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.SOULBOUND_LIVES) {
+            ServerPlayer soulmate = doubleLife.getSoulmate(self);
+            if (soulmate != null) {
+                if (soulmate.equals(target)) {
+                    OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
+                    return -1;
+                }
+                boolean success = doubleLifeGiveLife(source, self, soulmate, target);
+                if (!success) {
+                    return -1;
+                }
+            }
+        }
 
 			if (soulmate != null && doubleLife.SOULMATES_SHARE_LIVES) {
 
@@ -150,9 +163,8 @@ public class GivelifeCommand extends Command {
             request.put(target.getUUID(), System.currentTimeMillis());
             soulmateGivelifeRequests.put(self.getUUID(), request);
         }
-        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("§7Your soulmate must accept your request to give a life to this player."));
-        Component message = TextUtils.format("Your soulmate wants to give a life to {}.\nClick {} to accept the request.", target, TextUtils.runCommandText(TextUtils.formatString("/givelife {}", target.getScoreboardName())));
-        soulmate.sendSystemMessage(message);
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.GIVELIFE_DOUBLELIFE_INFO.get());
+        soulmate.ls$message(ModifiableText.GIVELIFE_DOUBLELIFE_ACCEPT.get(target, TextUtils.runCommandText(TextUtils.formatString("/givelife {}", target.getScoreboardName()))));
         return false;
     }
 }

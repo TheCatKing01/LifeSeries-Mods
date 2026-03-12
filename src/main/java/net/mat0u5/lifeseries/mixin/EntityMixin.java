@@ -11,7 +11,7 @@ import net.mat0u5.lifeseries.utils.interfaces.IEntityDataSaver;
 import net.mat0u5.lifeseries.utils.interfaces.IMorph;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -26,19 +26,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
 //? if >= 1.21.2 {
-/*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
-*///?}
+//?}
 //? if <= 1.21.9 {
-import net.minecraft.world.entity.monster.Evoker;
-//?} else {
-/*import net.minecraft.world.entity.monster.illager.Evoker;
+/*import net.minecraft.world.entity.monster.Evoker;
+*///?} else {
+import net.minecraft.world.entity.monster.illager.Evoker;
+//?}
+
+//? if >= 26.1 {
+/*import org.spongepowered.asm.mixin.gen.Accessor;
 *///?}
 
 @Mixin(value = Entity.class, priority = 1)
 public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
+    //? if >= 26.1 {
+    /*@Accessor("fluidInteraction")
+    abstract EntityFluidInteraction ls$entityFluidInteraction();
+    @Override
+    public EntityFluidInteraction ls$getEntityFluidInteraction() {
+        return ls$entityFluidInteraction();
+    }
+    *///?}
     /*
     private NbtCompound persistentData;
     @Override
@@ -95,10 +107,10 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
 
     @Inject(method = "getAirSupply", at = @At("RETURN"), cancellable = true)
     public void getAir(CallbackInfoReturnable<Integer> cir) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (currentSeason instanceof WildLife) {
             if (!Snail.SHOULD_DROWN_PLAYER) return;
-            if (!WildcardManager.isActiveWildcard(Wildcards.SNAILS)) return;
+            if (Snails.snails.isEmpty()) return;
             Entity entity = (Entity) (Object) this;
             if (entity instanceof Player player && !player.hasEffect(MobEffects.WATER_BREATHING)) {
                 if (!Snails.snails.containsKey(player.getUUID())) return;
@@ -114,15 +126,15 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
     }
 
     //? if <= 1.21 {
-    @Inject(method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
+    /*@Inject(method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
             at = @At("HEAD"), cancellable = true)
     public void dropStack(ItemStack stack, float yOffset, CallbackInfoReturnable<ItemEntity> cir) {
-    //?} else {
-    /*@Inject(method = "spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
+    *///?} else {
+    @Inject(method = "spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
             at = @At("HEAD"), cancellable = true)
     public void dropStack(ServerLevel level, ItemStack stack, float yOffset, CallbackInfoReturnable<ItemEntity> cir) {
-        *///?}
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        //?}
+        if (Main.isClientOrDisabled()) return;
         if (currentSeason instanceof WildLife) {
             Entity entity = (Entity) (Object) this;
             if (entity instanceof Evoker && stack.is(Items.TOTEM_OF_UNDYING)) {
@@ -133,17 +145,17 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
 
 
     //? if >= 1.21.2 {
-    /*//? if <= 1.21.6 {
-    @WrapOperation(
+    //? if <= 1.21.6 {
+    /*@WrapOperation(
             method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z")
     )
-    //?} else {
-    /^@WrapOperation(
+    *///?} else {
+    @WrapOperation(
             method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z")
     )
-    ^///?}
+    //?}
     private boolean allowRidingPlayers(EntityType instance, Operation<Boolean> original) {
         if(instance == EntityType.PLAYER) {
             return true;
@@ -151,5 +163,24 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
             return original.call(instance);
         }
     }
-    *///?}
+    //?}
+
+    //?if <= 1.21 {
+    /*@Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
+    *///?} else {
+    @Inject(method = "considersEntityAsAlly", at = @At("HEAD"), cancellable = true)
+    //?}
+    private void nonAllyPets(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (entity instanceof TamableAnimal animal) {
+            //? if <= 1.21.4 {
+            /*LivingEntity owner = animal.getOwner();
+            *///?} else {
+            LivingEntity owner = animal.getRootOwner();
+            //?}
+            Entity thisEntity = (Entity) (Object) this;
+            if (owner != thisEntity) {
+                cir.setReturnValue(false);
+            }
+        }
+    }
 }

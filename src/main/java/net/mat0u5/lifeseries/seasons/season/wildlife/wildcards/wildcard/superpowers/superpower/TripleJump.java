@@ -1,6 +1,8 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.ToggleableSuperpower;
 import net.mat0u5.lifeseries.utils.other.Time;
@@ -33,19 +35,19 @@ public class TripleJump extends ToggleableSuperpower {
 
         if (!player.onGround()) {
             //? if <= 1.21.4 {
-            MobEffectInstance jump = new MobEffectInstance(MobEffects.JUMP, 219, 2, false, false, false);
-            //?} else {
-            /*MobEffectInstance jump = new MobEffectInstance(MobEffects.JUMP_BOOST, 219, 2, false, false, false);
-            *///?}
+            /*MobEffectInstance jump = new MobEffectInstance(MobEffects.JUMP, 219, 2, false, false, false);
+            *///?} else {
+            MobEffectInstance jump = new MobEffectInstance(MobEffects.JUMP_BOOST, 219, 2, false, false, false);
+            //?}
             player.addEffect(jump);
             onGround = Time.zero();
         }
         else {
             //? if <= 1.21.4 {
-            player.removeEffect(MobEffects.JUMP);
-            //?} else {
-            /*player.removeEffect(MobEffects.JUMP_BOOST);
-            *///?}
+            /*player.removeEffect(MobEffects.JUMP);
+            *///?} else {
+            player.removeEffect(MobEffects.JUMP_BOOST);
+            //?}
             onGround.tick();
         }
 
@@ -67,6 +69,7 @@ public class TripleJump extends ToggleableSuperpower {
         if (player == null) return;
         player.ls$playNotifySound(SoundEvents.SLIME_JUMP, SoundSource.MASTER, 1, 1);
         NetworkHandlerServer.sendVignette(player, -1);
+        SimplePackets.TRIPLE_JUMP.target(player).sendToClient(true);
     }
 
     @Override
@@ -75,11 +78,12 @@ public class TripleJump extends ToggleableSuperpower {
         ServerPlayer player = getPlayer();
         if (player == null) return;
         //? if <= 1.21.4 {
-        player.removeEffect(MobEffects.JUMP);
-        //?} else {
-        /*player.removeEffect(MobEffects.JUMP_BOOST);
-        *///?}
+        /*player.removeEffect(MobEffects.JUMP);
+        *///?} else {
+        player.removeEffect(MobEffects.JUMP_BOOST);
+        //?}
         player.ls$playNotifySound(SoundEvents.SLIME_SQUISH, SoundSource.MASTER, 1, 1);
         NetworkHandlerServer.sendVignette(player, 0);
+        SimplePackets.TRIPLE_JUMP.target(player).sendToClient(false);
     }
 }

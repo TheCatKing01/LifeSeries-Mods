@@ -4,10 +4,13 @@ import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.command.manager.CommandManager;
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.config.ModifiableTextManager;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.lists.ListsManager;
@@ -22,7 +25,6 @@ import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
@@ -30,6 +32,7 @@ import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -64,18 +67,18 @@ import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
 //? if <= 1.20
-/*import net.minecraft.world.scores.Scoreboard;*/
+//import net.minecraft.world.scores.Scoreboard;
 //? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.GameRules;
 //? if > 1.21.9
-/*import net.minecraft.world.level.gamerules.GameRules;*/
+import net.minecraft.world.level.gamerules.GameRules;
 //? if > 1.20
 import net.minecraft.world.scores.DisplaySlot;
 //? if <= 1.21.9 {
-import net.minecraft.world.entity.monster.WitherSkeleton;
-//?} else {
-/*import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-*///?}
+/*import net.minecraft.world.entity.monster.WitherSkeleton;
+*///?} else {
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
+//?}
 
 public abstract class Season {
     public static final String RESOURCEPACK_MAIN_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-main-27d9e98eb6009401319a5256f7695f1bba902412/main.zip";
@@ -136,7 +139,10 @@ public abstract class Season {
     }
 
     public Integer getDefaultLives() {
-        return seasonConfig.DEFAULT_LIVES.get(seasonConfig);
+        if (livesManager.ROLL_LIVES) {
+            return null;
+        }
+        return seasonConfig.DEFAULT_LIVES.get();
     }
 
     protected int getMidnightChimesStartTime() {
@@ -151,10 +157,17 @@ public abstract class Season {
     }
 	
     public void initialize() {
+        ModifiableTextManager.initialize();
         reload();
     }
 
     public void seasonSwitched(Seasons changedTo) {
+        if (changedTo != getSeason()) {
+            switchOutOfSeason(changedTo);
+        }
+    }
+    public void switchOutOfSeason(Seasons changedTo) {
+
     }
 
     public void reloadStart() {
@@ -164,36 +177,39 @@ public abstract class Season {
         if (server == null) return;
 
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-        if (overworld != null && overworld.getWorldBorder().getStatus() == BorderStatus.STATIONARY) overworld.getWorldBorder().setSize(seasonConfig.WORLDBORDER_SIZE.get(seasonConfig));
+        if (overworld != null && overworld.getWorldBorder().getStatus() == BorderStatus.STATIONARY) overworld.getWorldBorder().setSize(seasonConfig.WORLDBORDER_SIZE.get());
         //? if >= 1.21.9 {
-        /*ServerLevel nether = server.getLevel(Level.NETHER);
+        ServerLevel nether = server.getLevel(Level.NETHER);
         ServerLevel end = server.getLevel(Level.END);
-        if (nether != null && nether.getWorldBorder().getStatus() == BorderStatus.STATIONARY) nether.getWorldBorder().setSize(seasonConfig.WORLDBORDER_NETHER_SIZE.get(seasonConfig));
-        if (end != null && end.getWorldBorder().getStatus() == BorderStatus.STATIONARY) end.getWorldBorder().setSize(seasonConfig.WORLDBORDER_END_SIZE.get(seasonConfig));
-        *///?}
+        if (nether != null && nether.getWorldBorder().getStatus() == BorderStatus.STATIONARY) nether.getWorldBorder().setSize(seasonConfig.WORLDBORDER_NETHER_SIZE.get());
+        if (end != null && end.getWorldBorder().getStatus() == BorderStatus.STATIONARY) end.getWorldBorder().setSize(seasonConfig.WORLDBORDER_END_SIZE.get());
+        //?}
 
         if (overworld != null) {
             //? if <= 1.21.9 {
-            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_KEEPINVENTORY, seasonConfig.KEEP_INVENTORY.get(seasonConfig));
-            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_ANNOUNCE_ADVANCEMENTS, seasonConfig.SHOW_ADVANCEMENTS.get(seasonConfig));
+            /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_KEEPINVENTORY, seasonConfig.KEEP_INVENTORY.get());
+            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_ANNOUNCE_ADVANCEMENTS, seasonConfig.SHOW_ADVANCEMENTS.get());
             OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_NATURAL_REGENERATION, getSeason() != Seasons.SECRET_LIFE);
-            //?} else {
-            /*OtherUtils.setBooleanGameRule(overworld, GameRules.KEEP_INVENTORY, seasonConfig.KEEP_INVENTORY.get(seasonConfig));
-            OtherUtils.setBooleanGameRule(overworld, GameRules.SHOW_ADVANCEMENT_MESSAGES, seasonConfig.SHOW_ADVANCEMENTS.get(seasonConfig));
+            *///?} else {
+            OtherUtils.setBooleanGameRule(overworld, GameRules.KEEP_INVENTORY, seasonConfig.KEEP_INVENTORY.get());
+            OtherUtils.setBooleanGameRule(overworld, GameRules.SHOW_ADVANCEMENT_MESSAGES, seasonConfig.SHOW_ADVANCEMENTS.get());
             OtherUtils.setBooleanGameRule(overworld, GameRules.NATURAL_HEALTH_REGENERATION, getSeason() != Seasons.SECRET_LIFE);
-            *///?}
+            //?}
 
             //? if >= 1.21.6 {
-            /*boolean locatorBarEnabled = seasonConfig.LOCATOR_BAR.get(seasonConfig);
+            boolean locatorBarEnabled = seasonConfig.LOCATOR_BAR.get();
             if (!locatorBarEnabled && this instanceof DoubleLife) {
                 locatorBarEnabled = DoubleLife.SOULMATE_LOCATOR_BAR;
             }
+            if (!locatorBarEnabled && boogeymanManager.BOOGEYMAN_ENABLED) {
+                locatorBarEnabled = boogeymanManager.BOOGEYMAN_LOCATOR_BAR;
+            }
             //? if <= 1.21.9 {
-            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_LOCATOR_BAR, locatorBarEnabled);
-            //?} else {
-            /^OtherUtils.setBooleanGameRule(overworld, GameRules.LOCATOR_BAR, locatorBarEnabled);
-            ^///?}
-            *///?}
+            /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_LOCATOR_BAR, locatorBarEnabled);
+            *///?} else {
+            OtherUtils.setBooleanGameRule(overworld, GameRules.LOCATOR_BAR, locatorBarEnabled);
+            //?}
+            //?}
         }
 
         //? if <= 1.20 {
@@ -232,22 +248,25 @@ public abstract class Season {
     }
 
     public void reload() {
-        MUTE_DEAD_PLAYERS = seasonConfig.MUTE_DEAD_PLAYERS.get(seasonConfig);
-        GIVELIFE_MAX_LIVES = seasonConfig.GIVELIFE_LIVES_MAX.get(seasonConfig);
-        TAB_LIST_SHOW_LIVES = seasonConfig.TAB_LIST_SHOW_LIVES.get(seasonConfig);
-        TAB_LIST_SHOW_DEAD_PLAYERS = seasonConfig.TAB_LIST_SHOW_DEAD_PLAYERS.get(seasonConfig);
-        TAB_LIST_SHOW_EXACT_LIVES = seasonConfig.TAB_LIST_SHOW_EXACT_LIVES.get(seasonConfig);
-        SHOW_HEALTH_BELOW_NAME = seasonConfig.SHOW_HEALTH_BELOW_NAME.get(seasonConfig);
-        WATCHERS_IN_TAB = seasonConfig.WATCHERS_IN_TAB.get(seasonConfig);
-        WATCHERS_MUTED = seasonConfig.WATCHERS_MUTED.get(seasonConfig);
-        ALLOW_SELF_DEFENSE = seasonConfig.ALLOW_SELF_DEFENSE.get(seasonConfig);
-        GIVELIFE_CAN_REVIVE = seasonConfig.GIVELIFE_CAN_REVIVE.get(seasonConfig);
-        SHOW_LOGIN_COMMAND_INFO = seasonConfig.SHOW_LOGIN_COMMAND_INFO.get(seasonConfig);
-        HIDE_UNJUSTIFIED_KILL_MESSAGES = seasonConfig.HIDE_UNJUSTIFIED_KILL_MESSAGES.get(seasonConfig);
-        Session.TICK_FREEZE_NOT_IN_SESSION = seasonConfig.TICK_FREEZE_NOT_IN_SESSION.get(seasonConfig);
-        BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get(seasonConfig);
-        ADDITIONAL_WITHER_SKULL_RATE = seasonConfig.ADDITIONAL_WITHER_SKULL_RATE.get(seasonConfig);
+        MUTE_DEAD_PLAYERS = seasonConfig.MUTE_DEAD_PLAYERS.get();
+        GIVELIFE_MAX_LIVES = seasonConfig.GIVELIFE_LIVES_MAX.get();
+        TAB_LIST_SHOW_LIVES = seasonConfig.TAB_LIST_SHOW_LIVES.get();
+        TAB_LIST_SHOW_DEAD_PLAYERS = seasonConfig.TAB_LIST_SHOW_DEAD_PLAYERS.get();
+        TAB_LIST_SHOW_EXACT_LIVES = seasonConfig.TAB_LIST_SHOW_EXACT_LIVES.get();
+        SHOW_HEALTH_BELOW_NAME = seasonConfig.SHOW_HEALTH_BELOW_NAME.get();
+        WATCHERS_IN_TAB = seasonConfig.WATCHERS_IN_TAB.get();
+        WATCHERS_MUTED = seasonConfig.WATCHERS_MUTED.get();
+        ALLOW_SELF_DEFENSE = seasonConfig.ALLOW_SELF_DEFENSE.get();
+        GIVELIFE_CAN_REVIVE = seasonConfig.GIVELIFE_CAN_REVIVE.get();
+        SHOW_LOGIN_COMMAND_INFO = seasonConfig.SHOW_LOGIN_COMMAND_INFO.get();
+        HIDE_UNJUSTIFIED_KILL_MESSAGES = seasonConfig.HIDE_UNJUSTIFIED_KILL_MESSAGES.get();
+        Session.TICK_FREEZE_NOT_IN_SESSION = seasonConfig.TICK_FREEZE_NOT_IN_SESSION.get();
+        Session.WORLDBORDER_OUTSIDE_TELEPORT = seasonConfig.WORLDBORDER_OUTSIDE_TELEPORT.get();
+        Session.SESSION_START_COUNTDOWN = seasonConfig.SESSION_START_COUNTDOWN.get();
+        BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get();
+        ADDITIONAL_WITHER_SKULL_RATE = seasonConfig.ADDITIONAL_WITHER_SKULL_RATE.get();
 
+        NetworkHandlerServer.reload();
         boogeymanManager.onReload();
         secretSociety.onReload();
         listsManager.onReload();
@@ -262,6 +281,8 @@ public abstract class Season {
         currentSession.freezeIfNecessary();
         DatapackIntegration.reload();
         PlayerUtils.resendCommandTrees();
+        SubInManager.reload();
+        LifeSkinsManager.reloadSkinsCache();
     }
 
     public static void setSkyColor(Vec3 color, boolean setMode) {
@@ -287,6 +308,7 @@ public abstract class Season {
         for (Command command : CommandManager.commands) {
             if (!command.isAllowed()) continue;
             for (String commandStr : command.getAdminCommands()) {
+                if (commandStr.isEmpty()) continue;
                 allCommands.add("/"+commandStr);
             }
         }
@@ -305,7 +327,7 @@ public abstract class Season {
     }
 
     public void sendSetSeasonPacket(ServerPlayer player) {
-        NetworkHandlerServer.sendStringListPacket(player, PacketNames.SEASON_INFO, List.of(currentSeason.getSeason().getId(), currentSeason.getAdminCommands(), currentSeason.getNonAdminCommands()));
+        SimplePackets.SEASON_INFO.target(player).sendToClient(List.of(currentSeason.getSeason().getId(), currentSeason.getAdminCommands(), currentSeason.getNonAdminCommands()));
     }
 
     public void reloadPlayers() {
@@ -324,6 +346,7 @@ public abstract class Season {
 
         WatcherManager.createTeams();
         livesManager.createTeams();
+        TeamUtils.createTeam("zombie", "Zombie", ChatFormatting.GRAY);
     }
 
 
@@ -371,21 +394,24 @@ public abstract class Season {
         return livesManager.getTeamForPlayer(player);
     }
 
+    public boolean modifyKeepInventory(ServerPlayer player, boolean originalKeepInventory) {
+        return originalKeepInventory;
+    }
 
     public void dropItemsOnLastDeath(ServerPlayer player) {
-        boolean doDrop = seasonConfig.PLAYERS_DROP_ITEMS_ON_FINAL_DEATH.get(seasonConfig);
+        boolean doDrop = seasonConfig.PLAYERS_DROP_ITEMS_ON_FINAL_DEATH.get();
         //? if <= 1.21.9 {
-        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-        //?} else {
-        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-        *///?}
+        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+        *///?} else {
+        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+        //?}
 
         if (doDrop && keepInventory) {
             for (ItemStack item : PlayerUtils.getPlayerInventory(player)) {
                 //? if <= 1.21 {
-                player.spawnAtLocation(item);
-                //?} else
-                /*player.spawnAtLocation(player.ls$getServerLevel(), item);*/
+                /*player.spawnAtLocation(item);
+                *///?} else
+                player.spawnAtLocation(player.ls$getServerLevel(), item);
             }
             player.getInventory().clearContent();
         }
@@ -423,6 +449,7 @@ public abstract class Season {
         boogeymanManager.sessionEnd();
         secretSociety.sessionEnd();
         listsManager.resetLists();
+        livesManager.assignedLives = false;
     }
 
     public boolean sessionStart() {
@@ -430,6 +457,7 @@ public abstract class Season {
         secretSociety.resetMembers();
         listsManager.resetLists();
         addSessionActions();
+        livesManager.assignedLives = false;
         return true;
     }
 
@@ -505,17 +533,17 @@ public abstract class Season {
     public void onPlayerDiedNaturally(ServerPlayer player, DamageSource source) {
         if (source.getEntity() instanceof TamableAnimal tamableAnimal) {
             //? if <= 1.21.4 {
-            ServerPlayer owner = PlayerUtils.getPlayer(tamableAnimal.getOwnerUUID());
-            //?} else {
-            /*ServerPlayer owner = null;
+            /*ServerPlayer owner = PlayerUtils.getPlayer(tamableAnimal.getOwnerUUID());
+            *///?} else {
+            ServerPlayer owner = null;
             if (tamableAnimal.getOwnerReference() != null) owner = PlayerUtils.getPlayer(tamableAnimal.getOwnerReference().getUUID());
-            *///?}
+            //?}
             if (owner != null) {
                 //? if <= 1.21.2 {
-                owner.awardKillScore(player, 1, source);
-                //?} else {
-                /*owner.awardKillScore(player, source);
-                *///?}
+                /*owner.awardKillScore(player, 1, source);
+                *///?} else {
+                owner.awardKillScore(player, source);
+                //?}
             }
         }
         if (server == null) return;
@@ -532,10 +560,10 @@ public abstract class Season {
         for (Map.Entry<Vec3, List<Float>> entry : info.entrySet()) {
             Vec3 pos = entry.getKey();
             //? if <= 1.21 {
-            int minY = player.ls$getServerLevel().getMinBuildHeight();
-            //?} else {
-            /*int minY = player.ls$getServerLevel().getMinY();
-            *///?}
+            /*int minY = player.ls$getServerLevel().getMinBuildHeight();
+            *///?} else {
+            int minY = player.ls$getServerLevel().getMinY();
+            //?}
             if (pos.y <= minY) continue;
 
             LevelUtils.teleport(player, player.ls$getServerLevel(), pos, entry.getValue().get(0), entry.getValue().get(1));
@@ -559,10 +587,10 @@ public abstract class Season {
         }
 
         //? if <= 1.21.2 {
-        killer.awardKillScore(victim, 1, killer.damageSources().playerAttack(killer));
-        //?} else {
-        /*killer.awardKillScore(victim, killer.damageSources().playerAttack(killer));
-        *///?}
+        /*killer.awardKillScore(victim, 1, killer.damageSources().playerAttack(killer));
+        *///?} else {
+        killer.awardKillScore(victim, killer.damageSources().playerAttack(killer));
+        //?}
     }
 
     public void tryClaimKillLifeGain(ServerPlayer killer, ServerPlayer victim) {
@@ -593,7 +621,7 @@ public abstract class Season {
 
     public void broadcastLifeGain(ServerPlayer player, ServerPlayer victim) {
         if (BROADCAST_LIFE_GAIN) {
-            PlayerUtils.broadcastMessage(TextUtils.format("{}§7 gained a life for killing {}.", player, victim));
+            PlayerUtils.broadcastMessage(ModifiableText.SEASON_KILL_GAINLIFE.get(player, victim));
         }
     }
 
@@ -618,7 +646,18 @@ public abstract class Season {
         boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
 
         if (!isAllowedToAttack(killer, victim) && !HIDE_UNJUSTIFIED_KILL_MESSAGES) {
-            PlayerUtils.broadcastMessageToAdmins(TextUtils.format("§c [Unjustified Kill?] {}§7 was killed by {}", victim, killer));
+            if (livesManager.SHOW_LIFE_DIFF) {
+                TaskScheduler.schedulePriorityTask(1, () -> {
+                    PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
+                });
+            }
+            else {
+                PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
+            }
+            DatapackIntegration.EVENT_UNJUSTIFIED_KILL.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+            ));
         }
 
         if (isBoogeyCure) {
@@ -648,17 +687,17 @@ public abstract class Season {
             if (entity instanceof WitherSkeleton && rnd.nextDouble() <= ADDITIONAL_WITHER_SKULL_RATE) {
                 ItemStack skullItem = Items.WITHER_SKELETON_SKULL.getDefaultInstance();
                 //? if <=1.21 {
-                entity.spawnAtLocation(skullItem);
-                //?} else
-                /*entity.spawnAtLocation((ServerLevel) entity.level(), skullItem);*/
+                /*entity.spawnAtLocation(skullItem);
+                *///?} else
+                entity.spawnAtLocation((ServerLevel) entity.level(), skullItem);
                 ci.cancel();
             }
         }
     }
 
     private void spawnEggChance(LivingEntity entity) {
-        double chance = seasonConfig.SPAWN_EGG_DROP_CHANCE.get(seasonConfig);
-        boolean onlyNatural = seasonConfig.SPAWN_EGG_DROP_ONLY_NATURAL.get(seasonConfig);
+        double chance = seasonConfig.SPAWN_EGG_DROP_CHANCE.get();
+        boolean onlyNatural = seasonConfig.SPAWN_EGG_DROP_ONLY_NATURAL.get();
         if (chance <= 0) return;
         if (entity instanceof EnderDragon) return;
         if (entity instanceof WitherBoss) return;
@@ -666,22 +705,30 @@ public abstract class Season {
         if (entity instanceof ElderGuardian) return;
         if (entity instanceof Snail) return;
         if (entity instanceof TriviaBot) return;
+        //? if <= 1.21.11 {
         if (entity.getTags().contains("notNatural") && onlyNatural) return;
+        //?} else {
+        /*if (entity.entityTags().contains("notNatural") && onlyNatural) return;
+        *///?}
 
         EntityType<?> entityType = entity.getType();
+
+        //? if <= 1.21.11 {
         SpawnEggItem spawnEgg = SpawnEggItem.byId(entityType);
-
-
         if (spawnEgg == null) return;
         ItemStack spawnEggItem = spawnEgg.getDefaultInstance();
+        //?} else {
+        /*ItemStack spawnEggItem = SpawnEggItem.byId(entityType).map(ItemStack::new).orElse(null);
+        *///?}
+
         if (spawnEggItem == null) return;
         if (spawnEggItem.isEmpty()) return;
 
         if (Math.random() <= chance) {
             //? if <=1.21 {
-            entity.spawnAtLocation(spawnEggItem);
-            //?} else
-            /*entity.spawnAtLocation((ServerLevel) entity.level(), spawnEggItem);*/
+            /*entity.spawnAtLocation(spawnEggItem);
+            *///?} else
+            entity.spawnAtLocation((ServerLevel) entity.level(), spawnEggItem);
         }
     }
 
@@ -700,22 +747,31 @@ public abstract class Season {
         if (!player.ls$hasAssignedLives()) {
             assignDefaultLives(player);
         }
-        if (player.ls$hasAssignedLives() && player.ls$isDead() && !PermissionManager.isAdmin(player)) {
+        if (shouldBeInSpectator(player)) {
             player.setGameMode(GameType.SPECTATOR);
-        }
-
-        if (player.ls$isWatcher()) {
-            if (this instanceof DoubleLife doubleLife) {
-                doubleLife.resetSoulmate(player);
-            }
         }
 
         TaskScheduler.scheduleTask(1, () -> {
             if (SubInManager.isBeingSubstituted(player.getUUID())) {
                 SubInManager.removeSubIn(player);
             }
+            if (SubInManager.isSubbingIn(player.getUUID())) {
+                SubInManager.reloadPlayerProfile(player);
+            }
         });
         listsManager.onPlayerJoin(player);
+    }
+
+    public boolean shouldBeInSpectator(ServerPlayer player) {
+        if (!PermissionManager.isAdmin(player)) {
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) {
+                return true;
+            }
+            if (player.ls$isWatcher()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void assignDefaultLives(ServerPlayer player) {
@@ -728,19 +784,19 @@ public abstract class Season {
     public void onPlayerFinishJoining(ServerPlayer player) {
         if (getSeason() != Seasons.UNASSIGNED && SHOW_LOGIN_COMMAND_INFO && !Main.modDisabled()) {
             if (PermissionManager.isAdmin(player)) {
-                player.sendSystemMessage(TextUtils.formatLoosely("§7{} commands: §r{}", getSeason().getName(), getAdminCommands()));
+                player.ls$message(ModifiableText.SEASON_COMMANDS_ADMIN.get(getSeason().getName(), getAdminCommands()));
             }
             else {
-                player.sendSystemMessage(TextUtils.formatLoosely("§7{} non-admin commands: §r{}", getSeason().getName(), getNonAdminCommands()));
+                player.ls$message(ModifiableText.SEASON_COMMANDS.get(getSeason().getName(), getNonAdminCommands()));
             }
         }
 
         learnRecipes();
         if (currentSession.statusNotStarted() && PermissionManager.isAdmin(player) && !Main.modDisabled()) {
-            player.sendSystemMessage(Component.nullToEmpty("\nUse §b'/session timer set <time>'§f to set the desired session time."));
-            player.sendSystemMessage(Component.nullToEmpty("After that, use §b'/session start'§f to start the session."));
+            player.ls$message(ModifiableText.SESSION_START_PROMPT.get());
         }
         boogeymanManager.onPlayerFinishJoining(player);
+        livesManager.onPlayerFinishJoining(player);
     }
 
     public void onPlayerDisconnect(ServerPlayer player) {
@@ -756,5 +812,9 @@ public abstract class Season {
         if (blacklist != null) {
             blacklist.onInventoryUpdated(player);
         }
+    }
+
+    public void usernameChanged(ServerPlayer player) {
+
     }
 }

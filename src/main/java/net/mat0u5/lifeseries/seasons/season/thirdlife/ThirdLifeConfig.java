@@ -20,7 +20,7 @@ public class ThirdLifeConfig extends ConfigManager {
         "netherite_helmet",
         "turtle_helmet",
         //? if >= 1.21.9
-        /*"copper_helmet",*/
+        "copper_helmet",
         "elytra"
     );
 
@@ -69,7 +69,7 @@ public class ThirdLifeConfig extends ConfigManager {
     public void instantiateProperties() {
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
         super.instantiateProperties();
     }
 }

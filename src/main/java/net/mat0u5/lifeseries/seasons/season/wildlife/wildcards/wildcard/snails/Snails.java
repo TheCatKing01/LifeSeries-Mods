@@ -1,11 +1,13 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.config.StringListConfig;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.snail.server.SnailPathfinding;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
@@ -30,6 +32,7 @@ public class Snails extends Wildcard {
 
     public static Map<UUID, Snail> snails = new HashMap<>();
     public static Map<UUID, String> snailNames = new HashMap<>();
+    public static List<UUID> preventSnails = new ArrayList<>();
     long ticks = 0;
 
     @Override
@@ -46,7 +49,7 @@ public class Snails extends Wildcard {
         }
         loadSnailNames();
         if (!currentSession.statusStarted()) {
-            PlayerUtils.broadcastMessageToAdmins(Component.nullToEmpty("§7Use the §f'/snail ...'§7 command to modify snail names and to get info on how to change snail textures."));
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_SNAIL_INFO.get());
         }
         super.activate();
     }
@@ -78,12 +81,29 @@ public class Snails extends Wildcard {
             }
         }
     }
+
     public static boolean canHaveSnail(ServerPlayer player) {
         if (player.isCreative()) return false;
         if (!player.isAlive()) return false;
         if (Events.joiningPlayers.contains(player.getUUID())) return false;
         if (player.isSpectator() && !SuperpowersWildcard.hasActivatedPower(player, Superpowers.ASTRAL_PROJECTION)) return false;
+        if (preventSnails.contains(player.getUUID())) return false;
         return true;
+    }
+
+    public static boolean toggleSnailPrevent(ServerPlayer player) {
+        if (preventSnails.contains(player.getUUID())) {
+            preventSnails.remove(player.getUUID());
+            return true;
+        }
+        else {
+            preventSnails.add(player.getUUID());
+            Snail snail = snails.remove(player.getUUID());
+            if (snail != null) {
+                snail.serverData.despawn();
+            }
+            return false;
+        }
     }
 
     public static void spawnSnailFor(ServerPlayer player) {
@@ -112,6 +132,11 @@ public class Snails extends Wildcard {
             }
         }
         toKill.forEach(Entity::discard);
+    }
+
+    public static void reloadSnails() {
+        reloadSnailNames();
+        reloadSnailSkins();
     }
 
     public static void reloadSnailNames() {
@@ -145,7 +170,7 @@ public class Snails extends Wildcard {
         if (snailNames.containsKey(player.getUUID())) {
             return snailNames.get(player.getUUID());
         }
-        return TextUtils.formatString("{}'s Snail", player);
+        return ModifiableText.WILDLIFE_SNAIL_DEFAULT_NAME.getString(player);
     }
 
     public static void saveSnailNames() {

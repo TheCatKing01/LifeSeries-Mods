@@ -1,17 +1,21 @@
 package net.mat0u5.lifeseries.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Either;
 import net.mat0u5.lifeseries.Main;
-import net.mat0u5.lifeseries.entity.fakeplayer.FakePlayer;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
-import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLife;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.utils.interfaces.IServerPlayer;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.player.NicknameManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +26,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,18 +40,20 @@ import java.util.OptionalInt;
 import static net.mat0u5.lifeseries.Main.*;
 
 //? if >= 1.21.11 {
-/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
-*///?}
+//?}
 //? if >= 1.21.2
-/*import java.util.Collection;*/
+import java.util.Collection;
+//? if <= 1.21.6
+//import net.mat0u5.lifeseries.entity.fakeplayer.FakePlayer;
 
 @Mixin(value = ServerPlayer.class, priority = 1)
 public class ServerPlayerMixin implements IServerPlayer {
 
     @Inject(method = "openMenu", at = @At("HEAD"))
     private void onInventoryOpen(@Nullable MenuProvider factory, CallbackInfoReturnable<OptionalInt> cir) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         ServerPlayer player = ls$get();
         if (blacklist == null) return;
         
@@ -57,7 +64,7 @@ public class ServerPlayerMixin implements IServerPlayer {
     }
 
     //? if <= 1.21.6 {
-    @Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", at = @At("HEAD"), cancellable = true)
     private void sendMessageToClient(Component message, boolean overlay, CallbackInfo ci) {
         if (Main.modFullyDisabled()) return;
         ServerPlayer player = ls$get();
@@ -83,14 +90,17 @@ public class ServerPlayerMixin implements IServerPlayer {
             cir.setReturnValue(false);
         }
     }
-    //?}
+    *///?}
 
+    //Located in the Player class in 26.1+
+    //? if <= 1.21.11 {
     @Inject(method = "attack", at = @At("HEAD"))
     private void onAttackEntity(Entity target, CallbackInfo ci) {
-        if (Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         ServerPlayer player = ls$get();
         currentSeason.onUpdatedInventory(player);
     }
+    //?}
 
     @Inject(method = "onEffectAdded", at = @At("TAIL"))
     private void onStatusEffectApplied(MobEffectInstance effect, Entity source, CallbackInfo ci) {
@@ -98,18 +108,18 @@ public class ServerPlayerMixin implements IServerPlayer {
     }
 
     //? if <= 1.21 {
-    @Inject(method = "onEffectRemoved", at = @At("TAIL"))
+    /*@Inject(method = "onEffectRemoved", at = @At("TAIL"))
     private void onStatusEffectRemoved(MobEffectInstance effect, CallbackInfo ci) {
         ls$onUpdatedEffects(effect, false);
     }
-    //?} else {
-    /*@Inject(method = "onEffectsRemoved", at = @At("TAIL"))
+    *///?} else {
+    @Inject(method = "onEffectsRemoved", at = @At("TAIL"))
     private void onStatusEffectRemoved(Collection<MobEffectInstance> effects, CallbackInfo ci) {
         for (MobEffectInstance effect : effects) {
             ls$onUpdatedEffects(effect, false);
         }
     }
-    *///?}
+    //?}
 
     @Inject(method = "onEffectUpdated", at = @At("TAIL"))
     private void onStatusEffectUpgraded(MobEffectInstance effect, boolean reapplyEffect, Entity source, CallbackInfo ci) {
@@ -122,7 +132,7 @@ public class ServerPlayerMixin implements IServerPlayer {
 
     @Unique
     private void ls$onUpdatedEffects(MobEffectInstance effect, boolean add) {
-        if (ls$processing || Main.modDisabled()) {
+        if (ls$processing || Main.isClientOrDisabled()) {
             return;
         }
         ServerPlayer player = ls$get();
@@ -207,52 +217,123 @@ public class ServerPlayerMixin implements IServerPlayer {
     @Unique @Override
     public void ls$hurt(DamageSource source, float amount) {
         //? if <= 1.21 {
-        ls$get().hurt(source, amount);
-        //?} else {
-        /*ls$get().hurtServer(ls$getServerLevel(), source, amount);
-         *///?}
+        /*ls$get().hurt(source, amount);
+        *///?} else {
+        ls$get().hurtServer(ls$getServerLevel(), source, amount);
+         //?}
     }
     @Unique @Override
     public void ls$hurt(ServerLevel level, DamageSource source, float amount) {
         //? if <= 1.21 {
-        ls$get().hurt(source, amount);
-        //?} else {
-        /*ls$get().hurtServer(level, source, amount);
-         *///?}
+        /*ls$get().hurt(source, amount);
+        *///?} else {
+        ls$get().hurtServer(level, source, amount);
+         //?}
     }
 
     @Unique @Override
     public ServerLevel ls$getServerLevel() {
         //? if <= 1.21.5 {
-        return ls$get().serverLevel();
-        //?} else {
-        /*return ls$get().level();
-         *///?}
+        /*return ls$get().serverLevel();
+        *///?} else {
+        return ls$get().level();
+         //?}
     }
 
     @Unique @Override
     public void ls$playNotifySound(SoundEvent sound, SoundSource soundSource, float volume, float pitch) {
         ServerPlayer self = ls$get();
         //? if <= 1.21.9 {
-        self.playNotifySound(sound, soundSource, volume, pitch);
-        //?} else {
-        /*self.connection
+        /*self.playNotifySound(sound, soundSource, volume, pitch);
+        *///?} else {
+        self.connection
                 .send(
                         new ClientboundSoundPacket(
                                 BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), soundSource, self.getX(), self.getY(), self.getZ(), volume, pitch, self.getRandom().nextLong()
                         )
                 );
-        *///?}
+        //?}
     }
 
+    @Unique @Override
+    public void ls$message(Component component) {
+        if (component.getString().isEmpty()) return;
+        ls$get().sendSystemMessage(component, false);
+    }
 
-    @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
-    private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        if (!Main.modDisabled() && currentSeason.getSeason() == Seasons.NICE_LIFE) {
-            if (NiceLifeTriviaManager.triviaInProgress) {
-                cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
-                ls$get().displayClientMessage(Component.literal("You can't seem to sleep right now"), true);
+    @Unique @Override
+    public void ls$message(Component component, boolean aboveHotbar) {
+        if (component.getString().isEmpty()) return;
+        ls$get().sendSystemMessage(component, aboveHotbar);
+    }
+	
+	@Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
+		private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+			if (Main.isLogicalNonDisabled() && currentSeason instanceof NiceLife niceLife) {
+
+				if (!NiceLife.SLEEP_BEFORE_MIDNIGHT && niceLife.isNight() && !niceLife.isAfterMidnight()) {
+					cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
+					ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
+					return;
+				}
+
+				if (NiceLifeTriviaManager.triviaInProgress) {
+					cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
+					ls$get().ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);
+				}
+			}
+		}
+
+    @Inject(method = "getTabListDisplayName", at = @At("TAIL"), cancellable = true)
+    private void customNickname(CallbackInfoReturnable<Component> cir) {
+        try {
+            Component nickname = NicknameManager.getNicknameText(ls$get().getUUID());
+
+            if (nickname != null) {
+                Component formattedName = PlayerTeam.formatNameForTeam(ls$get().getTeam(), nickname);
+                cir.setReturnValue(formattedName);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @WrapOperation(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+    private void modifyDeathMessage(PlayerList instance, Component component, boolean bl, Operation<Void> original) {
+        if (Main.isClientOrDisabled() || livesManager == null || !livesManager.SHOW_LIFE_DIFF) {
+            original.call(instance, component, bl);
+        }
+        else {
+            livesManager.updateLastStats();
+            TaskScheduler.schedulePriorityTask(1, () -> {
+                original.call(instance, livesManager.modifyBroadcastDeathMessage(component), bl);
+            });
+        }
+    }
+
+    @WrapOperation(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemToTeam(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/network/chat/Component;)V"))
+    private void modifyDeathMessage2(PlayerList instance, Player player, Component component, Operation<Void> original) {
+        if (Main.isClientOrDisabled() || livesManager == null || !livesManager.SHOW_LIFE_DIFF) {
+            original.call(instance, player, component);
+        }
+        else {
+            livesManager.updateLastStats();
+            TaskScheduler.schedulePriorityTask(1, () -> {
+                original.call(instance, player, livesManager.modifyBroadcastDeathMessage(component));
+            });
+        }
+    }
+
+    @WrapOperation(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemToAllExceptTeam(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/network/chat/Component;)V"))
+    private void modifyDeathMessage3(PlayerList instance, Player player, Component component, Operation<Void> original) {
+        if (Main.isClientOrDisabled() || livesManager == null || !livesManager.SHOW_LIFE_DIFF) {
+            original.call(instance, player, component);
+        }
+        else {
+            livesManager.updateLastStats();
+            TaskScheduler.schedulePriorityTask(1, () -> {
+                original.call(instance, player, livesManager.modifyBroadcastDeathMessage(component));
+            });
         }
     }
 }

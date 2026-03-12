@@ -1,0 +1,165 @@
+{
+    "wildlife_trivia_intro": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_intro",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_trivia_suspense": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_suspense",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_trivia_suspense_end": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_suspense_end",
+                "stream": true
+            }
+        ]
+    },
+    "wildlife_trivia_analyzing": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_analyzing"
+            }
+        ]
+    },
+    "wildlife_trivia_correct": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_correct"
+            }
+        ]
+    },
+    "wildlife_trivia_incorrect": {
+        "sounds": [
+            {
+                "attenuation_distance": 32,
+                "name": "wildlife/trivia/triviabot_incorrect"
+            }
+        ]
+    },
+    "nicelife_santabot_analyzing": {
+        "sounds": [
+            "nicelife/santabot_analyzing"
+        ]
+    },
+    "nicelife_santabot_away": {
+        "sounds": [
+            "nicelife/santabot_away"
+        ]
+    },
+    "nicelife_santabot_christmas_soundbyte": {
+        "sounds": [
+            "nicelife/santabot_christmas_soundbyte"
+        ]
+    },
+
+    "nicelife_santabot_correct1": {
+        "sounds": [
+            "nicelife/santabot_correct1"
+        ]
+    },
+    "nicelife_santabot_correct2": {
+        "sounds": [
+            "nicelife/santabot_correct2"
+        ]
+    },
+    "nicelife_santabot_correct3": {
+        "sounds": [
+            "nicelife/santabot_correct3"
+        ]
+    },
+    "nicelife_santabot_correct4": {
+        "sounds": [
+            "nicelife/santabot_correct4"
+        ]
+    },
+    "nicelife_santabot_correct5": {
+        "sounds": [
+            "nicelife/santabot_correct5"
+        ]
+    },
+    "nicelife_santabot_correct6": {
+        "sounds": [
+            "nicelife/santabot_correct6"
+        ]
+    },
+    "nicelife_santabot_incorrect1": {
+        "sounds": [
+            "nicelife/santabot_incorrect1"
+        ]
+    },
+    "nicelife_santabot_incorrect2": {
+        "sounds": [
+            "nicelife/santabot_incorrect2"
+        ]
+    },
+    "nicelife_santabot_incorrect3": {
+        "sounds": [
+            "nicelife/santabot_incorrect3"
+        ]
+    },
+    "nicelife_santabot_incorrect4": {
+        "sounds": [
+            "nicelife/santabot_incorrect4"
+        ]
+    },
+    "nicelife_santabot_incorrect5": {
+        "sounds": [
+            "nicelife/santabot_incorrect5"
+        ]
+    },
+    "nicelife_santabot_incorrect6": {
+        "sounds": [
+            "nicelife/santabot_incorrect6"
+        ]
+    },
+
+    "nicelife_santabot_incorrect_all_wrong": {
+        "sounds": [
+            "nicelife/santabot_incorrect_all_wrong"
+        ]
+    },
+    "nicelife_santabot_intro": {
+        "sounds": [
+            "nicelife/santabot_intro"
+        ]
+    },
+    "nicelife_santabot_introduction_long": {
+        "sounds": [
+            "nicelife/santabot_introduction_long"
+        ]
+    },
+    "nicelife_santabot_introduction_short": {
+        "sounds": [
+            "nicelife/santabot_introduction_short"
+        ]
+    },
+    "nicelife_santabot_suspense": {
+        "sounds": [
+            "nicelife/santabot_suspense"
+        ]
+    },
+    "nicelife_santabot_suspense_end": {
+        "sounds": [
+            "nicelife/santabot_suspense_end"
+        ]
+    },
+    "nicelife_santabot_turn": {
+      "sounds": [
+        "nicelife/santabot_turn"
+      ]
+    }
+}

@@ -25,7 +25,7 @@ public class DoubleLifeConfig extends ConfigManager {
             "netherite_helmet",
             "turtle_helmet",
             //? if >= 1.21.9
-            /*"copper_helmet",*/
+            "copper_helmet",
             "elytra"
     );
 
@@ -156,6 +156,15 @@ public class DoubleLifeConfig extends ConfigManager {
             "Reroll Based On Life Count", "Controls if soulbounds are rerolled by based on life counts. "
     );
 
+    public static final ConfigFileEntry<Double> SOULMATES_ASSIGN_MINUTE = new ConfigFileEntry<>(
+            "soulmates_assign_time", 1.0, ConfigTypes.MINUTES, "season[new]",
+            "Soulmates Assign Time", "How many minutes after the session starts the soulmates get assigned."
+    );
+    public static final ConfigFileEntry<Boolean> SOULBOUND_LIVES = new ConfigFileEntry<>(
+            "soulbound_lives", true, "season.soulbind[new]",
+            "Soulbound Lives", "Controls whether soulmates share their life count."
+    );
+
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
             "group_soulbind", null, ConfigTypes.TEXT, "{season.soulbind}",
             "More Soulbind Options", ""
@@ -197,11 +206,14 @@ public class DoubleLifeConfig extends ConfigManager {
 				,RANDOM_LIVES_MIN
                 ,RANDOM_LIVES_MAX	
 				,SOULMATES_SHARE_ROLL					
-				
+                , SOULBOUND_BOOGEYMAN
+                ,SOULBOUND_LIVES
+                ,SOULMATES_PVP_ALLOWED
+                , SOULMATES_ASSIGN_MINUTE
         ));
         //? if >= 1.21.6 {
-        /*result.add(SOULMATE_LOCATOR_BAR);
-        *///?}
+        result.add(SOULMATE_LOCATOR_BAR);
+        //?}
         return result;
     }
 
@@ -210,7 +222,9 @@ public class DoubleLifeConfig extends ConfigManager {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
-        BLACKLIST_CLAMPED_ENCHANTS.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);
+        LIVES_RANDOMIZE_MINUTE.defaultValue = 1.25;
+        LIVES_RANDOMIZE_MINUTE.description += "\n§cThis time should ALWAYS be after soulmates rolling!";
         super.instantiateProperties();
     }
 }

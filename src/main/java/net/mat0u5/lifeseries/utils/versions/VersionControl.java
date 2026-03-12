@@ -113,18 +113,27 @@ public class VersionControl {
         *   1.4.5       -   1.4.5.4
         *   1.4.5.5     -   1.4.5.42
         *   1.4.5.43    -   1.5.0-pre3
-        *   1.5.0       -   *
+        *   1.5.0
+        *   1.5.0.1     -   1.5.0.15
+        *   1.5.0.16
+        *   1.5.0.17    -   1.5.0.21
+        *   1.5.0.22    -   1.5.0.23
+        *   1.5.0.24
+        *   1.5.0.25    -   1.5.0.29
+        *   1.5.0.30    -   1.5.1-pre1
+        *   1.5.1       -   1.5.2-pre1
+        *   1.5.2       -   *
      */
 
     public static String clientCompatibilityMin() {
         // This is the version that the SERVER needs to have for the current client.
         if (Main.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.5.0";
+        return "1.5.2";
     }
 
     public static String serverCompatibilityMin() {
         // This is the version that the CLIENT needs to have for the current server.
         if (Main.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.5.0";
+        return "1.5.2";
     }
 }

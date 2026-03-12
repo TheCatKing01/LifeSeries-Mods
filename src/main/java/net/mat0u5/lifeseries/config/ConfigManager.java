@@ -5,6 +5,10 @@ import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.ConfigPayload;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
+import net.mat0u5.lifeseries.seasons.season.secretlife.TaskManager;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestion;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
@@ -12,9 +16,7 @@ import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.border.BorderStatus;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,6 +24,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
+
+//? if <= 1.20.2
+//import net.minecraft.world.scores.Score;
 //? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
 
@@ -48,6 +53,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_LIVES
                 ,GROUP_TEAMS
                 ,GROUP_EVENTS
+                ,GROUP_TEXTS
 
                 , GROUP_GLOBAL_LIVES // Group
                 ,DEFAULT_LIVES
@@ -58,17 +64,17 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,MAX_PLAYER_HEALTH // Group
                 ,KEEP_INVENTORY
 
-                //? if < 1.21.9 {
+                ,WORLDBORDER_GROUP
                 ,WORLDBORDER_SIZE
-                //?} else {
-                /*,WORLDBORDER_GROUP
-                ,WORLDBORDER_SIZE
+                //? if >= 1.21.9 {
                 ,WORLDBORDER_NETHER_SIZE
                 ,WORLDBORDER_END_SIZE
-                *///?}
+                //?}
+                , WORLDBORDER_OUTSIDE_TELEPORT
+
                 //? if >= 1.21.6 {
-                /*,LOCATOR_BAR
-                 *///?}
+                ,LOCATOR_BAR
+                 //?}
                 ,ALLOW_SELF_DEFENSE
                 ,SEE_FRIENDLY_INVISIBLE_PLAYERS
                 ,SHOW_LOGIN_COMMAND_INFO
@@ -79,6 +85,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 //?}
                 ,BROADCAST_LIFE_GAIN
                 ,ADDITIONAL_WITHER_SKULL_RATE
+                ,SESSION_START_COUNTDOWN
 
 
                 ,GROUP_BLACKLIST // Group
@@ -91,6 +98,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,TAB_LIST_SHOW_DEAD_PLAYERS
                 ,GROUP_SPAWN_EGG // Group
                 ,GROUP_WATCHERS // Group
+                ,GROUP_SUBIN // Group
 
                 ,LISTS // Group
                 ,SIMPLE_LIFE //Group
@@ -101,7 +109,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,BLACKLIST_ITEMS
                 ,BLACKLIST_RECIPES
                 ,BLACKLIST_BLOCKS
-                ,BLACKLIST_CLAMPED_ENCHANTS
+                ,GROUP_CLAMPED_ENCHANTS
+                    ,BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1
+                    ,BLACKLIST_CLAMPED_ENCHANTS_LEVEL_2
+                    ,BLACKLIST_CLAMPED_ENCHANTS_LEVEL_3
+                    ,BLACKLIST_CLAMPED_ENCHANTS_LEVEL_4
                 ,BLACKLIST_BANNED_ENCHANTS
                 ,BLACKLIST_BANNED_POTION_EFFECTS
                 ,BLACKLIST_CLAMPED_POTION_EFFECTS
@@ -113,7 +125,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,BOOGEYMAN_CHANCE_MULTIPLIER
                 ,BOOGEYMAN_IGNORE
                 ,BOOGEYMAN_FORCE
-                ,BOOGEYMAN_MESSAGE
                 ,BOOGEYMAN_CHOOSE_MINUTE
                 ,BOOGEYMAN_ANNOUNCE_OUTCOME
                     ,BOOGEYMAN_INFINITE // Group
@@ -122,6 +133,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,BOOGEYMAN_TEAM_NOTICE
                 ,BOOGEYMAN_KILLS_NEEDED
                 ,BOOGEYMAN_STEAL_LIFE
+                ,BOOGEYMAN_LOCATOR_BAR
 
                 ,SECRET_SOCIETY_MEMBER_AMOUNT
                 ,SECRET_SOCIETY_START_TIME
@@ -134,8 +146,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,PLAYERS_DROP_ITEMS_ON_FINAL_DEATH
                 ,FINAL_DEATH_TITLE_SHOW
-                ,FINAL_DEATH_TITLE_SUBTITLE
-                ,FINAL_DEATH_MESSAGE
                 ,FINAL_DEATH_LIGHTNING
                 ,FINAL_DEATH_SOUND
 
@@ -161,6 +171,14 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,TRADERS_MAX_AMOUNT
                 ,COMPLEX_LIFE_TRADES
+				
+                ,SUBIN_CHANGE_SKIN
+                ,SUBIN_CHANGE_USERNAME
+                ,LIVES_LIFE_DIFF_MESSAGE
+                ,LIVES_RANDOMIZE
+                ,LIVES_RANDOMIZE_MIN
+                ,LIVES_RANDOMIZE_MAX
+                , LIVES_RANDOMIZE_MINUTE
         ));
     }
 
@@ -189,6 +207,20 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 getOrCreateProperty(entry.key, stringValue);
             }
         }
+    }
+
+    public List<String> getAvailableConfigKeys() {
+        List<String> result = new ArrayList<>();
+        for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.TEXT) continue;
+            if (entry.type == ConfigTypes.GROUP) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            if (entry.type == ConfigTypes.NULL) continue;
+            result.add(entry.key);
+        }
+        return result;
     }
 
     public void sendConfigTo(ServerPlayer player) {
@@ -247,6 +279,92 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, teamEntry, index);
             index++;
         }
+        if (currentSeason.getSeason() == Seasons.SECRET_LIFE) {
+            for (String easyTask : TaskManager.easyTasks_all) {
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.easy",
+                        "", "", List.of("easy", easyTask), true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+            for (String hardTask : TaskManager.hardTasks_all) {
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.hard",
+                        "", "", List.of("hard", hardTask), true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+            for (String redTask : TaskManager.redTasks_all) {
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.red",
+                        "", "", List.of("red", redTask), true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+        }
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            for (TriviaQuestion question : TriviaWildcard.easyTrivia.tryGetTriviaQuestions()) {
+                List<String> info = new ArrayList<>();
+                info.add("easy");
+                info.add(question.getQuestion());
+                info.add(String.valueOf(question.getCorrectAnswerIndex()));
+                info.addAll(question.getAnswers());
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_trivia_entry_"+ UUID.randomUUID(), null, ConfigTypes.TRIVIA_QUESTION, "season.trivia.questions.easy",
+                        "", "", info, true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+            for (TriviaQuestion question : TriviaWildcard.normalTrivia.tryGetTriviaQuestions()) {
+                List<String> info = new ArrayList<>();
+                info.add("normal");
+                info.add(question.getQuestion());
+                info.add(String.valueOf(question.getCorrectAnswerIndex()));
+                info.addAll(question.getAnswers());
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_trivia_entry_"+ UUID.randomUUID(), null, ConfigTypes.TRIVIA_QUESTION, "season.trivia.questions.normal",
+                        "", "", info, true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+            for (TriviaQuestion question : TriviaWildcard.hardTrivia.tryGetTriviaQuestions()) {
+                List<String> info = new ArrayList<>();
+                info.add("hard");
+                info.add(question.getQuestion());
+                info.add(String.valueOf(question.getCorrectAnswerIndex()));
+                info.addAll(question.getAnswers());
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_trivia_entry_"+ UUID.randomUUID(), null, ConfigTypes.TRIVIA_QUESTION, "season.trivia.questions.hard",
+                        "", "", info, true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+        }
+        if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            for (TriviaQuestion question : NiceLifeTriviaManager.triviaQuestions.tryGetTriviaQuestions()) {
+                List<String> info = new ArrayList<>();
+                info.add("normal");
+                info.add(question.getQuestion());
+                info.add(String.valueOf(question.getCorrectAnswerIndex()));
+                info.addAll(question.getAnswers());
+                ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
+                        "dynamic_trivia_entry_"+ UUID.randomUUID(), null, ConfigTypes.TRIVIA_QUESTION, "season.trivia.questions",
+                        "", "", info, true
+                );
+                sendConfigEntry(player, taskEntry, index);
+                index++;
+            }
+        }
+        for (Map.Entry<String, ConfigFileEntry<String>> entry : ModifiableTextManager.getRegisteredEntries().entrySet()) {
+            sendConfigEntry(player, entry.getValue(), index);
+            index++;
+        }
     }
 
     public void sendConfigEntry(ServerPlayer player, ConfigFileEntry<?> entry, int index) {
@@ -295,6 +413,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
         renamedProperty("blacklist_banned_potions", "blacklist_banned_potion_effects");
         renamedProperty("auto_keep_inventory", "keep_inventory");
         renamedProperty("beoadcast_secret_keeper", "broadcast_secret_keeper");
+        renamedProperty("blacklist_clamped_enchants", "blacklist_clamped_enchants_level_1");
+        renamedProperty("wildcard_superpowers_zombies_lose_items", "wildcard_superpowers_zombies_first_spawn_clear_items");
+        renamedProperty("boogeyman_message", "text.boogeyman.message");
+        renamedProperty("final_death_title_subtitle", "text.final.death.title.subtitle");
+        renamedProperty("text.wildlife.superpowes.dead", "text.wildlife.superpowers.dead");
     }
 
     private void renamedProperty(String from, String to) {
@@ -307,6 +430,15 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
             removeProperty(from);
         }
+    }
+
+    public static void onUpdatedUnknown(String id, String value) {
+        try {
+            onUpdatedBoolean(id, Boolean.parseBoolean(value));
+        }catch(Exception e) {}
+        try {
+            onUpdatedInteger(id, Integer.parseInt(value));
+        }catch(Exception e) {}
     }
 
     public static void onUpdatedBoolean(String id, boolean value) {
@@ -326,7 +458,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             if (overworld != null) overworld.getWorldBorder().setSize(value);
         }
         //? if >= 1.21.9 {
-        /*if (id.equals(seasonConfig.WORLDBORDER_NETHER_SIZE.key)) {
+        if (id.equals(seasonConfig.WORLDBORDER_NETHER_SIZE.key)) {
             ServerLevel nether = server.getLevel(Level.NETHER);
             if (nether != null) nether.getWorldBorder().setSize(value);
         }
@@ -334,7 +466,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             ServerLevel end = server.getLevel(Level.END);
             if (end != null) end.getWorldBorder().setSize(value);
         }
-        *///?}
+        //?}
     }
 
     public static void moveOldMainFileIfExists() {

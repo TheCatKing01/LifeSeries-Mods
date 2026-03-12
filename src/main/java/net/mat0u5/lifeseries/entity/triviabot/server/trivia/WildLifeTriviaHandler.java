@@ -2,16 +2,17 @@ package net.mat0u5.lifeseries.entity.triviabot.server.trivia;
 
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.entity.triviabot.server.TriviaBotPathfinding;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.SizeShifting;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestion;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
-import net.mat0u5.lifeseries.utils.enums.PacketNames;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -57,15 +58,15 @@ import net.minecraft.core.component.DataComponents;
 //?}
 
 //? if > 1.21.9
-/*import net.minecraft.world.entity.EntityReference;*/
+import net.minecraft.world.entity.EntityReference;
 
 //? if <= 1.21.9 {
-import net.minecraft.world.entity.animal.Bee;
+/*import net.minecraft.world.entity.animal.Bee;
 import org.apache.http.util.EntityUtils;
 import org.joml.Vector3f;
-//?} else {
-/*import net.minecraft.world.entity.animal.bee.Bee;
-*///?}
+*///?} else {
+import net.minecraft.world.entity.animal.bee.Bee;
+//?}
 
 public class WildLifeTriviaHandler extends TriviaHandler {
     public WildLifeTriviaHandler(TriviaBot bot) {
@@ -115,7 +116,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
                 if (!bot.ranOutOfTime()) {
                     ServerPlayer boundPlayer = bot.serverData.getBoundPlayer();
                     if (boundPlayer != null) {
-                        NetworkHandlerServer.sendStringPacket(boundPlayer, PacketNames.RESET_TRIVIA, "true");
+                        SimplePackets.RESET_TRIVIA.target(boundPlayer).sendToClient();
                     }
                 }
                 bot.setRanOutOfTime(true);
@@ -304,18 +305,18 @@ public class WildLifeTriviaHandler extends TriviaHandler {
     private static final List<Holder<MobEffect>> blessEffects = List.of(
     //?}
             //? if <= 1.21.4 {
-            MobEffects.MOVEMENT_SPEED,
+            /*MobEffects.MOVEMENT_SPEED,
             MobEffects.DIG_SPEED,
             MobEffects.DAMAGE_BOOST,
             MobEffects.JUMP,
             MobEffects.DAMAGE_RESISTANCE,
-            //?} else {
-            /*MobEffects.SPEED,
+            *///?} else {
+            MobEffects.SPEED,
             MobEffects.HASTE,
             MobEffects.STRENGTH,
             MobEffects.JUMP_BOOST,
             MobEffects.RESISTANCE,
-            *///?}
+            //?}
 
             MobEffects.REGENERATION,
             MobEffects.FIRE_RESISTANCE,
@@ -350,16 +351,16 @@ public class WildLifeTriviaHandler extends TriviaHandler {
             if (effect == null) continue;
             int amplifier;
             //? if <= 1.21.4 {
-            if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
+            /*if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
                     effect == MobEffects.REGENERATION || effect == MobEffects.DAMAGE_BOOST || effect == MobEffects.HEALTH_BOOST || effect == MobEffects.DAMAGE_RESISTANCE) {
                 amplifier = 0;
             }
-            //?} else {
-            /*if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
+            *///?} else {
+            if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
                     effect == MobEffects.REGENERATION || effect == MobEffects.STRENGTH || effect == MobEffects.HEALTH_BOOST || effect == MobEffects.RESISTANCE) {
                 amplifier = 0;
             }
-            *///?}
+            //?}
             else {
                 amplifier = player.getRandom().nextInt(4);
             }
@@ -376,7 +377,8 @@ public class WildLifeTriviaHandler extends TriviaHandler {
             *///?} else {
             Component effectName = Component.translatable(effect.value().getDescriptionId());
             //?}
-            player.sendSystemMessage(TextUtils.formatLoosely(" §a§l+ §7{}§6 {}", effectName, romanNumeral));
+            player.ls$message(ModifiableText.WILDLIFE_TRIVIA_RECEIVE_EFFECT.get(effectName, romanNumeral));
+
         }
         player.sendSystemMessage(Component.empty());
     }
@@ -530,10 +532,10 @@ public class WildLifeTriviaHandler extends TriviaHandler {
     public static void curseMoonjump(ServerPlayer player) {
         cursedMoonJumpPlayers.add(player.getUUID());
         //? if >= 1.21.5 {
-        /*AttributeUtils.setJumpStrength(player, 0.85);
-        *///?} else {
-        AttributeUtils.setJumpStrength(player, 0.76);
-        //?}
+        AttributeUtils.setJumpStrength(player, 0.85);
+        //?} else {
+        /*AttributeUtils.setJumpStrength(player, 0.76);
+        *///?}
     }
 
     public static void curseBeeswarm(ServerPlayer player, BlockPos pos) {
@@ -544,7 +546,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         Bee bee4 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
         Bee bee5 = LevelUtils.spawnEntity(EntityType.BEE, player.ls$getServerLevel(), spawnPos);
         //? if <= 1.21.9 {
-        if (bee1 != null) bee1.setPersistentAngerTarget(player.getUUID());
+        /*if (bee1 != null) bee1.setPersistentAngerTarget(player.getUUID());
         if (bee2 != null) bee2.setPersistentAngerTarget(player.getUUID());
         if (bee3 != null) bee3.setPersistentAngerTarget(player.getUUID());
         if (bee4 != null) bee4.setPersistentAngerTarget(player.getUUID());
@@ -554,8 +556,8 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         if (bee3 != null) bee3.setRemainingPersistentAngerTime(1000000);
         if (bee4 != null) bee4.setRemainingPersistentAngerTime(1000000);
         if (bee5 != null) bee5.setRemainingPersistentAngerTime(1000000);
-        //?} else {
-        /*if (bee1 != null) bee1.setPersistentAngerTarget(EntityReference.of(player.getUUID()));
+        *///?} else {
+        if (bee1 != null) bee1.setPersistentAngerTarget(EntityReference.of(player.getUUID()));
         if (bee2 != null) bee2.setPersistentAngerTarget(EntityReference.of(player.getUUID()));
         if (bee3 != null) bee3.setPersistentAngerTarget(EntityReference.of(player.getUUID()));
         if (bee4 != null) bee4.setPersistentAngerTarget(EntityReference.of(player.getUUID()));
@@ -565,7 +567,7 @@ public class WildLifeTriviaHandler extends TriviaHandler {
         if (bee3 != null) bee3.setPersistentAngerEndTime(bee3.getAge() + 1000000);
         if (bee4 != null) bee4.setPersistentAngerEndTime(bee4.getAge() + 1000000);
         if (bee5 != null) bee5.setPersistentAngerEndTime(bee5.getAge() + 1000000);
-        *///?}
+        //?}
     }
 
     public static final List<UUID> cursedRoboticVoicePlayers = new ArrayList<>();

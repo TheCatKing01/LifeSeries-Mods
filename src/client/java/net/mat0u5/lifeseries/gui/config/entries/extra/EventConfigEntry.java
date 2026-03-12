@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.gui.config.entries.extra;
 import net.mat0u5.lifeseries.gui.config.entries.main.StringConfigEntry;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.render.RenderUtils;
+import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,14 +12,14 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Objects;
 //? if >= 1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-*///?}
+import net.minecraft.client.input.MouseButtonEvent;
+//?}
 
 //? if <= 1.21.9 {
-import net.minecraft.Util;
-//?} else {
-/*import net.minecraft.util.Util;
- *///?}
+/*import net.minecraft.Util;
+*///?} else {
+import net.minecraft.util.Util;
+ //?}
 
 public class EventConfigEntry extends StringConfigEntry {
     Boolean canceled;
@@ -58,8 +59,15 @@ public class EventConfigEntry extends StringConfigEntry {
             int widthText = textRenderer.width(part1);
             openTutorialButton.setX(x+widthText+15);
             RenderUtils.text(part2, x+widthText+openTutorialButton.getWidth()+20, y+6).render(context, textRenderer);
+
+            RenderUtils.text(Component.literal("Run Command:"), textField.getX(), y+6).colored(TextColors.LIGHT_GRAY).render(context, textRenderer);
         }
         super.renderEntry(context, x, y + (isFirst?PREFFERED_HEIGHT:0), width, height, mouseX, mouseY, hovered, tickDelta);
+    }
+
+    @Override
+    protected int getTextFieldPosY(int y, int height) {
+        return y+1;
     }
 
     @Override
@@ -140,21 +148,21 @@ public class EventConfigEntry extends StringConfigEntry {
 
 
     //? if <= 1.21.6 {
-    @Override
+    /*@Override
     protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
         if (canceledButton.mouseClicked(mouseX, mouseY, button) || openTutorialButton.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         return super.mouseClickedEntry(mouseX, mouseY, button);
     }
-    //?} else {
-    /*@Override
+    *///?} else {
+    @Override
     protected boolean mouseClickedEntry(MouseButtonEvent click, boolean doubled) {
         if (canceledButton.mouseClicked(click, doubled) || openTutorialButton.mouseClicked(click, doubled)) {
             return true;
         }
         return super.mouseClickedEntry(click, doubled);
     }
-    *///?}
+    //?}
 
 }

@@ -14,13 +14,13 @@ import static net.mat0u5.lifeseries.Main.currentSeason;
 @Mixin(value = Biome.class, priority = 1)
 public class BiomeMixin {
     //? if <= 1.21 {
-    @Inject(method = "getTemperature", at = @At(value = "HEAD"), cancellable = true)
-    public void render(BlockPos blockPos, CallbackInfoReturnable<Float> cir) {
-    //?} else {
     /*@Inject(method = "getTemperature", at = @At(value = "HEAD"), cancellable = true)
+    public void render(BlockPos blockPos, CallbackInfoReturnable<Float> cir) {
+    *///?} else {
+    @Inject(method = "getTemperature", at = @At(value = "HEAD"), cancellable = true)
     public void render(BlockPos blockPos, int i, CallbackInfoReturnable<Float> cir) {
-    *///?}
-        if (!Main.modDisabled() && currentSeason.getSeason() == Seasons.NICE_LIFE) {
+    //?}
+        if (!Main.modDisabled() && Main.getSeason() == Seasons.NICE_LIFE) {
             cir.setReturnValue(0.0f);
         }
     }

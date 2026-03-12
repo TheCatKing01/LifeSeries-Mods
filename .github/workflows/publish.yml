@@ -26,7 +26,7 @@ on:
       full_changelog:
         description: 'Full Changelog Link'
         required: true
-        default: 'https://github.com/Mat0u5/LifeSeries'
+        default: 'https://mat0u5.github.io/LifeSeries-docs/dev/changelog/?v=1.5.0-1.5.1'
         type: string
       version_type:
         description: 'Version type'
@@ -55,10 +55,10 @@ jobs:
       - name: validate gradle wrapper
         uses: gradle/wrapper-validation-action@v2
 
-      - name: setup jdk 21
+      - name: setup jdk 25
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 25
           distribution: 'microsoft'
 
       - name: make gradle wrapper executable

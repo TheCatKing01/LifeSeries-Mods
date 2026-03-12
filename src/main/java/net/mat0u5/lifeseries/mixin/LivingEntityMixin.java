@@ -30,7 +30,7 @@ import static net.mat0u5.lifeseries.Main.blacklist;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
 //? if >= 1.21.2
-/*import net.minecraft.world.entity.monster.creaking.Creaking;*/
+import net.minecraft.world.entity.monster.creaking.Creaking;
 
 //? if = 1.21.2 {
 /*import java.util.function.DoubleSupplier;
@@ -38,16 +38,16 @@ import java.util.function.Predicate;
 *///?}
 
 //? if >= 1.21.9 {
-/*import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.AstralProjection;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.AstralProjection;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.world.entity.decoration.Mannequin;
-*///?}
+//?}
 
 @Mixin(value = LivingEntity.class, priority = 1)
 public abstract class LivingEntityMixin {
     @Inject(method = "heal", at = @At("HEAD"), cancellable = true)
     private void onHealHead(float amount, CallbackInfo info) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (!(currentSeason instanceof SecretLife secretLife)) return;
         if (!secretLife.canChangeHealth()) return;
 
@@ -59,7 +59,7 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "heal", at = @At("TAIL"))
     private void onHeal(float amount, CallbackInfo info) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity instanceof ServerPlayer player) {
             if (player.ls$isWatcher()) return;
@@ -68,20 +68,20 @@ public abstract class LivingEntityMixin {
     }
 
     //? if <= 1.21 {
-    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-     //?} else {
-    /*@Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
+     *///?} else {
+    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
     public void hurtServer(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-    *///?}
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+    //?}
+        if (Main.isClientOrDisabled()) return;
 
         LivingEntity entity = (LivingEntity) (Object) this;
         //? if >= 1.21.2 {
-        /*if (entity instanceof Creaking creaking) {
+        if (entity instanceof Creaking creaking) {
             creaking.hurtTime = 20;
         }
-        *///?}
+        //?}
 
         //? if >= 1.21 {
         ItemStack weapon = source.getWeaponItem();
@@ -91,9 +91,9 @@ public abstract class LivingEntityMixin {
         if (!weapon.is(Items.MACE)) return;
         if (!ItemStackUtils.hasCustomComponentEntry(weapon, "WindChargeSuperpower")) return;
         //? if <= 1.21 {
-        cir.setReturnValue(entity.hurt(source, WindCharge.MAX_MACE_DAMAGE));
-        //?} else
-        /*cir.setReturnValue(entity.hurtServer(level, source, WindCharge.MAX_MACE_DAMAGE));*/
+        /*cir.setReturnValue(entity.hurt(source, WindCharge.MAX_MACE_DAMAGE));
+        *///?} else
+        cir.setReturnValue(entity.hurtServer(level, source, WindCharge.MAX_MACE_DAMAGE));
         //?}
     }
 
@@ -110,7 +110,7 @@ public abstract class LivingEntityMixin {
 
     @ModifyVariable(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public MobEffectInstance clampStatusEffect(MobEffectInstance value) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return value;
+        if (Main.isClientOrDisabled()) return value;
 
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity instanceof ServerPlayer) {
@@ -124,7 +124,7 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
     public void addStatusEffect(MobEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity instanceof ServerPlayer) {
             if (!effect.isAmbient() && !effect.showIcon() && !effect.isVisible()) return;
@@ -143,28 +143,28 @@ public abstract class LivingEntityMixin {
 
 
     //? if <= 1.21 {
-    @Inject(method = "hurt", at = @At("HEAD"))
+    /*@Inject(method = "hurt", at = @At("HEAD"))
     private void captureDamageSource(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.ls$lastDamageSource = source;
     }
-    //?} else {
-    /*@Inject(method = "hurtServer", at = @At("HEAD"))
+    *///?} else {
+    @Inject(method = "hurtServer", at = @At("HEAD"))
     private void captureDamageSource(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         this.ls$lastDamageSource = source;
     }
-    *///?}
+    //?}
 
     @ModifyArg(
             //? if <= 1.21 {
-            method = "hurt",
-            //?} else {
-            /*method = "hurtServer",
-            *///?}
+            /*method = "hurt",
+            *///?} else {
+            method = "hurtServer",
+            //?}
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"),
             index = 0
     )
     private double modifyKnockback(double strength) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return strength;
+        if (Main.isClientOrDisabled()) return strength;
         if (ls$lastDamageSource == null) return strength;
 
         DamageSource source = ls$lastDamageSource;
@@ -187,15 +187,15 @@ public abstract class LivingEntityMixin {
     *///?} else {
     private void onDrop(ServerLevel level, DamageSource damageSource, CallbackInfo ci) {
     //?}
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         Events.onEntityDropItems((LivingEntity) (Object) this, damageSource, ci);
     }
 
     //? if <= 1.21 {
-    @Inject(method = "checkTotemDeathProtection", at = @At("HEAD"))
-    //?} else {
     /*@Inject(method = "checkTotemDeathProtection", at = @At("HEAD"))
-    *///?}
+    *///?} else {
+    @Inject(method = "checkTotemDeathProtection", at = @At("HEAD"))
+    //?}
     private void stopFakeTotem(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         if (Main.modDisabled()) return;
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -209,7 +209,7 @@ public abstract class LivingEntityMixin {
 
 
     //? if >= 1.21.9 {
-    /*@Inject(method = "tick", at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"))
     public void tickMannequin(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity instanceof Mannequin mannequin && mannequin instanceof MannequinAccessor mannequinAccessor && mannequin.tickCount < 0) {
@@ -244,7 +244,7 @@ public abstract class LivingEntityMixin {
             }
         }
     }
-    *///?}
+    //?}
 
 /*
     @ModifyVariable(method = "handleRelativeFrictionAndCalculateMovement", at = @At("HEAD"), index = 2, argsOnly = true)

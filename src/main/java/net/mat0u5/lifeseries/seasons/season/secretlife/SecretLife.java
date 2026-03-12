@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.seasons.season.secretlife;
 
 import net.mat0u5.lifeseries.config.ConfigManager;
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
@@ -31,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.Main.livesManager;
 
 //? if <= 1.20.5 {
 /*import net.minecraft.world.item.EnchantedBookItem;
@@ -45,14 +47,14 @@ import net.minecraft.world.item.component.CustomData;
 //?}
 
 //? if >= 1.21.9 {
-/*import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.TypedEntityData;
-*///?}
+//?}
 
 //? if <= 1.21.9
-import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.GameRules;
 //? if > 1.21.9
-/*import net.minecraft.world.level.gamerules.GameRules;*/
+import net.minecraft.world.level.gamerules.GameRules;
 
 public class SecretLife extends Season {
 
@@ -64,13 +66,13 @@ public class SecretLife extends Season {
     SessionAction taskWarningAction = new SessionAction(Time.minutes(-5).add(Time.seconds(1))) {
         @Override
         public void trigger() {
-            PlayerUtils.broadcastMessage(Component.literal("Go submit / fail your secret tasks if you haven't!").withStyle(ChatFormatting.GRAY));
+            PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_WARNING_5MIN.get());
         }
     };
     SessionAction taskWarningAction2 = new SessionAction(Time.minutes(-30).add(Time.seconds(1))) {
         @Override
         public void trigger() {
-            PlayerUtils.broadcastMessage(Component.literal("You better start finishing your secret tasks if you haven't already!").withStyle(ChatFormatting.GRAY));
+            PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_WARNING_30MIN.get());
         }
     };
 
@@ -101,20 +103,20 @@ public class SecretLife extends Season {
     @Override
     public void reload() {
         super.reload();
-        MAX_HEALTH = seasonConfig.MAX_PLAYER_HEALTH.get(seasonConfig);
-        MAX_KILL_HEALTH = SecretLifeConfig.MAX_PLAYER_KILL_HEALTH.get(seasonConfig);
-        TaskManager.EASY_SUCCESS = SecretLifeConfig.TASK_HEALTH_EASY_PASS.get(seasonConfig);
-        TaskManager.EASY_FAIL = SecretLifeConfig.TASK_HEALTH_EASY_FAIL.get(seasonConfig);
-        TaskManager.HARD_SUCCESS = SecretLifeConfig.TASK_HEALTH_HARD_PASS.get(seasonConfig);
-        TaskManager.HARD_FAIL = SecretLifeConfig.TASK_HEALTH_HARD_FAIL.get(seasonConfig);
-        TaskManager.RED_SUCCESS = SecretLifeConfig.TASK_HEALTH_RED_PASS.get(seasonConfig);
-        TaskManager.RED_FAIL = SecretLifeConfig.TASK_HEALTH_RED_FAIL.get(seasonConfig);
-        TaskManager.ASSIGN_TASKS_MINUTE = SecretLifeConfig.ASSIGN_TASKS_MINUTE.get(seasonConfig);
-        TaskManager.BROADCAST_SECRET_KEEPER = SecretLifeConfig.BROADCAST_SECRET_KEEPER.get(seasonConfig);
-        TaskManager.CONSTANT_TASKS = SecretLifeConfig.CONSTANT_TASKS.get(seasonConfig);
-        TaskManager.PUBLIC_TASKS_ON_SUBMIT = SecretLifeConfig.BROADCAST_TASKS_WHEN_SUBMITTED.get(seasonConfig);
-        ONLY_LOSE_HEARTS_IN_SESSION = SecretLifeConfig.ONLY_LOSE_HEARTS_IN_SESSION.get(seasonConfig);
-        TaskManager.TASKS_NEED_CONFIRMATION = SecretLifeConfig.TASKS_NEED_CONFIRMATION.get(seasonConfig);
+        MAX_HEALTH = seasonConfig.MAX_PLAYER_HEALTH.get();
+        MAX_KILL_HEALTH = SecretLifeConfig.MAX_PLAYER_KILL_HEALTH.get();
+        TaskManager.EASY_SUCCESS = SecretLifeConfig.TASK_HEALTH_EASY_PASS.get();
+        TaskManager.EASY_FAIL = SecretLifeConfig.TASK_HEALTH_EASY_FAIL.get();
+        TaskManager.HARD_SUCCESS = SecretLifeConfig.TASK_HEALTH_HARD_PASS.get();
+        TaskManager.HARD_FAIL = SecretLifeConfig.TASK_HEALTH_HARD_FAIL.get();
+        TaskManager.RED_SUCCESS = SecretLifeConfig.TASK_HEALTH_RED_PASS.get();
+        TaskManager.RED_FAIL = SecretLifeConfig.TASK_HEALTH_RED_FAIL.get();
+        TaskManager.ASSIGN_TASKS_MINUTE = SecretLifeConfig.ASSIGN_TASKS_MINUTE.get();
+        TaskManager.BROADCAST_SECRET_KEEPER = SecretLifeConfig.BROADCAST_SECRET_KEEPER.get();
+        TaskManager.CONSTANT_TASKS = SecretLifeConfig.CONSTANT_TASKS.get();
+        TaskManager.PUBLIC_TASKS_ON_SUBMIT = SecretLifeConfig.BROADCAST_TASKS_WHEN_SUBMITTED.get();
+        ONLY_LOSE_HEARTS_IN_SESSION = SecretLifeConfig.ONLY_LOSE_HEARTS_IN_SESSION.get();
+        TaskManager.TASKS_NEED_CONFIRMATION = SecretLifeConfig.TASKS_NEED_CONFIRMATION.get();
     }
 
     @Override
@@ -222,21 +224,21 @@ public class SecretLife extends Season {
         nbtCompCamel.putString("id", "camel");
 
         //? if <= 1.21.4 {
-        CompoundTag saddleItemComp = new CompoundTag();
+        /*CompoundTag saddleItemComp = new CompoundTag();
         saddleItemComp.putInt("Count", 1);
         saddleItemComp.putString("id", "saddle");
         nbtCompSkeleton.put("SaddleItem", saddleItemComp);
         nbtCompZombie.put("SaddleItem", saddleItemComp);
         nbtCompCamel.put("SaddleItem", saddleItemComp);
-        //?} else {
-        /*CompoundTag equipmentItemComp = new CompoundTag();
+        *///?} else {
+        CompoundTag equipmentItemComp = new CompoundTag();
         CompoundTag saddleItemComp = new CompoundTag();
         saddleItemComp.putString("id", "saddle");
         equipmentItemComp.put("saddle", saddleItemComp);
         nbtCompSkeleton.put("equipment", equipmentItemComp);
         nbtCompZombie.put("equipment", equipmentItemComp);
         nbtCompCamel.put("equipment", equipmentItemComp);
-        *///?}
+        //?}
 
 
         //? if < 1.20.5 {
@@ -250,14 +252,14 @@ public class SecretLife extends Season {
         //?}
 
         //? if >=1.20.5 && <= 1.21.6 {
-        zombieHorse.set(DataComponents.ENTITY_DATA, nbtZombie);
+        /*zombieHorse.set(DataComponents.ENTITY_DATA, nbtZombie);
         skeletonHorse.set(DataComponents.ENTITY_DATA, nbtSkeleton);
         camel.set(DataComponents.ENTITY_DATA, nbtCamel);
-        //?} else if > 1.21.6 {
-        /*zombieHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.ZOMBIE, nbtZombie.copyTag()));
+        *///?} else if > 1.21.6 {
+        zombieHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.ZOMBIE, nbtZombie.copyTag()));
         skeletonHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.SKELETON, nbtSkeleton.copyTag()));
         camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.CAMEL, nbtCamel.copyTag()));
-        *///?}
+        //?}
         itemSpawner.addItem(zombieHorse, 10);
         itemSpawner.addItem(skeletonHorse, 10);
         itemSpawner.addItem(camel, 10);
@@ -339,7 +341,13 @@ public class SecretLife extends Season {
     @Override
     public void addSessionActions() {
         super.addSessionActions();
-        currentSession.addSessionAction(TaskManager.getActionChooseTasks());
+        currentSession.addSessionAction(new SessionAction(Time.minutes(TaskManager.ASSIGN_TASKS_MINUTE), ModifiableText.SESSION_ACTION_TASKS.getString()) {
+            @Override
+            public void trigger() {
+                TaskManager.chooseTasks(livesManager.getAlivePlayers(), null);
+                TaskManager.tasksChosen = true;
+            }
+        });
         currentSession.addSessionActionIfTime(taskWarningAction);
         currentSession.addSessionActionIfTime(taskWarningAction2);
     }
@@ -358,7 +366,7 @@ public class SecretLife extends Season {
         if (!playersWithTaskBooks.isEmpty()) {
             boolean isOne = playersWithTaskBooks.size() == 1;
             String playerNames = String.join(", ", playersWithTaskBooks);
-            PlayerUtils.broadcastMessageToAdmins(TextUtils.formatLoosely("§4{}§c still {} not submitted / failed a task this session.", playerNames, (isOne?"has":"have")));
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_TASK_NOT_SUBMITTED.get(playerNames, (isOne?"has":"have")));
         }
     }
 
@@ -375,9 +383,11 @@ public class SecretLife extends Season {
             double amountGained = Math.min(Math.max(MAX_KILL_HEALTH, MAX_HEALTH) - getPlayerHealth(killer), 20);
             if (amountGained > 0) {
                 addPlayerHealth(killer, amountGained);
-                double roundedHearts = Math.ceil(amountGained) / 2.0;
-                String text = TextUtils.pluralize(TextUtils.formatString("+{} Heart", roundedHearts), roundedHearts);
-                PlayerUtils.sendTitle(killer, Component.literal(text).withStyle(ChatFormatting.RED), 0, 40, 20);
+                int roundedGained = (int) Math.ceil(amountGained);
+                double roundedHearts = roundedGained / 2.0;
+                String roundedHeartsStr = String.valueOf(roundedHearts);
+                if (roundedGained % 2 == 0) roundedHeartsStr = String.valueOf((int)roundedHearts);
+                PlayerUtils.sendTitle(killer, ModifiableText.SECRETLIFE_HEART_GAIN.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
             }
         }
     }
@@ -398,13 +408,13 @@ public class SecretLife extends Season {
     public void modifyEntityDrops(LivingEntity entity, DamageSource damageSource, CallbackInfo ci) {
         super.modifyEntityDrops(entity, damageSource, ci);
         if (entity instanceof ServerPlayer player) {
-            boolean dropBook = SecretLifeConfig.PLAYERS_DROP_TASK_ON_DEATH.get(seasonConfig);
+            boolean dropBook = SecretLifeConfig.PLAYERS_DROP_TASK_ON_DEATH.get();
             if (dropBook || server == null) return;
             //? if <= 1.21.9 {
-            boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-            //?} else {
-            /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-            *///?}
+            /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+            *///?} else {
+            boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+            //?}
             if (keepInventory) return;
             giveBookOnRespawn.put(player.getUUID(), TaskManager.getPlayersTaskBook(player));
             TaskManager.removePlayersTaskBook(player);
@@ -412,18 +422,28 @@ public class SecretLife extends Season {
     }
 
     public void removePlayerHealth(ServerPlayer player, double health) {
-        addPlayerHealth(player,-health);
+        removePlayerHealth(player, health, false);
     }
-
     public void addPlayerHealth(ServerPlayer player, double health) {
-        double currentHealth = AttributeUtils.getMaxPlayerHealth(player);
-        setPlayerHealth(player, currentHealth + health);
+        addPlayerHealth(player, health, false);
+    }
+    public void setPlayerHealth(ServerPlayer player, double health) {
+        setPlayerHealth(player, health, false);
     }
 
-    public void setPlayerHealth(ServerPlayer player, double health) {
+    public void removePlayerHealth(ServerPlayer player, double health, boolean command) {
+        addPlayerHealth(player,-health, command);
+    }
+
+    public void addPlayerHealth(ServerPlayer player, double health, boolean command) {
+        double currentHealth = AttributeUtils.getMaxPlayerHealth(player);
+        setPlayerHealth(player, currentHealth + health, command);
+    }
+
+    public void setPlayerHealth(ServerPlayer player, double health, boolean command) {
         if (player == null) return;
         if (health < 0.1) health = 0.1;
-        if (canChangeHealth() || (health > getPlayerHealth(player))) {
+        if ((canChangeHealth() || command) || (health > getPlayerHealth(player))) {
             AttributeUtils.setMaxPlayerHealth(player, health);
         }
         if (health > player.getHealth() && player.isAlive()) {
@@ -485,9 +505,9 @@ public class SecretLife extends Season {
         }
         if (server.overworld() == null) return;
         //? if <= 1.21.9 {
-        server.overworld().getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(naturalRegeneration, server);
-         //?} else {
-        /*server.overworld().getGameRules().set(GameRules.NATURAL_HEALTH_REGENERATION, naturalRegeneration, server);
-        *///?}
+        /*server.overworld().getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(naturalRegeneration, server);
+         *///?} else {
+        server.overworld().getGameRules().set(GameRules.NATURAL_HEALTH_REGENERATION, naturalRegeneration, server);
+        //?}
     }
 }

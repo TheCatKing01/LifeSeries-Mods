@@ -1,11 +1,11 @@
 package net.mat0u5.lifeseries.particle;
 
 //? if < 1.21.9 {
-public class TriviaSpiritParticleGroup {
+/*public class TriviaSpiritParticleGroup {
 }
-//?} else {
+*///?} else {
 
-/*import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.mat0u5.lifeseries.mixin.client.ParticleAccessor;
 import net.minecraft.client.Camera;
@@ -14,8 +14,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.state.ParticleGroupRenderState;
+
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -25,10 +24,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 //? if <= 1.21.9 {
-import net.minecraft.client.renderer.RenderType;
+/*import net.minecraft.client.renderer.RenderType;
+ *///?} else {
+import net.minecraft.client.renderer.rendertype.RenderType;
+//?}
+
+//? if <= 1.21.11 {
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.ParticleGroupRenderState;
  //?} else {
-/^import net.minecraft.client.renderer.rendertype.RenderType;
-^///?}
+/*import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
+*///?}
 
 public class TriviaSpiritParticleGroup extends ParticleGroup<TriviaSpiritParticle> {
     public TriviaSpiritParticleGroup(final ParticleEngine engine) {
@@ -78,5 +85,5 @@ public class TriviaSpiritParticleGroup extends ParticleGroup<TriviaSpiritParticl
         }
     }
 }
-*///?}
+//?}
 

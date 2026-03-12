@@ -14,7 +14,7 @@ import java.util.List;
 import static net.mat0u5.lifeseries.Main.blacklist;
 
 //? if <= 1.21 {
-import net.minecraft.resources.ResourceLocation;
+/*import net.minecraft.resources.ResourceLocation;
 import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class RecipeManagerMixin {
 
     @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("HEAD"))
     private void applyMixin(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo info) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (blacklist == null) return;
         if (blacklist.loadedListItemIdentifier == null)  {
             blacklist.getItemBlacklist();
@@ -44,8 +44,8 @@ public class RecipeManagerMixin {
     }
 
 }
-//?} else {
-/*import net.minecraft.world.item.crafting.RecipeHolder;
+*///?} else {
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeMap;
 import org.spongepowered.asm.mixin.Shadow;
 @Mixin(RecipeManager.class)
@@ -56,7 +56,7 @@ public abstract class RecipeManagerMixin {
 
     @Inject(method = "apply(Lnet/minecraft/world/item/crafting/RecipeMap;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("HEAD"), cancellable = true)
     private void applyMixin(RecipeMap preparedRecipes, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo ci) {
-        if (!Main.isLogicalSide() || Main.modDisabled()) return;
+        if (Main.isClientOrDisabled()) return;
         if (blacklist == null) return;
         if (blacklist.loadedListItemIdentifier == null)  {
             blacklist.getItemBlacklist();
@@ -68,10 +68,10 @@ public abstract class RecipeManagerMixin {
 
         List<RecipeHolder<?>> filteredRecipes = preparedRecipes.values().stream()
                 //? if <= 1.21.9 {
-                .filter(recipe -> !blacklist.loadedListItemIdentifier.contains(recipe.id().location()) && !blacklist.loadedRecipeBlacklist.contains(recipe.id().location()))
-                //?} else {
-                /^.filter(recipe -> !blacklist.loadedListItemIdentifier.contains(recipe.id().identifier()) && !blacklist.loadedRecipeBlacklist.contains(recipe.id().identifier()))
-                ^///?}
+                /*.filter(recipe -> !blacklist.loadedListItemIdentifier.contains(recipe.id().location()) && !blacklist.loadedRecipeBlacklist.contains(recipe.id().location()))
+                *///?} else {
+                .filter(recipe -> !blacklist.loadedListItemIdentifier.contains(recipe.id().identifier()) && !blacklist.loadedRecipeBlacklist.contains(recipe.id().identifier()))
+                //?}
                 .toList();
 
         this.recipes = RecipeMap.create(filteredRecipes);
@@ -84,4 +84,4 @@ public abstract class RecipeManagerMixin {
     }
 
 }
-*///?}
+//?}

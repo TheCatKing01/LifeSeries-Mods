@@ -148,6 +148,7 @@ public class UpdateChecker {
     }
 
     public static String formatDescription(String rawDesctiption) {
+        rawDesctiption = rawDesctiption.replace("<br>","\n");
         if (rawDesctiption.contains("~~")) {
             String[] split = rawDesctiption.split("~~");
             String newDesctiption = split[0];
@@ -185,7 +186,7 @@ public class UpdateChecker {
             return;
         }
         if (!VersionControl.isDevVersion()) {
-            Component discordText = TextUtils.format("§7Click {}§7 to join the mod development discord if you have any questions, issues, requests, or if you just want to hang out :)\"", TextUtils.openURLText("https://discord.gg/QWJxfb4zQZ"));
+            Component discordText = TextUtils.format("§7Click {}§7 to join the mod development discord if you have any questions, issues, requests, or if you just want to hang out :)", TextUtils.openURLText("https://discord.gg/QWJxfb4zQZ"));
 
             Component updateText =
                     TextUtils.formatLoosely("A new version of the Life Series Mod is available ({}) §nserver-side§f. \n",versionName)
@@ -200,8 +201,8 @@ public class UpdateChecker {
                                 TextUtils.clickableText("Click to download on Modrinth", TextUtils.openURLClickEvent("https://modrinth.com/mod/life-series"))
                         );
             if (PermissionManager.isAdmin(player)) {
-                player.sendSystemMessage(updateText);
-                player.sendSystemMessage(discordText);
+                player.ls$message(updateText);
+                player.ls$message(discordText);
             }
         }
         else {
@@ -211,7 +212,7 @@ public class UpdateChecker {
                         TextUtils.clickableText("Download full releases on Modrinth", TextUtils.openURLClickEvent("https://modrinth.com/mod/life-series"))
                     );
 
-            player.sendSystemMessage(updateText);
+            player.ls$message(updateText);
         }
     }
     public static void shutdownExecutor() {

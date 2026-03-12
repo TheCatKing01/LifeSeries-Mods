@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season.limitedlife;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.boogeyman.Boogeyman;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
@@ -36,11 +37,11 @@ public class LimitedLifeBoogeymanManager extends BoogeymanManager {
                     Integer currentLives = ScoreboardUtils.getScore(boogeyman.name, LivesManager.SCOREBOARD_NAME);
                     if (currentLives == null) continue;
                     if (currentLives <= LimitedLifeLivesManager.RED_TIME) continue;
-
+                    Integer setLives = LimitedLife.getNextLivesColorLives(currentLives);
                     if (BOOGEYMAN_ANNOUNCE_OUTCOME) {
-                        PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. Their time has been dropped to the next color.", boogeyman.name));
+                        PlayerUtils.broadcastMessage(ModifiableText.BOOGEYMAN_FAIL.get(boogeyman.name, livesManager.getFormattedLives(setLives)));
                     }
-                    ScoreboardUtils.setScore(boogeyman.name, LivesManager.SCOREBOARD_NAME, LimitedLife.getNextLivesColorLives(currentLives));
+                    ScoreboardUtils.setScore(boogeyman.name, LivesManager.SCOREBOARD_NAME, setLives);
                     continue;
                 }
                 playerFailBoogeyman(player, true);
@@ -70,9 +71,10 @@ public class LimitedLifeBoogeymanManager extends BoogeymanManager {
         DatapackIntegration.EVENT_BOOGEYMAN_FAIL_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         if (!DatapackIntegration.EVENT_BOOGEYMAN_FAIL_REWARD.isCanceled()) {
             if (BOOGEYMAN_ADVANCED_DEATHS) {
-                PlayerUtils.sendTitle(player,Component.nullToEmpty("§cThe curse consumes you.."), 20, 30, 20);
+
+                PlayerUtils.sendTitle(player, ModifiableText.BOOGEYMAN_FAIL_ADVANCEDDEATH_NOTIFY_TITLE.get(), 20, 30, 20);
                 if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
-                    PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. They have been consumed by the curse.", player));
+                    PlayerUtils.broadcastMessage(ModifiableText.BOOGEYMAN_FAIL_ADVANCEDDEATH.get(player));
                 }
                 if (canChangeLives) {
                     AdvancedDeathsManager.setPlayerLives(player, setToLives);
@@ -84,10 +86,10 @@ public class LimitedLifeBoogeymanManager extends BoogeymanManager {
                 }
                 Component setTo = livesManager.getFormattedLives(player);
 
-                PlayerUtils.sendTitle(player,Component.nullToEmpty("§cYou have failed."), 20, 30, 20);
+                PlayerUtils.sendTitle(player, ModifiableText.BOOGEYMAN_FAIL_NOTIFY_TITLE.get(), 20, 30, 20);
                 PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_fail")));
                 if (BOOGEYMAN_ANNOUNCE_OUTCOME && sendMessage) {
-                    PlayerUtils.broadcastMessage(TextUtils.format("{}§7 failed to kill a player while being the §cBoogeyman§7. Their time has been dropped to {}", player, setTo));
+                    PlayerUtils.broadcastMessage(ModifiableText.BOOGEYMAN_FAIL.get(player, setTo));
                 }
             }
         }

@@ -15,13 +15,13 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 //? if <= 1.21.9 {
-import net.minecraft.resources.ResourceLocation;
+/*import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.SnowGolem;
 
-//?} else {
-/*import net.minecraft.resources.Identifier;
+*///?} else {
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.golem.SnowGolem;
- *///?}
+ //?}
 
 import static net.mat0u5.lifeseries.Main.livesManager;
 
@@ -29,10 +29,10 @@ public class AngrySnowman extends SnowGolem {
     public static final SoundEvent HURT_SOUND = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_snowman_hit"));
     public static final SoundEvent GROWL = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_snowman_growl"));
     //? if <= 1.21.9 {
-    public static final ResourceLocation ID = IdentifierHelper.mod("angrysnowman");
-    //?} else {
-    /*public static final Identifier ID = IdentifierHelper.mod("angrysnowman");
-    *///?}
+    /*public static final ResourceLocation ID = IdentifierHelper.mod("angrysnowman");
+    *///?} else {
+    public static final Identifier ID = IdentifierHelper.mod("angrysnowman");
+    //?}
 
 
     public AngrySnowman(EntityType<? extends SnowGolem> entityType, Level level) {
@@ -48,7 +48,7 @@ public class AngrySnowman extends SnowGolem {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, (double)12.0F)
+                .add(Attributes.MAX_HEALTH, (double)20.0F)
                 .add(Attributes.MOVEMENT_SPEED, (double)0.2F)
                 .add(Attributes.ATTACK_KNOCKBACK, (double)1F)
                 .add(Attributes.ATTACK_DAMAGE, 1);

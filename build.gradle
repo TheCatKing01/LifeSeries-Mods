@@ -56,14 +56,20 @@ dependencies {
 
  // Compile only for compatibility
  modCompileOnly "maven.modrinth:flashback:z0SX4zNw"
+ modCompileOnly "maven.modrinth:replaymod:1.21-2.6.23"
+ modCompileOnly "de.maxhenkel.voicechat:voicechat-api:2.5.27" //TODO this is a patch for older versions of SVC
 
  // Runtime only QOL mods
  if (isValidVersion(project.carpet_bot_relog_version)) modRuntimeOnly "maven.modrinth:carpet-bot-relog:${project.carpet_bot_relog_version}"
  if (isValidVersion(project.carpet_mod_version)) modRuntimeOnly "curse.maven:carpet-349239:${project.carpet_mod_version}"
 
  //Runtime and compile
- if (isValidVersion(project.voicechat_mod_version)) modImplementation modRuntimeOnly ("maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}")
- if (isValidVersion(project.voicechat_api_version)) implementation "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
+ if (isValidVersion(project.voicechat_mod_version)) {
+  modImplementation modRuntimeOnly ("maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}")
+ }
+ else {
+  modCompileOnly ("maven.modrinth:simple-voice-chat:fabric-1.21.1-2.5.35")
+ }
 }
 loom {
  runConfigs.all {
@@ -72,6 +78,7 @@ loom {
  }
 }
 def java21 = stonecutter.eval(stonecutter.current.version, ">=1.20.5")
+def java25 = stonecutter.eval(stonecutter.current.version, ">=26.1")
 
 processResources {
  filesMatching("fabric.mod.json") {
@@ -82,21 +89,21 @@ processResources {
           "javaVersion": project.property('java_version')
  }
  filesMatching("lifeseries.mixins.json") {
-  expand "javaVersion": java21 ? "JAVA_21":"JAVA_17"
+  expand "javaVersion": java25 ? "JAVA_25" : java21 ? "JAVA_21" : "JAVA_17"
  }
 }
 processClientResources {
  filesMatching("lifeseries.client.mixins.json") {
-  expand "javaVersion": java21 ? "JAVA_21":"JAVA_17"
+  expand "javaVersion": java25 ? "JAVA_25" : java21 ? "JAVA_21" : "JAVA_17"
  }
 }
 
 tasks.withType(JavaCompile).configureEach {
- it.options.release = java21 ? 21 : 17
+ it.options.release = java25 ? 25 : java21 ? 21 : 17
 }
 
 java {
- def javaVersion = java21 ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+ def javaVersion = java25 ? JavaVersion.VERSION_25 : java21 ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
  targetCompatibility = javaVersion
  sourceCompatibility = javaVersion
 }

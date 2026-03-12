@@ -1,0 +1,19 @@
+{
+   "pack":{
+      "pack_format":15,
+      "supported_formats": {"min_inclusive": 15, "max_inclusive": 1000},
+      "min_format": 15,
+      "max_format": 1000,
+      "description":"Turns the trivia/santa bots evil"
+   },
+   "overlays": {
+      "entries": [
+         {
+            "min_format": 42,
+            "max_format": 1000,
+            "formats": {"min_inclusive": 42, "max_inclusive": 1000},
+            "directory": "1.21.2-latest"
+         }
+      ]
+   }
+}
