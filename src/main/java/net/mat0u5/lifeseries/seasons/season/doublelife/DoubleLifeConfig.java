@@ -103,35 +103,17 @@ public class DoubleLifeConfig extends ConfigManager {
             "soulmates_pvp_allowed", true, "season",
             "Soulmates PvP Allowed", "Controls whether soulmates can hit each other."
     );
-	
-	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_LIVES = new ConfigFileEntry<>(
-			"soulmates_share_lives", true, "season",
-            "Soulmates Share Lives", "Controls whether soulmates share the same life count."
-    );
-	
-	public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_ROLL = new ConfigFileEntry<>(
+
+    public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_ROLL = new ConfigFileEntry<>(
 			"soulmates_share_roll", false, "season.lives",
-            "Share Lives Rolled", "Controls whether soulmates are rolled the same amount of lives (only works when share lives is false)."
+            "Fuse Rolls", "Controls whether soulmates are rolled the same amount of lives (only works when lives aren't shared)."
     );
 	
 	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
             "split_soulmates_when_red", false, "season",
             "Breakup Soulmates When Red", "Controls whether soulmates are broken up when one of them become red"
     );
-	
-	    public static final ConfigFileEntry<Boolean> RANDOM_LIVES_ENABLED = new ConfigFileEntry<>(
-			"random_lives_enabled", false, "{season.lives}",
-            "Roll Random Lives", "Controls whether random lives are assigned after the soulmate roll."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MIN = new ConfigFileEntry<>(
-            "random_lives_min", 2, "season.lives",
-            "Random Lives Min", "The minimum lives you can get from the random roll."
-    );
-    public static final ConfigFileEntry<Integer> RANDOM_LIVES_MAX = new ConfigFileEntry<>(
-            "random_lives_max", 6, "season.lives",
-            "Random Lives Max", "The maximum lives you can get from the random roll."
-    );
-	public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntry<>(
+public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntry<>(
 			"reroll_session", false, "season.reroll",
             "Reroll Soulmates Each Session", "Controls whether soulmates are given a new soulbound each session. "
     );
@@ -182,10 +164,7 @@ public class DoubleLifeConfig extends ConfigManager {
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         List<ConfigFileEntry<?>> result =  new ArrayList<>(List.of(
 				GROUP_SOULBIND //Group
-				,GROUP_REROLL //Group
-				,RANDOM_LIVES_ENABLED
-				,SOULMATES_SHARE_LIVES
-				,ANNOUNCE_SOULMATES
+				,GROUP_REROLL //Group,ANNOUNCE_SOULMATES
 				,SPLIT_SOULMATES_WHEN_RED
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
@@ -201,10 +180,7 @@ public class DoubleLifeConfig extends ConfigManager {
                 ,SOULBOUND_EFFECTS
                 ,SOULBOUND_INVENTORIES
                 ,SOULBOUND_BOOGEYMAN
-                ,SOULMATES_PVP_ALLOWED
-								
-				,RANDOM_LIVES_MIN
-                ,RANDOM_LIVES_MAX	
+                ,SOULMATES_PVP_ALLOWED	
 				,SOULMATES_SHARE_ROLL					
                 , SOULBOUND_BOOGEYMAN
                 ,SOULBOUND_LIVES
@@ -228,3 +204,14 @@ public class DoubleLifeConfig extends ConfigManager {
         super.instantiateProperties();
     }
 }
+
+
+
+
+
+
+
+
+
+
+

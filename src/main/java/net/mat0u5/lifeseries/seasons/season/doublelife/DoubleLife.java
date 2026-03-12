@@ -14,6 +14,7 @@ import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -54,11 +55,7 @@ public class DoubleLife extends Season {
     public boolean DISABLE_START_TELEPORT = false;
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
-    public boolean SOULMATES_SHARE_LIVES = true;
     public boolean SOULMATES_SHARE_ROLL = true;
-    public boolean RANDOM_LIVES_ENABLED = false;
-    public int RANDOM_LIVES_MIN = 2;
-    public int RANDOM_LIVES_MAX = 6;
     public boolean REROLL_SESSION = false;
     public boolean REROLL_MIDSESSION = false;
     public double REROLL_TIME = 30.0;
@@ -185,13 +182,7 @@ public class DoubleLife extends Season {
         DISABLE_START_TELEPORT = DoubleLifeConfig.DISABLE_START_TELEPORT.get(seasonConfig);
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
-        SOULMATES_SHARE_LIVES = DoubleLifeConfig.SOULMATES_SHARE_LIVES.get(seasonConfig);
 	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
-		RANDOM_LIVES_ENABLED = DoubleLifeConfig.RANDOM_LIVES_ENABLED.get(seasonConfig);
-        int minLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MIN.get(seasonConfig);
-        int maxLivesConfig = DoubleLifeConfig.RANDOM_LIVES_MAX.get(seasonConfig);
-        RANDOM_LIVES_MIN = Math.min(minLivesConfig, maxLivesConfig);
-        RANDOM_LIVES_MAX = Math.max(minLivesConfig, maxLivesConfig);
 		REROLL_SESSION = DoubleLifeConfig.REROLL_SESSION.get(seasonConfig);
 		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
 		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
@@ -203,8 +194,20 @@ public class DoubleLife extends Season {
 	
 	@Override
     public void assignDefaultLives(ServerPlayer player) {
-        if (RANDOM_LIVES_ENABLED) return;
+        if (livesManager.ROLL_LIVES) return;
         super.assignDefaultLives(player);
+    }
+
+    public boolean shouldShareLives() {
+        return SOULBOUND_LIVES;
+    }
+
+    public boolean shouldFuseRolls() {
+        return SOULMATES_SHARE_ROLL;
+    }
+
+    public boolean shouldRollTogether() {
+        return shouldShareLives() || shouldFuseRolls();
     }
 
     public void loadSoulmates() {
@@ -362,61 +365,22 @@ public class DoubleLife extends Season {
     public void rollSoulmates() {
         List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(),5,20,5);
+        PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
         TaskScheduler.scheduleTask(25, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_2.get(),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_2.get(), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(50, () -> {
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_1.get(),5,20,5);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_1.get(), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(75, () -> {
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(),10,50,20);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
             PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
-		TaskScheduler.scheduleTask(165, () -> {
-			chooseRandomSoulmates();
-
-			for (ServerPlayer player : playersToRoll) {
-				Component text = Component.literal("????").withStyle(ChatFormatting.GREEN);
-				if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
-					ServerPlayer soulmate = getSoulmate(player);
-					if (soulmate != null) {
-						text = TextUtils.format("{}", soulmate);
-					}
-				}
-
-				PlayerUtils.sendTitle(player, text, 20, 60, 20);
-
-				PlayerUtils.playSoundToPlayer(player,
-						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
-			}
-			TaskScheduler.scheduleTask(70, () -> assignRandomLives(playersToRoll));
-		});
-    }
-	
-	private void assignRandomLives(List<ServerPlayer> players) {
-        if (!RANDOM_LIVES_ENABLED) return;
-        List<ServerPlayer> rollTargets = getPlayersWithoutLives(players);
-        if (rollTargets.isEmpty()) return;
-        String bothPrefix = (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) ? " both" : "";
-        PlayerUtils.sendTitleToPlayers(rollTargets, Component.literal("And you" + bothPrefix + " will have...").withStyle(ChatFormatting.GRAY), 10, 40, 10);
-        TaskScheduler.scheduleTask(Time.seconds(3), () -> rollRandomLives(rollTargets));
-    }
-
-    private void rollRandomLives(List<ServerPlayer> players) {
-        int delay = showRandomNumbers(players) + 20;
-        Map<ServerPlayer, Integer> lives = buildRandomLives(players);
-
-        TaskScheduler.scheduleTask(delay, () -> {
-            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
-                Integer livesNum = playerEntry.getValue();
-                ServerPlayer player = playerEntry.getKey();
-                Component textLives = livesManager.getFormattedLives(livesNum);
-                PlayerUtils.sendTitle(player, textLives, 0, 25, 0);
         TaskScheduler.scheduleTask(165, () -> {
             chooseRandomSoulmates();
+
             for (ServerPlayer player : playersToRoll) {
                 Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
                 if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
@@ -425,163 +389,38 @@ public class DoubleLife extends Season {
                         text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_PLAYER.get(soulmate);
                     }
                 }
-                PlayerUtils.sendTitle(player, text,20,60,20);
-                PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
-            }
-            PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-        });
 
-        delay += 20;
+                PlayerUtils.sendTitle(player, text, 20, 60, 20);
 
-        TaskScheduler.scheduleTask(delay, () -> {
-            for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
-                Integer livesNum = playerEntry.getValue();
-                ServerPlayer player = playerEntry.getKey();
-                Component textLives = TextUtils.format("{}§a {}.", livesManager.getFormattedLives(livesNum), TextUtils.pluralize("life", "lives", livesNum));
-                PlayerUtils.sendTitle(player, textLives, 0, 60, 20);
-                SessionTranscript.assignRandomLives(player, livesNum);
-                livesManager.setPlayerLives(player, livesNum);
+                PlayerUtils.playSoundToPlayer(player,
+                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
-            PlayerUtils.playSoundToPlayers(lives.keySet(), SoundEvents.END_PORTAL_SPAWN);
-            reloadAllPlayerTeams();
         });
     }
 
-    private int showRandomNumbers(List<ServerPlayer> players) {
-        int currentDelay = 0;
-        int lastLives = -1;
-        for (int i = 0; i < 80; i++) {
-            if (i >= 75) currentDelay += 20;
-            else if (i >= 65) currentDelay += 8;
-            else if (i >= 50) currentDelay += 4;
-            else if (i >= 30) currentDelay += 2;
-            else currentDelay += 1;
-
-            int lives = getRandomLife(lastLives);
-            lastLives = lives;
-
-            TaskScheduler.scheduleTask(currentDelay, () -> {
-                PlayerUtils.sendTitleToPlayers(players, livesManager.getFormattedLives(lives), 0, 25, 0);
-                PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
-            });
     public List<ServerPlayer> getNonAssignedPlayers() {
         List<ServerPlayer> playersToRoll = new ArrayList<>();
+
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
-            if (player.ls$hasAssignedLives() && player.ls$isDead()) continue;
-            if (hasSoulmate(player)) continue;
+            if (player == null) continue;
+
+            if (player.ls$isDead()) {
+                continue;
+            }
+
+            if (hasSoulmate(player) && REROLL_UNBOUND) {
+                continue;
+            }
+
+            if (!canParticipateInSoulmateRoll(player)) {
+                continue;
+            }
+
             playersToRoll.add(player);
         }
 
-        return currentDelay;
+        return playersToRoll;
     }
-
-    private Map<ServerPlayer, Integer> buildRandomLives(List<ServerPlayer> players) {
-        Map<ServerPlayer, Integer> lives = new HashMap<>();
-        List<ServerPlayer> rollTargets = new ArrayList<>();
-        Set<UUID> processed = new HashSet<>();
-
-        for (ServerPlayer player : players) {
-            if (player == null) continue;
-            if (player.ls$hasAssignedLives()) continue;
-            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
-                ServerPlayer soulmate = getSoulmate(player);
-                if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
-            }
-            UUID playerId = player.getUUID();
-            if (processed.contains(playerId)) continue;
-            processed.add(playerId);
-            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
-                ServerPlayer soulmate = getSoulmate(player);
-                if (soulmate != null) {
-                    processed.add(soulmate.getUUID());
-                }
-            }
-            rollTargets.add(player);
-        }
-
-        int totalSize = rollTargets.size();
-        int chosenNotRandomly = RANDOM_LIVES_MIN;
-        for (ServerPlayer player : rollTargets) {
-            int diff = RANDOM_LIVES_MAX - RANDOM_LIVES_MIN + 2;
-            int assignedLives = getRandomLife();
-            if (chosenNotRandomly <= RANDOM_LIVES_MAX && totalSize > diff) {
-                assignedLives = chosenNotRandomly;
-                chosenNotRandomly++;
-            }
-
-            setLivesForPlayer(player, assignedLives, lives);
-            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
-                ServerPlayer soulmate = getSoulmate(player);
-                if (soulmate != null) {
-                    setLivesForPlayer(soulmate, assignedLives, lives);
-                }
-            }
-        }
-
-        return lives;
-    }
-
-    private List<ServerPlayer> getPlayersWithoutLives(List<ServerPlayer> players) {
-        List<ServerPlayer> result = new ArrayList<>();
-        for (ServerPlayer player : players) {
-            if (player == null) continue;
-            if (player.ls$hasAssignedLives()) continue;
-            if (SOULMATES_SHARE_LIVES || SOULMATES_SHARE_ROLL) {
-                ServerPlayer soulmate = getSoulmate(player);
-                if (soulmate != null && soulmate.ls$hasAssignedLives()) continue;
-            }
-            result.add(player);
-        }
-        return result;
-    }
-
-    private void setLivesForPlayer(ServerPlayer player, int lives, Map<ServerPlayer, Integer> livesMap) {
-        if (player == null) return;
-        livesMap.put(player, lives);
-    }
-
-    private int getRandomLife() {
-        return rnd.nextInt(RANDOM_LIVES_MIN, RANDOM_LIVES_MAX + 1);
-    }
-
-    private int getRandomLife(int except) {
-        if (RANDOM_LIVES_MIN != RANDOM_LIVES_MAX) {
-            int tries = 0;
-            while (tries < 100) {
-                tries++;
-                int lives = getRandomLife();
-                if (lives != except) {
-                    return lives;
-                }
-            }
-        }
-        return getRandomLife();
-    }
-	
-	public List<ServerPlayer> getNonAssignedPlayers() {
-		List<ServerPlayer> playersToRoll = new ArrayList<>();
-
-		for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
-			if (player == null) continue;
-
-			if (player.ls$isDead() && !(RANDOM_LIVES_ENABLED && !player.ls$hasAssignedLives())) {
-				continue;
-			}
-
-			if (hasSoulmate(player) && REROLL_UNBOUND) {
-				continue;
-			}
-
-			if (!canParticipateInSoulmateRoll(player)) {
-				continue;
-			}
-
-			playersToRoll.add(player);
-		}
-
-		return playersToRoll;
-	}
-
 
     public void distributePlayers() {
         if (DISABLE_START_TELEPORT) return;
@@ -733,126 +572,88 @@ public class DoubleLife extends Season {
 
         UUID playerId = player.getUUID();
         Integer beforeLives = player.ls$getLives();
-		suppressSplitOnRedDuringDeath.add(playerId);
-		
-		if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
-			try {
-				super.onPlayerDeath(player, source);
+        suppressSplitOnRedDuringDeath.add(playerId);
 
-				if (pendingSoulmateLifeLoss.remove(playerId)) {
-					ensureLifeConsumed(player, beforeLives);
-				}
+        try {
+            if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
+                super.onPlayerDeath(player, source);
 
-				TaskScheduler.scheduleTask(1, () -> {
-					syncPlayer(player);
-					handleSoulmateSplitOnRedAfterDeath(player, beforeLives);
-				});
-
-				return;
-			} finally {
-				suppressSplitOnRedDuringDeath.remove(playerId);
-			}
-		}
-
-		try {
-            super.onPlayerDeath(player, source);
-
-			if (!hasSoulmate(player)) return;
-			if (!isSoulmateOnline(player)) return;
-
-			ServerPlayer soulmate = getSoulmate(player);
-			if (soulmate == null) return;
-			if (!soulmate.isAlive()) return;
-
-			if (!processingLinkedDeath.add(playerId)) return;
-
-			try {
-            //? if <= 1.21.9 {
-            boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-            //?} else {
-            /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-            *///?}
-            if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
-                soulmate.getInventory().clearContent();
-            }
-
-            pendingSoulmateLifeLoss.add(soulmate.getUUID());
-
-            //? if <=1.21 {
-            DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
-                    .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
-            soulmate.setLastHurtByMob(player);
-            soulmate.setLastHurtByPlayer(player);
-            soulmate.hurt(damageSource, 1000);
-            //?} else {
-            /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
-                    .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
-            soulmate.setLastHurtByMob(player);
-            //? if <= 1.21.4 {
-            soulmate.setLastHurtByPlayer(player);
-            //?} else {
-            /^soulmate.setLastHurtByPlayer(player, 100);
-            ^///?}
-            soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
-            *///?}
-
-            TaskScheduler.scheduleTask(1, () -> {
-                syncPlayer(player);
-                syncPlayer(soulmate);
-
-                if (SOULMATES_SHARE_LIVES) {
-                    Integer a = player.ls$getLives();
-                    Integer b = soulmate.ls$getLives();
-                    if (a != null && b != null) {
-                        int min = Math.min(a, b);
-                        player.ls$setLives(min);
-                        soulmate.ls$setLives(min);
-                    }
+                if (pendingSoulmateLifeLoss.remove(playerId)) {
+                    ensureLifeConsumed(player, beforeLives);
                 }
 
-                checkForEnding();
-				
-				
-            });
-            TaskScheduler.scheduleTask(2, () -> handleSoulmateSplitOnRedAfterDeath(player, beforeLives));
+                TaskScheduler.scheduleTask(1, () -> {
+                    syncPlayer(player);
+                    handleSoulmateSplitOnRedAfterDeath(player, beforeLives);
+                });
+
+                return;
+            }
+
+            super.onPlayerDeath(player, source);
+
+            if (!hasSoulmate(player)) return;
+            if (!isSoulmateOnline(player)) return;
+
+            ServerPlayer soulmate = getSoulmate(player);
+            if (soulmate == null) return;
+            if (!soulmate.isAlive()) return;
+
+            if (!processingLinkedDeath.add(playerId)) return;
+
+            try {
+                //? if <= 1.21.9 {
+                boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+                //?} else {
+                /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+                *///?}
+                if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
+                    soulmate.getInventory().clearContent();
+                }
+
+                pendingSoulmateLifeLoss.add(soulmate.getUUID());
+
+                //? if <=1.21 {
+                DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
+                        .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
+                soulmate.setLastHurtByMob(player);
+                soulmate.setLastHurtByPlayer(player);
+                soulmate.hurt(damageSource, 1000);
+                //?} else {
+                /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
+                        .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
+                soulmate.setLastHurtByMob(player);
+                //? if <= 1.21.4 {
+                soulmate.setLastHurtByPlayer(player);
+                //?} else {
+                /^soulmate.setLastHurtByPlayer(player, 100);
+                ^///?}
+                soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
+                *///?}
+
+                TaskScheduler.scheduleTask(1, () -> {
+                    syncPlayer(player);
+                    syncPlayer(soulmate);
+
+                    if (shouldShareLives()) {
+                        Integer a = player.ls$getLives();
+                        Integer b = soulmate.ls$getLives();
+                        if (a != null && b != null) {
+                            int min = Math.min(a, b);
+                            player.ls$setLives(min);
+                            soulmate.ls$setLives(min);
+                        }
+                    }
+
+                    checkForEnding();
+                });
+                TaskScheduler.scheduleTask(2, () -> handleSoulmateSplitOnRedAfterDeath(player, beforeLives));
             } finally {
                 processingLinkedDeath.remove(playerId);
             }
-
         } finally {
-            processingLinkedDeath.remove(playerId);
+            suppressSplitOnRedDuringDeath.remove(playerId);
         }
-        if (soulmate == null) return;
-        if (!soulmate.isAlive()) return;
-        //? if <= 1.21.9 {
-        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-        *///?} else {
-        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-        //?}
-        if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
-            soulmate.getInventory().clearContent();
-        }
-
-        //? if <=1.21 {
-        /*DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
-                .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
-        soulmate.setLastHurtByMob(player);
-        soulmate.setLastHurtByPlayer(player);
-        soulmate.hurt(damageSource, 1000);
-         *///?} else {
-        DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
-                .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
-        soulmate.setLastHurtByMob(player);
-        //? if <= 1.21.4 {
-        /*soulmate.setLastHurtByPlayer(player);
-        *///?} else {
-        soulmate.setLastHurtByPlayer(player, 100);
-        //?}
-        soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
-        //?}
-
-
-        TaskScheduler.scheduleTask(1, this::checkForEnding);
     }
 
     public void syncAllPlayers() {
@@ -877,13 +678,12 @@ public class DoubleLife extends Season {
             }
         }
 
-        if (SOULMATES_SHARE_LIVES) {
-        if (SOULBOUND_LIVES) {
+        if (shouldShareLives()) {
             Integer soulmateLives = soulmate.ls$getLives();
             Integer playerLives = player.ls$getLives();
             if (soulmateLives != null && playerLives != null)  {
                 if (!Objects.equals(soulmateLives, playerLives)) {
-                    int minLives = Math.min(soulmateLives,playerLives);
+                    int minLives = Math.min(soulmateLives, playerLives);
                     player.ls$setLives(minLives);
                     soulmate.ls$setLives(minLives);
                 }
@@ -893,36 +693,26 @@ public class DoubleLife extends Season {
         updateFood(player, soulmate);
         syncPlayerInventory(player, soulmate);
     }
-	
-	public void syncSoulboundLives(ServerPlayer player) {
-		if (player == null) return;
 
-		Integer oldLives = lastKnownLives.get(player.getUUID());
-
-		if (SOULMATES_SHARE_LIVES) {
-			Integer lives = player.ls$getLives();
-			ServerPlayer soulmate = getSoulmate(player);
-			if (lives != null && soulmate != null && player.isAlive() && soulmate.isAlive()) {
-				soulmate.ls$setLives(lives);
-			}
-		}
-
-		checkRedTransition(player, oldLives);
-
-		Integer now = player.ls$getLives();
-		if (now != null) {
-			lastKnownLives.put(player.getUUID(), now);
-		}
-	}
     public void syncSoulboundLives(ServerPlayer player) {
-        if (!SOULBOUND_LIVES) return;
         if (player == null) return;
-        Integer lives = player.ls$getLives();
-        ServerPlayer soulmate = getSoulmate(player);
-        if (lives == null) return;
-        if (soulmate == null) return;
-        if (!player.isAlive() || !soulmate.isAlive()) return;
-        soulmate.ls$setLives(lives);
+
+        Integer oldLives = lastKnownLives.get(player.getUUID());
+
+        if (shouldShareLives()) {
+            Integer lives = player.ls$getLives();
+            ServerPlayer soulmate = getSoulmate(player);
+            if (lives != null && soulmate != null && player.isAlive() && soulmate.isAlive()) {
+                soulmate.ls$setLives(lives);
+            }
+        }
+
+        checkRedTransition(player, oldLives);
+
+        Integer now = player.ls$getLives();
+        if (now != null) {
+            lastKnownLives.put(player.getUUID(), now);
+        }
     }
 
     public void canFoodHeal(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
@@ -1220,10 +1010,37 @@ public class DoubleLife extends Season {
 		}
 	}
 
-}
     @Override
     public void tryKillLifeGain(ServerPlayer killer, ServerPlayer victim) {
         super.tryKillLifeGain(killer, victim);
         syncSoulboundLives(killer);
     }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

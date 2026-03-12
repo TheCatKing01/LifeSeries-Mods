@@ -96,7 +96,8 @@ public class GivelifeCommand extends Command {
             OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_TOO_MANY.get());
             return -1;
         }
-        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.SOULBOUND_LIVES) {
+
+        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.shouldShareLives()) {
             ServerPlayer soulmate = doubleLife.getSoulmate(self);
             if (soulmate != null) {
                 if (soulmate.equals(target)) {
@@ -110,31 +111,19 @@ public class GivelifeCommand extends Command {
             }
         }
 
-			if (soulmate != null && doubleLife.SOULMATES_SHARE_LIVES) {
+        Component currentPlayerName = self.getDisplayName();
+        self.ls$addLives(-giveAmount);
+        livesManager.addToLivesNoUpdate(target, giveAmount);
+        AnimationUtils.playTotemAnimation(self);
 
-				if (soulmate.equals(target)) {
-					source.sendFailure(TextUtils.format("You cannot give {} to your soulmate", livesOrTime));
-					return -1;
-				}
+        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.shouldShareLives()) {
+            doubleLife.syncSoulboundLives(self);
+            doubleLife.syncSoulboundLives(target);
+        }
 
-				boolean success = doubleLifeGiveLife(source, self, soulmate, target);
-				if (!success) return -1;
-			}
-		}
-
-		Component currentPlayerName = self.getDisplayName();
-		self.ls$addLives(-giveAmount);
-		livesManager.addToLivesNoUpdate(target, giveAmount);
-		AnimationUtils.playTotemAnimation(self);
-
-		if (currentSeason instanceof DoubleLife doubleLife && doubleLife.SOULMATES_SHARE_LIVES) {
-			doubleLife.syncSoulboundLives(self);
-			doubleLife.syncSoulboundLives(target);
-		}
-
-		TaskScheduler.scheduleTask(Time.seconds(2), () -> 
-			livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive)
-		);
+        TaskScheduler.scheduleTask(Time.seconds(2), () ->
+                livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive)
+        );
 
         return 1;
     }
@@ -168,3 +157,4 @@ public class GivelifeCommand extends Command {
         return false;
     }
 }
+
