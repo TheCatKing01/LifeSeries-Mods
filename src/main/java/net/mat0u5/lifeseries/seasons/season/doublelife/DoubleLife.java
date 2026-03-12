@@ -603,10 +603,10 @@ public class DoubleLife extends Season {
 
             try {
                 //? if <= 1.21.9 {
-                boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-                //?} else {
-                /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-                *///?}
+                /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+                *///?} else {
+                boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+                //?}
                 if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
                     soulmate.getInventory().clearContent();
                 }
@@ -614,22 +614,22 @@ public class DoubleLife extends Season {
                 pendingSoulmateLifeLoss.add(soulmate.getUUID());
 
                 //? if <=1.21 {
-                DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
+                /*DamageSource damageSource = new DamageSource( soulmate.level().registryAccess()
                         .registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SOULMATE_DAMAGE));
                 soulmate.setLastHurtByMob(player);
                 soulmate.setLastHurtByPlayer(player);
                 soulmate.hurt(damageSource, 1000);
-                //?} else {
-                /*DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
+                *///?} else {
+                DamageSource damageSource = new DamageSource( soulmate.ls$getServerLevel().registryAccess()
                         .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SOULMATE_DAMAGE));
                 soulmate.setLastHurtByMob(player);
                 //? if <= 1.21.4 {
-                soulmate.setLastHurtByPlayer(player);
-                //?} else {
-                /^soulmate.setLastHurtByPlayer(player, 100);
-                ^///?}
+                /*soulmate.setLastHurtByPlayer(player);
+                *///?} else {
+                soulmate.setLastHurtByPlayer(player, 100);
+                //?}
                 soulmate.hurtServer(soulmate.ls$getServerLevel(), damageSource, 1000);
-                *///?}
+                //?}
 
                 TaskScheduler.scheduleTask(1, () -> {
                     syncPlayer(player);
@@ -1017,6 +1017,7 @@ public class DoubleLife extends Season {
     }
 
 }
+
 
 
 
