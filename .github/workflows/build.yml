@@ -5,7 +5,7 @@ name: build
 on:
   push:
     branches:
-      - testing-again
+      - life-series-plus
 
 jobs:
   build:
