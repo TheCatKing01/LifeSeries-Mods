@@ -1,0 +1,25 @@
+package net.mat0u5.lifeseries.utils.other;
+
+import net.minecraft.world.entity.Entity;
+
+import java.util.Collection;
+import java.util.Collections;
+
+public final class EntityTagUtils {
+    private EntityTagUtils() {
+    }
+
+    public static Collection<String> getTags(Entity entity) {
+        if (entity == null) return Collections.emptySet();
+        //? if >= 26.1 {
+        return entity.entityTags();
+        //?} else {
+        return entity.getTags();
+        //?}
+    }
+
+    public static boolean hasTag(Entity entity, String tag) {
+        if (tag == null) return false;
+        return getTags(entity).contains(tag);
+    }
+}
