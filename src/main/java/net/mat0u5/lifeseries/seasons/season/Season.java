@@ -706,7 +706,7 @@ public abstract class Season {
         if (entity instanceof Snail) return;
         if (entity instanceof TriviaBot) return;
         //? if <= 1.21.11 {
-        if (EntityTagUtils.hasTag(entity, "notNatural") && onlyNatural) return;
+        if (entity.getTags().contains("notNatural") && onlyNatural) return;
         //?} else {
         /*if (entity.entityTags().contains("notNatural") && onlyNatural) return;
         *///?}
@@ -818,5 +818,3 @@ public abstract class Season {
 
     }
 }
-
-

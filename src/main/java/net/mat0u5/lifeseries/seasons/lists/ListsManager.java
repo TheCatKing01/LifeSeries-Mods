@@ -256,7 +256,7 @@ public class ListsManager {
                 continue;
             }
             entry.cured = false;
-            if (!EntityTagUtils.hasTag(player, "naughty")) {
+            if (!player.getTags().contains("naughty")) {
                 player.addTag("naughty");
             }
             livesManager.applyCorrectTeam(player);
@@ -270,7 +270,7 @@ public class ListsManager {
                 continue;
             }
             entry.cured = true;
-            if (EntityTagUtils.hasTag(player, "naughty")) {
+            if (player.getTags().contains("naughty")) {
                 player.removeTag("naughty");
             }
             livesManager.applyCorrectTeam(player);
@@ -329,11 +329,11 @@ public class ListsManager {
 
     private void clearListTags(ServerPlayer player, boolean notify) {
         boolean removed = false;
-        if (EntityTagUtils.hasTag(player, "nice")) {
+        if (player.getTags().contains("nice")) {
             player.removeTag("nice");
             removed = true;
         }
-        if (EntityTagUtils.hasTag(player, "naughty")) {
+        if (player.getTags().contains("naughty")) {
             player.removeTag("naughty");
             removed = true;
         }
@@ -388,6 +388,3 @@ public class ListsManager {
     // TODO: implement later
 	}
 }
-
-
-

@@ -363,7 +363,7 @@ public class MobSwap extends Wildcard {
                 if (entity instanceof TriviaBot) return;
                 if (entity.hasCustomName()) return;
                 //? if <= 1.21.11 {
-                if (!EntityTagUtils.hasTag(entity, "mobswap")) return;
+                if (!entity.getTags().contains("mobswap")) return;
                 //?} else {
                 /*if (!entity.entityTags().contains("mobswap")) return;
                 *///?}
@@ -420,5 +420,3 @@ public class MobSwap extends Wildcard {
         //?}
     }
 }
-
-

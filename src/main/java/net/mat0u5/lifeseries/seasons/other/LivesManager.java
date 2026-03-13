@@ -123,20 +123,12 @@ public class LivesManager {
 	public void applyCorrectTeam(ServerPlayer player) {
 		if (player == null || isWatcher(player)) return;
 
-		//? if <= 1.21.11 {
-		if (EntityTagUtils.hasTag(player, "nice")) {
-		//?} else {
-		/*if (player.entityTags().contains("nice")) {
-		*///?}
+		if (player.getTags().contains("nice")) {
 			joinTeam(player, "nice_list");
 			return;
 		}
 
-		//? if <= 1.21.11 {
-		if (EntityTagUtils.hasTag(player, "naughty")) {
-		//?} else {
-		/*if (player.entityTags().contains("naughty")) {
-		*///?}
+		if (player.getTags().contains("naughty")) {
 			joinTeam(player, "naughty_list");
 			return;
 		}
@@ -257,11 +249,11 @@ public class LivesManager {
     }
     public String getTeamForPlayer(ServerPlayer player) {
 		
-        if (EntityTagUtils.hasTag(player, "nice")) {
+        if (player.getTags().contains("nice")) {
             return "nice_list";
         }
 
-        if (EntityTagUtils.hasTag(player, "naughty")) {
+        if (player.getTags().contains("naughty")) {
             return "naughty_list";
         }
 
@@ -418,7 +410,7 @@ public class LivesManager {
         }
 		
 		if (livesBefore != null && lives < livesBefore) {
-			if (EntityTagUtils.hasTag(player, "naughty")) {
+			if (player.getTags().contains("naughty")) {
 				player.removeTag("naughty");
 			}
 		}
@@ -789,9 +781,4 @@ public class LivesManager {
         }
     }
 }
-
-
-
-
-
 

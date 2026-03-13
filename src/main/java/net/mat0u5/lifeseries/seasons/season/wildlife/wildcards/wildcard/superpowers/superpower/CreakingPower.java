@@ -175,7 +175,7 @@ public class CreakingPower extends ToggleableSuperpower {
                 if (!(entity instanceof Creaking)) return;
                 if (allCreatedEntities.contains(entity.getUUID())) return;
                 //? if <= 1.21.11 {
-                if (!EntityTagUtils.hasTag(entity, "creakingFromSuperpower")) return;
+                if (!entity.getTags().contains("creakingFromSuperpower")) return;
                 //?} else {
                 /*if (!entity.entityTags().contains("creakingFromSuperpower")) return;
                 *///?}
@@ -186,5 +186,3 @@ public class CreakingPower extends ToggleableSuperpower {
     }
     //?}
 }
-
-
