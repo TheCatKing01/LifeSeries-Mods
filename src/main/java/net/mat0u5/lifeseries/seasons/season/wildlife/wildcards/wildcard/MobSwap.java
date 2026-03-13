@@ -9,6 +9,7 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.Time;
+import net.mat0u5.lifeseries.utils.other.TagUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.core.BlockPos;
@@ -363,7 +364,7 @@ public class MobSwap extends Wildcard {
                 if (entity instanceof TriviaBot) return;
                 if (entity.hasCustomName()) return;
                 //? if <= 1.21.11 {
-                if (!entity.getTags().contains("mobswap")) return;
+                if (!TagUtils.hasTag(entity, "mobswap")) return;
                 //?} else {
                 /*if (!entity.entityTags().contains("mobswap")) return;
                 *///?}
@@ -420,3 +421,8 @@ public class MobSwap extends Wildcard {
         //?}
     }
 }
+
+
+
+
+

@@ -123,12 +123,12 @@ public class LivesManager {
 	public void applyCorrectTeam(ServerPlayer player) {
 		if (player == null || isWatcher(player)) return;
 
-		if (player.getTags().contains("nice")) {
+		if (TagUtils.hasTag(player, "nice")) {
 			joinTeam(player, "nice_list");
 			return;
 		}
 
-		if (player.getTags().contains("naughty")) {
+		if (TagUtils.hasTag(player, "naughty")) {
 			joinTeam(player, "naughty_list");
 			return;
 		}
@@ -249,11 +249,11 @@ public class LivesManager {
     }
     public String getTeamForPlayer(ServerPlayer player) {
 		
-        if (player.getTags().contains("nice")) {
+        if (TagUtils.hasTag(player, "nice")) {
             return "nice_list";
         }
 
-        if (player.getTags().contains("naughty")) {
+        if (TagUtils.hasTag(player, "naughty")) {
             return "naughty_list";
         }
 
@@ -410,7 +410,7 @@ public class LivesManager {
         }
 		
 		if (livesBefore != null && lives < livesBefore) {
-			if (player.getTags().contains("naughty")) {
+			if (TagUtils.hasTag(player, "naughty")) {
 				player.removeTag("naughty");
 			}
 		}
@@ -781,4 +781,5 @@ public class LivesManager {
         }
     }
 }
+
 

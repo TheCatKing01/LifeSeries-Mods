@@ -241,11 +241,7 @@ public class DoubleLife extends Season {
 
     public void removeSoulmateTags() {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            //? if <= 1.21.11 {
-            List<String> tagsCopy = new ArrayList<>(player.getTags());
-            //?} else {
-            /*List<String> tagsCopy = new ArrayList<>(player.entityTags());
-            *///?}
+            List<String> tagsCopy = new ArrayList<>(TagUtils.getTags(player));
             for (String tag : tagsCopy) {
                 if (tag.startsWith("soulmate_")) {
                     player.removeTag(tag);
@@ -1017,6 +1013,7 @@ public class DoubleLife extends Season {
     }
 
 }
+
 
 
 

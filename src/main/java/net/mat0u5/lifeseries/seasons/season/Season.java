@@ -28,6 +28,7 @@ import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
+import net.mat0u5.lifeseries.utils.other.TagUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
@@ -706,7 +707,7 @@ public abstract class Season {
         if (entity instanceof Snail) return;
         if (entity instanceof TriviaBot) return;
         //? if <= 1.21.11 {
-        if (entity.getTags().contains("notNatural") && onlyNatural) return;
+        if (TagUtils.hasTag(entity, "notNatural") && onlyNatural) return;
         //?} else {
         /*if (entity.entityTags().contains("notNatural") && onlyNatural) return;
         *///?}
@@ -818,3 +819,8 @@ public abstract class Season {
 
     }
 }
+
+
+
+
+

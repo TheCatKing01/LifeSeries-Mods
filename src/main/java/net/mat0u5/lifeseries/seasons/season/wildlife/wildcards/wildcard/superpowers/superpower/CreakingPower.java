@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.ToggleableSuperpower;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.TeamUtils;
+import net.mat0u5.lifeseries.utils.other.TagUtils;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -175,7 +176,7 @@ public class CreakingPower extends ToggleableSuperpower {
                 if (!(entity instanceof Creaking)) return;
                 if (allCreatedEntities.contains(entity.getUUID())) return;
                 //? if <= 1.21.11 {
-                if (!entity.getTags().contains("creakingFromSuperpower")) return;
+                if (!TagUtils.hasTag(entity, "creakingFromSuperpower")) return;
                 //?} else {
                 /*if (!entity.entityTags().contains("creakingFromSuperpower")) return;
                 *///?}
@@ -186,3 +187,8 @@ public class CreakingPower extends ToggleableSuperpower {
     }
     //?}
 }
+
+
+
+
+

@@ -256,7 +256,7 @@ public class ListsManager {
                 continue;
             }
             entry.cured = false;
-            if (!player.getTags().contains("naughty")) {
+            if (!TagUtils.hasTag(player, "naughty")) {
                 player.addTag("naughty");
             }
             livesManager.applyCorrectTeam(player);
@@ -270,7 +270,7 @@ public class ListsManager {
                 continue;
             }
             entry.cured = true;
-            if (player.getTags().contains("naughty")) {
+            if (TagUtils.hasTag(player, "naughty")) {
                 player.removeTag("naughty");
             }
             livesManager.applyCorrectTeam(player);
@@ -329,11 +329,11 @@ public class ListsManager {
 
     private void clearListTags(ServerPlayer player, boolean notify) {
         boolean removed = false;
-        if (player.getTags().contains("nice")) {
+        if (TagUtils.hasTag(player, "nice")) {
             player.removeTag("nice");
             removed = true;
         }
-        if (player.getTags().contains("naughty")) {
+        if (TagUtils.hasTag(player, "naughty")) {
             player.removeTag("naughty");
             removed = true;
         }
@@ -388,3 +388,4 @@ public class ListsManager {
     // TODO: implement later
 	}
 }
+
