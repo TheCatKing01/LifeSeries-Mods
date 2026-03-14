@@ -19,12 +19,14 @@ import static net.mat0u5.lifeseries.Main.*;
 public class ListsManager {
 
     public boolean LISTS_ENABLED = false;
-    public int LISTS_AMOUNT_MIN = 1;
-    public int LISTS_AMOUNT_MAX = 99;
-    public double LISTS_CHOOSE_MINUTE = 10;
+    public int NAUGHTY_LIST_PLAYERS = 1;
+    public int NICE_LIST_PLAYERS = 1;
+    public double LISTS_ROLL_TIME = 10;
 
-    public List<String> LISTS_IGNORE = new ArrayList<>();
-    public List<String> LISTS_FORCE = new ArrayList<>();
+    public List<String> NAUGHTY_LIST_IGNORE = new ArrayList<>();
+    public List<String> NAUGHTY_LIST_FORCE = new ArrayList<>();
+    public List<String> NICE_LIST_IGNORE = new ArrayList<>();
+    public List<String> NICE_LIST_FORCE = new ArrayList<>();
 
     private final Random rnd = new Random();
 
@@ -38,7 +40,7 @@ public class ListsManager {
         if (!LISTS_ENABLED) return;
 
         currentSession.addSessionAction(
-            new SessionAction(Time.minutes(LISTS_CHOOSE_MINUTE), "Roll naughty/nice lists") {
+            new SessionAction(Time.minutes(LISTS_ROLL_TIME), "Roll naughty/nice lists") {
                 @Override
                 public void trigger() {
                     if (!LISTS_ENABLED || listsChosen) return;
@@ -106,37 +108,44 @@ public class ListsManager {
 
     public void listsChooseRandom(List<ServerPlayer> allowedPlayers, ListsRollType rollType) {
         if (!LISTS_ENABLED) return;
-        if (LISTS_AMOUNT_MAX < LISTS_AMOUNT_MIN) return;
+        if (NAUGHTY_LIST_PLAYERS < 0 || NICE_LIST_PLAYERS < 0) return;
 
-        List<ServerPlayer> listPlayers = getRandomListPlayers(allowedPlayers, rollType);
-        List<ServerPlayer> normalPlayers = new ArrayList<>(allowedPlayers);
-        normalPlayers.removeAll(listPlayers);
-
-        handleListsLists(normalPlayers, listPlayers);
-        listsChosen = true;
-    }
-
-    public List<ServerPlayer> getRandomListPlayers(List<ServerPlayer> allowedPlayers, ListsRollType rollType) {
-        List<ServerPlayer> result = new ArrayList<>();
         List<ServerPlayer> candidates = new ArrayList<>(livesManager.getNonRedPlayers());
-
         candidates.removeIf(p ->
             !allowedPlayers.contains(p) ||
-            rolledPlayers.contains(p.getUUID()) ||
-            LISTS_IGNORE.contains(p.getScoreboardName().toLowerCase(Locale.ROOT))
+            rolledPlayers.contains(p.getUUID())
         );
 
-        Collections.shuffle(candidates);
-        int amount = getListsAmount(rollType);
+        List<ServerPlayer> naughtyList = getRandomListPlayers(candidates, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
+        List<ServerPlayer> remaining = new ArrayList<>(candidates);
+        remaining.removeAll(naughtyList);
+        List<ServerPlayer> niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
 
-        for (ServerPlayer p : candidates) {
-            if (LISTS_FORCE.contains(p.getScoreboardName().toLowerCase(Locale.ROOT))) {
+        List<ServerPlayer> normalPlayers = new ArrayList<>(allowedPlayers);
+        normalPlayers.removeAll(naughtyList);
+        normalPlayers.removeAll(niceList);
+
+        handleListsLists(normalPlayers, niceList, naughtyList);
+        listsChosen = true;
+    }
+    public List<ServerPlayer> getRandomListPlayers(List<ServerPlayer> candidates, int desiredCount, List<String> forceList, List<String> ignoreList) {
+        List<ServerPlayer> result = new ArrayList<>();
+        List<ServerPlayer> filteredCandidates = new ArrayList<>(candidates);
+        filteredCandidates.removeIf(p ->
+            ignoreList.contains(p.getScoreboardName().toLowerCase(Locale.ROOT))
+        );
+
+        Collections.shuffle(filteredCandidates);
+        int amount = Math.max(desiredCount, 0);
+
+        for (ServerPlayer p : filteredCandidates) {
+            if (forceList.contains(p.getScoreboardName().toLowerCase(Locale.ROOT))) {
                 result.add(p);
-                amount--;
             }
         }
+        amount = Math.max(desiredCount - result.size(), 0);
 
-        for (ServerPlayer p : candidates) {
+        for (ServerPlayer p : filteredCandidates) {
             if (amount <= 0) break;
             if (result.contains(p)) continue;
             result.add(p);
@@ -146,17 +155,7 @@ public class ListsManager {
         return result;
     }
 
-    public int getListsAmount(ListsRollType rollType) {
-        int count = LISTS_AMOUNT_MIN;
-        List<ServerPlayer> nonReds = livesManager.getNonRedPlayers();
-
-        while (Math.random() < 0.5 && count < nonReds.size()) {
-            count++;
-        }
-        return Math.min(count, LISTS_AMOUNT_MAX);
-    }
-
-    public void handleListsLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> listPlayers) {
+    public void handleListsLists(List<ServerPlayer> normalPlayers, List<ServerPlayer> niceListPlayers, List<ServerPlayer> naughtyListPlayers) {
 
         PlayerUtils.sendTitleToPlayers(
             normalPlayers,
@@ -168,45 +167,54 @@ public class ListsManager {
             SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("lastlife_boogeyman_no"))
         );
 
-        Collections.shuffle(listPlayers, rnd);
+        Collections.shuffle(niceListPlayers, rnd);
+        Collections.shuffle(naughtyListPlayers, rnd);
 
-        for (int i = 0; i < listPlayers.size(); i++) {
-            ServerPlayer player = listPlayers.get(i);
-
+        for (ServerPlayer player : niceListPlayers) {
             player.removeTag("nice");
             player.removeTag("naughty");
-
-            if (i % 2 == 0) {
-                player.addTag("nice");
-                PlayerUtils.sendTitle(player,
-                    Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
-					PlayerUtils.playSoundToPlayers(
-						List.of(player),
-						SoundEvent.createVariableRangeEvent(
-							IdentifierHelper.vanilla("nicelife_nicelist_start")
-						)
-					);
-            } else {
-                player.addTag("naughty");
-                PlayerUtils.sendTitle(player,
-                    Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
-					PlayerUtils.playSoundToPlayers(
-						List.of(player),
-						SoundEvent.createVariableRangeEvent(
-							IdentifierHelper.vanilla("nicelife_naughtylist")
-						)
-					);
-            }
-
-            Lists.ListType listType = i % 2 == 0 ? Lists.ListType.NICE : Lists.ListType.NAUGHTY;
-            Lists entry = addLists(player, listType);
+            player.addTag("nice");
+            PlayerUtils.sendTitle(player,
+                Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
+            PlayerUtils.playSoundToPlayers(
+                List.of(player),
+                SoundEvent.createVariableRangeEvent(
+                    IdentifierHelper.vanilla("nicelife_nicelist_start")
+                )
+            );
+            Lists entry = addLists(player, Lists.ListType.NICE);
             messageLists(entry, player);
+            livesManager.applyCorrectTeam(player);
         }
 
+        for (ServerPlayer player : naughtyListPlayers) {
+            player.removeTag("nice");
+            player.removeTag("naughty");
+            player.addTag("naughty");
+            PlayerUtils.sendTitle(player,
+                Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
+            PlayerUtils.playSoundToPlayers(
+                List.of(player),
+                SoundEvent.createVariableRangeEvent(
+                    IdentifierHelper.vanilla("nicelife_naughtylist")
+                )
+            );
+            Lists entry = addLists(player, Lists.ListType.NAUGHTY);
+            messageLists(entry, player);
+            livesManager.applyCorrectTeam(player);
+        }
+
+        for (ServerPlayer player : normalPlayers) {
+            livesManager.applyCorrectTeam(player);
+        }
+
+        List<ServerPlayer> listPlayers = new ArrayList<>();
+        listPlayers.addAll(niceListPlayers);
+        listPlayers.addAll(naughtyListPlayers);
         SessionTranscript.listsChosen(listPlayers);
+        PlayerUtils.updatePlayerLists();
 		
     }
-
     public boolean isOnLists(ServerPlayer player) {
         return lists.stream().anyMatch(l -> l.uuid.equals(player.getUUID()));
     }
@@ -216,7 +224,8 @@ public class ListsManager {
         return entry != null && entry.listType == Lists.ListType.NAUGHTY;
     }
 
-    public Lists addLists(ServerPlayer player, Lists.ListType listType) {        rolledPlayers.add(player.getUUID());
+    public Lists addLists(ServerPlayer player, Lists.ListType listType) {
+        rolledPlayers.add(player.getUUID());
         Lists entry = new Lists(player, listType);
         lists.add(entry);
         listsListChanged = true;
@@ -231,11 +240,13 @@ public class ListsManager {
         if (server != null) {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 clearListTags(player, true);
+                livesManager.applyCorrectTeam(player);
             }
         }
         lists.clear();
         rolledPlayers.clear();
         listsChosen = false;
+        PlayerUtils.updatePlayerLists();
     }
 	
     public void onPlayerJoin(ServerPlayer player) {
@@ -261,6 +272,7 @@ public class ListsManager {
             }
             livesManager.applyCorrectTeam(player);
         }
+        PlayerUtils.updatePlayerLists();
     }
 
     public void cureNaughtyList(Collection<ServerPlayer> targets) {
@@ -275,6 +287,7 @@ public class ListsManager {
             }
             livesManager.applyCorrectTeam(player);
         }
+        PlayerUtils.updatePlayerLists();
     }
 
     private Lists getListEntry(ServerPlayer player) {
@@ -292,6 +305,7 @@ public class ListsManager {
         rolledPlayers.remove(player.getUUID());
         clearListTags(player, notify);
         livesManager.applyCorrectTeam(player);
+        PlayerUtils.updatePlayerLists();
         if (entry == null) {
             return Optional.empty();
         }
@@ -317,6 +331,7 @@ public class ListsManager {
             String listName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
             player.sendSystemMessage(Component.literal("§6[NOTICE] You were added to the " + listName + " list."));
         }
+        PlayerUtils.updatePlayerLists();
     }
 
     public Optional<Lists.ListType> getPlayerListType(ServerPlayer player) {
@@ -347,30 +362,49 @@ public class ListsManager {
 		if (!LISTS_ENABLED) {
 			resetLists();
 		}
+        NAUGHTY_LIST_PLAYERS = seasonConfig.NAUGHTY_LIST_PLAYERS.get(seasonConfig);
+		NICE_LIST_PLAYERS = seasonConfig.NICE_LIST_PLAYERS.get(seasonConfig);
+		LISTS_ROLL_TIME = seasonConfig.LISTS_ROLL_TIME.get(seasonConfig);
 
-		LISTS_AMOUNT_MIN = seasonConfig.LISTS_MIN_AMOUNT.get(seasonConfig);
-		LISTS_AMOUNT_MAX = seasonConfig.LISTS_MAX_AMOUNT.get(seasonConfig);
-		LISTS_CHOOSE_MINUTE = seasonConfig.LISTS_CHOOSE_MINUTE.get(seasonConfig);
+		NAUGHTY_LIST_IGNORE.clear();
+		NAUGHTY_LIST_FORCE.clear();
+		NICE_LIST_IGNORE.clear();
+		NICE_LIST_FORCE.clear();
 
-		LISTS_IGNORE.clear();
-		LISTS_FORCE.clear();
-
-		for (String s : seasonConfig.LISTS_IGNORE.get(seasonConfig)
+		for (String s : seasonConfig.NAUGHTY_LIST_IGNORE.get(seasonConfig)
 				.replaceAll("\\[","")
 				.replaceAll("]","")
 				.replaceAll(" ","")
 				.trim()
 				.split(",")) {
-			if (!s.isEmpty()) LISTS_IGNORE.add(s.toLowerCase(Locale.ROOT));
+			if (!s.isEmpty()) NAUGHTY_LIST_IGNORE.add(s.toLowerCase(Locale.ROOT));
 		}
 
-		for (String s : seasonConfig.LISTS_FORCE.get(seasonConfig)
+		for (String s : seasonConfig.NAUGHTY_LIST_FORCE.get(seasonConfig)
 				.replaceAll("\\[","")
 				.replaceAll("]","")
 				.replaceAll(" ","")
 				.trim()
 				.split(",")) {
-			if (!s.isEmpty()) LISTS_FORCE.add(s.toLowerCase(Locale.ROOT));
+			if (!s.isEmpty()) NAUGHTY_LIST_FORCE.add(s.toLowerCase(Locale.ROOT));
+		}
+
+		for (String s : seasonConfig.NICE_LIST_IGNORE.get(seasonConfig)
+				.replaceAll("\\[","")
+				.replaceAll("]","")
+				.replaceAll(" ","")
+				.trim()
+				.split(",")) {
+			if (!s.isEmpty()) NICE_LIST_IGNORE.add(s.toLowerCase(Locale.ROOT));
+		}
+
+		for (String s : seasonConfig.NICE_LIST_FORCE.get(seasonConfig)
+				.replaceAll("\\[","")
+				.replaceAll("]","")
+				.replaceAll(" ","")
+				.trim()
+				.split(",")) {
+			if (!s.isEmpty()) NICE_LIST_FORCE.add(s.toLowerCase(Locale.ROOT));
 		}
 	}
 
@@ -388,4 +422,24 @@ public class ListsManager {
     // TODO: implement later
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -163,11 +163,13 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WATCHERS_IN_TAB
                 ,WATCHERS_MUTED
 
-                ,LISTS_MIN_AMOUNT
-                ,LISTS_MAX_AMOUNT
-                ,LISTS_IGNORE
-                ,LISTS_FORCE
-                ,LISTS_CHOOSE_MINUTE
+                ,NAUGHTY_LIST_PLAYERS
+                ,NICE_LIST_PLAYERS
+                ,LISTS_ROLL_TIME
+                ,NAUGHTY_LIST_FORCE
+                ,NAUGHTY_LIST_IGNORE
+                ,NICE_LIST_FORCE
+                ,NICE_LIST_IGNORE
 
                 ,TRADERS_MAX_AMOUNT
                 ,COMPLEX_LIFE_TRADES
@@ -418,6 +420,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
         renamedProperty("boogeyman_message", "text.boogeyman.message");
         renamedProperty("final_death_title_subtitle", "text.final.death.title.subtitle");
         renamedProperty("text.wildlife.superpowes.dead", "text.wildlife.superpowers.dead");
+
+        renamedProperty("lists_choose_minute", "lists_roll_time");
+        migrateListsSplit("lists_ignore", "lists_naughty_ignore", "lists_nice_ignore");
+        migrateListsSplit("lists_force", "lists_naughty_force", "lists_nice_force");
+        migrateListsPlayers();
     }
 
     private void renamedProperty(String from, String to) {
@@ -430,6 +437,39 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
             removeProperty(from);
         }
+    }
+
+    private void migrateListsSplit(String oldKey, String newKeyA, String newKeyB) {
+        if (!properties.containsKey(oldKey)) return;
+        String value = getProperty(oldKey);
+        if (value != null) {
+            if (!properties.containsKey(newKeyA)) {
+                setProperty(newKeyA, value);
+            }
+            if (!properties.containsKey(newKeyB)) {
+                setProperty(newKeyB, value);
+            }
+        }
+        removeProperty(oldKey);
+    }
+
+    private void migrateListsPlayers() {
+        String value = null;
+        if (properties.containsKey("lists_min_amount")) {
+            value = getProperty("lists_min_amount");
+        } else if (properties.containsKey("lists_max_amount")) {
+            value = getProperty("lists_max_amount");
+        }
+        if (value != null) {
+            if (!properties.containsKey("lists_naughty_players")) {
+                setProperty("lists_naughty_players", value);
+            }
+            if (!properties.containsKey("lists_nice_players")) {
+                setProperty("lists_nice_players", value);
+            }
+        }
+        removeProperty("lists_min_amount");
+        removeProperty("lists_max_amount");
     }
 
     public static void onUpdatedUnknown(String id, String value) {
@@ -634,3 +674,11 @@ public abstract class ConfigManager extends DefaultConfigValues {
         return defaultValue;
     }
 }
+
+
+
+
+
+
+
+

@@ -374,27 +374,34 @@ public class DefaultConfigValues {
             "lists", false, ConfigTypes.LISTS, "{lifeseries_plus.lists}",
             "Naughty/Nice Lists Enabled", "Enables the naughty/nice lists."
     );
-    public final ConfigFileEntry<Integer> LISTS_MIN_AMOUNT = new ConfigFileEntry<>(
-            "lists_min_amount", 1, "lifeseries_plus.lists",
-            "Minimum List Amount", "The minimum amount of players who will be on the naughty/nice list."
+        public final ConfigFileEntry<Integer> NAUGHTY_LIST_PLAYERS = new ConfigFileEntry<>(
+            "lists_naughty_players", 1, "lifeseries_plus.lists",
+            "Naughty List Players", "The number of players who will be on the Naughty List."
     );
-    public final ConfigFileEntry<Integer> LISTS_MAX_AMOUNT = new ConfigFileEntry<>(
-            "lists_max_amount", 99, "lifeseries_plus.lists",
-            "Maximum Lists Amount", "The maximum amount of players who will be on the naughty/nice list."
+    public final ConfigFileEntry<Integer> NICE_LIST_PLAYERS = new ConfigFileEntry<>(
+            "lists_nice_players", 1, "lifeseries_plus.lists",
+            "Nice List Players", "The number of players who will be on the Nice List."
     );
-    public final ConfigFileEntry<String> LISTS_IGNORE = new ConfigFileEntry<>(
-            "lists_ignore", "[]", "lifeseries_plus.lists",
-            "Lists Ignore List", "A list of players that cannot be on the naughty/nice lists."
+    public final ConfigFileEntry<Double> LISTS_ROLL_TIME = new ConfigFileEntry<>(
+            "lists_roll_time", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
+            "Lists Roll Time", "The number of minutes (in the session) after which the naughty/nice lists are rolled."
     );
-    public final ConfigFileEntry<String> LISTS_FORCE = new ConfigFileEntry<>(
-            "lists_force", "[]", "lifeseries_plus.lists",
-            "Lists Force List", "A list of players that are forced be on the naughty/nice lists."
+    public final ConfigFileEntry<String> NAUGHTY_LIST_FORCE = new ConfigFileEntry<>(
+            "lists_naughty_force", "[]", "lifeseries_plus.lists",
+            "Naughty Force List", "A list of players that are forced to be on the Naughty List."
     );
-    public final ConfigFileEntry<Double> LISTS_CHOOSE_MINUTE = new ConfigFileEntry<>(
-            "lists_choose_minute", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
-            "Lists Choose Time", "The number of minutes (in the session) after which the the naughty/nice lists are rolled."
+    public final ConfigFileEntry<String> NAUGHTY_LIST_IGNORE = new ConfigFileEntry<>(
+            "lists_naughty_ignore", "[]", "lifeseries_plus.lists",
+            "Naughty Ignore List", "A list of players that cannot be on the Naughty List."
     );
-
+    public final ConfigFileEntry<String> NICE_LIST_FORCE = new ConfigFileEntry<>(
+            "lists_nice_force", "[]", "lifeseries_plus.lists",
+            "Nice Force List", "A list of players that are forced to be on the Nice List."
+    );
+    public final ConfigFileEntry<String> NICE_LIST_IGNORE = new ConfigFileEntry<>(
+            "lists_nice_ignore", "[]", "lifeseries_plus.lists",
+            "Nice Ignore List", "A list of players that cannot be on the Nice List."
+    );
     /*
      * Group Entries
      */
@@ -462,3 +469,5 @@ public class DefaultConfigValues {
             "spawner_recipe", "blacklist_items", "blacklist_recipes"
     );
 }
+
+
