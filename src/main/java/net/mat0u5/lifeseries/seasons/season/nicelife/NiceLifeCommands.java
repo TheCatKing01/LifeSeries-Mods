@@ -1,4 +1,4 @@
-﻿package net.mat0u5.lifeseries.seasons.season.nicelife;
+package net.mat0u5.lifeseries.seasons.season.nicelife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;

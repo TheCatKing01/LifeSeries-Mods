@@ -1,4 +1,4 @@
-﻿package net.mat0u5.lifeseries.network;
+package net.mat0u5.lifeseries.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

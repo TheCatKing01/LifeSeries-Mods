@@ -1,4 +1,4 @@
-﻿package net.mat0u5.lifeseries.seasons.lists;
+package net.mat0u5.lifeseries.seasons.lists;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
