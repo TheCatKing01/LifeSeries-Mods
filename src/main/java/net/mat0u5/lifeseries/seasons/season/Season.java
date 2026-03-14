@@ -470,6 +470,7 @@ public abstract class Season {
         timer.tick();
         boogeymanManager.tick();
         secretSociety.tick();
+        listsManager.tick();
         if (timer.isMultipleOf(Time.seconds(5)) || reloadPlayerTeams) {
             reloadPlayerTeams = false;
             reloadAllPlayerTeams();
@@ -819,6 +820,7 @@ public abstract class Season {
 
     }
 }
+
 
 
 

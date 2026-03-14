@@ -392,7 +392,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Boolean> LISTS_GLOW = new ConfigFileEntry<>(
             "lists_glow", true, "lifeseries_plus.lists",
-            "Lists Glow", "Controls whether naughty list players glow like in Nice Life."
+            "Naughty List Glow", "Controls whether naughty list players glow."
     );
     public final ConfigFileEntry<String> NAUGHTY_LIST_FORCE = new ConfigFileEntry<>(
             "lists_naughty_force", "[]", "lifeseries_plus.lists",

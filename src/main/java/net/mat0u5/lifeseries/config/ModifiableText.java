@@ -504,6 +504,16 @@ public enum ModifiableText {
     ,NICELIFE_NICELIST_ADD_MULTIPLE(Seasons.NICE_LIFE, "Added {} targets to the Nice List", List.of("number of targets"))
     ,NICELIFE_NICELIST_REMOVE_SINGLE(Seasons.NICE_LIFE, "Removed {} from the Nice List", List.of("Player"))
     ,NICELIFE_NICELIST_REMOVE_MULTIPLE(Seasons.NICE_LIFE, "Removed {} targets from the Nice List", List.of("number of targets"))
+    ,LISTS_NICELIST_START_INFO_PT1("\n \u00A76[\u00A7e!\u00A76]\u00A77 At sunset, players on the nice list will vote to give a \u00A72non-pink\u00A77 name a life.\n")
+    ,LISTS_NICELIST_START_INFO_PT2(" \u00A76[\u00A7e!\u00A76]\u00A77 The majority of the \u00A7dpinks\u00A77 must vote for the same player for the life to be given.\n")
+    ,LISTS_NICELIST_START_INFO_PT3(" \u00A76[\u00A7e!\u00A76]\u00A77 Pink names are not allowed to be targeted by any other players, including \u00A7creds\u00A77.\n")
+    ,LISTS_NICELIST_START_INFO_PT4(" \u00A76[\u00A7e!\u00A76]\u00A77 You are on the nice list. Type {}\u00A77 to choose who you would like to give a life to.\n", List.of("ClickHere"))
+    ,LISTS_NICELIST_START_INFO_PT5(" \u00A76[\u00A7e!\u00A76]\u00A77 You can change your vote at anytime, but the results will be locked in at sunset.\n")
+    ,LISTS_NICELIST_VOTE("\n \u00A76[\u00A7e!\u00A76]\u00A77 You voted for {}\u00A77.\n", List.of("Player"))
+    ,LISTS_NICELIST_VOTE_REMINDER("\n\u00A77Don't forget to {}\u00A77!\n", List.of("ClickHere"))
+    ,LISTS_NICELIST_VOTE_TITLE("Vote for who should get a life")
+    ,LISTS_NAUGHTYLIST_START_INFO_PT2(" \u00A76[\u00A7e!\u00A76]\u00A77 People on the \u00A7cnaughty list\u00A77 have a purple name and can be killed.\n")
+    ,LISTS_NAUGHTYLIST_START_INFO_PT3(" \u00A76[\u00A7e!\u00A76]\u00A77 They return to their previous colour at sunset. They can defend themselves.\n")
     ,NICELIFE_NAUGHTYLIST_START_TITLE_PT1(Seasons.NICE_LIFE, "Â§cThese players are on...")
     ,NICELIFE_NAUGHTYLIST_START_TITLE_PT2(Seasons.NICE_LIFE, "Â§cTHE NAUGHTY LIST")
     ,NICELIFE_NAUGHTYLIST_START_INFO_PT1(Seasons.NICE_LIFE, Formatted.LOOSELY_STYLED,"\n Â§6[Â§e!Â§6]Â§7 You have voted for {} {} to be on the Â§cNAUGHTY LISTÂ§7.\n", List.of("count", "person/people"))
@@ -540,7 +550,12 @@ public enum ModifiableText {
     ,NICELIFE_REDWINTER_PT2(Seasons.NICE_LIFE, "Â§cRed winter is here..")
     ,NICELIFE_NAUGHTYLIST_END_TITLE(Seasons.NICE_LIFE, "Â§cPlayers return to normal in...")
     ,NICELIFE_NICELIST_VOTE_END_TITLE(Seasons.NICE_LIFE, "Â§cThe nice vote will end in...")
-    ,LISTS_VOTE_END_TITLE("Â§cThe lists will end in...")
+    ,LISTS_VOTE_END_TITLE("\u00A7cThe lists will end in...")
+    ,LISTS_VOTE_COUNTDOWN_3("\u00A723..")
+    ,LISTS_VOTE_COUNTDOWN_2("\u00A7e2..")
+    ,LISTS_VOTE_COUNTDOWN_1("\u00A7c1..")
+    ,LISTS_NICELIST_VOTE_ERROR_INSUFFICIENT("\u00A7cInsufficient votes")
+    ,LISTS_NICELIST_VOTE_ERROR_AGREEMENT("\u00A7cNo agreement reached")
     ,NICELIFE_VOTE_COUNTDOWN_3(Seasons.NICE_LIFE, "Â§23..")
     ,NICELIFE_VOTE_COUNTDOWN_2(Seasons.NICE_LIFE, "Â§e2..")
     ,NICELIFE_VOTE_COUNTDOWN_1(Seasons.NICE_LIFE, "Â§c1..")
@@ -711,4 +726,7 @@ public enum ModifiableText {
         return null;
     }
 }
+
+
+
 
