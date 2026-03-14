@@ -460,7 +460,7 @@ public class ListsManager {
         NORMAL
     }
 	
-		private void messageLists(Lists lists, ServerPlayer player) {
+    private void messageLists(Lists lists, ServerPlayer player) {
         if (lists == null || player == null) return;
 
         boolean niceLife = isNiceLifeSeason();
@@ -492,17 +492,6 @@ public class ListsManager {
             TaskScheduler.scheduleTask(110, () -> {
                 if (player.ls$isAlive() && isNaughtyListMember(player)) {
                     player.ls$message(infoPt3.get());
-                }
-            });
-        }
-	}
-            });
-        }
-        else {
-            player.ls$message(ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT2.get());
-            TaskScheduler.scheduleTask(110, () -> {
-                if (player.ls$isAlive() && isNaughtyListMember(player)) {
-                    player.ls$message(ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT3.get());
                 }
             });
         }
@@ -762,6 +751,8 @@ public class ListsManager {
         resetLists();
     }
 }
+
+
 
 
 
