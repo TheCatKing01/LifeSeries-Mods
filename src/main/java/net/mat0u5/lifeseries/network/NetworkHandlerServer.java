@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.network;
+﻿package net.mat0u5.lifeseries.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -146,6 +146,9 @@ public class NetworkHandlerServer {
         });
         SimplePackets.SUBMIT_VOTE.setServerReceive((player, payload) -> {
             NiceLifeVotingManager.handleVote(player, payload.value());
+            if (Main.currentSeason != null) {
+                Main.currentSeason.listsManager.handleVote(player, payload.value());
+            }
         });
 
         SimplePackets.SET_LIVES.setServerReceive((player, payload) -> {
@@ -536,7 +539,7 @@ public class NetworkHandlerServer {
         PlayerUtils.broadcastMessageToAdmins(ModifiableText.CONFIG_UPDATED.get());
         if (configNeedsReload) {
             OtherUtils.reloadServer();
-            //PlayerUtils.broadcastMessageToAdmins(Text.of("Run §7'/lifeseries reload'§r to apply all the changes."));
+            //PlayerUtils.broadcastMessageToAdmins(Text.of("Run Â§7'/lifeseries reload'Â§r to apply all the changes."));
         }
         else {
             Main.softReloadStart();
@@ -713,8 +716,8 @@ public class NetworkHandlerServer {
     }
 
     public static Component getDisconnectClientText() {
-        return Component.literal("You must have the §2Life Series mod\n§l installed on the client§r§r§f to play "+currentSeason.getSeason().getName()+"!\n").append(
-                Component.literal("§9§nThe Life Series mod is available on Modrinth."));
+        return Component.literal("You must have the Â§2Life Series mod\nÂ§l installed on the clientÂ§rÂ§rÂ§f to play "+currentSeason.getSeason().getName()+"!\n").append(
+                Component.literal("Â§9Â§nThe Life Series mod is available on Modrinth."));
     }
 
     public static boolean wasHandshakeSuccessful(ServerPlayer player) {

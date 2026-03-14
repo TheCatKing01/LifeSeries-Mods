@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.config;
+﻿package net.mat0u5.lifeseries.config;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
@@ -166,6 +166,8 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,NAUGHTY_LIST_PLAYERS
                 ,NICE_LIST_PLAYERS
                 ,LISTS_ROLL_TIME
+                ,LISTS_DURATION
+                ,LISTS_GLOW
                 ,NAUGHTY_LIST_FORCE
                 ,NAUGHTY_LIST_IGNORE
                 ,NICE_LIST_FORCE
@@ -674,6 +676,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
         return defaultValue;
     }
 }
+
 
 
 

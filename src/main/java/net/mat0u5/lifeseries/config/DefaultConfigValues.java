@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.config;
+﻿package net.mat0u5.lifeseries.config;
 
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 
@@ -375,16 +375,24 @@ public class DefaultConfigValues {
             "Naughty/Nice Lists Enabled", "Enables the naughty/nice lists."
     );
         public final ConfigFileEntry<Integer> NAUGHTY_LIST_PLAYERS = new ConfigFileEntry<>(
-            "lists_naughty_players", 1, "lifeseries_plus.lists",
-            "Naughty List Players", "The number of players who will be on the Naughty List."
+            "lists_naughty_players", 3, "lifeseries_plus.lists",
+            "Naughty List Player Count", "The number of players who will be on the Naughty List."
     );
     public final ConfigFileEntry<Integer> NICE_LIST_PLAYERS = new ConfigFileEntry<>(
-            "lists_nice_players", 1, "lifeseries_plus.lists",
-            "Nice List Players", "The number of players who will be on the Nice List."
+            "lists_nice_players", 3, "lifeseries_plus.lists",
+            "Nice List Player Count", "The number of players who will be on the Nice List."
     );
     public final ConfigFileEntry<Double> LISTS_ROLL_TIME = new ConfigFileEntry<>(
             "lists_roll_time", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
             "Lists Roll Time", "The number of minutes (in the session) after which the naughty/nice lists are rolled."
+    );
+    public final ConfigFileEntry<Double> LISTS_DURATION = new ConfigFileEntry<>(
+            "lists_duration", 10.0, ConfigTypes.MINUTES, "lifeseries_plus.lists",
+            "Lists Duration", "How many minutes the naughty/nice lists last before ending and the vote is chosen."
+    );
+    public final ConfigFileEntry<Boolean> LISTS_GLOW = new ConfigFileEntry<>(
+            "lists_glow", true, "lifeseries_plus.lists",
+            "Lists Glow", "Controls whether naughty list players glow like in Nice Life."
     );
     public final ConfigFileEntry<String> NAUGHTY_LIST_FORCE = new ConfigFileEntry<>(
             "lists_naughty_force", "[]", "lifeseries_plus.lists",
@@ -435,7 +443,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Object> GROUP_WATCHERS = new ConfigFileEntry<>(
             "group_watchers", null, ConfigTypes.TEXT, "{global.watchers}",
-            "Watchers §7('/watcher' command)", ""
+            "Watchers Â§7('/watcher' command)", ""
     );
     public final ConfigFileEntry<Object> GROUP_SUBIN = new ConfigFileEntry<>(
             "group_subin", null, ConfigTypes.TEXT, "{global.subin}",
@@ -469,5 +477,7 @@ public class DefaultConfigValues {
             "spawner_recipe", "blacklist_items", "blacklist_recipes"
     );
 }
+
+
 
 

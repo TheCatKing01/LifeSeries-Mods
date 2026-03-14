@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.seasons.lists;
+﻿package net.mat0u5.lifeseries.seasons.lists;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -46,6 +46,12 @@ public class ListsCommand extends Command {
     }
     private LiteralArgumentBuilder<CommandSourceStack> buildRootCommand() {
         return literal("lists")
+            .then(literal("end")
+                .requires(PermissionManager::isAdmin)
+                .executes(context -> listsEnd(
+                    context.getSource()
+                ))
+            )
             .then(literal("clear")
                 .requires(PermissionManager::isAdmin)
                 .executes(context -> listsClear(
@@ -131,9 +137,9 @@ public class ListsCommand extends Command {
 		}
 
 		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {}§7...", targets.iterator().next()));
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Â§7Resetting naughty list cure status for {}Â§7...", targets.iterator().next()));
 		} else {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {} targets§7...", targets.size()));
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("Â§7Resetting naughty list cure status for {} targetsÂ§7...", targets.size()));
 		}
 
 		bm.resetNaughtyStatus(targets);
@@ -165,7 +171,7 @@ public class ListsCommand extends Command {
 
         bm.addPlayerToList(target, listType, true);
         String listTypeName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {}§7 to the §e{}§7 list.", target, listTypeName));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {}Â§7 to the Â§e{}Â§7 list.", target, listTypeName));
         return 1;
     }
 
@@ -177,12 +183,23 @@ public class ListsCommand extends Command {
 
         var removedType = bm.removePlayerFromLists(target, true);
         if (removedType.isEmpty()) {
-            source.sendFailure(TextUtils.format("{}§c is not on any list.", target));
+            source.sendFailure(TextUtils.format("{}Â§c is not on any list.", target));
             return -1;
         }
 
         String listTypeName = removedType.get() == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {}§7 from the §e{}§7 list.", target, listTypeName));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {}Â§7 from the Â§e{}Â§7 list.", target, listTypeName));
+        return 1;
+    }
+
+
+    public int listsEnd(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        ListsManager bm = getBM();
+        if (bm == null) return -1;
+
+        bm.endListsNow();
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Ended the current naughty/nice lists"));
         return 1;
     }
 
@@ -201,7 +218,7 @@ public class ListsCommand extends Command {
         ListsManager bm = getBM();
         if (bm == null) return -1;
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("§7Rolling naughty/nice lists..."));
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Â§7Rolling naughty/nice lists..."));
 
         bm.resetLists();
         bm.prepareToChooseLists();
@@ -210,3 +227,4 @@ public class ListsCommand extends Command {
     }
 	
 }
+

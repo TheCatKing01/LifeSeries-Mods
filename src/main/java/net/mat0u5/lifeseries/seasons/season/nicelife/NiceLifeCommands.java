@@ -1,8 +1,9 @@
-package net.mat0u5.lifeseries.seasons.season.nicelife;
+﻿package net.mat0u5.lifeseries.seasons.season.nicelife;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
+import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -327,16 +328,47 @@ public class NiceLifeCommands extends Command {
     }
 
     private int vote(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
+        if (Main.modDisabled()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
+            return -1;
+        }
         ServerPlayer self = source.getPlayer();
         if (self == null) return -1;
 
-        if (!NiceLifeVotingManager.niceListMembers.contains(self.getUUID())) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_MISSING.get());
+        if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            if (!NiceLifeVotingManager.niceListMembers.contains(self.getUUID())) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_MISSING.get());
+                return -1;
+            }
+            if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_PROGRESS.get());
+                return -1;
+            }
+            if (self.ls$isDead()) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_DEAD.get());
+                return -1;
+            }
+            if (self.ls$isWatcher()) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_WATCHER.get());
+                return -1;
+            }
+
+            boolean success = NiceLifeVotingManager.openNiceListLifeVote(self);
+
+            if (!success) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_TARGET.get());
+                return -1;
+            }
+
+            return 1;
+        }
+
+        if (!currentSeason.listsManager.isListsVoteActive()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_PROGRESS.get());
             return -1;
         }
-        if (NiceLifeVotingManager.voteType != NiceLifeVotingManager.VoteType.NICE_LIST_LIFE) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_PROGRESS.get());
+        if (!currentSeason.listsManager.isNiceListMember(self)) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_NICELIST_MISSING.get());
             return -1;
         }
         if (self.ls$isDead()) {
@@ -348,7 +380,7 @@ public class NiceLifeCommands extends Command {
             return -1;
         }
 
-        boolean success = NiceLifeVotingManager.openNiceListLifeVote(self);
+        boolean success = currentSeason.listsManager.openListsLifeVote(self);
 
         if (!success) {
             OtherUtils.sendCommandFailure(source, ModifiableText.NICELIFE_VOTE_ERROR_TARGET.get());
@@ -358,3 +390,4 @@ public class NiceLifeCommands extends Command {
         return 1;
     }
 }
+
