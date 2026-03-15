@@ -1,4 +1,4 @@
-﻿package net.mat0u5.lifeseries.seasons.season.nicelife;
+package net.mat0u5.lifeseries.seasons.season.nicelife;
 
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
