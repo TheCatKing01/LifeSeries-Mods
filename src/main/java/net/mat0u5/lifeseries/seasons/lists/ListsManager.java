@@ -31,7 +31,7 @@ public class ListsManager {
     public boolean LISTS_GLOW = true;
 
     private static final Time LISTS_GLOW_TIME_INTERVAL = Time.seconds(60);
-    private static final Time LISTS_GLOW_TIME = Time.seconds(5);
+    private static final Time LISTS_GLOW_TIME = Time.seconds(3);
 
     public List<String> NAUGHTY_LIST_IGNORE = new ArrayList<>();
     public List<String> NAUGHTY_LIST_FORCE = new ArrayList<>();
@@ -80,32 +80,47 @@ public class ListsManager {
     }
 	
 	public void showRolling(List<ServerPlayer> players) {
-		PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+		PlayerUtils.playSoundToPlayers(
+			players,
+			SoundEvent.createVariableRangeEvent(
+				IdentifierHelper.vanilla("nicelife_nicelist_countdown_3")
+			)
+		);
 		PlayerUtils.sendTitleToPlayers(
 			players,
 			Component.literal("3").withStyle(ChatFormatting.GREEN),
-			0, 35, 0
+			0, 25, 0
 		);
 
-		TaskScheduler.scheduleTask(30, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+		TaskScheduler.scheduleTask(25, () -> {
+			PlayerUtils.playSoundToPlayers(
+				players,
+				SoundEvent.createVariableRangeEvent(
+					IdentifierHelper.vanilla("nicelife_nicelist_countdown_2")
+				)
+			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
 				Component.literal("2").withStyle(ChatFormatting.YELLOW),
-				0, 35, 0
+				0, 25, 0
 			);
 		});
 
-		TaskScheduler.scheduleTask(60, () -> {
-			PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+		TaskScheduler.scheduleTask(50, () -> {
+			PlayerUtils.playSoundToPlayers(
+				players,
+				SoundEvent.createVariableRangeEvent(
+					IdentifierHelper.vanilla("nicelife_nicelist_countdown_1")
+				)
+			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
 				Component.literal("1").withStyle(ChatFormatting.RED),
-				0, 35, 0
+				0, 25, 0
 			);
 		});
 
-		TaskScheduler.scheduleTask(90, () -> {
+		TaskScheduler.scheduleTask(75, () -> {
 			PlayerUtils.playSoundToPlayers(
 				players,
 				SoundEvent.createVariableRangeEvent(
@@ -357,7 +372,7 @@ public class ListsManager {
 
         if (notify) {
             String listName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-            player.sendSystemMessage(Component.literal("Â§6[NOTICE] You were added to the " + listName + " list."));
+            player.sendSystemMessage(Component.literal("§6[NOTICE] You were added to the " + listName + " list."));
         }
         PlayerUtils.updatePlayerLists();
     }
@@ -381,7 +396,7 @@ public class ListsManager {
             removed = true;
         }
         if (removed && notify) {
-            player.sendSystemMessage(Component.literal("Â§c[NOTICE] You are no longer on the naughty/nice list."));
+            player.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
         }
     }
 
@@ -472,28 +487,24 @@ public class ListsManager {
             ModifiableText infoPt4 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT4 : ModifiableText.LISTS_NICELIST_START_INFO_PT4;
             ModifiableText infoPt5 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT5 : ModifiableText.LISTS_NICELIST_START_INFO_PT5;
 
-            player.ls$message(infoPt1.get());
-            player.ls$message(infoPt2.get());
-            player.ls$message(infoPt3.get());
-            player.ls$message(infoPt4.get(
-                TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"))
-            ));
-            TaskScheduler.scheduleTask(110, () -> {
-                if (player.ls$isAlive() && isNiceListMember(player)) {
-                    player.ls$message(infoPt5.get());
-                }
-            });
+            Component combined = Component.empty()
+                .append(infoPt1.get())
+                .append(infoPt2.get())
+                .append(infoPt3.get())
+                .append(infoPt4.get(
+                    TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
+                ))
+                .append(infoPt5.get());
+            player.ls$message(combined);
         }
         else {
             ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT2 : ModifiableText.LISTS_NAUGHTYLIST_START_INFO_PT2;
             ModifiableText infoPt3 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT3 : ModifiableText.LISTS_NAUGHTYLIST_START_INFO_PT3;
 
-            player.ls$message(infoPt2.get());
-            TaskScheduler.scheduleTask(110, () -> {
-                if (player.ls$isAlive() && isNaughtyListMember(player)) {
-                    player.ls$message(infoPt3.get());
-                }
-            });
+            Component combined = Component.empty()
+                .append(infoPt2.get())
+                .append(infoPt3.get());
+            player.ls$message(combined);
         }
 	}
 
@@ -612,7 +623,7 @@ public class ListsManager {
             ? ModifiableText.NICELIFE_NICELIST_VOTE_REMINDER
             : ModifiableText.LISTS_NICELIST_VOTE_REMINDER;
         Component message = reminderText.get(
-            TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"))
+            TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
         );
         PlayerUtils.playSoundToPlayers(niceListPlayers, SoundEvents.NOTE_BLOCK_BELL.value(), 1f, 1);
         PlayerUtils.broadcastMessage(niceListPlayers, message);
@@ -646,14 +657,14 @@ public class ListsManager {
             PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), sound, 1f, 1);
             PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), countdown3.get(), 15, 25, 15);
         });
-        delay += 40;
+        delay += 25;
         TaskScheduler.scheduleTask(delay, () -> {
             if (runId != listsCycleId) return;
             SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_countdown_2"));
             PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), sound, 1f, 1);
             PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), countdown2.get(), 15, 25, 15);
         });
-        delay += 40;
+        delay += 25;
         TaskScheduler.scheduleTask(delay, () -> {
             if (runId != listsCycleId) return;
             SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_countdown_1"));
@@ -719,7 +730,7 @@ public class ListsManager {
                     mostVotes = votes;
                 }
             }
-            double requiredVotes = (double)availableVotes/2.0;
+            double requiredVotes = (double)validVotes/2.0;
             ServerPlayer winner = PlayerUtils.getPlayer(mostVotedFor);
 
             if (mostVotes > requiredVotes && winner != null) {
