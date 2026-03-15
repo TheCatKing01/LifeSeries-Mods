@@ -478,21 +478,17 @@ public class ListsManager {
 	private void messageLists(Lists lists, ServerPlayer player) {
 		if (lists == null || player == null) return;
 
-		boolean niceLife = isNiceLifeSeason();
 		ModifiableText message;
 
 		if (lists.listType == Lists.ListType.NICE) {
-			message = niceLife
-				? ModifiableText.NICELIFE_NICELIST_START_INFO_PT
-				: ModifiableText.LISTS_NICELIST_START_INFO;
+			message = ModifiableText.LISTS_NICELIST_START_INFO;
 		} else {
-			message = niceLife
-				? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO
-				: ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
+			message = ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
 		}
 
 		player.ls$message(message.get());
 	}
+	
     public void endListsNow() {
         if (!LISTS_ENABLED) return;
         if (!listsChosen) {
