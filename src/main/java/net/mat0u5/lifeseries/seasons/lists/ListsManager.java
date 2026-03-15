@@ -475,21 +475,23 @@ public class ListsManager {
         NORMAL
     }
 	
-    private void messageLists(Lists lists, ServerPlayer player) {
-        if (lists == null || player == null) return;
+	private void messageLists(Lists lists, ServerPlayer player) {
+		if (lists == null || player == null) return;
 
-        boolean niceLife = isNiceLifeSeason();
+		boolean niceLife = isNiceLifeSeason();
+		ModifiableText message;
 
-        if (lists.listType == Lists.ListType.NICE) {
-            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT : ModifiableText.LISTS_NICELIST_START_INFO;
-        }
-        else {
-            ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO : ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
-            Component combined = Component.empty()
-                .append(infoPt2.get())
-                .append(infoPt3.get());
-            player.ls$message(combined);
-        }
+		if (lists.listType == Lists.ListType.NICE) {
+			message = niceLife
+				? ModifiableText.NICELIFE_NICELIST_START_INFO
+				: ModifiableText.LISTS_NICELIST_START_INFO;
+		} else {
+			message = niceLife
+				? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO
+				: ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
+		}
+
+		player.ls$message(message.get());
 	}
 
     public void endListsNow() {
