@@ -481,17 +481,7 @@ public class ListsManager {
         boolean niceLife = isNiceLifeSeason();
 
         if (lists.listType == Lists.ListType.NICE) {
-            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT : ModifiableText.LISTS_NICELIST_START_INFO_PT;
-
-            Component combined = Component.empty()
-                .append(infoPt1.get())
-                .append(infoPt2.get())
-                .append(infoPt3.get())
-                .append(infoPt4.get(
-                    TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
-                ))
-                .append(infoPt5.get());
-            player.ls$message(combined);
+            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT : ModifiableText.LISTS_NICELIST_START_INFO;
         }
         else {
             ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO : ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
