@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.config;
+﻿package net.mat0u5.lifeseries.config;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
@@ -155,3 +155,6 @@ public class ModifiableTextManager {
         return toMinecraftColorFormatting(configEntry.get());
     }
 }
+
+
+

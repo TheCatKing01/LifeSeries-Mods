@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.seasons.lists;
+ï»¿package net.mat0u5.lifeseries.seasons.lists;
 
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -31,7 +31,7 @@ public class ListsManager {
     public boolean LISTS_GLOW = true;
 
     private static final Time LISTS_GLOW_TIME_INTERVAL = Time.seconds(60);
-    private static final Time LISTS_GLOW_TIME = Time.seconds(3);
+    private static final Time LISTS_GLOW_TIME = Time.seconds(10);
 
     public List<String> NAUGHTY_LIST_IGNORE = new ArrayList<>();
     public List<String> NAUGHTY_LIST_FORCE = new ArrayList<>();
@@ -124,7 +124,7 @@ public class ListsManager {
 			PlayerUtils.playSoundToPlayers(
 				players,
 				SoundEvent.createVariableRangeEvent(
-					IdentifierHelper.vanilla("lastlife_boogeyman_wait")
+					IdentifierHelper.vanilla("nicelife_vote_result")
 				)
 			);
 			PlayerUtils.sendTitleToPlayers(
@@ -372,7 +372,7 @@ public class ListsManager {
 
         if (notify) {
             String listName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-            player.sendSystemMessage(Component.literal("§6[NOTICE] You were added to the " + listName + " list."));
+            player.sendSystemMessage(Component.literal("Â§6[NOTICE] You were added to the " + listName + " list."));
         }
         PlayerUtils.updatePlayerLists();
     }
@@ -396,7 +396,7 @@ public class ListsManager {
             removed = true;
         }
         if (removed && notify) {
-            player.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
+            player.sendSystemMessage(Component.literal("Â§c[NOTICE] You are no longer on the naughty/nice list."));
         }
     }
 
@@ -492,7 +492,7 @@ public class ListsManager {
                 .append(infoPt2.get())
                 .append(infoPt3.get())
                 .append(infoPt4.get(
-                    TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
+                    TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"))
                 ))
                 .append(infoPt5.get());
             player.ls$message(combined);
@@ -623,7 +623,7 @@ public class ListsManager {
             ? ModifiableText.NICELIFE_NICELIST_VOTE_REMINDER
             : ModifiableText.LISTS_NICELIST_VOTE_REMINDER;
         Component message = reminderText.get(
-            TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
+            TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"))
         );
         PlayerUtils.playSoundToPlayers(niceListPlayers, SoundEvents.NOTE_BLOCK_BELL.value(), 1f, 1);
         PlayerUtils.broadcastMessage(niceListPlayers, message);
@@ -762,6 +762,9 @@ public class ListsManager {
         resetLists();
     }
 }
+
+
+
 
 
 
