@@ -88,7 +88,7 @@ public class ListsManager {
 		);
 		PlayerUtils.sendTitleToPlayers(
 			players,
-			Component.literal("3").withStyle(ChatFormatting.GREEN),
+			Component.literal("3").withStyle(ChatFormatting.DARK_GREEN),
 			0, 25, 0
 		);
 
@@ -481,11 +481,7 @@ public class ListsManager {
         boolean niceLife = isNiceLifeSeason();
 
         if (lists.listType == Lists.ListType.NICE) {
-            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT1 : ModifiableText.LISTS_NICELIST_START_INFO_PT1;
-            ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT2 : ModifiableText.LISTS_NICELIST_START_INFO_PT2;
-            ModifiableText infoPt3 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT3 : ModifiableText.LISTS_NICELIST_START_INFO_PT3;
-            ModifiableText infoPt4 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT4 : ModifiableText.LISTS_NICELIST_START_INFO_PT4;
-            ModifiableText infoPt5 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT5 : ModifiableText.LISTS_NICELIST_START_INFO_PT5;
+            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT : ModifiableText.LISTS_NICELIST_START_INFO_PT;
 
             Component combined = Component.empty()
                 .append(infoPt1.get())
@@ -498,9 +494,7 @@ public class ListsManager {
             player.ls$message(combined);
         }
         else {
-            ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT2 : ModifiableText.LISTS_NAUGHTYLIST_START_INFO_PT2;
-            ModifiableText infoPt3 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO_PT3 : ModifiableText.LISTS_NAUGHTYLIST_START_INFO_PT3;
-
+            ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO : ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
             Component combined = Component.empty()
                 .append(infoPt2.get())
                 .append(infoPt3.get());
