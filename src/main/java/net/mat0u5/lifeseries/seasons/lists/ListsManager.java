@@ -479,27 +479,6 @@ public class ListsManager {
         if (lists == null || player == null) return;
 
         boolean niceLife = isNiceLifeSeason();
-
-        if (lists.listType == Lists.ListType.NICE) {
-            ModifiableText infoPt1 = niceLife ? ModifiableText.NICELIFE_NICELIST_START_INFO_PT : ModifiableText.LISTS_NICELIST_START_INFO_PT;
-
-            Component combined = Component.empty()
-                .append(infoPt1.get())
-                .append(infoPt2.get())
-                .append(infoPt3.get())
-                .append(infoPt4.get(
-                    TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"))
-                ))
-                .append(infoPt5.get());
-            player.ls$message(combined);
-        }
-        else {
-            ModifiableText infoPt2 = niceLife ? ModifiableText.NICELIFE_NAUGHTYLIST_START_INFO : ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
-            Component combined = Component.empty()
-                .append(infoPt2.get())
-                .append(infoPt3.get());
-            player.ls$message(combined);
-        }
 	}
 
     public void endListsNow() {
