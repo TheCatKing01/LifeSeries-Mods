@@ -65,9 +65,13 @@ public class ListsManager {
     }
 
     public void prepareToChooseLists() {
+        prepareToChooseLists(ListsRollType.NORMAL);
+    }
+
+    public void prepareToChooseLists(ListsRollType rollType) {
         if (!LISTS_ENABLED) return;
-		resetLists();
-        chooseLists(livesManager.getAlivePlayers(), ListsRollType.NORMAL);
+        resetLists();
+        chooseLists(livesManager.getAlivePlayers(), rollType);
     }
 
     public void chooseLists(List<ServerPlayer> allowedPlayers, ListsRollType rollType) {
@@ -145,10 +149,24 @@ public class ListsManager {
             rolledPlayers.contains(p.getUUID())
         );
 
-        List<ServerPlayer> naughtyList = getRandomListPlayers(candidates, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
         List<ServerPlayer> remaining = new ArrayList<>(candidates);
-        remaining.removeAll(naughtyList);
-        List<ServerPlayer> niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
+        List<ServerPlayer> naughtyList = new ArrayList<>();
+        List<ServerPlayer> niceList = new ArrayList<>();
+
+        if (rollType == ListsRollType.NAUGHTY_ONLY) {
+            naughtyList = getRandomListPlayers(remaining, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
+            remaining.removeAll(naughtyList);
+        }
+        else if (rollType == ListsRollType.NICE_ONLY) {
+            niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
+            remaining.removeAll(niceList);
+        }
+        else {
+            naughtyList = getRandomListPlayers(remaining, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
+            remaining.removeAll(naughtyList);
+            niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
+            remaining.removeAll(niceList);
+        }
 
         List<ServerPlayer> normalPlayers = new ArrayList<>(allowedPlayers);
         normalPlayers.removeAll(naughtyList);
@@ -472,7 +490,9 @@ public class ListsManager {
     }
 
     public enum ListsRollType {
-        NORMAL
+        NORMAL,
+        NICE_ONLY,
+        NAUGHTY_ONLY
     }
 	
 	private void messageLists(Lists lists, ServerPlayer player) {

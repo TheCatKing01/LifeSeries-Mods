@@ -105,8 +105,52 @@ public class ListsCommand extends Command {
             .then(literal("randomize")
                 .requires(PermissionManager::isAdmin)
                 .executes(context -> listsChooseRandom(
-                    context.getSource()
+                    context.getSource(),
+                    ListsManager.ListsRollType.NORMAL
                 ))
+                .then(literal("both")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NORMAL
+                    ))
+                )
+                .then(literal("nice")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NICE_ONLY
+                    ))
+                )
+                .then(literal("naughty")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NAUGHTY_ONLY
+                    ))
+                )
+            )
+            .then(literal("randomise")
+                .requires(PermissionManager::isAdmin)
+                .executes(context -> listsChooseRandom(
+                    context.getSource(),
+                    ListsManager.ListsRollType.NORMAL
+                ))
+                .then(literal("both")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NORMAL
+                    ))
+                )
+                .then(literal("nice")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NICE_ONLY
+                    ))
+                )
+                .then(literal("naughty")
+                    .executes(context -> listsChooseRandom(
+                        context.getSource(),
+                        ListsManager.ListsRollType.NAUGHTY_ONLY
+                    ))
+                )
             );
     }
 
@@ -213,15 +257,19 @@ public class ListsCommand extends Command {
         return 1;
     }
 
-    public int listsChooseRandom(CommandSourceStack source) {
+    public int listsChooseRandom(CommandSourceStack source, ListsManager.ListsRollType rollType) {
         if (checkBanned(source)) return -1;
         ListsManager bm = getBM();
         if (bm == null) return -1;
 
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Â§7Rolling naughty/nice lists..."));
+        String rollMessage = switch (rollType) {
+            case NICE_ONLY -> "Â§7Rolling nice list...";
+            case NAUGHTY_ONLY -> "Â§7Rolling naughty list...";
+            default -> "Â§7Rolling naughty/nice lists...";
+        };
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty(rollMessage));
 
-        bm.resetLists();
-        bm.prepareToChooseLists();
+        bm.prepareToChooseLists(rollType);
 
         return 1;
     }
