@@ -126,31 +126,6 @@ public class ListsCommand extends Command {
                         ListsManager.ListsRollType.NAUGHTY_ONLY
                     ))
                 )
-            )
-            .then(literal("randomise")
-                .requires(PermissionManager::isAdmin)
-                .executes(context -> listsChooseRandom(
-                    context.getSource(),
-                    ListsManager.ListsRollType.NORMAL
-                ))
-                .then(literal("both")
-                    .executes(context -> listsChooseRandom(
-                        context.getSource(),
-                        ListsManager.ListsRollType.NORMAL
-                    ))
-                )
-                .then(literal("nice")
-                    .executes(context -> listsChooseRandom(
-                        context.getSource(),
-                        ListsManager.ListsRollType.NICE_ONLY
-                    ))
-                )
-                .then(literal("naughty")
-                    .executes(context -> listsChooseRandom(
-                        context.getSource(),
-                        ListsManager.ListsRollType.NAUGHTY_ONLY
-                    ))
-                )
             );
     }
 

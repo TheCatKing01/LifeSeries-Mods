@@ -143,29 +143,32 @@ public class ListsManager {
         if (!LISTS_ENABLED) return;
         if (NAUGHTY_LIST_PLAYERS < 0 || NICE_LIST_PLAYERS < 0) return;
 
-        List<ServerPlayer> candidates = new ArrayList<>(livesManager.getNonRedPlayers());
-        candidates.removeIf(p ->
+        List<ServerPlayer> candidatesAll = new ArrayList<>(allowedPlayers);
+        candidatesAll.removeIf(p -> rolledPlayers.contains(p.getUUID()));
+
+        List<ServerPlayer> candidatesNonRed = new ArrayList<>(livesManager.getNonRedPlayers());
+        candidatesNonRed.removeIf(p ->
             !allowedPlayers.contains(p) ||
             rolledPlayers.contains(p.getUUID())
         );
 
-        List<ServerPlayer> remaining = new ArrayList<>(candidates);
+        List<ServerPlayer> remainingAll = new ArrayList<>(candidatesAll);
         List<ServerPlayer> naughtyList = new ArrayList<>();
         List<ServerPlayer> niceList = new ArrayList<>();
 
         if (rollType == ListsRollType.NAUGHTY_ONLY) {
-            naughtyList = getRandomListPlayers(remaining, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
-            remaining.removeAll(naughtyList);
+            naughtyList = getRandomListPlayers(candidatesNonRed, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
+            remainingAll.removeAll(naughtyList);
         }
         else if (rollType == ListsRollType.NICE_ONLY) {
-            niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
-            remaining.removeAll(niceList);
+            niceList = getRandomListPlayers(remainingAll, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
+            remainingAll.removeAll(niceList);
         }
         else {
-            naughtyList = getRandomListPlayers(remaining, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
-            remaining.removeAll(naughtyList);
-            niceList = getRandomListPlayers(remaining, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
-            remaining.removeAll(niceList);
+            naughtyList = getRandomListPlayers(candidatesNonRed, NAUGHTY_LIST_PLAYERS, NAUGHTY_LIST_FORCE, NAUGHTY_LIST_IGNORE);
+            remainingAll.removeAll(naughtyList);
+            niceList = getRandomListPlayers(remainingAll, NICE_LIST_PLAYERS, NICE_LIST_FORCE, NICE_LIST_IGNORE);
+            remainingAll.removeAll(niceList);
         }
 
         List<ServerPlayer> normalPlayers = new ArrayList<>(allowedPlayers);
@@ -500,13 +503,18 @@ public class ListsManager {
 
 		ModifiableText message;
 
+		String minutesText = (LISTS_DURATION % 1 == 0)
+			? String.valueOf((int) LISTS_DURATION)
+			: String.valueOf(LISTS_DURATION);
+
 		if (lists.listType == Lists.ListType.NICE) {
+			Component clickableVote = TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"));
 			message = ModifiableText.LISTS_NICELIST_START_INFO;
+			player.ls$message(message.get(minutesText, clickableVote));
 		} else {
 			message = ModifiableText.LISTS_NAUGHTYLIST_START_INFO;
+			player.ls$message(message.get(minutesText));
 		}
-
-		player.ls$message(message.get());
 	}
 	
     public void endListsNow() {
