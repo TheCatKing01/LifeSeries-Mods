@@ -156,9 +156,9 @@ public class ListsCommand extends Command {
 		}
 
 		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Â§7Resetting naughty list cure status for {}Â§7...", targets.iterator().next()));
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {}§7...", targets.iterator().next()));
 		} else {
-			OtherUtils.sendCommandFeedback(source, TextUtils.format("Â§7Resetting naughty list cure status for {} targetsÂ§7...", targets.size()));
+			OtherUtils.sendCommandFeedback(source, TextUtils.format("§7Resetting naughty list cure status for {} targets§7...", targets.size()));
 		}
 
 		bm.resetNaughtyStatus(targets);
@@ -190,7 +190,7 @@ public class ListsCommand extends Command {
 
         bm.addPlayerToList(target, listType, true);
         String listTypeName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {}Â§7 to the Â§e{}Â§7 list.", target, listTypeName));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Added {}§7 to the §e{}§7 list.", target, listTypeName));
         return 1;
     }
 
@@ -202,12 +202,12 @@ public class ListsCommand extends Command {
 
         var removedType = bm.removePlayerFromLists(target, true);
         if (removedType.isEmpty()) {
-            source.sendFailure(TextUtils.format("{}Â§c is not on any list.", target));
+            source.sendFailure(TextUtils.format("{}§c is not on any list.", target));
             return -1;
         }
 
         String listTypeName = removedType.get() == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {}Â§7 from the Â§e{}Â§7 list.", target, listTypeName));
+        OtherUtils.sendCommandFeedback(source, TextUtils.format("Removed {}§7 from the §e{}§7 list.", target, listTypeName));
         return 1;
     }
 
@@ -238,9 +238,9 @@ public class ListsCommand extends Command {
         if (bm == null) return -1;
 
         String rollMessage = switch (rollType) {
-            case NICE_ONLY -> "Â§7Rolling nice list...";
-            case NAUGHTY_ONLY -> "Â§7Rolling naughty list...";
-            default -> "Â§7Rolling naughty/nice lists...";
+            case NICE_ONLY -> "§7Rolling nice list...";
+            case NAUGHTY_ONLY -> "§7Rolling naughty list...";
+            default -> "§7Rolling naughty/nice lists...";
         };
         OtherUtils.sendCommandFeedback(source, Component.nullToEmpty(rollMessage));
 

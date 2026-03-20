@@ -716,8 +716,8 @@ public class NetworkHandlerServer {
     }
 
     public static Component getDisconnectClientText() {
-        return Component.literal("You must have the Â§2Life Series mod\nÂ§l installed on the clientÂ§rÂ§rÂ§f to play "+currentSeason.getSeason().getName()+"!\n").append(
-                Component.literal("Â§9Â§nThe Life Series mod is available on Modrinth."));
+        return Component.literal("You must have the §2Life Series mod\n§l installed on the client§r§r§f to play "+currentSeason.getSeason().getName()+"!\n").append(
+                Component.literal("§9§nThe Life Series mod is available on Modrinth."));
     }
 
     public static boolean wasHandshakeSuccessful(ServerPlayer player) {

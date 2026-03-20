@@ -508,7 +508,7 @@ public class ListsManager {
 			: String.valueOf(LISTS_DURATION);
 
 		if (lists.listType == Lists.ListType.NICE) {
-			Component clickableVote = TextUtils.clickableText("Â§fÂ§l/vote", TextUtils.runCommandClickEvent("/vote"));
+			Component clickableVote = TextUtils.clickableText("§f§l/vote", TextUtils.runCommandClickEvent("/vote"));
 			message = ModifiableText.LISTS_NICELIST_START_INFO;
 			player.ls$message(message.get(minutesText, clickableVote));
 		} else {

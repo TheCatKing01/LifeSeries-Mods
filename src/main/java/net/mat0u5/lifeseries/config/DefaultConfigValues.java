@@ -443,7 +443,7 @@ public class DefaultConfigValues {
     );
     public final ConfigFileEntry<Object> GROUP_WATCHERS = new ConfigFileEntry<>(
             "group_watchers", null, ConfigTypes.TEXT, "{global.watchers}",
-            "Watchers Â§7('/watcher' command)", ""
+            "Watchers §7('/watcher' command)", ""
     );
     public final ConfigFileEntry<Object> GROUP_SUBIN = new ConfigFileEntry<>(
             "group_subin", null, ConfigTypes.TEXT, "{global.subin}",
