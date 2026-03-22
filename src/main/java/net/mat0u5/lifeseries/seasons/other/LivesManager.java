@@ -412,6 +412,7 @@ public class LivesManager {
 		if (livesBefore != null && lives < livesBefore) {
 			if (TagUtils.hasTag(player, "naughty")) {
 				player.removeTag("naughty");
+                player.removeEffect(net.minecraft.world.effect.MobEffects.GLOWING);
 			}
 		}
 		

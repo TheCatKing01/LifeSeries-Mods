@@ -9,7 +9,6 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -92,7 +91,7 @@ public class ListsManager {
 		);
 		PlayerUtils.sendTitleToPlayers(
 			players,
-			Component.literal("3").withStyle(ChatFormatting.DARK_GREEN),
+			ModifiableText.COUNTDOWN_COLOR_3.get(),
 			0, 25, 0
 		);
 
@@ -105,7 +104,7 @@ public class ListsManager {
 			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
-				Component.literal("2").withStyle(ChatFormatting.YELLOW),
+				ModifiableText.COUNTDOWN_COLOR_2.get(),
 				0, 25, 0
 			);
 		});
@@ -119,7 +118,7 @@ public class ListsManager {
 			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
-				Component.literal("1").withStyle(ChatFormatting.RED),
+				ModifiableText.COUNTDOWN_COLOR_1.get(),
 				0, 25, 0
 			);
 		});
@@ -133,7 +132,7 @@ public class ListsManager {
 			);
 			PlayerUtils.sendTitleToPlayers(
 				players,
-				Component.literal("You are on...").withStyle(ChatFormatting.YELLOW),
+				ModifiableText.LISTS_ROLLING_REVEAL_TITLE.get(),
 				10, 50, 20
 			);
 		});
@@ -210,7 +209,7 @@ public class ListsManager {
 
         PlayerUtils.sendTitleToPlayers(
             normalPlayers,
-            Component.literal("No List").withStyle(ChatFormatting.YELLOW),
+            ModifiableText.LISTS_NO_LIST_TITLE.get(),
             10, 50, 20
         );
 		PlayerUtils.playSoundToPlayers(
@@ -226,7 +225,7 @@ public class ListsManager {
             player.removeTag("naughty");
             player.addTag("nice");
             PlayerUtils.sendTitle(player,
-                Component.literal("The Nice List").withStyle(ChatFormatting.GREEN),10, 50, 20 );
+                ModifiableText.LISTS_NICELIST_TITLE.get(),10, 50, 20 );
             PlayerUtils.playSoundToPlayers(
                 List.of(player),
                 SoundEvent.createVariableRangeEvent(
@@ -243,7 +242,7 @@ public class ListsManager {
             player.removeTag("naughty");
             player.addTag("naughty");
             PlayerUtils.sendTitle(player,
-                Component.literal("The Naughty List").withStyle(ChatFormatting.RED),10, 50, 20);
+                ModifiableText.LISTS_NAUGHTYLIST_TITLE.get(),10, 50, 20);
             PlayerUtils.playSoundToPlayers(
                 List.of(player),
                 SoundEvent.createVariableRangeEvent(
@@ -349,6 +348,7 @@ public class ListsManager {
             if (TagUtils.hasTag(player, "naughty")) {
                 player.removeTag("naughty");
             }
+            player.removeEffect(MobEffects.GLOWING);
             livesManager.applyCorrectTeam(player);
         }
         PlayerUtils.updatePlayerLists();
@@ -393,7 +393,7 @@ public class ListsManager {
 
         if (notify) {
             String listName = listType == Lists.ListType.NAUGHTY ? "naughty" : "nice";
-            player.sendSystemMessage(Component.literal("§6[NOTICE] You were added to the " + listName + " list."));
+            player.sendSystemMessage(ModifiableText.LISTS_NOTICE_ADDED.get(listName));
         }
         PlayerUtils.updatePlayerLists();
     }
@@ -416,8 +416,11 @@ public class ListsManager {
             player.removeTag("naughty");
             removed = true;
         }
+        if (removed) {
+            player.removeEffect(MobEffects.GLOWING);
+        }
         if (removed && notify) {
-            player.sendSystemMessage(Component.literal("§c[NOTICE] You are no longer on the naughty/nice list."));
+            player.sendSystemMessage(ModifiableText.LISTS_NOTICE_REMOVED.get());
         }
     }
 
@@ -537,7 +540,7 @@ public class ListsManager {
     public boolean openListsLifeVote(ServerPlayer player) {
         List<String> availableForVoting = new ArrayList<>();
         for (ServerPlayer availableVotePlayer : livesManager.getAlivePlayers()) {
-            if (isOnLists(availableVotePlayer)) continue;
+            if (isNiceListMember(availableVotePlayer)) continue;
             availableForVoting.add(availableVotePlayer.getScoreboardName());
         }
         if (availableForVoting.isEmpty()) {
@@ -568,7 +571,7 @@ public class ListsManager {
         ServerPlayer votedFor = PlayerUtils.getPlayer(vote);
         if (votedFor == null) return;
         if (votedFor.ls$isDead()) return;
-        if (isOnLists(votedFor)) return;
+        if (isNiceListMember(votedFor)) return;
 
         PlayerUtils.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_BELL.value(), 1f, 1);
         ModifiableText voteText = isNiceLifeSeason()
@@ -599,7 +602,7 @@ public class ListsManager {
                 endListsVote(runId);
             }
             else {
-                resetLists();
+                endListsNoVote(runId);
             }
             return;
         }
@@ -607,7 +610,7 @@ public class ListsManager {
         if (!listsVoteActive) {
             TaskScheduler.scheduleTask(Time.minutes(LISTS_DURATION), () -> {
                 if (runId != listsCycleId) return;
-                resetLists();
+                endListsNoVote(runId);
             });
             return;
         }
@@ -687,6 +690,51 @@ public class ListsManager {
         });
     }
 
+    private void endListsNoVote(int runId) {
+        if (!LISTS_ENABLED || !listsChosen || runId != listsCycleId) return;
+
+        PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.LISTS_VOTE_END_TITLE.get(), 15, 80, 20);
+
+        ModifiableText countdown3 = isNiceLifeSeason()
+            ? ModifiableText.NICELIFE_VOTE_COUNTDOWN_3
+            : ModifiableText.LISTS_VOTE_COUNTDOWN_3;
+        ModifiableText countdown2 = isNiceLifeSeason()
+            ? ModifiableText.NICELIFE_VOTE_COUNTDOWN_2
+            : ModifiableText.LISTS_VOTE_COUNTDOWN_2;
+        ModifiableText countdown1 = isNiceLifeSeason()
+            ? ModifiableText.NICELIFE_VOTE_COUNTDOWN_1
+            : ModifiableText.LISTS_VOTE_COUNTDOWN_1;
+
+        int delay = 95;
+        TaskScheduler.scheduleTask(delay, () -> {
+            if (runId != listsCycleId) return;
+            SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_countdown_3"));
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), sound, 1f, 1);
+            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), countdown3.get(), 15, 25, 15);
+        });
+        delay += 25;
+        TaskScheduler.scheduleTask(delay, () -> {
+            if (runId != listsCycleId) return;
+            SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_countdown_2"));
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), sound, 1f, 1);
+            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), countdown2.get(), 15, 25, 15);
+        });
+        delay += 25;
+        TaskScheduler.scheduleTask(delay, () -> {
+            if (runId != listsCycleId) return;
+            SoundEvent sound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_countdown_1"));
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), sound, 1f, 1);
+            PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), countdown1.get(), 15, 25, 15);
+        });
+        delay += 55;
+        TaskScheduler.scheduleTask(delay, () -> {
+            if (runId != listsCycleId) return;
+            SoundEvent endSound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_end"));
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), endSound, 1f, 1);
+            resetLists();
+        });
+    }
+
     private void actuallyEndListsVote() {
         ModifiableText insufficientText = isNiceLifeSeason()
             ? ModifiableText.NICELIFE_NICELIST_VOTE_ERROR_INSUFFICIENT
@@ -715,7 +763,7 @@ public class ListsManager {
             ServerPlayer votedFor = PlayerUtils.getPlayer(votedForUUID);
             if (votingPlayer == null || votedFor == null) continue;
             if (votingPlayer.ls$isDead() || votedFor.ls$isDead()) continue;
-            if (!isNiceListMember(votingPlayer) || isOnLists(votedFor)) continue;
+            if (!isNiceListMember(votingPlayer) || isNiceListMember(votedFor)) continue;
             validVotes++;
             if (!reloadedVotesByCount.containsKey(votedForUUID)) {
                 reloadedVotesByCount.put(votedForUUID, 0);

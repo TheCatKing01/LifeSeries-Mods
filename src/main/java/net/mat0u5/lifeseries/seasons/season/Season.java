@@ -423,6 +423,12 @@ public abstract class Season {
     }
 
     public boolean isAllowedToAttack(ServerPlayer attacker, ServerPlayer victim, boolean allowSelfDefense) {
+        if (TagUtils.hasTag(victim, "nice")) {
+            return false;
+        }
+        if (TagUtils.hasTag(victim, "naughty")) {
+            return true;
+        }
         if (attacker.ls$isOnLastLife(false)) {
             return true;
         }
