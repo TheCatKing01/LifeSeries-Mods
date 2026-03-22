@@ -26,6 +26,8 @@ import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
+import net.mat0u5.lifeseries.utils.player.TeamUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -40,6 +42,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.scores.PlayerTeam;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -324,7 +327,25 @@ public class WildLife extends Season {
         String team = super.getTeamForPlayer(player);
 
         if (SuperpowersWildcard.hasActivatedPower(player, Superpowers.CREAKING)) {
-            return "creaking_"+player.getScoreboardName();
+            String creakingTeamName = "creaking_" + player.getScoreboardName();
+            if (team != null) {
+                PlayerTeam baseTeam = TeamUtils.getTeam(team);
+                if (baseTeam != null) {
+                    PlayerTeam creakingTeam = TeamUtils.getTeam(creakingTeamName);
+                    if (creakingTeam == null) {
+                        TeamUtils.createTeam(creakingTeamName, baseTeam.getDisplayName().getString(), baseTeam.getColor());
+                    } else {
+                        if (creakingTeam.getColor() != baseTeam.getColor()) {
+                            creakingTeam.setColor(baseTeam.getColor());
+                        }
+                        String baseDisplayName = baseTeam.getDisplayName().getString();
+                        if (!creakingTeam.getDisplayName().getString().equals(baseDisplayName)) {
+                            creakingTeam.setDisplayName(Component.literal(baseDisplayName).withStyle(baseTeam.getColor()));
+                        }
+                    }
+                }
+            }
+            return creakingTeamName;
         }
         if (Necromancy.isRessurectedPlayer(player) && !player.isSpectator()) {
             return "zombie";

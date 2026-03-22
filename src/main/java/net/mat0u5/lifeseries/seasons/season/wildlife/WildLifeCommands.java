@@ -691,6 +691,10 @@ public class WildLifeCommands extends Command {
         }
         WildcardManager.fadedWildcard();
         Wildcard wildcardInstance = WildcardManager.activeWildcards.get(wildcard);
+        if (wildcard == Wildcards.SUPERPOWERS) {
+            SuperpowersWildcard.externalResetAllPowers();
+            currentSeason.reloadAllPlayerTeams();
+        }
         wildcardInstance.deactivate();
         WildcardManager.activeWildcards.remove(wildcard);
 

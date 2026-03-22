@@ -100,9 +100,7 @@ public class CreakingPower extends ToggleableSuperpower {
         }
         createdTeams.clear();
         if (getPlayer() != null) {
-            if (TeamUtils.getPlayerTeam(getPlayer()) == null) {
-                currentSeason.reloadPlayerTeam(getPlayer());
-            }
+            currentSeason.reloadPlayerTeam(getPlayer());
         }
         //?}
     }
