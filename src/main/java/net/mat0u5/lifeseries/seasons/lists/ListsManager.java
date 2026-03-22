@@ -488,7 +488,7 @@ public class ListsManager {
             for (Lists entry : lists) {
                 if (entry.listType != Lists.ListType.NAUGHTY) continue;
                 ServerPlayer player = entry.getPlayer();
-                if (player != null && !player.ls$isDead()) {
+                if (player != null && !player.ls$isDead() && TagUtils.hasTag(player, "naughty")) {
                     player.addEffect(glowing);
                 }
             }
@@ -531,7 +531,8 @@ public class ListsManager {
             endListsVote(runId);
             return;
         }
-        resetLists();
+        int runId = ++listsCycleId;
+        endListsNoVote(runId);
     }
     public boolean isListsVoteActive() {
         return LISTS_ENABLED && listsChosen && listsVoteActive;
