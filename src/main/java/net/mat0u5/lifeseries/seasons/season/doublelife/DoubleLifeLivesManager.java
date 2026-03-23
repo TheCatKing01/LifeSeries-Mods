@@ -1,12 +1,14 @@
 package net.mat0u5.lifeseries.seasons.season.doublelife;
 
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
+import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
@@ -31,25 +33,51 @@ public class DoubleLifeLivesManager extends LivesManager {
     }
 
     @Override
+    public void setPlayerLives(ServerPlayer player, int lives) {
+        if (player == null) return;
+        super.setPlayerLives(player, lives);
+
+        if (!(currentSeason instanceof DoubleLife doubleLife)) return;
+        if (doubleLife.shouldSuppressSoulboundLivesSync(player.getUUID())) return;
+        if (!doubleLife.shouldShareLives()) return;
+
+        UUID soulmateUUID = doubleLife.getSoulmateUUID(player.getUUID());
+        if (soulmateUUID == null) return;
+
+        ServerPlayer soulmate = PlayerUtils.getPlayer(soulmateUUID);
+        if (soulmate == null) return;
+
+        Integer soulmateLives = soulmate.ls$getLives();
+        if (soulmateLives != null && Objects.equals(soulmateLives, lives)) return;
+
+        super.setPlayerLives(soulmate, lives);
+    }
+
+    @Override
     public Map<ServerPlayer, Integer> getFinalRandomLives(List<ServerPlayer> players) {
         if (!(currentSeason instanceof DoubleLife doubleLife) || !doubleLife.shouldRollTogether()) return super.getFinalRandomLives(players);
 
-        Map<UUID, Integer> livesUUID = new HashMap<>();
+        Map<UUID, Integer> pairLives = new HashMap<>();
         Map<ServerPlayer, Integer> lives = new HashMap<>();
         for (ServerPlayer player : players) {
             int randomLives = getRandomLife();
 
-            ServerPlayer soulmate = doubleLife.getSoulmate(player);
-            if (soulmate != null) {
-                if (soulmate.ls$hasAssignedLives()) {
+            UUID soulmateUUID = doubleLife.getSoulmateUUID(player.getUUID());
+            if (soulmateUUID != null) {
+                ServerPlayer soulmate = PlayerUtils.getPlayer(soulmateUUID);
+                if (soulmate != null && soulmate.ls$hasAssignedLives()) {
                     randomLives = soulmate.ls$getLives();
                 }
-                if (livesUUID.containsKey(soulmate.getUUID())) {
-                    randomLives = livesUUID.get(soulmate.getUUID());
+
+                UUID pairKey = player.getUUID().compareTo(soulmateUUID) < 0 ? player.getUUID() : soulmateUUID;
+                if (pairLives.containsKey(pairKey)) {
+                    randomLives = pairLives.get(pairKey);
+                }
+                else {
+                    pairLives.put(pairKey, randomLives);
                 }
             }
 
-            livesUUID.put(player.getUUID(), randomLives);
             lives.put(player, randomLives);
         }
         return lives;

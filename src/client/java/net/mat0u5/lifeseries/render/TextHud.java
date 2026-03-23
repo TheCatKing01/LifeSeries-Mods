@@ -139,16 +139,15 @@ public class TextHud {
     }
 
     public static int renderListsTimer(Minecraft client, GuiGraphics context, int y) {
-        if (!MainClient.SESSION_TIMER) return 0;
         if (System.currentTimeMillis() - MainClient.listsTimeLastUpdated > 15000) return 0;
         if (MainClient.listsTime <= 0) return 0;
 
         long remainingTime = roundTime(MainClient.listsTime) - System.currentTimeMillis();
         MutableComponent timerText = Component.empty();
         if (remainingTime < 0) {
-            timerText = timerText.append(Component.nullToEmpty("Â§7Lists have ended"));
+            timerText = timerText.append(Component.nullToEmpty("§7List Timer: §fEnded"));
         } else {
-            timerText = timerText.append(TextUtils.formatLoosely("Â§7Lists end in {}", Time.millis(remainingTime).formatLong()));
+            timerText = timerText.append(TextUtils.formatLoosely("§7List Timer: §f{}", Time.millis(remainingTime).formatLong()));
         }
 
         return drawHudText(client, context, timerText, y);

@@ -105,8 +105,8 @@ public class DoubleLifeConfig extends ConfigManager {
     );
 
     public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_ROLL = new ConfigFileEntry<>(
-			"soulmates_share_roll", false, "season.lives",
-            "Fuse Rolls", "Controls whether soulmates are rolled the same amount of lives (only works when lives aren't shared)."
+			"soulmates_share_roll", false, "global.lives.random",
+            "Fuse Rolls", "Controls whether the soulmate and roll lives rolled are fused into one."
     );
 	
 	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
@@ -134,16 +134,16 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
             "Only Reroll Unbound Players", "Controls if only players without a soulmate are rerolled. "
     );
 	public static final ConfigFileEntry<Boolean> REROLL_LIVES = new ConfigFileEntry<>(
-			"reroll_lives", false, "season.reroll",
+			"reroll_lives", true, "season.reroll",
             "Reroll Based On Life Count", "Controls if soulbounds are rerolled by based on life counts. "
     );
 
     public static final ConfigFileEntry<Double> SOULMATES_ASSIGN_MINUTE = new ConfigFileEntry<>(
-            "soulmates_assign_time", 1.0, ConfigTypes.MINUTES, "season[new]",
+            "soulmates_assign_time", 1.0, ConfigTypes.MINUTES, "season",
             "Soulmates Assign Time", "How many minutes after the session starts the soulmates get assigned."
     );
     public static final ConfigFileEntry<Boolean> SOULBOUND_LIVES = new ConfigFileEntry<>(
-            "soulbound_lives", true, "season.soulbind[new]",
+            "soulbound_lives", true, "season.soulbind",
             "Soulbound Lives", "Controls whether soulmates share their life count."
     );
 
@@ -181,7 +181,7 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
                 ,SOULBOUND_INVENTORIES
                 ,SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED	
-				,SOULMATES_SHARE_ROLL					
+		,SOULMATES_SHARE_ROLL					
                 , SOULBOUND_BOOGEYMAN
                 ,SOULBOUND_LIVES
                 ,SOULMATES_PVP_ALLOWED

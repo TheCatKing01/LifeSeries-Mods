@@ -66,6 +66,7 @@ public class DoubleLife extends Season {
     private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
     private final Set<UUID> processingLinkedDeath = new HashSet<>();
 	private final Set<UUID> suppressSplitOnRedDuringDeath = new HashSet<>();
+    private final Set<UUID> suppressSoulboundLivesSync = new HashSet<>();
 
     public SessionAction actionChooseSoulmates = new SessionAction(Time.minutes(1), "Assign Soulmates if necessary") {
         @Override
@@ -133,6 +134,17 @@ public class DoubleLife extends Season {
 
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
+
+        if (shouldShareLives()) {
+            ServerPlayer soulmate = getSoulmate(player);
+            if (soulmate != null) {
+                Integer soulmateLives = soulmate.ls$getLives();
+                Integer playerLives = player.ls$getLives();
+                if (soulmateLives != null && !Objects.equals(soulmateLives, playerLives)) {
+                    player.ls$setLives(soulmateLives);
+                }
+            }
+        }
 
         syncPlayer(player);
     }
@@ -572,7 +584,12 @@ public class DoubleLife extends Season {
 
         try {
             if (source.is(DoubleLife.SOULMATE_DAMAGE)) {
-                super.onPlayerDeath(player, source);
+                suppressSoulboundLivesSync.add(playerId);
+                try {
+                    super.onPlayerDeath(player, source);
+                } finally {
+                    suppressSoulboundLivesSync.remove(playerId);
+                }
 
                 if (pendingSoulmateLifeLoss.remove(playerId)) {
                     ensureLifeConsumed(player, beforeLives);
@@ -586,7 +603,12 @@ public class DoubleLife extends Season {
                 return;
             }
 
-            super.onPlayerDeath(player, source);
+            suppressSoulboundLivesSync.add(playerId);
+            try {
+                super.onPlayerDeath(player, source);
+            } finally {
+                suppressSoulboundLivesSync.remove(playerId);
+            }
 
             if (!hasSoulmate(player)) return;
             if (!isSoulmateOnline(player)) return;
@@ -1010,6 +1032,11 @@ public class DoubleLife extends Season {
     public void tryKillLifeGain(ServerPlayer killer, ServerPlayer victim) {
         super.tryKillLifeGain(killer, victim);
         syncSoulboundLives(killer);
+    }
+
+    public boolean shouldSuppressSoulboundLivesSync(UUID playerUUID) {
+        if (playerUUID == null) return false;
+        return suppressSoulboundLivesSync.contains(playerUUID);
     }
 
 }
