@@ -155,7 +155,7 @@ public class DoubleLife extends Season {
         currentSession.addSessionAction(new SessionAction(Time.minutes(SOULMATES_ASSIGN_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_SOULMATES.getString()) {
             @Override
             public void trigger() {
-                rollSoulmates();
+                rollSoulmates(REROLL_SESSION);
             }
         });
         if (!DISABLE_START_TELEPORT) {
@@ -165,6 +165,9 @@ public class DoubleLife extends Season {
                     distributePlayers();
                 }
             });
+        }
+        if (REROLL_MIDSESSION) {
+            scheduleMidSessionReroll();
         }
     }
 
@@ -195,6 +198,7 @@ public class DoubleLife extends Season {
         SOULBOUND_BOOGEYMAN = DoubleLifeConfig.SOULBOUND_BOOGEYMAN.get(seasonConfig);
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
 	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
+        SOULBOUND_LIVES = DoubleLifeConfig.SOULBOUND_LIVES.get(seasonConfig);
 		REROLL_SESSION = DoubleLifeConfig.REROLL_SESSION.get(seasonConfig);
 		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
 		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
@@ -371,7 +375,17 @@ public class DoubleLife extends Season {
     }
 
     public void rollSoulmates() {
+        rollSoulmates(false);
+    }
+
+    public void rollSoulmates(boolean forceReroll) {
+        if (forceReroll) {
+            resetAllSoulmates();
+        }
         List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
+        if (playersToRoll.isEmpty()) {
+            return;
+        }
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
         PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
         TaskScheduler.scheduleTask(25, () -> {
@@ -898,16 +912,13 @@ public class DoubleLife extends Season {
         if (!hasSoulmate(player)) return;
 
         ServerPlayer soulmate = getSoulmate(player);
-        sendSoulmateSplitMessage(player,
-                "§cYou have become red, so your soulbound with your soulmate has been broken.");
+        sendSoulmateSplitMessage(player, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_SELF.get());
         if (soulmate != null) {
             if (soulmate.ls$isOnLastLife(false)) {
-                sendSoulmateSplitMessage(soulmate,
-                        "§cYou have become red, so your soulbound with your soulmate has been broken.");
+                sendSoulmateSplitMessage(soulmate, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_SELF.get());
             }
             else {
-                sendSoulmateSplitMessage(soulmate,
-                        "§cYour soulmate has become red, so your soulbound with them has been broken.");
+                sendSoulmateSplitMessage(soulmate, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_OTHER.get());
             }
         }
 		resetSoulmatePair(player);
@@ -923,25 +934,23 @@ public class DoubleLife extends Season {
         if (!hasSoulmate(player)) return;
 
         ServerPlayer soulmate = getSoulmate(player);
-        sendSoulmateSplitMessage(player,
-                "§cYou have become red, so your soulbound with your soulmate has been broken.");
+        sendSoulmateSplitMessage(player, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_SELF.get());
         if (soulmate != null) {
             if (soulmate.ls$isOnLastLife(false)) {
-                sendSoulmateSplitMessage(soulmate,
-                        "§cYou have become red, so your soulbound with your soulmate has been broken.");
+                sendSoulmateSplitMessage(soulmate, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_SELF.get());
             }
             else {
-                sendSoulmateSplitMessage(soulmate,
-                        "§cYour soulmate has become red, so your soulbound with them has been broken.");
+                sendSoulmateSplitMessage(soulmate, ModifiableText.DOUBLELIFE_SOULMATE_SPLIT_OTHER.get());
             }
         }
 		resetSoulmatePair(player);
     }
 
-    private void sendSoulmateSplitMessage(ServerPlayer target, String template) {
+    private void sendSoulmateSplitMessage(ServerPlayer target, Component message) {
         if (target == null) return;
-        if (template == null || template.isBlank()) return;
-        target.sendSystemMessage(Component.nullToEmpty(template));
+        if (message == null) return;
+        if (message.getString().isBlank()) return;
+        target.sendSystemMessage(message);
     }
 
     public void checkForEnding() {
@@ -982,6 +991,16 @@ public class DoubleLife extends Season {
 		int safeLives = (lives == null) ? 0 : lives;
 		return Component.nullToEmpty("§aLives: §f" + safeLives);
 	}
+
+    private void scheduleMidSessionReroll() {
+        if (!REROLL_MIDSESSION) return;
+        TaskScheduler.scheduleTask(Time.minutes(REROLL_TIME), () -> {
+            if (currentSession == null || !currentSession.statusStarted()) return;
+            if (!REROLL_MIDSESSION) return;
+            rollSoulmates(true);
+            scheduleMidSessionReroll();
+        });
+    }
 	
 	private boolean canParticipateInSoulmateRoll(ServerPlayer player) {
 		if (player == null) return false;
@@ -1040,6 +1059,8 @@ public class DoubleLife extends Season {
     }
 
 }
+
+
 
 
 

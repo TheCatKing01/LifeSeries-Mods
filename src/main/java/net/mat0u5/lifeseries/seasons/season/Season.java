@@ -505,6 +505,7 @@ public abstract class Season {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
         listsManager.addSessionActions();
+        livesManager.addSessionActions();
     }
 
     /*

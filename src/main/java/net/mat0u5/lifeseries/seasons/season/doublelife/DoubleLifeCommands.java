@@ -288,7 +288,7 @@ public class DoubleLifeCommands extends Command {
         if (checkBanned(source)) return -1;
         DoubleLife season = ((DoubleLife) currentSeason);
         OtherUtils.sendCommandFeedback(source, ModifiableText.DOUBLELIFE_SOULMATE_ROLLING.get());
-        season.rollSoulmates();
+        season.rollSoulmates(true);
         return 1;
     }
 }

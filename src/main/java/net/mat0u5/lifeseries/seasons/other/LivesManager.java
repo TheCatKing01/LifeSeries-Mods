@@ -610,6 +610,7 @@ public class LivesManager {
     }
 
     public void assignRandomLives(List<ServerPlayer> players) {
+        assignedLives = true;
         players.forEach(this::resetPlayerLife);
         PlayerUtils.sendTitleToPlayers(players, ModifiableText.LIVES_RANDOMIZE_TITLE.get(), 10, 40, 10);
         TaskScheduler.scheduleTask(Time.seconds(3), ()-> rollLives(players));

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lifeseries",
-	"version": "${version}+1.0.2+${minecraftVersion}",
+	"version": "${version}+1.1.0+${minecraftVersion}",
 	"name": "Life Series+",
 	"description": "A fork of Mat0u5’s Life Series mod adding extra features like allowing players to have multiple superpowers or allowing Simple Life traders to spawn in all series.",
 	"authors": [

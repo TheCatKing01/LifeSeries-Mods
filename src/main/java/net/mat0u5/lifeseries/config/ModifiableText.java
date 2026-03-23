@@ -298,6 +298,8 @@ public enum ModifiableText {
     ,DOUBLELIFE_SOULMATE_ROLLING(Seasons.DOUBLE_LIFE, "§7Rolling soulmates...")
     ,DOUBLELIFE_UNPAIRED(Seasons.DOUBLE_LIFE, "[Double Life] {} was not paired with anyone.", List.of("Player"))
     ,DOUBLELIFE_SOULMATE_TITLE(Seasons.DOUBLE_LIFE, "§aYour soulmate is...")
+    ,DOUBLELIFE_SOULMATE_SPLIT_SELF(Seasons.DOUBLE_LIFE, "§cYou have become red, so your soulbound with your soulmate has been broken.")
+    ,DOUBLELIFE_SOULMATE_SPLIT_OTHER(Seasons.DOUBLE_LIFE, "§cYour soulmate has become red, so your soulbound with them has been broken.")
     ,DOUBLELIFE_LASTPAIR_PT1_TITLE(Seasons.DOUBLE_LIFE, "")
     ,DOUBLELIFE_LASTPAIR_PT1_SUBTITLE(Seasons.DOUBLE_LIFE, "§aYour fate is your own...")
     ,DOUBLELIFE_LASTPAIR_PT2_TITLE(Seasons.DOUBLE_LIFE, "")
@@ -727,6 +729,8 @@ public enum ModifiableText {
         return null;
     }
 }
+
+
 
 
 
