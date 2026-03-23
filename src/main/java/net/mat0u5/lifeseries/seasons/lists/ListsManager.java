@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.seasons.lists;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
@@ -31,6 +32,7 @@ public class ListsManager {
 
     private static final Time LISTS_GLOW_TIME_INTERVAL = Time.seconds(60);
     private static final Time LISTS_GLOW_TIME = Time.seconds(10);
+    private static final Time LISTS_TIMER_INTERVAL = Time.ticks(5);
 
     public List<String> NAUGHTY_LIST_IGNORE = new ArrayList<>();
     public List<String> NAUGHTY_LIST_FORCE = new ArrayList<>();
@@ -40,6 +42,9 @@ public class ListsManager {
     private final Random rnd = new Random();
     private int listsCycleId = 0;
     private Time listsGlowTimePassed = Time.zero();
+    private Time listsTimerPassed = Time.zero();
+    private Time listsTimerInterval = Time.zero();
+    private final Set<UUID> listsDisplayTimer = new HashSet<>();
 
     public List<Lists> lists = new ArrayList<>();
     public List<UUID> rolledPlayers = new ArrayList<>();
@@ -176,6 +181,7 @@ public class ListsManager {
 
         handleListsLists(normalPlayers, niceList, naughtyList);
         listsChosen = true;
+        listsTimerPassed = Time.zero();
         startListsVoteCountdown();
     }
     public List<ServerPlayer> getRandomListPlayers(List<ServerPlayer> candidates, int desiredCount, List<String> forceList, List<String> ignoreList) {
@@ -309,6 +315,7 @@ public class ListsManager {
         listsVoteActive = false;
         listsCycleId++;
         listsChosen = false;
+        listsTimerPassed = Time.zero();
         PlayerUtils.updatePlayerLists();
     }
 	
@@ -482,6 +489,17 @@ public class ListsManager {
         for (Lists l : lists) l.tick();
         listsListChanged = false;
 
+        if (listsChosen) {
+            listsTimerPassed.tick();
+        } else {
+            listsTimerPassed = Time.zero();
+        }
+
+        listsTimerInterval.tick();
+        if (listsTimerInterval.isMultipleOf(LISTS_TIMER_INTERVAL)) {
+            displayListsTimer();
+        }
+
         listsGlowTimePassed.tick();
         if (LISTS_GLOW && listsChosen && listsGlowTimePassed.isMultipleOf(LISTS_GLOW_TIME_INTERVAL)) {
             MobEffectInstance glowing = new MobEffectInstance(MobEffects.GLOWING, LISTS_GLOW_TIME.getTicks(), 0);
@@ -501,8 +519,8 @@ public class ListsManager {
         NAUGHTY_ONLY
     }
 	
-	private void messageLists(Lists lists, ServerPlayer player) {
-		if (lists == null || player == null) return;
+    private void messageLists(Lists lists, ServerPlayer player) {
+        if (lists == null || player == null) return;
 
 		ModifiableText message;
 
@@ -694,6 +712,8 @@ public class ListsManager {
     private void endListsNoVote(int runId) {
         if (!LISTS_ENABLED || !listsChosen || runId != listsCycleId) return;
 
+        SoundEvent voteSound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_vote_result"));
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), voteSound, 1f, 1);
         PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), ModifiableText.LISTS_VOTE_END_TITLE.get(), 15, 80, 20);
 
         ModifiableText countdown3 = isNiceLifeSeason()
@@ -730,10 +750,54 @@ public class ListsManager {
         delay += 55;
         TaskScheduler.scheduleTask(delay, () -> {
             if (runId != listsCycleId) return;
-            SoundEvent endSound = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_nicelist_end"));
-            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), endSound, 1f, 1);
+            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.CHICKEN_EGG, 1f, 1);
             resetLists();
         });
+    }
+
+    public Time getListsRemainingTime() {
+        if (!LISTS_ENABLED || !listsChosen) return Time.zero();
+        Time duration = Time.minutes(LISTS_DURATION);
+        return duration.diff(listsTimerPassed);
+    }
+
+    public String getListsRemainingTimeStr() {
+        Time remaining = getListsRemainingTime();
+        if (remaining == null) return "";
+        return remaining.formatLong();
+    }
+
+    public boolean isInListsDisplayTimer(ServerPlayer player) {
+        return listsDisplayTimer.contains(player.getUUID());
+    }
+
+    public void addToListsDisplayTimer(ServerPlayer player) {
+        listsDisplayTimer.add(player.getUUID());
+    }
+
+    public void removeFromListsDisplayTimer(ServerPlayer player) {
+        listsDisplayTimer.remove(player.getUUID());
+    }
+
+    public void toggleListsDisplayTimer(ServerPlayer player) {
+        if (isInListsDisplayTimer(player)) removeFromListsDisplayTimer(player);
+        else addToListsDisplayTimer(player);
+    }
+
+    public void displayListsTimer() {
+        if (server == null) return;
+        long timestamp = 0;
+        if (LISTS_ENABLED && listsChosen) {
+            Time remaining = getListsRemainingTime();
+            timestamp = Time.now().add(remaining).getMillis();
+        }
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            if (isOnLists(player) || isInListsDisplayTimer(player)) {
+                SimplePackets.LISTS_TIMER.target(player).sendToClient(timestamp);
+            } else {
+                SimplePackets.LISTS_TIMER.target(player).sendToClient(0);
+            }
+        }
     }
 
     private void actuallyEndListsVote() {

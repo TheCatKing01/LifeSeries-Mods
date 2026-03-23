@@ -283,6 +283,10 @@ public class NetworkHandlerClient {
             MainClient.sessionTime = payload.number();
             MainClient.sessionTimeLastUpdated = System.currentTimeMillis();
         });
+        SimplePackets.LISTS_TIMER.setClientReceive(payload -> {
+            MainClient.listsTime = payload.number();
+            MainClient.listsTimeLastUpdated = System.currentTimeMillis();
+        });
 
         //Empty payloads
         SimplePackets.JUMP.setClientReceive(payload -> {

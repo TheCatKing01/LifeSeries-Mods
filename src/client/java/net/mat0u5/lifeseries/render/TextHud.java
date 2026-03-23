@@ -25,6 +25,7 @@ public class TextHud {
         if (!Main.modDisabled()) {
             yPos += renderGameNotBroken(client, context, yPos);
             yPos += renderSessionTimer(client, context, yPos);
+            yPos += renderListsTimer(client, context, yPos);
             yPos += renderLimitedLifeTimer(client, context, yPos);
             yPos += renderMimicryTimer(client, context, yPos);
             yPos += renderSuperpowerCooldown(client, context, yPos);
@@ -132,6 +133,22 @@ public class TextHud {
             if (remainingTime < 0) timerText = timerText.append(Component.nullToEmpty("§7Session has ended"));
 
             else timerText = timerText.append(TextUtils.formatLoosely("§7Session {}", Time.millis(remainingTime).formatLong()));
+        }
+
+        return drawHudText(client, context, timerText, y);
+    }
+
+    public static int renderListsTimer(Minecraft client, GuiGraphics context, int y) {
+        if (!MainClient.SESSION_TIMER) return 0;
+        if (System.currentTimeMillis() - MainClient.listsTimeLastUpdated > 15000) return 0;
+        if (MainClient.listsTime <= 0) return 0;
+
+        long remainingTime = roundTime(MainClient.listsTime) - System.currentTimeMillis();
+        MutableComponent timerText = Component.empty();
+        if (remainingTime < 0) {
+            timerText = timerText.append(Component.nullToEmpty("Â§7Lists have ended"));
+        } else {
+            timerText = timerText.append(TextUtils.formatLoosely("Â§7Lists end in {}", Time.millis(remainingTime).formatLong()));
         }
 
         return drawHudText(client, context, timerText, y);

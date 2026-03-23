@@ -44,6 +44,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static boolean preventGliding = false;
     public static long sessionTime = 0;
     public static long sessionTimeLastUpdated = 0;
+    public static long listsTime = 0;
+    public static long listsTimeLastUpdated = 0;
 
     public static String limitedLifeTimerColor = "";
     public static long limitedLifeTimeLastUpdated = 0;
@@ -180,6 +182,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         preventGliding = false;
         sessionTime = 0;
         sessionTimeLastUpdated = 0;
+        listsTime = 0;
+        listsTimeLastUpdated = 0;
 
         limitedLifeTimerColor = "";
         limitedLifeTimeLastUpdated = 0;

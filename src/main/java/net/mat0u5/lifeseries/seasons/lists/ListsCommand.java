@@ -126,6 +126,17 @@ public class ListsCommand extends Command {
                         ListsManager.ListsRollType.NAUGHTY_ONLY
                     ))
                 )
+            )
+            .then(literal("timeRemaining")
+                .requires(PermissionManager::isAdmin)
+                .executes(context -> listsTimeRemaining(
+                    context.getSource()
+                ))
+                .then(literal("showDisplay")
+                    .executes(context -> listsTimeRemainingShowDisplay(
+                        context.getSource()
+                    ))
+                )
             );
     }
 
@@ -246,6 +257,43 @@ public class ListsCommand extends Command {
 
         bm.prepareToChooseLists(rollType);
 
+        return 1;
+    }
+
+    public int listsTimeRemaining(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        ListsManager bm = getBM();
+        if (bm == null) return -1;
+
+        if (!bm.isListsActive()) {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Lists are not currently active."));
+            return 1;
+        }
+
+        if (bm.getListsRemainingTime().getNanos() <= 0) {
+            OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("Lists are ending now."));
+            return 1;
+        }
+
+        String remaining = bm.getListsRemainingTimeStr();
+        OtherUtils.sendCommandFeedbackQuiet(source, Component.nullToEmpty("Lists time remaining: " + remaining));
+        return 1;
+    }
+
+    public int listsTimeRemainingShowDisplay(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        ListsManager bm = getBM();
+        if (bm == null) return -1;
+        ServerPlayer self = source.getPlayer();
+        if (self == null) return -1;
+
+        bm.toggleListsDisplayTimer(self);
+        if (bm.isInListsDisplayTimer(self)) {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Lists timer display enabled."));
+        } else {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Lists timer display disabled."));
+        }
+        bm.displayListsTimer();
         return 1;
     }
 	
