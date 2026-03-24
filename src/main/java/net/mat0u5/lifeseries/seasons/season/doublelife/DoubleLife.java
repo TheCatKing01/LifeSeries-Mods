@@ -383,10 +383,10 @@ public class DoubleLife extends Season {
     }
 
     public void rollSoulmates(boolean forceReroll, boolean ignoreParticipationRules) {
-        if (forceReroll) {
-            resetAllSoulmates();
-        }
         List<ServerPlayer> playersToRoll = getPlayersForSoulmateRoll(forceReroll, ignoreParticipationRules);
+        if (forceReroll) {
+            clearSoulmatesFor(playersToRoll);
+        }
         if (playersToRoll.isEmpty()) {
             return;
         }
@@ -404,6 +404,7 @@ public class DoubleLife extends Season {
                 PlayerUtils.playSoundToPlayer(player,
                         SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
+            triggerFusedLivesRollAfterReveal();
             return;
         }
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
@@ -437,7 +438,35 @@ public class DoubleLife extends Season {
                 PlayerUtils.playSoundToPlayer(player,
                         SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
             }
+            triggerFusedLivesRollAfterReveal();
         });
+    }
+
+    private void triggerFusedLivesRollAfterReveal() {
+        if (!shouldFuseRolls()) return;
+        if (!livesManager.ROLL_LIVES) return;
+        TaskScheduler.scheduleTask(100, () -> livesManager.assignRandomLivesToUnassignedPlayers());
+    }
+
+    private void clearSoulmatesFor(Collection<ServerPlayer> players) {
+        if (players == null || players.isEmpty()) return;
+        Set<UUID> toClear = new HashSet<>();
+        for (ServerPlayer player : players) {
+            if (player == null) continue;
+            UUID playerId = player.getUUID();
+            UUID soulmateId = soulmates.get(playerId);
+            if (soulmateId != null) {
+                toClear.add(playerId);
+                toClear.add(soulmateId);
+            }
+            else {
+                toClear.add(playerId);
+            }
+        }
+        for (UUID id : toClear) {
+            soulmates.remove(id);
+        }
+        updateOrderedSoulmates();
     }
 
     public List<ServerPlayer> getNonAssignedPlayers() {
@@ -447,10 +476,6 @@ public class DoubleLife extends Season {
             if (player == null) continue;
 
             if (player.ls$hasAssignedLives() && player.ls$isDead()) {
-                continue;
-            }
-
-            if (hasSoulmate(player) && REROLL_UNBOUND) {
                 continue;
             }
 
@@ -465,18 +490,46 @@ public class DoubleLife extends Season {
     }
 
     private List<ServerPlayer> getPlayersForSoulmateRoll(boolean forceReroll, boolean ignoreParticipationRules) {
-        if (!forceReroll && !ignoreParticipationRules) {
-            return getNonAssignedPlayers();
-        }
-        if (!ignoreParticipationRules) {
-            return getNonAssignedPlayers();
-        }
         List<ServerPlayer> playersToRoll = new ArrayList<>();
+        Set<UUID> blocked = new HashSet<>();
+
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
             if (player == null) continue;
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) {
+                blocked.add(player.getUUID());
+                continue;
+            }
+            if (!ignoreParticipationRules && !canParticipateInSoulmateRoll(player)) {
+                blocked.add(player.getUUID());
+                continue;
+            }
+            if (!forceReroll && hasSoulmate(player)) {
+                blocked.add(player.getUUID());
+                continue;
+            }
+            if (!ignoreParticipationRules && forceReroll && REROLL_UNBOUND && hasSoulmate(player)) {
+                blocked.add(player.getUUID());
+                continue;
+            }
+        }
+
+        // Preserve existing pairs when someone is blocked
+        Set<UUID> blockedWithPairs = new HashSet<>(blocked);
+        for (UUID blockedId : blocked) {
+            UUID soulmate = soulmates.get(blockedId);
+            if (soulmate != null) {
+                blockedWithPairs.add(soulmate);
+            }
+        }
+
+        for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
+            if (player == null) continue;
+            if (blockedWithPairs.contains(player.getUUID())) continue;
+            if (!ignoreParticipationRules && !canParticipateInSoulmateRoll(player)) continue;
             if (player.ls$hasAssignedLives() && player.ls$isDead()) continue;
             playersToRoll.add(player);
         }
+
         return playersToRoll;
     }
 
@@ -530,6 +583,34 @@ public class DoubleLife extends Season {
 			}
 		}
 
+        List<ServerPlayer> unpaired = new ArrayList<>();
+        if (REROLL_LIVES) {
+            Map<Integer, List<ServerPlayer>> groups = new HashMap<>();
+            for (ServerPlayer player : remainingPlayers) {
+                Integer lives = player.ls$getLives();
+                groups.computeIfAbsent(lives, ignored -> new ArrayList<>()).add(player);
+            }
+            for (List<ServerPlayer> group : groups.values()) {
+                List<ServerPlayer> groupRemaining = new ArrayList<>(group);
+                pairRandomly(groupRemaining);
+                unpaired.addAll(groupRemaining);
+            }
+        }
+        else {
+            pairRandomly(remainingPlayers);
+            unpaired.addAll(remainingPlayers);
+        }
+
+        saveSoulmates();
+
+        for (ServerPlayer remaining : unpaired) {
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.DOUBLELIFE_UNPAIRED.get(remaining.getDisplayName()));
+        }
+        soulmatesForce.clear();
+        soulmatesPrevent.clear();
+    }
+
+    private void pairRandomly(List<ServerPlayer> remainingPlayers) {
         while(!remainingPlayers.isEmpty()) {
             Collections.shuffle(remainingPlayers);
             ServerPlayer player1 = remainingPlayers.get(0);
@@ -546,14 +627,6 @@ public class DoubleLife extends Season {
                 setSoulmate(player1,player2);
             }
         }
-
-        saveSoulmates();
-
-        for (ServerPlayer remaining : remainingPlayers) {
-            PlayerUtils.broadcastMessageToAdmins(ModifiableText.DOUBLELIFE_UNPAIRED.get(remaining.getDisplayName()));
-        }
-        soulmatesForce.clear();
-        soulmatesPrevent.clear();
     }
 
     @Override

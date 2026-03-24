@@ -587,6 +587,9 @@ public class LivesManager {
     }
 
     public void addSessionActions() {
+        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.shouldFuseRolls()) {
+            return;
+        }
         if (ROLL_LIVES) {
             currentSession.addSessionAction(new SessionAction(Time.minutes(LIVES_RANDOMIZE_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_LIVES.getString()) {
                 @Override

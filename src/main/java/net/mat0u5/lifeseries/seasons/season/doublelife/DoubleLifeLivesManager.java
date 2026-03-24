@@ -1,6 +1,9 @@
 package net.mat0u5.lifeseries.seasons.season.doublelife;
 
+import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,6 +33,25 @@ public class DoubleLifeLivesManager extends LivesManager {
         if (currentSeason instanceof DoubleLife doubleLife) {
             doubleLife.syncSoulboundLives(target);
         }
+    }
+
+    @Override
+    public void assignRandomLives(List<ServerPlayer> players) {
+        assignedLives = true;
+        players.forEach(this::resetPlayerLife);
+
+        Component title = ModifiableText.LIVES_RANDOMIZE_TITLE.get();
+        if (currentSeason instanceof DoubleLife doubleLife) {
+            if (doubleLife.shouldShareLives()) {
+                title = ModifiableText.DOUBLELIFE_LIVES_RANDOMIZE_TITLE_BOTH.get();
+            }
+            else {
+                title = ModifiableText.DOUBLELIFE_LIVES_RANDOMIZE_TITLE_SOLO.get();
+            }
+        }
+
+        PlayerUtils.sendTitleToPlayers(players, title, 10, 40, 10);
+        TaskScheduler.scheduleTask(Time.seconds(3), () -> rollLives(players));
     }
 
     @Override

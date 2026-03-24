@@ -98,16 +98,19 @@ public class GivelifeCommand extends Command {
             return -1;
         }
 
-        if (currentSeason instanceof DoubleLife doubleLife && doubleLife.shouldShareLives()) {
+        if (currentSeason instanceof DoubleLife doubleLife) {
             ServerPlayer soulmate = doubleLife.getSoulmate(self);
-            if (soulmate != null) {
-                if (soulmate.equals(target)) {
-                    if (!DoubleLifeConfig.GIVELIFE_SOULMATES.get(seasonConfig)) {
-                        OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
-                        return -1;
-                    }
+            if (soulmate != null && soulmate.equals(target) && !DoubleLifeConfig.GIVELIFE_SOULMATES.get(seasonConfig)) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
+                return -1;
+            }
+
+            if (doubleLife.shouldShareLives()) {
+                if (!DoubleLifeConfig.GIVELIFE_SOULMATES.get(seasonConfig)) {
+                    OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
+                    return -1;
                 }
-                else {
+                if (soulmate != null && !soulmate.equals(target)) {
                     boolean success = doubleLifeGiveLife(source, self, soulmate, target);
                     if (!success) {
                         return -1;
