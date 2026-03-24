@@ -390,6 +390,22 @@ public class DoubleLife extends Season {
         if (playersToRoll.isEmpty()) {
             return;
         }
+        if (currentSession == null || !currentSession.statusStarted()) {
+            chooseRandomSoulmates(playersToRoll);
+            for (ServerPlayer player : playersToRoll) {
+                Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
+                if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
+                    ServerPlayer soulmate = getSoulmate(player);
+                    if (soulmate != null) {
+                        text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_PLAYER.get(soulmate);
+                    }
+                }
+                PlayerUtils.sendTitle(player, text, 20, 60, 20);
+                PlayerUtils.playSoundToPlayer(player,
+                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
+            }
+            return;
+        }
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
         PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
         TaskScheduler.scheduleTask(25, () -> {
@@ -430,7 +446,7 @@ public class DoubleLife extends Season {
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
             if (player == null) continue;
 
-            if (player.ls$isDead()) {
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) {
                 continue;
             }
 
@@ -458,7 +474,7 @@ public class DoubleLife extends Season {
         List<ServerPlayer> playersToRoll = new ArrayList<>();
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
             if (player == null) continue;
-            if (player.ls$isDead()) continue;
+            if (player.ls$hasAssignedLives() && player.ls$isDead()) continue;
             playersToRoll.add(player);
         }
         return playersToRoll;

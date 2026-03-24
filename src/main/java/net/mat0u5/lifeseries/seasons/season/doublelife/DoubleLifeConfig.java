@@ -147,7 +147,7 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
             "Soulbound Lives", "Controls whether soulmates share their life count."
     );
 	public static final ConfigFileEntry<Boolean> GIVELIFE_SOULMATES = new ConfigFileEntry<>(
-            "givelife_soulmates", true, "global.givelife.lives",
+            "givelife_soulmates", true, "season.soulbind.lives",
             "Soulmate Givelife", "Controls whether soulmates can givelife to their soulmate."
     );
 
