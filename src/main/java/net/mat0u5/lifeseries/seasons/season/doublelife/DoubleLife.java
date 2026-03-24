@@ -223,7 +223,7 @@ public class DoubleLife extends Season {
     }
 
     public boolean shouldRollTogether() {
-        return shouldShareLives() || shouldFuseRolls();
+        return shouldShareLives() || livesManager.SHOULMATES_ROLL_SAME_LIVES;
     }
 
     public void loadSoulmates() {
@@ -392,18 +392,21 @@ public class DoubleLife extends Season {
         }
         if (currentSession == null || !currentSession.statusStarted()) {
             chooseRandomSoulmates(playersToRoll);
-            for (ServerPlayer player : playersToRoll) {
-                Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
-                if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
-                    ServerPlayer soulmate = getSoulmate(player);
-                    if (soulmate != null) {
-                        text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_PLAYER.get(soulmate);
+            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
+            TaskScheduler.scheduleTask(80, () -> {
+                for (ServerPlayer player : playersToRoll) {
+                    Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
+                    if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
+                        ServerPlayer soulmate = getSoulmate(player);
+                        if (soulmate != null) {
+                            text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_PLAYER.get(soulmate);
+                        }
                     }
+                    PlayerUtils.sendTitle(player, text, 20, 60, 20);
+                    PlayerUtils.playSoundToPlayer(player,
+                            SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
                 }
-                PlayerUtils.sendTitle(player, text, 20, 60, 20);
-                PlayerUtils.playSoundToPlayer(player,
-                        SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_chosen")));
-            }
+            });
             triggerFusedLivesRollAfterReveal();
             return;
         }

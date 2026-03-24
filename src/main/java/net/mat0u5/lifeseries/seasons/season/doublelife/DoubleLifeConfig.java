@@ -108,6 +108,11 @@ public class DoubleLifeConfig extends ConfigManager {
 			"soulmates_share_roll", false, "global.lives.random",
             "Fuse Rolls", "Controls whether the soulmate and roll lives rolled are fused into one."
     );
+
+    public static final ConfigFileEntry<Boolean> LIVES_RANDOMIZE_SOULMATES_SAME = new ConfigFileEntry<>(
+            "lives_randomize_soulmates_same", true, "global.lives.random",
+            "Soulmates Roll Same Life Count", "Forces both soulmates to roll the same amount of lives."
+    );
 	
 	public static final ConfigFileEntry<Boolean> SPLIT_SOULMATES_WHEN_RED = new ConfigFileEntry<>(
             "split_soulmates_when_red", false, "season",
@@ -184,8 +189,9 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
                 ,SOULBOUND_EFFECTS
                 ,SOULBOUND_INVENTORIES
                 ,SOULBOUND_BOOGEYMAN
-                ,SOULMATES_PVP_ALLOWED	
+				,SOULMATES_PVP_ALLOWED	
 				,SOULMATES_SHARE_ROLL
+                ,LIVES_RANDOMIZE_SOULMATES_SAME
                 ,SOULBOUND_BOOGEYMAN
                 ,SOULBOUND_LIVES
 				,GIVELIFE_SOULMATES
