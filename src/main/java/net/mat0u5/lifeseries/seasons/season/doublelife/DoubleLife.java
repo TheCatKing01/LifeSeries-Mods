@@ -223,7 +223,7 @@ public class DoubleLife extends Season {
     }
 
     public boolean shouldRollTogether() {
-        return shouldShareLives() || livesManager.SHOULMATES_ROLL_SAME_LIVES;
+        return shouldShareLives() || DoubleLifeConfig.LIVES_RANDOMIZE_SOULMATES_SAME.get(seasonConfig);
     }
 
     public void loadSoulmates() {

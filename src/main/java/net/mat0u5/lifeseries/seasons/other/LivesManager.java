@@ -56,7 +56,6 @@ public class LivesManager {
     public int ROLL_MIN_LIVES = 2;
     public int ROLL_MAX_LIVES = 6;
     public double LIVES_RANDOMIZE_MINUTE = 1.0;
-    public boolean SOULMATES_ROLL_SAME_LIVES = true;
     public boolean SHOW_LIFE_DIFF = false;
 
     public boolean assignedLives = false;
@@ -70,11 +69,6 @@ public class LivesManager {
         SEE_FRIENDLY_INVISIBLE_PLAYERS = seasonConfig.SEE_FRIENDLY_INVISIBLE_PLAYERS.get();
         LIVES_SYSTEM_DISABLED = seasonConfig.LIVES_SYSTEM_DISABLED.get();
         LIVES_RANDOMIZE_MINUTE = seasonConfig.LIVES_RANDOMIZE_MINUTE.get();
-        if (currentSeason instanceof DoubleLife) {
-            SOULMATES_ROLL_SAME_LIVES = net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLifeConfig.LIVES_RANDOMIZE_SOULMATES_SAME.get(seasonConfig);
-        } else {
-            SOULMATES_ROLL_SAME_LIVES = true;
-        }
         updateTeams();
 
         ROLL_LIVES = seasonConfig.LIVES_RANDOMIZE.get();
