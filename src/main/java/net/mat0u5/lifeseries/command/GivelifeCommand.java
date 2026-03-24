@@ -6,6 +6,7 @@ import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
+import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLifeConfig;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
@@ -101,12 +102,16 @@ public class GivelifeCommand extends Command {
             ServerPlayer soulmate = doubleLife.getSoulmate(self);
             if (soulmate != null) {
                 if (soulmate.equals(target)) {
-                    OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
-                    return -1;
+                    if (!DoubleLifeConfig.GIVELIFE_SOULMATES.get(seasonConfig)) {
+                        OtherUtils.sendCommandFailure(source, ModifiableText.GIVELIFE_ERROR_SOULMATE.get());
+                        return -1;
+                    }
                 }
-                boolean success = doubleLifeGiveLife(source, self, soulmate, target);
-                if (!success) {
-                    return -1;
+                else {
+                    boolean success = doubleLifeGiveLife(source, self, soulmate, target);
+                    if (!success) {
+                        return -1;
+                    }
                 }
             }
         }

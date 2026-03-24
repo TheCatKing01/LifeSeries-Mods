@@ -143,8 +143,12 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
             "Soulmates Assign Time", "How many minutes after the session starts the soulmates get assigned."
     );
     public static final ConfigFileEntry<Boolean> SOULBOUND_LIVES = new ConfigFileEntry<>(
-            "soulbound_lives", true, "season.soulbind",
+            "soulbound_lives", true, "{season.soulbind.lives}",
             "Soulbound Lives", "Controls whether soulmates share their life count."
+    );
+	public static final ConfigFileEntry<Boolean> GIVELIFE_SOULMATES = new ConfigFileEntry<>(
+            "givelife_soulmates", true, "global.givelife.lives",
+            "Soulmate Givelife", "Controls whether soulmates can givelife to their soulmate."
     );
 
     public static final ConfigFileEntry<Object> GROUP_SOULBIND = new ConfigFileEntry<>(
@@ -181,11 +185,12 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
                 ,SOULBOUND_INVENTORIES
                 ,SOULBOUND_BOOGEYMAN
                 ,SOULMATES_PVP_ALLOWED	
-		,SOULMATES_SHARE_ROLL					
-                , SOULBOUND_BOOGEYMAN
+				,SOULMATES_SHARE_ROLL
+                ,SOULBOUND_BOOGEYMAN
                 ,SOULBOUND_LIVES
+				,GIVELIFE_SOULMATES
                 ,SOULMATES_PVP_ALLOWED
-                , SOULMATES_ASSIGN_MINUTE
+                ,SOULMATES_ASSIGN_MINUTE
         ));
         //? if >= 1.21.6 {
         result.add(SOULMATE_LOCATOR_BAR);
