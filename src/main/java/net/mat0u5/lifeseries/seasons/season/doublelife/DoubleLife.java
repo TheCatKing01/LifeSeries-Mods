@@ -57,6 +57,7 @@ public class DoubleLife extends Season {
     public boolean SOULMATES_PVP_ALLOWED = true;
     public boolean SOULMATES_SHARE_ROLL = true;
     public boolean REROLL_SESSION = false;
+    public boolean CLEAR_ON_SESSION_END = true;
     public boolean REROLL_MIDSESSION = false;
     public double REROLL_TIME = 30.0;
     public boolean REROLL_REDS = true;
@@ -122,6 +123,15 @@ public class DoubleLife extends Season {
     @Override
     public void reloadStart() {
         loadSoulmates();
+    }
+
+    @Override
+    public void sessionEnd() {
+        super.sessionEnd();
+        if (REROLL_SESSION && CLEAR_ON_SESSION_END) {
+            resetAllSoulmates();
+            updateOrderedSoulmates();
+        }
     }
 
     @Override
@@ -200,6 +210,7 @@ public class DoubleLife extends Season {
 	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
         SOULBOUND_LIVES = DoubleLifeConfig.SOULBOUND_LIVES.get(seasonConfig);
 		REROLL_SESSION = DoubleLifeConfig.REROLL_SESSION.get(seasonConfig);
+        CLEAR_ON_SESSION_END = DoubleLifeConfig.CLEAR_ON_SESSION_END.get(seasonConfig);
 		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
 		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
 		REROLL_REDS = DoubleLifeConfig.REROLL_REDS.get(seasonConfig);

@@ -122,6 +122,10 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
 			"reroll_session", false, "season.reroll",
             "Reroll Soulmates Each Session", "Controls whether soulmates are given a new soulbound each session. "
     );
+    public static final ConfigFileEntry<Boolean> CLEAR_ON_SESSION_END = new ConfigFileEntry<>(
+            "clear_on_session_end", true, "season.reroll",
+            "Clear On Session End", "Controls whether soulmates are removed when a session ends."
+    );
 	public static final ConfigFileEntry<Boolean> REROLL_MIDSESSION = new ConfigFileEntry<>(
 			"reroll_midsession", false, "{season.reroll.midsession}",
             "Reroll Soulmates Mid-Session", "Controls whether soulmates are given a new soulbound mid-session. "
@@ -179,6 +183,7 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
                 ,DISABLE_START_TELEPORT
 			
 				,REROLL_SESSION
+                ,CLEAR_ON_SESSION_END
 				,REROLL_MIDSESSION
 				,REROLL_TIME
 				,REROLL_LIVES
