@@ -118,12 +118,8 @@ public class DoubleLifeConfig extends ConfigManager {
             "split_soulmates_when_red", false, "season",
             "Breakup Soulmates When Red", "Controls whether soulmates are broken up when one of them become red"
     );
-public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntry<>(
-			"reroll_session", false, "season.reroll",
-            "Reroll Soulmates Each Session", "Controls whether soulmates are given a new soulbound each session. "
-    );
     public static final ConfigFileEntry<Boolean> CLEAR_ON_SESSION_END = new ConfigFileEntry<>(
-            "clear_on_session_end", true, "season.reroll",
+            "clear_on_session_end", false, "season.reroll",
             "Clear On Session End", "Controls whether soulmates are removed when a session ends."
     );
 	public static final ConfigFileEntry<Boolean> REROLL_MIDSESSION = new ConfigFileEntry<>(
@@ -182,7 +178,6 @@ public static final ConfigFileEntry<Boolean> REROLL_SESSION = new ConfigFileEntr
                 ,BREAKUP_LAST_PAIR_STANDING
                 ,DISABLE_START_TELEPORT
 			
-				,REROLL_SESSION
                 ,CLEAR_ON_SESSION_END
 				,REROLL_MIDSESSION
 				,REROLL_TIME

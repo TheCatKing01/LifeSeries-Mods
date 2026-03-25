@@ -56,7 +56,6 @@ public class DoubleLife extends Season {
     public static boolean SOULMATE_LOCATOR_BAR = false;
     public boolean SOULMATES_PVP_ALLOWED = true;
     public boolean SOULMATES_SHARE_ROLL = true;
-    public boolean REROLL_SESSION = false;
     public boolean CLEAR_ON_SESSION_END = true;
     public boolean REROLL_MIDSESSION = false;
     public double REROLL_TIME = 30.0;
@@ -128,7 +127,7 @@ public class DoubleLife extends Season {
     @Override
     public void sessionEnd() {
         super.sessionEnd();
-        if (REROLL_SESSION && CLEAR_ON_SESSION_END) {
+        if (CLEAR_ON_SESSION_END) {
             resetAllSoulmates();
             updateOrderedSoulmates();
         }
@@ -165,7 +164,7 @@ public class DoubleLife extends Season {
         currentSession.addSessionAction(new SessionAction(Time.minutes(SOULMATES_ASSIGN_MINUTE), ModifiableText.SESSION_ACTION_ASSIGN_SOULMATES.getString()) {
             @Override
             public void trigger() {
-                rollSoulmates(REROLL_SESSION, false);
+                rollSoulmates();
             }
         });
         if (!DISABLE_START_TELEPORT) {
@@ -209,7 +208,6 @@ public class DoubleLife extends Season {
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
 	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
         SOULBOUND_LIVES = DoubleLifeConfig.SOULBOUND_LIVES.get(seasonConfig);
-		REROLL_SESSION = DoubleLifeConfig.REROLL_SESSION.get(seasonConfig);
         CLEAR_ON_SESSION_END = DoubleLifeConfig.CLEAR_ON_SESSION_END.get(seasonConfig);
 		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
 		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
@@ -386,15 +384,19 @@ public class DoubleLife extends Season {
     }
 
     public void rollSoulmates() {
-        rollSoulmates(false, false);
+        rollSoulmates(false, false, false);
     }
 
     public void rollSoulmates(boolean forceReroll) {
-        rollSoulmates(forceReroll, forceReroll);
+        rollSoulmates(forceReroll, forceReroll, false);
     }
 
     public void rollSoulmates(boolean forceReroll, boolean ignoreParticipationRules) {
-        List<ServerPlayer> playersToRoll = getPlayersForSoulmateRoll(forceReroll, ignoreParticipationRules);
+        rollSoulmates(forceReroll, ignoreParticipationRules, false);
+    }
+
+    public void rollSoulmates(boolean forceReroll, boolean ignoreParticipationRules, boolean ignoreUnboundRule) {
+        List<ServerPlayer> playersToRoll = getPlayersForSoulmateRoll(forceReroll, ignoreParticipationRules, ignoreUnboundRule);
         if (forceReroll) {
             clearSoulmatesFor(playersToRoll);
         }
@@ -503,7 +505,7 @@ public class DoubleLife extends Season {
         return playersToRoll;
     }
 
-    private List<ServerPlayer> getPlayersForSoulmateRoll(boolean forceReroll, boolean ignoreParticipationRules) {
+    private List<ServerPlayer> getPlayersForSoulmateRoll(boolean forceReroll, boolean ignoreParticipationRules, boolean ignoreUnboundRule) {
         List<ServerPlayer> playersToRoll = new ArrayList<>();
         Set<UUID> blocked = new HashSet<>();
 
@@ -521,7 +523,7 @@ public class DoubleLife extends Season {
                 blocked.add(player.getUUID());
                 continue;
             }
-            if (!ignoreParticipationRules && forceReroll && REROLL_UNBOUND && hasSoulmate(player)) {
+            if (!ignoreParticipationRules && !ignoreUnboundRule && forceReroll && REROLL_UNBOUND && hasSoulmate(player)) {
                 blocked.add(player.getUUID());
                 continue;
             }
@@ -1124,7 +1126,7 @@ public class DoubleLife extends Season {
         TaskScheduler.scheduleTask(Time.minutes(REROLL_TIME), () -> {
             if (currentSession == null || !currentSession.statusStarted()) return;
             if (!REROLL_MIDSESSION) return;
-            rollSoulmates(true, false);
+            rollSoulmates(true, false, true);
             scheduleMidSessionReroll();
         });
     }

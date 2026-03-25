@@ -424,6 +424,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
         renamedProperty("text.wildlife.superpowes.dead", "text.wildlife.superpowers.dead");
 
         renamedProperty("lists_choose_minute", "lists_roll_time");
+        renamedProperty("reroll_session", "clear_on_session_end");
         migrateListsSplit("lists_ignore", "lists_naughty_ignore", "lists_nice_ignore");
         migrateListsSplit("lists_force", "lists_naughty_force", "lists_nice_force");
         migrateListsPlayers();
