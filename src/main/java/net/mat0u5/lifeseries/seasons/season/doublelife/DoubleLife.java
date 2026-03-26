@@ -62,6 +62,7 @@ public class DoubleLife extends Season {
     public boolean REROLL_REDS = true;
     public boolean REROLL_UNBOUND = false;
     public boolean REROLL_LIVES = false;
+    private boolean didSessionStartTeleport = false;
 
     private final Set<UUID> pendingSoulmateLifeLoss = new HashSet<>();
     private final Set<UUID> processingLinkedDeath = new HashSet<>();
@@ -130,6 +131,14 @@ public class DoubleLife extends Season {
         if (CLEAR_ON_SESSION_END) {
             resetAllSoulmates();
             updateOrderedSoulmates();
+        }
+    }
+
+    @Override
+    public void switchOutOfSeason(Seasons changedTo) {
+        super.switchOutOfSeason(changedTo);
+        if (changedTo != Seasons.DOUBLE_LIFE) {
+            didSessionStartTeleport = false;
         }
     }
 
@@ -396,6 +405,10 @@ public class DoubleLife extends Season {
     }
 
     public void rollSoulmates(boolean forceReroll, boolean ignoreParticipationRules, boolean ignoreUnboundRule) {
+        rollSoulmates(forceReroll, ignoreParticipationRules, ignoreUnboundRule, false);
+    }
+
+    public void rollSoulmates(boolean forceReroll, boolean ignoreParticipationRules, boolean ignoreUnboundRule, boolean forceCountdown) {
         List<ServerPlayer> playersToRoll = getPlayersForSoulmateRoll(forceReroll, ignoreParticipationRules, ignoreUnboundRule);
         if (forceReroll) {
             clearSoulmatesFor(playersToRoll);
@@ -403,7 +416,8 @@ public class DoubleLife extends Season {
         if (playersToRoll.isEmpty()) {
             return;
         }
-        if (currentSession == null || !currentSession.statusStarted()) {
+        boolean doCountdown = forceCountdown || (currentSession != null && currentSession.statusStarted());
+        if (!doCountdown) {
             chooseRandomSoulmates(playersToRoll);
             PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
             TaskScheduler.scheduleTask(80, () -> {
@@ -551,6 +565,7 @@ public class DoubleLife extends Season {
 
     public void distributePlayers() {
         if (DISABLE_START_TELEPORT) return;
+        if (didSessionStartTeleport) return;
         if (server == null) return;
         List<ServerPlayer> players = getNonAssignedPlayers();
         if (players.isEmpty()) return;
@@ -572,6 +587,7 @@ public class DoubleLife extends Season {
         for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
             player.removeTag("randomTeleport");
         }
+        didSessionStartTeleport = true;
     }
 
     public void chooseRandomSoulmates() {
