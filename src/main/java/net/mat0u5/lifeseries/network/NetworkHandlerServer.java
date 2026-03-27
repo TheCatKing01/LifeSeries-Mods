@@ -27,6 +27,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Hunger;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.SizeShifting;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
@@ -55,7 +56,9 @@ import net.minecraft.network.DisconnectionDetails;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.mat0u5.lifeseries.Main.*;
@@ -63,6 +66,7 @@ import static net.mat0u5.lifeseries.Main.*;
 public class NetworkHandlerServer {
     public static final List<UUID> handshakeSuccessful = new ArrayList<>();
     public static final List<UUID> preLoginHandshake = new ArrayList<>();
+    private static final Map<UUID, List<UUID>> pendingClientModeTriviaRequests = new HashMap<>();
     public static RegistryOverrideBahaviours REGISTRY_OVERRIDE_BEHAVIOR = RegistryOverrideBahaviours.LOGIN;
     public static boolean PRE_LOGIN_OVERRIDE_KICK = false;
 
@@ -149,6 +153,9 @@ public class NetworkHandlerServer {
             if (Main.currentSeason != null) {
                 Main.currentSeason.listsManager.handleVote(player, payload.value());
             }
+        });
+        SimplePackets.CLIENT_MODE_TRIVIA_RESPONSE.setServerReceive((player, payload) -> {
+            handleClientModeTriviaResponse(player, payload.value());
         });
 
         SimplePackets.SET_LIVES.setServerReceive((player, payload) -> {
@@ -470,7 +477,7 @@ public class NetworkHandlerServer {
             preLoginHandshake.add(OtherUtils.profileId(profile));
             LOGGER.info("Received pre-login packet from " + OtherUtils.profileName(profile));
         }
-        else if (currentSeason.getSeason().requiresClient()) {
+        else if (clientModeEnabled()) {
             LOGGER.info("Did not receive pre-login packet from " + OtherUtils.profileName(profile));
             if (!PRE_LOGIN_OVERRIDE_KICK) {
                 handler.disconnect(getDisconnectClientText());
@@ -706,7 +713,7 @@ public class NetworkHandlerServer {
 
     public static void tryKickFailedHandshake(ServerPlayer player) {
         if (server == null) return;
-        if (!currentSeason.getSeason().requiresClient()) return;
+        if (!clientModeEnabled()) return;
         if (wasHandshakeSuccessful(player)) return;
         //? if <= 1.20.5 {
         /*player.connection.disconnect(getDisconnectClientText());
@@ -732,5 +739,31 @@ public class NetworkHandlerServer {
 
     public static void sideTitle(ServerPlayer player, Component text) {
         ServerPlayNetworking.send(player, new SidetitlePacket(text));
+    }
+
+    public static void requestClientModeForTriviaSpawn(ServerPlayer requester, List<ServerPlayer> targets) {
+        if (requester == null) return;
+        List<UUID> targetUuids = new ArrayList<>();
+        for (ServerPlayer target : targets) {
+            if (target != null) targetUuids.add(target.getUUID());
+        }
+        pendingClientModeTriviaRequests.put(requester.getUUID(), targetUuids);
+        SimplePackets.CLIENT_MODE_TRIVIA_PROMPT.target(requester).sendToClient();
+    }
+
+    private static void handleClientModeTriviaResponse(ServerPlayer requester, boolean enable) {
+        if (requester == null) return;
+        if (!PermissionManager.isAdmin(requester)) return;
+        List<UUID> targets = pendingClientModeTriviaRequests.remove(requester.getUUID());
+        if (targets == null) return;
+        if (!enable) return;
+
+        setClientMode(true);
+        for (UUID uuid : targets) {
+            ServerPlayer target = PlayerUtils.getPlayer(uuid);
+            if (target != null && wasHandshakeSuccessful(target)) {
+                TriviaWildcard.spawnBotFor(target);
+            }
+        }
     }
 }

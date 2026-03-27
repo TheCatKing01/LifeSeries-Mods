@@ -42,6 +42,7 @@ public class SimplePackets {
     public static final SimpleBooleanPacket ADMIN_INFO = new SimpleBooleanPacket("ADMIN_INFO");
     public static final SimpleBooleanPacket TRIPLE_JUMP = new SimpleBooleanPacket("TRIPLE_JUMP");
     public static final SimpleBooleanPacket MOD_DISABLED = new SimpleBooleanPacket("MOD_DISABLED");
+    public static final SimpleBooleanPacket CLIENT_MODE_TRIVIA_RESPONSE = new SimpleBooleanPacket("CLIENT_MODE_TRIVIA_RESPONSE");
 
     public static final SimpleNumberPacket PLAYER_MIN_MSPT = new SimpleNumberPacket("PLAYER_MIN_MSPT");
     public static final SimpleNumberPacket SIZESHIFTING_CHANGE = new SimpleNumberPacket("SIZESHIFTING_CHANGE");
@@ -75,6 +76,7 @@ public class SimplePackets {
     public static final SimpleEmptyPacket TRIVIA_ALL_WRONG = new SimpleEmptyPacket("TRIVIA_ALL_WRONG");
     public static final SimpleEmptyPacket STOP_TRIVIA_SOUNDS = new SimpleEmptyPacket("STOP_TRIVIA_SOUNDS");
     public static final SimpleEmptyPacket REMOVE_SLEEP_SCREENS = new SimpleEmptyPacket("REMOVE_SLEEP_SCREENS");
+    public static final SimpleEmptyPacket CLIENT_MODE_TRIVIA_PROMPT = new SimpleEmptyPacket("CLIENT_MODE_TRIVIA_PROMPT");
 
 
     //public static final SimpleLongPacket _______ = new SimpleLongPacket("_______");

@@ -57,7 +57,7 @@ public class RegistrySyncManagerMixin {
     //?}
         if (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.NEVER ||
                 (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.LOGIN && NetworkHandlerServer.preLoginHandshake.contains(profileUUID)) ||
-                (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.SEASON && currentSeason.getSeason().requiresClient())) {
+                (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.SEASON && Main.clientModeEnabled())) {
             Main.LOGGER.info("Sending unmodified registry entries to client");
             return originalValue;
         }

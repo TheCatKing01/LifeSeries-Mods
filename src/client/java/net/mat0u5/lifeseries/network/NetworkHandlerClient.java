@@ -44,6 +44,7 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -245,6 +246,19 @@ public class NetworkHandlerClient {
         SimplePackets.ADMIN_INFO.setClientReceive(payload -> MainClient.isAdmin = payload.value());
         SimplePackets.TRIPLE_JUMP.setClientReceive(payload -> MainClient.tripleJumpActive = payload.value());
         SimplePackets.MOD_DISABLED.setClientReceive(payload -> MainClient.modDisabledServerSide = payload.value());
+        SimplePackets.CLIENT_MODE_TRIVIA_PROMPT.setClientReceive(payload -> {
+            Minecraft client = Minecraft.getInstance();
+            client.setScreen(new ConfirmScreen(
+                    confirmed -> {
+                        SimplePackets.CLIENT_MODE_TRIVIA_RESPONSE.sendToServer(confirmed);
+                        client.setScreen(null);
+                    },
+                    Component.nullToEmpty("Client Mode Required"),
+                    Component.nullToEmpty("Enable client mode to spawn trivia bots? Players without the mod will be kicked."),
+                    Component.nullToEmpty("Enable Client Mode"),
+                    Component.nullToEmpty("Cancel")
+            ));
+        });
 
         //Number payload
         SimplePackets.PLAYER_MIN_MSPT.setClientReceive(payload -> {

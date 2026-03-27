@@ -46,6 +46,7 @@ public class Main implements ModInitializer {
 	public static final boolean ISOLATED_ENVIRONMENT = false;
 	public static final Seasons DEFAULT_SEASON = Seasons.UNASSIGNED;
 	public static boolean MOD_DISABLED = false;
+	public static boolean CLIENT_MODE = false;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static ConfigManager config;
@@ -78,6 +79,7 @@ public class Main implements ModInitializer {
 		SnailSkins.createConfig();
 
 		MOD_DISABLED = config.getOrCreateProperty("modDisabled", "false").equalsIgnoreCase("true");
+		CLIENT_MODE = config.getOrCreateProperty("clientMode", "false").equalsIgnoreCase("true");
 		String season = config.getOrCreateProperty("currentSeries", DEFAULT_SEASON.getId());
 
 		parseSeason(season);
@@ -119,6 +121,24 @@ public class Main implements ModInitializer {
 			fullReload();
 		}
 		SimplePackets.MOD_DISABLED.sendToClient(Main.MOD_DISABLED);
+	}
+
+	public static boolean clientModeEnabled() {
+		if (currentSeason != null && currentSeason.getSeason().requiresClient()) return true;
+		return CLIENT_MODE;
+	}
+
+	public static boolean clientModeForced() {
+		return currentSeason != null && currentSeason.getSeason().requiresClient();
+	}
+
+	public static void setClientMode(boolean enabled) {
+		boolean previous = CLIENT_MODE;
+		CLIENT_MODE = enabled;
+		config.setProperty("clientMode", String.valueOf(CLIENT_MODE));
+		if (!previous && enabled) {
+			PlayerUtils.getAllPlayers().forEach(NetworkHandlerServer::tryKickFailedHandshake);
+		}
 	}
 
 	public static void fullReload() {
@@ -181,6 +201,7 @@ public class Main implements ModInitializer {
 		currentSeason.reloadStart();
 		seasonConfig.loadProperties();
 		config.loadProperties();
+		CLIENT_MODE = config.getOrCreateProperty("clientMode", "false").equalsIgnoreCase("true");
 		blacklist.reloadBlacklist();
 		currentSeason.reload();
 		NetworkHandlerServer.sendUpdatePackets();

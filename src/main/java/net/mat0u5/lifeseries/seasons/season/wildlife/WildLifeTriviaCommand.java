@@ -6,7 +6,9 @@ import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
 import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestion;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestionManager;
@@ -76,7 +78,7 @@ public class WildLifeTriviaCommand extends Command {
                                 )
                         )
                         .then(literal("bot")
-                                .requires(source -> isAllowed())
+                                .requires(source -> canSpawnBots())
                                 .then(literal("spawn")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> spawnBotFor(
@@ -237,7 +239,29 @@ public class WildLifeTriviaCommand extends Command {
     }
 
     public int spawnBotFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (Main.modDisabled()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
+            return -1;
+        }
+        if (!canSpawnBots()) {
+            OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Trivia bots can only be spawned in Wild Life or when client mode is enabled."));
+            return -1;
+        }
+
+        if (!Main.clientModeEnabled()) {
+            ServerPlayer requester = source.getPlayer();
+            if (requester == null) {
+                OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Client mode is off. Run '/lifeseries clientMode on' to spawn trivia bots."));
+                return -1;
+            }
+            if (!NetworkHandlerServer.wasHandshakeSuccessful(requester)) {
+                OtherUtils.sendCommandFailure(source, Component.nullToEmpty("You must have the Life Series mod installed client-side to enable client mode."));
+                return -1;
+            }
+            NetworkHandlerServer.requestClientModeForTriviaSpawn(requester, new ArrayList<>(targets));
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is off. Check your screen to enable it."));
+            return 1;
+        }
 
         for (ServerPlayer player : targets) {
             TriviaWildcard.spawnBotFor(player);
@@ -251,6 +275,11 @@ public class WildLifeTriviaCommand extends Command {
         }
 
         return 1;
+    }
+
+    private boolean canSpawnBots() {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) return true;
+        return !currentSeason.getSeason().requiresClient();
     }
 
 

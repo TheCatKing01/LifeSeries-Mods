@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
 
+import static net.mat0u5.lifeseries.Main.clientModeEnabled;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
 public class TriviaBotServerData implements PlayerBoundEntity {
@@ -86,6 +87,12 @@ public class TriviaBotServerData implements PlayerBoundEntity {
             }
             else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
                 if (!NiceLifeTriviaManager.bots.containsValue(bot)) {
+                    despawn();
+                    return true;
+                }
+            }
+            else if (clientModeEnabled()) {
+                if (!TriviaWildcard.bots.containsValue(bot)) {
                     despawn();
                     return true;
                 }

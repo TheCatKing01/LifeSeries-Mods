@@ -113,6 +113,16 @@ public class LifeSeriesCommand extends Command {
                 .then(literal("disable")
                     .requires(PermissionManager::isAdmin)
                     .executes(context -> enableOrDisable(context.getSource(), true))
+                )
+                .then(literal("clientMode")
+                    .requires(PermissionManager::isAdmin)
+                    .executes(context -> clientMode(context.getSource()))
+                    .then(literal("on")
+                        .executes(context -> setClientMode(context.getSource(), true))
+                    )
+                    .then(literal("off")
+                        .executes(context -> setClientMode(context.getSource(), false))
+                    )
                 );
         dispatcher.register(lifeseriesTree);
         dispatcher.register(literal("ls").redirect(lifeseriesTree.build()));
@@ -264,6 +274,27 @@ public class LifeSeriesCommand extends Command {
         if (checkBanned(source)) return -1;
         Component text = TextUtils.format("§7Click {}§7 to open the full Life Series Mod Credits", TextUtils.openURLText("https://mat0u5.github.io/LifeSeries-docs/other/credits"));
         OtherUtils.sendCommandFeedbackQuiet(source, text);
+        return 1;
+    }
+    public int clientMode(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        String status = clientModeEnabled() ? "ON" : "OFF";
+        if (clientModeForced()) {
+            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is forced ON for this series."));
+        }
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is currently " + status + "."));
+        return 1;
+    }
+
+    public int setClientMode(CommandSourceStack source, boolean enabled) {
+        if (checkBanned(source)) return -1;
+        if (!enabled && clientModeForced()) {
+            OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Client mode is forced ON for this series."));
+            return -1;
+        }
+        Main.setClientMode(enabled);
+        String status = clientModeEnabled() ? "ON" : "OFF";
+        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode set to " + status + "."));
         return 1;
     }
 }

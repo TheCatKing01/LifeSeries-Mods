@@ -16,5 +16,6 @@ public class MainConfig extends ConfigManager {
     @Override
     public void instantiateProperties() {
         getOrCreateProperty("currentSeries", Main.DEFAULT_SEASON.getId());
+        getOrCreateProperty("clientMode", "false");
     }
 }
