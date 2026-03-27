@@ -62,7 +62,7 @@ public class TriviaQuestionConfigEntry extends ModifiableListEntry {
             RenderUtils.text(questionText,x + 25, y+6).colored(TextColors.LIGHT_GRAY).render(context, textRenderer);
             textField.setY(y+1);
             textField.setX(x + 25 + textRenderer.width(questionText) + 7);
-            int buttonX = resetButton != null ? resetButton.getX() : width;
+            int buttonX = resetButton != null ? resetButton.getX() : (x + width);
             textField.setWidth(buttonX-textField.getX()-10);
             textField.render(context, mouseX, mouseY, tickDelta);
         }

@@ -197,29 +197,17 @@ public class NiceLife extends Season {
 			/*server.setWeatherParameters(0, 1000, true, false);
 			*///?}
         }
-		
+
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
-				&& !freezeTime;
+				&& !freezeTime
+                && !NiceLifeTriviaManager.triviaInProgress;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
         *///?} else {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
         //?}
 		
-		if (isNight()) {
-			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-				if (!player.isSleeping()) {
-				}
-			}
-		} else {
-			for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-				if (player.isSleeping()) {
-					player.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
-				}
-			}
-		}
-		
-		if (!isNight()) {
+		if (!NiceLifeTriviaManager.triviaInProgress && (!isNight() || !isAfterMidnight())) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
 				if (serverPlayer.isSleeping()) {
 					serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);

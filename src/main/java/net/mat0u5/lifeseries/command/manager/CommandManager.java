@@ -6,7 +6,6 @@ import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanCommand;
 import net.mat0u5.lifeseries.seasons.lists.ListsCommand;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLifeCommands;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeCommands;
-import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaCommand;
 import net.mat0u5.lifeseries.seasons.season.pastlife.PastLifeCommands;
 import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLifeCommands;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLifeTriviaCommand;
@@ -41,7 +40,6 @@ public class CommandManager {
         commands.add(new NiceLifeCommands());
 
         commands.add(new WildLifeTriviaCommand());
-        commands.add(new NiceLifeTriviaCommand());
 
         commands.add(new SelfMessageCommand());
         commands.add(new SideTitleCommand());

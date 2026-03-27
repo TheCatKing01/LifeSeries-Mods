@@ -102,6 +102,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,LISTS // Group
                 ,SIMPLE_LIFE //Group
+				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES
 
                 //Group stuff
@@ -174,15 +175,26 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,NICE_LIST_IGNORE
 
                 ,TRADERS_MAX_AMOUNT
-                ,COMPLEX_LIFE_TRADES
 				
-                ,SUBIN_CHANGE_SKIN
+				,SUBIN_CHANGE_SKIN
                 ,SUBIN_CHANGE_USERNAME
                 ,LIVES_LIFE_DIFF_MESSAGE
                 ,LIVES_RANDOMIZE
                 ,LIVES_RANDOMIZE_MIN
                 ,LIVES_RANDOMIZE_MAX
-                , LIVES_RANDOMIZE_MINUTE
+
+                ,TRADERS_MAX_AMOUNT
+                ,COMPLEX_LIFE_TRADES
+
+                ,WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS
+                ,WILDCARD_TRIVIA_BOTS_PER_PLAYER
+                ,WILDCARD_TRIVIA_SECONDS_EASY
+                ,WILDCARD_TRIVIA_SECONDS_NORMAL
+                ,WILDCARD_TRIVIA_SECONDS_HARD
+                ,GROUP_TRIVIA_QUESTIONS
+				,GROUP_TRIVIA_QUESTIONS_EASY
+				,GROUP_TRIVIA_QUESTIONS_NORMAL
+                ,GROUP_TRIVIA_QUESTIONS_HARD
         ));
     }
 
@@ -351,9 +363,12 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
         }
         if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            if (NiceLifeTriviaManager.triviaQuestions == null) {
+                NiceLifeTriviaManager.initialize();
+            }
             for (TriviaQuestion question : NiceLifeTriviaManager.triviaQuestions.tryGetTriviaQuestions()) {
                 List<String> info = new ArrayList<>();
-                info.add("normal");
+                info.add("nicelife");
                 info.add(question.getQuestion());
                 info.add(String.valueOf(question.getCorrectAnswerIndex()));
                 info.addAll(question.getAnswers());

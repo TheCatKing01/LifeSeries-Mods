@@ -55,6 +55,7 @@ public class TriviaBot extends AmbientCreature {
     public static final float MOVEMENT_SPEED = 0.45f;
     public static final int MAX_DISTANCE = 100;
     public static boolean CAN_START_RIDING = true;
+    public static boolean FORCE_SANTA_BOT_SPAWN = false;
 
     public TriviaBotClientData clientData = new TriviaBotClientData(this);
     public TriviaBotServerData serverData = new TriviaBotServerData(this);
@@ -81,7 +82,7 @@ public class TriviaBot extends AmbientCreature {
             //? if <= 1.20.3 {
             /*this.setMaxUpStep(1.0F);
              *///?}
-            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            if (currentSeason.getSeason() == Seasons.NICE_LIFE || FORCE_SANTA_BOT_SPAWN) {
                 triviaHandler = new NiceLifeTriviaHandler(this);
                 setSantaBot(true);
             }

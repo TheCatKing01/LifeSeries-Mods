@@ -79,14 +79,16 @@ public class TriviaBotServerData implements PlayerBoundEntity {
             return true;
         }
         if (bot.tickCount % 10 == 0) {
+            boolean isTrackedWildLifeBot = TriviaWildcard.bots.containsValue(bot);
+            boolean isTrackedNiceLifeBot = NiceLifeTriviaManager.bots.containsValue(bot);
             if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-                if (!TriviaWildcard.bots.containsValue(bot)) {
+                if (!isTrackedWildLifeBot) {
                     despawn();
                     return true;
                 }
             }
             else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-                if (!NiceLifeTriviaManager.bots.containsValue(bot)) {
+                if (!isTrackedNiceLifeBot && !isTrackedWildLifeBot) {
                     despawn();
                     return true;
                 }
@@ -97,7 +99,7 @@ public class TriviaBotServerData implements PlayerBoundEntity {
                     return true;
                 }
             }
-            else {
+            else if (!isTrackedWildLifeBot && !isTrackedNiceLifeBot) {
                 despawn();
                 return true;
             }
@@ -129,6 +131,7 @@ public class TriviaBotServerData implements PlayerBoundEntity {
     public void despawn() {
         if (getBoundPlayerUUID() != null) {
             TriviaWildcard.bots.remove(getBoundPlayerUUID());
+            NiceLifeTriviaManager.bots.remove(getBoundPlayerUUID());
         }
         if (!bot.level().isClientSide()) {
             //? if <= 1.21 {

@@ -10,6 +10,7 @@ import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestion;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaQuestionManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
@@ -52,8 +53,22 @@ public class WildLifeTriviaCommand extends Command {
         dispatcher.register(
                 literal("trivia")
                         .requires(PermissionManager::isAdmin)
+							.then(literal("assignSanta")
+									.requires(source -> currentSeason.getSeason() == Seasons.NICE_LIFE)
+									.then(argument("question", StringArgumentType.greedyString())
+											.suggests((context, builder) -> SharedSuggestionProvider.suggest(this.getNiceLifeTriviaSuggestionsStr(), builder))
+											.executes(context -> setNiceLifeTrivia(
+													context.getSource(),
+													StringArgumentType.getString(context, "question")
+											))
+									)
+									.then(literal("reset")
+										.executes(context -> resetNiceLifeTrivia(
+													context.getSource()
+											))
+									)
+							)
                         .then(literal("assign")
-                                .requires(source -> isAllowed())
                                 .then(argument("player", EntityArgument.players())
                                         .then(argument("difficulty", StringArgumentType.string())
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(List.of("easy","normal","hard"), builder))
@@ -78,8 +93,15 @@ public class WildLifeTriviaCommand extends Command {
                                 )
                         )
                         .then(literal("bot")
-                                .requires(source -> canSpawnBots())
                                 .then(literal("spawn")
+                                        .then(argument("player", EntityArgument.players())
+                                                .executes(context -> spawnBotFor(
+                                                        context.getSource(),
+                                                        EntityArgument.getPlayers(context, "player")
+                                                ))
+                                        )
+                                )
+                                .then(literal("spawnFor")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> spawnBotFor(
                                                         context.getSource(),
@@ -89,7 +111,6 @@ public class WildLifeTriviaCommand extends Command {
                                 )
                         )
                         .then(literal("punishment")
-                                .requires(source -> isAllowed())
                                 .then(literal("clear")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> clearPunishment(
@@ -134,7 +155,6 @@ public class WildLifeTriviaCommand extends Command {
 
     private static Random rnd = new Random();
     public int setPunishment(CommandSourceStack source, Collection<ServerPlayer> targets, String punishment) {
-        if (checkBanned(source)) return -1;
         if (!CompatibilityManager.voicechatLoaded() && punishment.equals("robotic_voice")) {
             OtherUtils.sendCommandFailure(source, ModifiableText.MOD_SVC_MISSING_SERVER.get());
             return -1;
@@ -224,7 +244,6 @@ public class WildLifeTriviaCommand extends Command {
     }
 
     public int clearPunishment(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
         for (ServerPlayer player : targets) {
             TriviaWildcard.resetPlayerPunishments(player);
         }
@@ -279,7 +298,7 @@ public class WildLifeTriviaCommand extends Command {
 
     private boolean canSpawnBots() {
         if (currentSeason.getSeason() == Seasons.WILD_LIFE) return true;
-        return !currentSeason.getSeason().requiresClient();
+        return Main.clientModeEnabled();
     }
 
 
@@ -295,12 +314,21 @@ public class WildLifeTriviaCommand extends Command {
         List<TriviaQuestion> result = new ArrayList<>();
         TriviaQuestionManager manager = null;
         if (questionType.equalsIgnoreCase("easy")) {
+            if (TriviaWildcard.easyTrivia == null) {
+                TriviaWildcard.easyTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","easy-trivia.json");
+            }
             manager = TriviaWildcard.easyTrivia;
         }
         else if (questionType.equalsIgnoreCase("normal")) {
+            if (TriviaWildcard.normalTrivia == null) {
+                TriviaWildcard.normalTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","normal-trivia.json");
+            }
             manager = TriviaWildcard.normalTrivia;
         }
         else if (questionType.equalsIgnoreCase("hard")) {
+            if (TriviaWildcard.hardTrivia == null) {
+                TriviaWildcard.hardTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","hard-trivia.json");
+            }
             manager = TriviaWildcard.hardTrivia;
         }
         if (manager != null) {
@@ -311,8 +339,62 @@ public class WildLifeTriviaCommand extends Command {
         return result;
     }
 
+    public List<String> getNiceLifeTriviaSuggestionsStr() {
+        List<String> result = new ArrayList<>();
+        for (TriviaQuestion question : getNiceLifeTriviaQuestions()) {
+            result.add(question.getQuestion());
+        }
+        return result;
+    }
+
+    public List<TriviaQuestion> getNiceLifeTriviaQuestions() {
+        List<TriviaQuestion> result = new ArrayList<>();
+        if (NiceLifeTriviaManager.triviaQuestions == null) {
+            NiceLifeTriviaManager.initialize();
+        }
+        TriviaQuestionManager manager = NiceLifeTriviaManager.triviaQuestions;
+        if (manager != null) {
+            try {
+                result.addAll(manager.getTriviaQuestions());
+            } catch (Exception e) {}
+        }
+        return result;
+    }
+
+    private int setNiceLifeTrivia(CommandSourceStack source, String question) {
+        if (currentSeason.getSeason() != Seasons.NICE_LIFE) {
+            source.sendFailure(Component.nullToEmpty("This command is only available in Nice Life."));
+            return -1;
+        }
+        TriviaQuestion triviaQuestion = null;
+        for (TriviaQuestion possibleQuestion : getNiceLifeTriviaQuestions()) {
+            if (possibleQuestion.getQuestion().equals(question)) {
+                triviaQuestion = possibleQuestion;
+                break;
+            }
+        }
+
+        if (triviaQuestion == null) {
+            source.sendFailure(Component.nullToEmpty("Could not find Nice Life trivia with that question."));
+            return -1;
+        }
+
+        NiceLifeTriviaManager.preAssignedTrivia = triviaQuestion;
+        OtherUtils.sendCommandFeedback(source, Component.literal("Successfuly assigned trivia"));
+        return 1;
+    }
+
+    private int resetNiceLifeTrivia(CommandSourceStack source) {
+        if (currentSeason.getSeason() != Seasons.NICE_LIFE) {
+            source.sendFailure(Component.nullToEmpty("This command is only available in Nice Life."));
+            return -1;
+        }
+        NiceLifeTriviaManager.preAssignedTrivia = null;
+        OtherUtils.sendCommandFeedback(source, Component.literal("Reset assigned trivia"));
+        return 1;
+    }
+
     private int setTrivia(CommandSourceStack source, Collection<ServerPlayer> targets, String difficulty, String question) {
-        if (checkBanned(source)) return -1;
 
         TriviaQuestion triviaQuestion = null;
         for (TriviaQuestion possibleQuestion : getTriviaQuestions(difficulty)) {
@@ -347,7 +429,6 @@ public class WildLifeTriviaCommand extends Command {
     }
 
     private int resetTrivia(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
         for (ServerPlayer player : targets) {
             UUID uuid = player.getUUID();
             TriviaWildcard.preAssignedTrivia.remove(uuid);

@@ -92,16 +92,27 @@ public class NetworkHandlerServer {
     }
 
     public static void initializeSimplePacketReceivers() {
+		
+		SimplePackets.TRIVIA_ANSWER.setServerReceive((player, payload) -> {
+			if (VersionControl.isDevVersion())
+				Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, payload.number()));
 
-        SimplePackets.TRIVIA_ANSWER.setServerReceive((player, payload) -> {
-            if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, payload.number()));
-            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-                NiceLifeTriviaManager.handleAnswer(player, payload.number());
-            }
-            else {
-                TriviaWildcard.handleAnswer(player, payload.number());
-            }
-        });
+			boolean hasNiceLifeBot = NiceLifeTriviaManager.bots.containsKey(player.getUUID());
+			boolean hasWildLifeBot = TriviaWildcard.bots.containsKey(player.getUUID());
+
+			if (hasNiceLifeBot) {
+				NiceLifeTriviaManager.handleAnswer(player, payload.number());
+			}
+			else if (hasWildLifeBot) {
+				TriviaWildcard.handleAnswer(player, payload.number());
+			}
+			else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+				NiceLifeTriviaManager.handleAnswer(player, payload.number());
+			}
+			else {
+				TriviaWildcard.handleAnswer(player, payload.number());
+			}
+		});
 
         SimplePackets.HOLDING_JUMP.setServerReceive((player, payload) -> {
             if (currentSeason.getSeason() == Seasons.WILD_LIFE && WildcardManager.isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
@@ -245,12 +256,17 @@ public class NetworkHandlerServer {
                         String[] splitQuestion = questionStr.split("~~~");
                         if (splitQuestion.length < 3) continue;
                         String questionText = splitQuestion[0];
-                        int correctAnswerIndex = Integer.parseInt(splitQuestion[1]);
                         List<String> answers = new ArrayList<>();
                         for (int i = 2; i < splitQuestion.length; i++) {
                             answers.add(splitQuestion[i]);
                         }
-                        triviaQuestions.add(new TriviaQuestion(questionText, answers, correctAnswerIndex-1));
+                        int parsedCorrectAnswerIndex = Integer.parseInt(splitQuestion[1]);
+                        int correctAnswerIndex = parsedCorrectAnswerIndex;
+                        if (parsedCorrectAnswerIndex >= 1 && parsedCorrectAnswerIndex <= answers.size()) {
+                            correctAnswerIndex = parsedCorrectAnswerIndex - 1;
+                        }
+                        if (correctAnswerIndex < 0 || correctAnswerIndex >= answers.size()) continue;
+                        triviaQuestions.add(new TriviaQuestion(questionText, answers, correctAnswerIndex));
                     }catch(Exception e) {}
                 }
                 TriviaQuestionManager manager = null;
@@ -266,6 +282,9 @@ public class NetworkHandlerServer {
                     }
                 }
                 else {
+                    if (NiceLifeTriviaManager.triviaQuestions == null) {
+                        NiceLifeTriviaManager.initialize();
+                    }
                     manager = NiceLifeTriviaManager.triviaQuestions;
                 }
                 if (manager == null) return;
@@ -615,10 +634,10 @@ public class NetworkHandlerServer {
     /*
         Sending
      */
-    public static void sendTriviaPacket(ServerPlayer player, String question, int difficulty, long timestamp, int timeToComplete, List<String> answers) {
-        TriviaQuestionPayload triviaQuestionPacket = new TriviaQuestionPayload(question, difficulty, timestamp, timeToComplete, answers);
-        if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Sending trivia question packet to {}): {{}, {}, {}, {}, {}}", player, question, difficulty, timestamp, timeToComplete, answers));
-
+    public static void sendTriviaPacket(ServerPlayer player, String question, int difficulty, long timestamp, int timeToComplete, List<String> answers, boolean niceLifeStyle) {
+        TriviaQuestionPayload triviaQuestionPacket = new TriviaQuestionPayload(question, difficulty, timestamp, timeToComplete, answers, niceLifeStyle);
+        if (VersionControl.isDevVersion()) Main.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Sending trivia question packet to {}): {{}, {}, {}, {}, {}, {}}", player, question, difficulty, timestamp, timeToComplete, answers, niceLifeStyle));
+		
         ServerPlayNetworking.send(player, triviaQuestionPacket);
     }
 
