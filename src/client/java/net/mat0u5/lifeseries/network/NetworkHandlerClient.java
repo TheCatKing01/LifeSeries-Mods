@@ -259,6 +259,19 @@ public class NetworkHandlerClient {
                     Component.nullToEmpty("Cancel")
             ));
         });
+        SimplePackets.CLIENT_MODE_SNAIL_PROMPT.setClientReceive(payload -> {
+            Minecraft client = Minecraft.getInstance();
+            client.setScreen(new ConfirmScreen(
+                    confirmed -> {
+                        SimplePackets.CLIENT_MODE_SNAIL_RESPONSE.sendToServer(confirmed);
+                        client.setScreen(null);
+                    },
+                    Component.nullToEmpty("Client Mode Required"),
+                    Component.nullToEmpty("Enable client mode to spawn snails? Players without the mod will be kicked."),
+                    Component.nullToEmpty("Enable Client Mode"),
+                    Component.nullToEmpty("Cancel")
+            ));
+        });
 
         //Number payload
         SimplePackets.PLAYER_MIN_MSPT.setClientReceive(payload -> {

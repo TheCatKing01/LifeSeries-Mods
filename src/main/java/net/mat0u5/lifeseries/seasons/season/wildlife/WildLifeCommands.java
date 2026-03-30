@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
@@ -243,7 +244,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int despawnSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
 
         for (ServerPlayer player : targets) {
             Snail snail = Snails.snails.remove(player.getUUID());
@@ -262,7 +263,26 @@ public class WildLifeCommands extends Command {
         return 1;
     }
     public int spawnSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
+
+        if (!canSpawnSnails()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.SNAIL_SPAWN_REQUIRES_CLIENTMODE.get());
+            return -1;
+        }
+        if (!Main.clientModeEnabled()) {
+            ServerPlayer requester = source.getPlayer();
+            if (requester == null) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_SNAIL.get());
+                return -1;
+            }
+            if (!NetworkHandlerServer.wasHandshakeSuccessful(requester)) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_REQUIRE_CLIENT.get());
+                return -1;
+            }
+            NetworkHandlerServer.requestClientModeForSnailSpawn(requester, new ArrayList<>(targets));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_SNAIL.get());
+            return 1;
+        }
 
         for (ServerPlayer player : targets) {
             Snails.preventSnails.remove(player.getUUID());
@@ -280,7 +300,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int toggleSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
 
 
         if (targets.size() == 1) {
@@ -347,7 +367,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int requestSnailName(CommandSourceStack source, String name) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -358,7 +378,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int snailTexturesReload(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -370,7 +390,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailTexturesInfo(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -380,7 +400,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailTextures(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         List<String> textures = SnailSkins.getAllSkins();
         if (textures.isEmpty()) {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SNAIL_TEXTURES_NONE.get());
@@ -632,14 +652,14 @@ public class WildLifeCommands extends Command {
     }
 
     public int setSnailName(CommandSourceStack source, ServerPlayer player, String name) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         Snails.setSnailName(player, name);
         OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SNAIL_NAME_SET.get(player, name));
         return 1;
     }
 
     public int resetSnailName(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
 
         for (ServerPlayer player : targets) {
@@ -658,7 +678,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailNames(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkBanned(source)) return -1;
+        if (checkSnailCommandDisabled(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
 
         if (targets.size() == 1) {
@@ -762,5 +782,19 @@ public class WildLifeCommands extends Command {
         }
         OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED.get(Wildcards.getActiveWildcardsStr()));
         return 1;
+    }
+
+    private boolean checkSnailCommandDisabled(CommandSourceStack source) {
+        if (Main.modDisabled()) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean canSpawnSnails() {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) return true;
+        if (currentSeason.getSeason() == Seasons.NICE_LIFE) return true;
+        return !currentSeason.getSeason().requiresClient();
     }
 }

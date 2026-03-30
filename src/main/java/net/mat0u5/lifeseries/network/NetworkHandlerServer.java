@@ -27,6 +27,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.Hunger;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.SizeShifting;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -67,6 +68,7 @@ public class NetworkHandlerServer {
     public static final List<UUID> handshakeSuccessful = new ArrayList<>();
     public static final List<UUID> preLoginHandshake = new ArrayList<>();
     private static final Map<UUID, List<UUID>> pendingClientModeTriviaRequests = new HashMap<>();
+    private static final Map<UUID, List<UUID>> pendingClientModeSnailRequests = new HashMap<>();
     public static RegistryOverrideBahaviours REGISTRY_OVERRIDE_BEHAVIOR = RegistryOverrideBahaviours.LOGIN;
     public static boolean PRE_LOGIN_OVERRIDE_KICK = false;
 
@@ -167,6 +169,9 @@ public class NetworkHandlerServer {
         });
         SimplePackets.CLIENT_MODE_TRIVIA_RESPONSE.setServerReceive((player, payload) -> {
             handleClientModeTriviaResponse(player, payload.value());
+        });
+        SimplePackets.CLIENT_MODE_SNAIL_RESPONSE.setServerReceive((player, payload) -> {
+            handleClientModeSnailResponse(player, payload.value());
         });
 
         SimplePackets.SET_LIVES.setServerReceive((player, payload) -> {
@@ -782,6 +787,33 @@ public class NetworkHandlerServer {
             ServerPlayer target = PlayerUtils.getPlayer(uuid);
             if (target != null && wasHandshakeSuccessful(target)) {
                 TriviaWildcard.spawnBotFor(target);
+            }
+        }
+    }
+
+    public static void requestClientModeForSnailSpawn(ServerPlayer requester, List<ServerPlayer> targets) {
+        if (requester == null) return;
+        List<UUID> targetUuids = new ArrayList<>();
+        for (ServerPlayer target : targets) {
+            if (target != null) targetUuids.add(target.getUUID());
+        }
+        pendingClientModeSnailRequests.put(requester.getUUID(), targetUuids);
+        SimplePackets.CLIENT_MODE_SNAIL_PROMPT.target(requester).sendToClient();
+    }
+
+    private static void handleClientModeSnailResponse(ServerPlayer requester, boolean enable) {
+        if (requester == null) return;
+        if (!PermissionManager.isAdmin(requester)) return;
+        List<UUID> targets = pendingClientModeSnailRequests.remove(requester.getUUID());
+        if (targets == null) return;
+        if (!enable) return;
+
+        setClientMode(true);
+        for (UUID uuid : targets) {
+            ServerPlayer target = PlayerUtils.getPlayer(uuid);
+            if (target != null && wasHandshakeSuccessful(target)) {
+                Snails.preventSnails.remove(target.getUUID());
+                Snails.spawnSnailFor(target);
             }
         }
     }
