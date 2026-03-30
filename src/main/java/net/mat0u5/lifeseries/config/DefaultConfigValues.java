@@ -369,7 +369,24 @@ public class DefaultConfigValues {
             "midnight_chimes", false, "lifeseries_plus",
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
-	
+
+    public static final ConfigFileEntry<Object> GROUP_SNAILS = new ConfigFileEntry<>(
+            "group_snails", null, ConfigTypes.TEXT, "{lifeseries_plus.snails}",
+            "Snails", ""
+    );
+    public static final ConfigFileEntry<Double> WILDCARD_SNAILS_SPEED_MULTIPLIER = new ConfigFileEntry<>(
+            "wildcard_snails_speed_multiplier", 1.0, "lifeseries_plus.snails",
+            "Speed Multiplier", "Snail movement speed multiplier."
+    );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_DROWN_PLAYERS = new ConfigFileEntry<>(
+            "wildcard_snails_drown_players", true, "lifeseries_plus.snails",
+            "Drown Players", "Controls whether snails can drown players when the snails are underwater."
+    );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_EFFECTS = new ConfigFileEntry<>(
+            "wildcard_snails_effects", false, "lifeseries_plus.snails",
+            "Can Have Potion Effects", "Controls whether snails can have potion effects, like invisibility."
+    );
+
     public static final ConfigFileEntry<Boolean> WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS = new ConfigFileEntry<>(
             "wildcard_trivia_bots_can_enter_boats", true, "lifeseries_plus.trivia",
             "Trivia Bots Can Enter Boats", "Controls whether trivia bots can enter boats."

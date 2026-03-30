@@ -118,19 +118,6 @@ public class WildLifeConfig extends ConfigManager {
             "Non Edible Items", "A list of items that you can't eat."
     );
 
-    public static final ConfigFileEntry<Double> WILDCARD_SNAILS_SPEED_MULTIPLIER = new ConfigFileEntry<>(
-            "wildcard_snails_speed_multiplier", 1.0, "season.snails",
-            "Speed Multiplier", "Snail movement speed multiplier."
-    );
-    public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_DROWN_PLAYERS = new ConfigFileEntry<>(
-            "wildcard_snails_drown_players", true, "season.snails",
-            "Drown Players", "Controls whether snails can drown players when the snails are underwater."
-    );
-    public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_EFFECTS = new ConfigFileEntry<>(
-            "wildcard_snails_effects", false, "season.snails",
-            "Can Have Potion Effects", "Controls whether snails can have potion effects, like invisibility."
-    );
-
     public static final ConfigFileEntry<Double> WILDCARD_TIMEDILATION_MIN_SPEED = new ConfigFileEntry<>(
             "wildcard_timedilation_min_speed", 0.05, "season.timedilation",
             "Min World Speed Multiplier", "Controls the minimum speed the WORLD can move."
@@ -254,10 +241,6 @@ public class WildLifeConfig extends ConfigManager {
             "group_hunger", null, ConfigTypes.TEXT, "{season.hunger}",
             "Hunger", ""
     );
-    public static final ConfigFileEntry<Object> GROUP_SNAILS = new ConfigFileEntry<>(
-            "group_snails", null, ConfigTypes.TEXT, "{season.snails}",
-            "Snails", ""
-    );
     public static final ConfigFileEntry<Object> GROUP_TIMEDILATION = new ConfigFileEntry<>(
             "group_timedilation", null, ConfigTypes.TEXT, "{season.timedilation}",
             "Time Dilation", ""
@@ -305,8 +288,11 @@ public class WildLifeConfig extends ConfigManager {
                 GROUP_GENERAL //Group
                 ,GROUP_SIZESHIFTING //Group
                 ,GROUP_HUNGER //Group
-                ,GROUP_SNAILS //Group
                 ,GROUP_TIMEDILATION //Group
+				,new ConfigFileEntry<>(
+                    GROUP_SNAILS.key, GROUP_SNAILS.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_SNAILS.displayName, GROUP_SNAILS.description
+				)
 				,new ConfigFileEntry<>(
                     GROUP_TRIVIA.key, GROUP_TRIVIA.defaultValue, ConfigTypes.GROUP, "season",
                     GROUP_TRIVIA.displayName, GROUP_TRIVIA.description
@@ -334,9 +320,18 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_HUNGER_SOUND_CHANCE
                 ,WILDCARD_HUNGER_NON_EDIBLE_ITEMS
 
-                ,WILDCARD_SNAILS_SPEED_MULTIPLIER
-                ,WILDCARD_SNAILS_DROWN_PLAYERS
-                ,WILDCARD_SNAILS_EFFECTS
+                ,new ConfigFileEntry<>(
+                        WILDCARD_SNAILS_SPEED_MULTIPLIER.key, WILDCARD_SNAILS_SPEED_MULTIPLIER.defaultValue, ConfigTypes.DOUBLE, "season",
+                        WILDCARD_SNAILS_SPEED_MULTIPLIER.displayName, WILDCARD_SNAILS_SPEED_MULTIPLIER.description
+                )
+                ,new ConfigFileEntry<>(
+                        WILDCARD_SNAILS_DROWN_PLAYERS.key, WILDCARD_SNAILS_DROWN_PLAYERS.defaultValue, ConfigTypes.BOOLEAN, "season",
+                        WILDCARD_SNAILS_DROWN_PLAYERS.displayName, WILDCARD_SNAILS_DROWN_PLAYERS.description
+                )
+                ,new ConfigFileEntry<>(
+                        WILDCARD_SNAILS_EFFECTS.key, WILDCARD_SNAILS_EFFECTS.defaultValue, ConfigTypes.BOOLEAN, "season",
+                        WILDCARD_SNAILS_EFFECTS.displayName, WILDCARD_SNAILS_EFFECTS.description
+                )
 
                 ,WILDCARD_TIMEDILATION_MIN_SPEED
                 ,WILDCARD_TIMEDILATION_MAX_SPEED

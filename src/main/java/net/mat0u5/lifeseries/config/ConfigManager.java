@@ -102,6 +102,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,LISTS // Group
                 ,SIMPLE_LIFE //Group
+                ,GROUP_SNAILS
 				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES
 
@@ -195,6 +196,9 @@ public abstract class ConfigManager extends DefaultConfigValues {
 				,GROUP_TRIVIA_QUESTIONS_EASY
 				,GROUP_TRIVIA_QUESTIONS_NORMAL
                 ,GROUP_TRIVIA_QUESTIONS_HARD
+                ,WILDCARD_SNAILS_SPEED_MULTIPLIER
+                ,WILDCARD_SNAILS_DROWN_PLAYERS
+                ,WILDCARD_SNAILS_EFFECTS
         ));
     }
 

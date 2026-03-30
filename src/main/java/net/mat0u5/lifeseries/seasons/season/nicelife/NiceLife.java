@@ -5,6 +5,7 @@ import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.NiceLifeTriviaHandler;
 import net.mat0u5.lifeseries.mixin.ServerLevelAccessor;
@@ -12,6 +13,7 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.Session;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.core.BlockPos;
@@ -49,7 +51,9 @@ import net.minecraft.world.level.gamerules.GameRules;
 *///?}
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class NiceLife extends Season {
@@ -75,6 +79,8 @@ public class NiceLife extends Season {
     public static Time naughtyListGlowTime = Time.seconds(5);
     public static Time timePassed = Time.zero();
     public static Time triviaCannotStartFor = Time.zero();
+    private final Set<UUID> snailsPausedForChimes = new HashSet<>();
+    private int snailsResumeDelayTicks = 0;
 
     @Override
     public void initialize() {
@@ -96,6 +102,8 @@ public class NiceLife extends Season {
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
         if (server == null) return;
+        snailsPausedForChimes.clear();
+        snailsResumeDelayTicks = 0;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT, true);
         *///?} else {
@@ -207,13 +215,15 @@ public class NiceLife extends Season {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
         //?}
 		
-		if (!NiceLifeTriviaManager.triviaInProgress && (!isNight() || !isAfterMidnight())) {
+        if (!NiceLifeTriviaManager.triviaInProgress && (!isNight() || !isAfterMidnight())) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
 				if (serverPlayer.isSleeping()) {
 					serverPlayer.ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_EARLY.get(), true);
 				}
 			}
 		}
+
+        resumeSnailsForAwakePlayers();
 
         if (triviaCannotStartFor.isSmaller(Time.zero())) {
 			if (canStartTriviaBySleeping(percentage)) {
@@ -278,6 +288,9 @@ public class NiceLife extends Season {
         if (timePassed.getTicks() % 20 == 0 && CompatibilityManager.voicechatLoaded()) {
             VoicechatMain.niceLifeTick();
         }
+        if (snailsResumeDelayTicks > 0) {
+            snailsResumeDelayTicks--;
+        }
     }
 
     public static boolean areEnoughSleeping(int percentage) {
@@ -308,6 +321,8 @@ public class NiceLife extends Season {
     @Override
     protected void onMidnightChimes() {
         postponeTriviaStart(Time.ticks(779));
+        despawnSnailsForMidnightChimes();
+        snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks, NiceLifeVotingManager.getNightResultsDurationTicks());
     }
 
     @Override
@@ -368,6 +383,7 @@ public class NiceLife extends Season {
             accessor.ls$wakeUpAllPlayers();
             NiceLifeTriviaManager.endTrivia();
         }
+        resumeSnailsForAwakePlayers();
     }
 
     public void wakeUpAllPlayers() {
@@ -383,6 +399,7 @@ public class NiceLife extends Season {
             }
             SimplePackets.REMOVE_SLEEP_SCREENS.target(player).sendToClient();
         }
+        resumeSnailsForAwakePlayers();
     }
 
 
@@ -703,4 +720,43 @@ public class NiceLife extends Season {
 
 		return dayTime >= 13000 && dayTime <= 23000;
 		}
+
+    private void resumeSnailsForAwakePlayers() {
+        if (snailsResumeDelayTicks > 0) return;
+        if (snailsPausedForChimes.isEmpty()) return;
+        List<UUID> toRemove = new ArrayList<>();
+        for (UUID playerUUID : snailsPausedForChimes) {
+            ServerPlayer player = PlayerUtils.getPlayer(playerUUID);
+            if (player == null) {
+                toRemove.add(playerUUID);
+                continue;
+            }
+            if (player.isSleeping()) continue;
+            if (!Snails.canHaveSnail(player)) {
+                toRemove.add(playerUUID);
+                continue;
+            }
+            if (!Snails.snails.containsKey(playerUUID)) {
+                Snails.spawnSnailFor(player);
+            }
+            toRemove.add(playerUUID);
+        }
+        snailsPausedForChimes.removeAll(toRemove);
+    }
+
+    private void despawnSnailsForMidnightChimes() {
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            UUID playerUUID = player.getUUID();
+            if (snailsPausedForChimes.contains(playerUUID)) continue;
+            Snail snail = Snails.snails.get(playerUUID);
+            if (snail == null) continue;
+            if (!snail.isAlive()) {
+                Snails.snails.remove(playerUUID);
+                continue;
+            }
+            snail.serverData.despawn();
+            Snails.snails.remove(playerUUID);
+            snailsPausedForChimes.add(playerUUID);
+        }
+    }
 }

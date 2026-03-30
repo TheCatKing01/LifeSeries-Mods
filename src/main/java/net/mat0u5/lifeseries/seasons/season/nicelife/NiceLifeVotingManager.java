@@ -78,6 +78,19 @@ public class NiceLifeVotingManager {
         }
     }
 
+    public static int getNightResultsDurationTicks() {
+        int count;
+        if (voteType == VoteType.NICE_LIST) {
+            count = NICE_LIST_COUNT;
+        } else if (voteType == VoteType.NAUGHTY_LIST) {
+            count = NAUGHTY_LIST_COUNT;
+        } else {
+            count = Math.max(NICE_LIST_COUNT, NAUGHTY_LIST_COUNT);
+        }
+        if (count < 0) count = 0;
+        return 305 + (55 * count);
+    }
+
     public static void handleVote(ServerPlayer player, String vote) {
         if (NiceLifeTriviaManager.triviaInProgress) {
             if (voteType == VoteType.NICE_LIST || voteType == VoteType.NAUGHTY_LIST) {
