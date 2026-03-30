@@ -53,22 +53,23 @@ public class WildLifeTriviaCommand extends Command {
         dispatcher.register(
                 literal("trivia")
                         .requires(PermissionManager::isAdmin)
-							.then(literal("assignSanta")
-									.requires(source -> currentSeason.getSeason() == Seasons.NICE_LIFE)
-									.then(argument("question", StringArgumentType.greedyString())
-											.suggests((context, builder) -> SharedSuggestionProvider.suggest(this.getNiceLifeTriviaSuggestionsStr(), builder))
-											.executes(context -> setNiceLifeTrivia(
-													context.getSource(),
-													StringArgumentType.getString(context, "question")
-											))
-									)
-									.then(literal("reset")
-										.executes(context -> resetNiceLifeTrivia(
-													context.getSource()
-											))
-									)
-							)
+                        .then(literal("assignSanta")
+                                .requires(source -> currentSeason.getSeason() == Seasons.NICE_LIFE)
+                                .then(argument("question", StringArgumentType.greedyString())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(this.getNiceLifeTriviaSuggestionsStr(), builder))
+                                        .executes(context -> setNiceLifeTrivia(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "question")
+                                        ))
+                                )
+                                .then(literal("reset")
+                                        .executes(context -> resetNiceLifeTrivia(
+                                                context.getSource()
+                                        ))
+                                )
+                        )
                         .then(literal("assign")
+                                .requires(source -> isAllowed())
                                 .then(argument("player", EntityArgument.players())
                                         .then(argument("difficulty", StringArgumentType.string())
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(List.of("easy","normal","hard"), builder))
@@ -93,15 +94,8 @@ public class WildLifeTriviaCommand extends Command {
                                 )
                         )
                         .then(literal("bot")
+                                .requires(source -> canSpawnBots())
                                 .then(literal("spawn")
-                                        .then(argument("player", EntityArgument.players())
-                                                .executes(context -> spawnBotFor(
-                                                        context.getSource(),
-                                                        EntityArgument.getPlayers(context, "player")
-                                                ))
-                                        )
-                                )
-                                .then(literal("spawnFor")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> spawnBotFor(
                                                         context.getSource(),
@@ -111,6 +105,7 @@ public class WildLifeTriviaCommand extends Command {
                                 )
                         )
                         .then(literal("punishment")
+                                .requires(source -> isAllowed())
                                 .then(literal("clear")
                                         .then(argument("player", EntityArgument.players())
                                                 .executes(context -> clearPunishment(
@@ -298,7 +293,8 @@ public class WildLifeTriviaCommand extends Command {
 
     private boolean canSpawnBots() {
         if (currentSeason.getSeason() == Seasons.WILD_LIFE) return true;
-        return Main.clientModeEnabled();
+        if (currentSeason.getSeason() == Seasons.NICE_LIFE) return true;
+        return !currentSeason.getSeason().requiresClient();
     }
 
 
@@ -306,35 +302,6 @@ public class WildLifeTriviaCommand extends Command {
         List<String> result = new ArrayList<>();
         for (TriviaQuestion question : getTriviaQuestions(questionType)) {
             result.add(question.getQuestion());
-        }
-        return result;
-    }
-
-    public List<TriviaQuestion> getTriviaQuestions(String questionType) {
-        List<TriviaQuestion> result = new ArrayList<>();
-        TriviaQuestionManager manager = null;
-        if (questionType.equalsIgnoreCase("easy")) {
-            if (TriviaWildcard.easyTrivia == null) {
-                TriviaWildcard.easyTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","easy-trivia.json");
-            }
-            manager = TriviaWildcard.easyTrivia;
-        }
-        else if (questionType.equalsIgnoreCase("normal")) {
-            if (TriviaWildcard.normalTrivia == null) {
-                TriviaWildcard.normalTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","normal-trivia.json");
-            }
-            manager = TriviaWildcard.normalTrivia;
-        }
-        else if (questionType.equalsIgnoreCase("hard")) {
-            if (TriviaWildcard.hardTrivia == null) {
-                TriviaWildcard.hardTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","hard-trivia.json");
-            }
-            manager = TriviaWildcard.hardTrivia;
-        }
-        if (manager != null) {
-            try {
-                result.addAll(manager.getTriviaQuestions());
-            }catch(Exception e) {}
         }
         return result;
     }
@@ -392,6 +359,35 @@ public class WildLifeTriviaCommand extends Command {
         NiceLifeTriviaManager.preAssignedTrivia = null;
         OtherUtils.sendCommandFeedback(source, Component.literal("Reset assigned trivia"));
         return 1;
+    }
+
+    public List<TriviaQuestion> getTriviaQuestions(String questionType) {
+        List<TriviaQuestion> result = new ArrayList<>();
+        TriviaQuestionManager manager = null;
+        if (questionType.equalsIgnoreCase("easy")) {
+            if (TriviaWildcard.easyTrivia == null) {
+                TriviaWildcard.easyTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","easy-trivia.json");
+            }
+            manager = TriviaWildcard.easyTrivia;
+        }
+        else if (questionType.equalsIgnoreCase("normal")) {
+            if (TriviaWildcard.normalTrivia == null) {
+                TriviaWildcard.normalTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","normal-trivia.json");
+            }
+            manager = TriviaWildcard.normalTrivia;
+        }
+        else if (questionType.equalsIgnoreCase("hard")) {
+            if (TriviaWildcard.hardTrivia == null) {
+                TriviaWildcard.hardTrivia = new TriviaQuestionManager("./config/lifeseries/wildlife","hard-trivia.json");
+            }
+            manager = TriviaWildcard.hardTrivia;
+        }
+        if (manager != null) {
+            try {
+                result.addAll(manager.getTriviaQuestions());
+            }catch(Exception e) {}
+        }
+        return result;
     }
 
     private int setTrivia(CommandSourceStack source, Collection<ServerPlayer> targets, String difficulty, String question) {
