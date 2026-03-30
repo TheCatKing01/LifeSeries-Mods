@@ -280,21 +280,21 @@ public class LifeSeriesCommand extends Command {
         if (checkBanned(source)) return -1;
         String status = clientModeEnabled() ? "ON" : "OFF";
         if (clientModeForced()) {
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is forced ON for this series."));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_FORCED_ON.get());
         }
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is currently " + status + "."));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_STATUS.get(status));
         return 1;
     }
 
     public int setClientMode(CommandSourceStack source, boolean enabled) {
         if (checkBanned(source)) return -1;
         if (!enabled && clientModeForced()) {
-            OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Client mode is forced ON for this series."));
+            OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_FORCED_ON.get());
             return -1;
         }
         Main.setClientMode(enabled);
         String status = clientModeEnabled() ? "ON" : "OFF";
-        OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode set to " + status + "."));
+        OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_SET.get(status));
         return 1;
     }
 }

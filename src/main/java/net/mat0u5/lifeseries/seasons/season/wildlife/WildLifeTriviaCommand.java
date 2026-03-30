@@ -263,22 +263,22 @@ public class WildLifeTriviaCommand extends Command {
             return -1;
         }
         if (!canSpawnBots()) {
-            OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Trivia bots can only be spawned in Wild Life or when client mode is enabled."));
+            OtherUtils.sendCommandFailure(source, ModifiableText.TRIVIA_BOT_SPAWN_REQUIRES_CLIENTMODE.get());
             return -1;
         }
 
         if (!Main.clientModeEnabled()) {
             ServerPlayer requester = source.getPlayer();
             if (requester == null) {
-                OtherUtils.sendCommandFailure(source, Component.nullToEmpty("Client mode is off. Run '/lifeseries clientMode on' to spawn trivia bots."));
+                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_TRIVIA.get());
                 return -1;
             }
             if (!NetworkHandlerServer.wasHandshakeSuccessful(requester)) {
-                OtherUtils.sendCommandFailure(source, Component.nullToEmpty("You must have the Life Series mod installed client-side to enable client mode."));
+                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_REQUIRE_CLIENT.get());
                 return -1;
             }
             NetworkHandlerServer.requestClientModeForTriviaSpawn(requester, new ArrayList<>(targets));
-            OtherUtils.sendCommandFeedback(source, Component.nullToEmpty("Client mode is off. Check your screen to enable it."));
+            OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_TRIVIA.get());
             return 1;
         }
 
