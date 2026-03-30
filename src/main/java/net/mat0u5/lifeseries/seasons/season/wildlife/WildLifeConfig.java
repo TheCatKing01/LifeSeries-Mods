@@ -241,9 +241,21 @@ public class WildLifeConfig extends ConfigManager {
             "group_hunger", null, ConfigTypes.TEXT, "{season.hunger}",
             "Hunger", ""
     );
+    public static final ConfigFileEntry<Object> GROUP_SNAILS_SEASON = new ConfigFileEntry<>(
+            "group_snails_season", null, ConfigTypes.TEXT, "{season.snails}",
+            "Snails", ""
+    );
     public static final ConfigFileEntry<Object> GROUP_TIMEDILATION = new ConfigFileEntry<>(
             "group_timedilation", null, ConfigTypes.TEXT, "{season.timedilation}",
             "Time Dilation", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_SEASON = new ConfigFileEntry<>(
+            "group_trivia_season", null, ConfigTypes.TEXT, "{season.trivia}",
+            "Trivia Bots", ""
+    );
+    public static final ConfigFileEntry<Object> GROUP_TRIVIA_QUESTIONS_SEASON = new ConfigFileEntry<>(
+            "group_trivia_questions_season", null, ConfigTypes.TEXT, "{season.trivia.questions}",
+            "Trivia Questions", ""
     );
 
     public static final ConfigFileEntry<Object> GROUP_MOBSWAP = new ConfigFileEntry<>(
@@ -288,15 +300,10 @@ public class WildLifeConfig extends ConfigManager {
                 GROUP_GENERAL //Group
                 ,GROUP_SIZESHIFTING //Group
                 ,GROUP_HUNGER //Group
+                ,GROUP_SNAILS_SEASON //Group
                 ,GROUP_TIMEDILATION //Group
-				,new ConfigFileEntry<>(
-                    GROUP_SNAILS.key, GROUP_SNAILS.defaultValue, ConfigTypes.GROUP, "season",
-                    GROUP_SNAILS.displayName, GROUP_SNAILS.description
-				)
-				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA.key, GROUP_TRIVIA.defaultValue, ConfigTypes.GROUP, "season",
-                    GROUP_TRIVIA.displayName, GROUP_TRIVIA.description
-				)
+                ,GROUP_TRIVIA_SEASON //Group
+                ,GROUP_TRIVIA_QUESTIONS_SEASON //Group
                 ,GROUP_MOBSWAP //Group
                 ,GROUP_SUPERPOWERS //Group
                 ,GROUP_CALLBACK //Group
@@ -321,15 +328,15 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_HUNGER_NON_EDIBLE_ITEMS
 
                 ,new ConfigFileEntry<>(
-                        WILDCARD_SNAILS_SPEED_MULTIPLIER.key, WILDCARD_SNAILS_SPEED_MULTIPLIER.defaultValue, ConfigTypes.DOUBLE, "season",
+                        WILDCARD_SNAILS_SPEED_MULTIPLIER.key, WILDCARD_SNAILS_SPEED_MULTIPLIER.defaultValue, ConfigTypes.DOUBLE, "season.snails",
                         WILDCARD_SNAILS_SPEED_MULTIPLIER.displayName, WILDCARD_SNAILS_SPEED_MULTIPLIER.description
                 )
                 ,new ConfigFileEntry<>(
-                        WILDCARD_SNAILS_DROWN_PLAYERS.key, WILDCARD_SNAILS_DROWN_PLAYERS.defaultValue, ConfigTypes.BOOLEAN, "season",
+                        WILDCARD_SNAILS_DROWN_PLAYERS.key, WILDCARD_SNAILS_DROWN_PLAYERS.defaultValue, ConfigTypes.BOOLEAN, "season.snails",
                         WILDCARD_SNAILS_DROWN_PLAYERS.displayName, WILDCARD_SNAILS_DROWN_PLAYERS.description
                 )
                 ,new ConfigFileEntry<>(
-                        WILDCARD_SNAILS_EFFECTS.key, WILDCARD_SNAILS_EFFECTS.defaultValue, ConfigTypes.BOOLEAN, "season",
+                        WILDCARD_SNAILS_EFFECTS.key, WILDCARD_SNAILS_EFFECTS.defaultValue, ConfigTypes.BOOLEAN, "season.snails",
                         WILDCARD_SNAILS_EFFECTS.displayName, WILDCARD_SNAILS_EFFECTS.description
                 )
 
@@ -338,39 +345,39 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_TIMEDILATION_PLAYER_MAX_SPEED
 				
 				,new ConfigFileEntry<>(
-                    WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.key, WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.defaultValue, ConfigTypes.BOOLEAN, "season",
+                    WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.key, WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.defaultValue, ConfigTypes.BOOLEAN, "season.trivia",
                     WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.displayName, WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.description
 					)
 				,new ConfigFileEntry<>(
-                    WILDCARD_TRIVIA_BOTS_PER_PLAYER.key, WILDCARD_TRIVIA_BOTS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "season",
+                    WILDCARD_TRIVIA_BOTS_PER_PLAYER.key, WILDCARD_TRIVIA_BOTS_PER_PLAYER.defaultValue, ConfigTypes.INTEGER, "season.trivia",
                     WILDCARD_TRIVIA_BOTS_PER_PLAYER.displayName, WILDCARD_TRIVIA_BOTS_PER_PLAYER.description
 					)
 				,new ConfigFileEntry<>(
-                    WILDCARD_TRIVIA_SECONDS_EASY.key, WILDCARD_TRIVIA_SECONDS_EASY.defaultValue, ConfigTypes.INTEGER, "season",
+                    WILDCARD_TRIVIA_SECONDS_EASY.key, WILDCARD_TRIVIA_SECONDS_EASY.defaultValue, ConfigTypes.INTEGER, "season.trivia",
                     WILDCARD_TRIVIA_SECONDS_EASY.displayName, WILDCARD_TRIVIA_SECONDS_EASY.description
 					)
 				,new ConfigFileEntry<>(
-                    WILDCARD_TRIVIA_SECONDS_NORMAL.key, WILDCARD_TRIVIA_SECONDS_NORMAL.defaultValue, ConfigTypes.INTEGER, "season",
+                    WILDCARD_TRIVIA_SECONDS_NORMAL.key, WILDCARD_TRIVIA_SECONDS_NORMAL.defaultValue, ConfigTypes.INTEGER, "season.trivia",
                     WILDCARD_TRIVIA_SECONDS_NORMAL.displayName, WILDCARD_TRIVIA_SECONDS_NORMAL.description
 					)
 				,new ConfigFileEntry<>(
-                    WILDCARD_TRIVIA_SECONDS_HARD.key, WILDCARD_TRIVIA_SECONDS_HARD.defaultValue, ConfigTypes.INTEGER, "season",
+                    WILDCARD_TRIVIA_SECONDS_HARD.key, WILDCARD_TRIVIA_SECONDS_HARD.defaultValue, ConfigTypes.INTEGER, "season.trivia",
                     WILDCARD_TRIVIA_SECONDS_HARD.displayName, WILDCARD_TRIVIA_SECONDS_HARD.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS.key, GROUP_TRIVIA_QUESTIONS.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS.key, GROUP_TRIVIA_QUESTIONS.defaultValue, ConfigTypes.GROUP, "season.trivia",
                     GROUP_TRIVIA_QUESTIONS.displayName, GROUP_TRIVIA_QUESTIONS.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_EASY.key, GROUP_TRIVIA_QUESTIONS_EASY.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_EASY.key, GROUP_TRIVIA_QUESTIONS_EASY.defaultValue, ConfigTypes.GROUP, "season.trivia.questions",
                     GROUP_TRIVIA_QUESTIONS_EASY.displayName, GROUP_TRIVIA_QUESTIONS_EASY.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_NORMAL.key, GROUP_TRIVIA_QUESTIONS_NORMAL.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_NORMAL.key, GROUP_TRIVIA_QUESTIONS_NORMAL.defaultValue, ConfigTypes.GROUP, "season.trivia.questions",
                     GROUP_TRIVIA_QUESTIONS_NORMAL.displayName, GROUP_TRIVIA_QUESTIONS_NORMAL.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_HARD.key, GROUP_TRIVIA_QUESTIONS_HARD.defaultValue, ConfigTypes.GROUP, "season",
+                    GROUP_TRIVIA_QUESTIONS_HARD.key, GROUP_TRIVIA_QUESTIONS_HARD.defaultValue, ConfigTypes.GROUP, "season.trivia.questions",
                     GROUP_TRIVIA_QUESTIONS_HARD.displayName, GROUP_TRIVIA_QUESTIONS_HARD.description
 					)
 

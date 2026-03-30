@@ -267,6 +267,9 @@ public abstract class Season {
         Session.SESSION_START_COUNTDOWN = seasonConfig.SESSION_START_COUNTDOWN.get();
         BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get();
         ADDITIONAL_WITHER_SKULL_RATE = seasonConfig.ADDITIONAL_WITHER_SKULL_RATE.get();
+        Snail.GLOBAL_SPEED_MULTIPLIER = seasonConfig.WILDCARD_SNAILS_SPEED_MULTIPLIER.get();
+        Snail.SHOULD_DROWN_PLAYER = seasonConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get();
+        Snail.ALLOW_POTION_EFFECTS = seasonConfig.WILDCARD_SNAILS_EFFECTS.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();

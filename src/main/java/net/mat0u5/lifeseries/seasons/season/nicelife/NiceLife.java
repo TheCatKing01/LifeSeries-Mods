@@ -371,6 +371,7 @@ public class NiceLife extends Season {
 
     public void sleepThroughNight() {
         if (server == null) return;
+        NiceLifeTriviaManager.endTrivia();
         ServerLevel overworld = server.overworld();
         if (overworld instanceof ServerLevelAccessor accessor) {
 			//? if <= 1.21.11 {
@@ -381,7 +382,6 @@ public class NiceLife extends Season {
 			overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
 			*///?}
             accessor.ls$wakeUpAllPlayers();
-            NiceLifeTriviaManager.endTrivia();
         }
         resumeSnailsForAwakePlayers();
     }
