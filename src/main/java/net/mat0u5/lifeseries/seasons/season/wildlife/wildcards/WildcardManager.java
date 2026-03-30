@@ -44,12 +44,15 @@ public class WildcardManager {
     }
 
     public static void chosenWildcard(Wildcards wildcard) {
-        PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_WILDCARD_CHOOSE.get(wildcard));
+        if (wildcard == null) return;
         WildcardManager.chosenWildcard = wildcard;
+        if (wildcard == Wildcards.NULL) return;
+        PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_WILDCARD_CHOOSE.get(wildcard));
     }
 
     public static void chooseRandomWildcard() {
         if (chosenWildcard != null) {
+            if (chosenWildcard == Wildcards.NULL) return;
             activeWildcards.put(chosenWildcard, chosenWildcard.getInstance());
             return;
         }

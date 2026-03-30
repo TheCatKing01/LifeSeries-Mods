@@ -20,9 +20,11 @@ import net.mat0u5.lifeseries.seasons.other.MidnightChimes;
 import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
+import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
@@ -169,7 +171,13 @@ public abstract class Season {
         }
     }
     public void switchOutOfSeason(Seasons changedTo) {
-
+        NiceLifeTriviaManager.killAllBots();
+        NiceLifeTriviaManager.killAllSnowmen();
+        TriviaWildcard.killAllBots();
+        TriviaWildcard.killAllTriviaSnails();
+        Snails.killAllSnails();
+        Snails.snails.clear();
+        Snails.preventSnails.clear();
     }
 
     public void reloadStart() {

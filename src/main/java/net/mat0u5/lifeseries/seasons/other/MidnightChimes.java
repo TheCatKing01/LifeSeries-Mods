@@ -24,7 +24,7 @@ public class MidnightChimes {
 				playedMidnightChimes = false;
 			}
 
-			if (!playedMidnightChimes && dayTime >= minTime && dayTime <= maxTime) {
+                        if (!playedMidnightChimes && dayTime >= minTime - 20 && dayTime <= maxTime - 1) {
 				playedMidnightChimes = true;
 				PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
 						SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla(MIDNIGHT_CHIMES_SOUND)),

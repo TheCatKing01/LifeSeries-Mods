@@ -276,8 +276,12 @@ public class WildLifeConfig extends ConfigManager {
     );
 
     public static final ConfigFileEntry<Double> ACTIVATE_WILDCARD_MINUTE = new ConfigFileEntry<>(
-            "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "season.general",
+            "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "lifeseries_plus.wildcards",
             "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
+    );
+    public static final ConfigFileEntry<Boolean> WILDCARD_AUTO_ACTIVATE = new ConfigFileEntry<>(
+            "wildcard_auto_activate", true, "lifeseries_plus.wildcards",
+            "Auto-Activate Wildcards", "Controls whether wildcards activate automatically after the set time."
     );
 	
 	public static final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
@@ -312,6 +316,7 @@ public class WildLifeConfig extends ConfigManager {
 
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE
+                ,WILDCARD_AUTO_ACTIVATE
 
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
                 ,WILDCARD_SIZESHIFTING_MAX_SIZE

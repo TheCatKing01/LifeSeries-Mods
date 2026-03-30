@@ -26,6 +26,8 @@ public class ClientSounds {
             "wildlife_trivia_analyzing",
 
             "nicelife_santabot_intro",
+            "nicelife_santabot_introduction_long",
+            "nicelife_santabot_introduction_short",
             "nicelife_santabot_suspense",
             "nicelife_santabot_suspense_end",
             "nicelife_santabot_analyzing",
@@ -36,7 +38,9 @@ public class ClientSounds {
             "nicelife_santabot_incorrect5",
             "nicelife_santabot_incorrect6",
             "nicelife_santabot_vote",
-            "nicelife_santabot_turn"
+            "nicelife_santabot_turn",
+            "nicelife_midnight_chimes",
+            "nicelife_santabot_christmas_soundbyte"
     );
 
     public static void onSoundPlay(SoundInstance sound) {

@@ -102,6 +102,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,LISTS // Group
                 ,SIMPLE_LIFE //Group
+                ,GROUP_WILDCARDS
                 ,GROUP_SNAILS
 				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES

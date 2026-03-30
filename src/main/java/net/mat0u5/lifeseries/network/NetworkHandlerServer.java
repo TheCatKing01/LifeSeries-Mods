@@ -131,7 +131,12 @@ public class NetworkHandlerServer {
         });
         SimplePackets.SELECTED_WILDCARD.setServerReceive((player, payload) -> {
             if (PermissionManager.isAdmin(player)) {
-                Wildcards wildcard = Wildcards.getFromString(payload.value());
+                String wildcardValue = payload.value();
+                if (wildcardValue != null && wildcardValue.equalsIgnoreCase("none")) {
+                    WildcardManager.chosenWildcard(Wildcards.NULL);
+                    return;
+                }
+                Wildcards wildcard = Wildcards.getFromString(wildcardValue);
                 if (wildcard != null && wildcard != Wildcards.NULL) {
                     WildcardManager.chosenWildcard(wildcard);
                 }

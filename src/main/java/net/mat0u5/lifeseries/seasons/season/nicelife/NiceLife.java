@@ -13,6 +13,9 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Season;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.Session;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
@@ -81,6 +84,7 @@ public class NiceLife extends Season {
     public static Time triviaCannotStartFor = Time.zero();
     private final Set<UUID> snailsPausedForChimes = new HashSet<>();
     private int snailsResumeDelayTicks = 0;
+    private Wildcard pausedSnailWildcard = null;
 
     @Override
     public void initialize() {
@@ -101,9 +105,11 @@ public class NiceLife extends Season {
 
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
+        super.switchOutOfSeason(changedTo);
         if (server == null) return;
         snailsPausedForChimes.clear();
         snailsResumeDelayTicks = 0;
+        pausedSnailWildcard = null;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT, true);
         *///?} else {
@@ -321,7 +327,16 @@ public class NiceLife extends Season {
     @Override
     protected void onMidnightChimes() {
         postponeTriviaStart(Time.ticks(779));
-        despawnSnailsForMidnightChimes();
+        if (WildcardManager.isActiveWildcard(Wildcards.SNAILS)) {
+            pausedSnailWildcard = WildcardManager.activeWildcards.remove(Wildcards.SNAILS);
+            if (pausedSnailWildcard != null) {
+                pausedSnailWildcard.deactivate();
+            }
+            snailsPausedForChimes.clear();
+        }
+        else {
+            despawnSnailsForMidnightChimes();
+        }
         snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks, NiceLifeVotingManager.getNightResultsDurationTicks());
     }
 
@@ -723,6 +738,12 @@ public class NiceLife extends Season {
 
     private void resumeSnailsForAwakePlayers() {
         if (snailsResumeDelayTicks > 0) return;
+        if (pausedSnailWildcard != null) {
+            WildcardManager.activeWildcards.put(Wildcards.SNAILS, pausedSnailWildcard);
+            pausedSnailWildcard.activate();
+            pausedSnailWildcard = null;
+            return;
+        }
         if (snailsPausedForChimes.isEmpty()) return;
         List<UUID> toRemove = new ArrayList<>();
         for (UUID playerUUID : snailsPausedForChimes) {

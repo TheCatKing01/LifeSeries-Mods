@@ -79,9 +79,7 @@ public class WildLife extends Season {
 
     @Override
     public void switchOutOfSeason(Seasons changedTo) {
-        Snails.killAllSnails();
-        TriviaWildcard.killAllTriviaSnails();
-        TriviaWildcard.killAllBots();
+        super.switchOutOfSeason(changedTo);
     }
 
     @Override
@@ -174,11 +172,14 @@ public class WildLife extends Season {
     @Override
     public void addSessionActions() {
         super.addSessionActions();
+        if (!WildLifeConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            return;
+        }
         currentSession.addSessionActionIfTime(
                 new SessionAction(Time.minutes(WildcardManager.ACTIVATE_WILDCARD_MINUTE-2)) {
                     @Override
                     public void trigger() {
-                        if (WildcardManager.activeWildcards.isEmpty()) {
+                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
                             PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_WARNING_2MIN.get());
                         }
                     }
@@ -188,7 +189,7 @@ public class WildLife extends Season {
                 new SessionAction(Time.minutes(WildcardManager.ACTIVATE_WILDCARD_MINUTE), ModifiableText.SESSION_ACTION_WILDCARD.getString()) {
                     @Override
                     public void trigger() {
-                        if (WildcardManager.activeWildcards.isEmpty()) {
+                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
                             WildcardManager.activateWildcards();
                         }
                     }
