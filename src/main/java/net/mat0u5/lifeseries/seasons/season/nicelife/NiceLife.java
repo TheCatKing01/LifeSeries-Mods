@@ -332,12 +332,15 @@ public class NiceLife extends Season {
             if (pausedSnailWildcard != null) {
                 pausedSnailWildcard.deactivate();
             }
+            PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_FADED.get());
             snailsPausedForChimes.clear();
+            snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks,
+                    NiceLifeVotingManager.getNightResultsDurationTicks() + Time.seconds(5).getTicks());
         }
         else {
             despawnSnailsForMidnightChimes();
+            snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks, NiceLifeVotingManager.getNightResultsDurationTicks());
         }
-        snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks, NiceLifeVotingManager.getNightResultsDurationTicks());
     }
 
     @Override
@@ -739,9 +742,18 @@ public class NiceLife extends Season {
     private void resumeSnailsForAwakePlayers() {
         if (snailsResumeDelayTicks > 0) return;
         if (pausedSnailWildcard != null) {
-            WildcardManager.activeWildcards.put(Wildcards.SNAILS, pausedSnailWildcard);
-            pausedSnailWildcard.activate();
+            for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+                if (player.isSleeping()) {
+                    return;
+                }
+            }
+            Wildcard paused = pausedSnailWildcard;
             pausedSnailWildcard = null;
+            WildcardManager.showDots();
+            TaskScheduler.scheduleTask(90, () -> {
+                WildcardManager.activeWildcards.put(Wildcards.SNAILS, paused);
+                paused.activate();
+            });
             return;
         }
         if (snailsPausedForChimes.isEmpty()) return;

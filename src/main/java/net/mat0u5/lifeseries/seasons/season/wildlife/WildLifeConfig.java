@@ -306,6 +306,14 @@ public class WildLifeConfig extends ConfigManager {
 				,GROUP_POWERS //Group
 
                 //Group stuff
+                ,new ConfigFileEntry<>(
+                        ACTIVATE_WILDCARD_MINUTE.key, ACTIVATE_WILDCARD_MINUTE.defaultValue, ConfigTypes.MINUTES, "season.general",
+                        ACTIVATE_WILDCARD_MINUTE.displayName, ACTIVATE_WILDCARD_MINUTE.description
+                )
+                ,new ConfigFileEntry<>(
+                        WILDCARD_AUTO_ACTIVATE.key, WILDCARD_AUTO_ACTIVATE.defaultValue, ConfigTypes.BOOLEAN, "season.general",
+                        WILDCARD_AUTO_ACTIVATE.displayName, WILDCARD_AUTO_ACTIVATE.description
+                )
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
                 ,WILDCARD_SIZESHIFTING_MAX_SIZE
                 ,WILDCARD_SIZESHIFTING_SIZE_CHANGE_MULTIPLIER

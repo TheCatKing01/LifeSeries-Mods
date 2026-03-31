@@ -63,7 +63,7 @@ public class SessionTranscript {
     }
 
     public static void endingIsYours() {
-        addMessageWithTime("The ending is yours... Make it WILD.");
+        addMessageWithTime(ModifiableText.WILDLIFE_MAKEITWILD_TRANSCRIPT.getString());
     }
 
     public static void newHungerRule() {

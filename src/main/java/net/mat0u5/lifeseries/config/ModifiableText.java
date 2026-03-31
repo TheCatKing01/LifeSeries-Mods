@@ -461,6 +461,8 @@ public enum ModifiableText {
     ,WILDLIFE_MAKEITWILD_PT2(Seasons.WILD_LIFE, "§cMake")
     ,WILDLIFE_MAKEITWILD_PT3(Seasons.WILD_LIFE, "§cMake §eit")
     ,WILDLIFE_MAKEITWILD_PT4(Seasons.WILD_LIFE, "§cMake §eit §a§lWILD")
+    ,WILDLIFE_MAKEITWILD_TRANSCRIPT("The ending is yours... Make it WILD.")
+    ,NICELIFE_SNAILS_IN_BED(Seasons.NICE_LIFE, "I heard snails in bed.")
     ,WILDLIFE_SUPERPOWERS_DEAD(Seasons.WILD_LIFE, "Dead players can't use superpowers!")
     ,WILDLIFE_POWER_MIMIC_ERROR(Seasons.WILD_LIFE, "You cannot mimic that power.")
     ,WILDLIFE_POWER_MIMIC_NOPLAYER(Seasons.WILD_LIFE, "You are not looking at a player.")

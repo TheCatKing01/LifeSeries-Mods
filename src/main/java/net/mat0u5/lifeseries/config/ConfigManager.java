@@ -251,8 +251,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
         for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
             if (currentSeason.getSeason() == Seasons.WILD_LIFE && entry.groupInfo != null) {
                 String groupInfo = entry.groupInfo;
-                if (groupInfo.contains("lifeseries_plus.wildcards.snails")
-                        || groupInfo.contains("lifeseries_plus.wildcards.trivia")) {
+                if (groupInfo.contains("lifeseries_plus.wildcards")) {
                     continue;
                 }
             }
