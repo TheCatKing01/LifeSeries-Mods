@@ -32,12 +32,12 @@ public class WildLifeTriviaCommand extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() == Seasons.WILD_LIFE;
+        return currentSeason.getSeason() != Seasons.UNASSIGNED;
     }
 
     @Override
     public Component getBannedText() {
-        return Component.nullToEmpty("This command is only available in Wild Life.");
+        return Component.nullToEmpty("This command is only available when you have selected a Season.");
     }
 
     public List<String> getAdminCommands() {

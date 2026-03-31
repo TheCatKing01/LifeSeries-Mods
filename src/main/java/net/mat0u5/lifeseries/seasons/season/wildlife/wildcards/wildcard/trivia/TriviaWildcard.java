@@ -118,6 +118,7 @@ public class TriviaWildcard extends Wildcard {
         int sessionStart = activatedAt.getTicks();
         int sessionEnd = currentSession.getSessionLength().getTicks() - 6000; // Don't spawn bots 5 minutes before the end
         int availableTime = sessionEnd - sessionStart;
+        if (availableTime <= 0) return;
 
         List<ServerPlayer> players = livesManager.getAlivePlayers();
         if (players.isEmpty()) return;
@@ -128,12 +129,12 @@ public class TriviaWildcard extends Wildcard {
 
         if (desiredTotalSpawns == 0) return;
 
-        int interval = availableTime / desiredTotalSpawns;
-        if (numPlayers * interval < MIN_BOT_DELAY) {
-            interval = MIN_BOT_DELAY / numPlayers;
+        int interval = Math.max(1, availableTime / desiredTotalSpawns);
+        if (numPlayers * interval < MIN_BOT_DELAY && availableTime >= MIN_BOT_DELAY) {
+            interval = Math.max(1, MIN_BOT_DELAY / numPlayers);
         }
 
-        int maxSpawns = Math.min(desiredTotalSpawns, availableTime / interval);
+        int maxSpawns = Math.min(desiredTotalSpawns, Math.max(1, availableTime / interval));
 
         for (ServerPlayer player : players) {
             UUID uuid = player.getUUID();

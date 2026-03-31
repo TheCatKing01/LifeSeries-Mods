@@ -746,6 +746,7 @@ public class NiceLife extends Season {
 
     private void resumeSnailsForAwakePlayers() {
         if (snailsResumeDelayTicks > 0) return;
+        if (resumeSnailsAfterResults) return;
         if (pausedSnailWildcard != null) {
             for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
                 if (player.isSleeping()) {
