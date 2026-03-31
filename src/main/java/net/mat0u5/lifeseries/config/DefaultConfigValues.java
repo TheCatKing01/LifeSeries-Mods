@@ -374,6 +374,14 @@ public class DefaultConfigValues {
             "group_wildcards", null, ConfigTypes.TEXT, "{lifeseries_plus.wildcards}",
             "Wildcards", ""
     );
+    public final ConfigFileEntry<Double> ACTIVATE_WILDCARD_MINUTE = new ConfigFileEntry<>(
+            "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "lifeseries_plus.wildcards",
+            "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
+    );
+    public final ConfigFileEntry<Boolean> WILDCARD_AUTO_ACTIVATE = new ConfigFileEntry<>(
+            "wildcard_auto_activate", true, "lifeseries_plus.wildcards",
+            "Auto-Activate Wildcards", "Controls whether wildcards activate automatically after the set time."
+    );
     public static final ConfigFileEntry<Object> GROUP_SNAILS = new ConfigFileEntry<>(
             "group_snails", null, ConfigTypes.TEXT, "{lifeseries_plus.wildcards.snails}",
             "Snails", ""

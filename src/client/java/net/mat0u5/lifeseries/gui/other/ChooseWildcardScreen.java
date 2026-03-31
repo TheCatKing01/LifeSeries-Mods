@@ -1,7 +1,6 @@
 package net.mat0u5.lifeseries.gui.other;
 
 import net.mat0u5.lifeseries.gui.DefaultScreen;
-import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,19 +16,25 @@ public class ChooseWildcardScreen extends DefaultScreen {
     @Override
     protected void init() {
         super.init();
-        int buttonWidth = 120;
-        int centerX = startX + (BG_WIDTH / 2);
-        int buttonX = centerX - (buttonWidth / 2);
-        int firstButtonY = startY + 50;
-        int buttonSpacing = 25;
+        int oneThirdX = startX + BG_WIDTH / 3;
+        int twoThirdX = startX + (BG_WIDTH / 3) * 2;
 
         this.addRenderableWidget(
-                Button.builder(Component.literal("Trivia"), btn -> {
+                Button.builder(Component.literal("Size Shifting"), btn -> {
                             this.onClose();
-                            SimplePackets.SELECTED_WILDCARD.sendToServer("trivia");
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("size_shifting");
                         })
-                        .pos(buttonX, firstButtonY)
-                        .size(buttonWidth, 20)
+                        .pos(oneThirdX - 50, startY  + 40)
+                        .size(80, 20)
+                        .build()
+        );
+        this.addRenderableWidget(
+                Button.builder(Component.literal("Hunger"), btn -> {
+                            this.onClose();
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("hunger");
+                        })
+                        .pos(oneThirdX - 50, startY  + 65)
+                        .size(80, 20)
                         .build()
         );
         this.addRenderableWidget(
@@ -37,17 +42,59 @@ public class ChooseWildcardScreen extends DefaultScreen {
                             this.onClose();
                             SimplePackets.SELECTED_WILDCARD.sendToServer("snails");
                         })
-                        .pos(buttonX, firstButtonY + buttonSpacing)
-                        .size(buttonWidth, 20)
+                        .pos(oneThirdX - 50, startY  + 90)
+                        .size(80, 20)
                         .build()
         );
         this.addRenderableWidget(
-                Button.builder(Component.literal("None"), btn -> {
+                Button.builder(Component.literal("Time Dilation"), btn -> {
                             this.onClose();
-                            SimplePackets.SELECTED_WILDCARD.sendToServer("none");
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("time_dilation");
                         })
-                        .pos(buttonX, firstButtonY + buttonSpacing * 2)
-                        .size(buttonWidth, 20)
+                        .pos(oneThirdX - 50, startY  + 115)
+                        .size(80, 20)
+                        .build()
+        );
+
+        /*
+            Second column
+         */
+
+        this.addRenderableWidget(
+                Button.builder(Component.literal("Trivia"), btn -> {
+                            this.onClose();
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("trivia");
+                        })
+                        .pos(twoThirdX - 30, startY  + 40)
+                        .size(80, 20)
+                        .build()
+        );
+
+        this.addRenderableWidget(
+                Button.builder(Component.literal("Mob Swap"), btn -> {
+                            this.onClose();
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("mob_swap");
+                        })
+                        .pos(twoThirdX - 30, startY  + 65)
+                        .size(80, 20)
+                        .build()
+        );
+        this.addRenderableWidget(
+                Button.builder(Component.literal("Superpowers"), btn -> {
+                            this.onClose();
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("superpowers");
+                        })
+                        .pos(twoThirdX - 30, startY  + 90)
+                        .size(80, 20)
+                        .build()
+        );
+        this.addRenderableWidget(
+                Button.builder(Component.literal("Callback"), btn -> {
+                            this.onClose();
+                            SimplePackets.SELECTED_WILDCARD.sendToServer("callback");
+                        })
+                        .pos(twoThirdX - 30, startY  + 115)
+                        .size(80, 20)
                         .build()
         );
     }

@@ -283,7 +283,7 @@ public class WildLifeConfig extends ConfigManager {
             "wildcard_auto_activate", true, "lifeseries_plus.wildcards",
             "Auto-Activate Wildcards", "Controls whether wildcards activate automatically after the set time."
     );
-	
+
 	public static final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
             "wild_midnight_chimes", false, "{lifeseries_plus.chimes}",
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
@@ -317,7 +317,6 @@ public class WildLifeConfig extends ConfigManager {
                 //Group stuff
                 ,ACTIVATE_WILDCARD_MINUTE
                 ,WILDCARD_AUTO_ACTIVATE
-
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
                 ,WILDCARD_SIZESHIFTING_MAX_SIZE
                 ,WILDCARD_SIZESHIFTING_SIZE_CHANGE_MULTIPLIER

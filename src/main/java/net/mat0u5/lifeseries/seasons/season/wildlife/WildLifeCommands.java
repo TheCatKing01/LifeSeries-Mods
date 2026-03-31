@@ -725,6 +725,7 @@ public class WildLifeCommands extends Command {
 
     public int activateWildcard(CommandSourceStack source, String wildcardName) {
         if (checkBanned(source)) return -1;
+        if (!WildcardManager.ensureClientModeForWildcards()) return -1;
         if (wildcardName.equalsIgnoreCase("*")) {
             List<Wildcards> inactiveWildcards = Wildcards.getInactiveWildcards();
             for (Wildcards wildcard : inactiveWildcards) {
@@ -776,11 +777,12 @@ public class WildLifeCommands extends Command {
 
     public int listActiveWildcards(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        if (Wildcards.getActiveWildcardsStr().isEmpty()) {
+        List<String> activeWildcards = Wildcards.getActiveWildcardsStr();
+        if (activeWildcards.isEmpty()) {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED_NONE.get());
             return 1;
         }
-        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED.get(Wildcards.getActiveWildcardsStr()));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED.get(activeWildcards));
         return 1;
     }
 

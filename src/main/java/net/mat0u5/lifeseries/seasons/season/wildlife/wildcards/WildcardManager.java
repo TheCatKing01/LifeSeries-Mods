@@ -95,6 +95,7 @@ public class WildcardManager {
     }
 
     public static void activateWildcards() {
+        if (!ensureClientModeForWildcards()) return;
         showDots();
         TaskScheduler.scheduleTask(90, () -> {
             if (activeWildcards.isEmpty()) {
@@ -225,6 +226,24 @@ public class WildcardManager {
                 SimplePackets.SELECT_WILDCARDS.target(player).sendToClient();
             }
         }
+    }
+
+    public static boolean ensureClientModeForWildcards() {
+        if (clientModeEnabled()) return true;
+        ServerPlayer requester = null;
+        for (ServerPlayer player : PlayerUtils.getAdminPlayers()) {
+            if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
+                requester = player;
+                break;
+            }
+        }
+        if (requester == null) {
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.CLIENT_MODE_REQUIRE_CLIENT.get());
+            return false;
+        }
+        setClientMode(true);
+        PlayerUtils.broadcastMessageToAdmins(ModifiableText.CLIENT_MODE_SET.get("ON"));
+        return true;
     }
 
     public static void onSessionEnd() {
