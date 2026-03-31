@@ -200,15 +200,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WILDCARD_SNAILS_EFFECTS
         ));
 
-        if (currentSeason != null && currentSeason.getSeason() == Seasons.WILD_LIFE) {
-            entries.addAll(List.of(
-                    GROUP_TRIVIA_QUESTIONS
-                    ,GROUP_TRIVIA_QUESTIONS_EASY
-                    ,GROUP_TRIVIA_QUESTIONS_NORMAL
-                    ,GROUP_TRIVIA_QUESTIONS_HARD
-            ));
-        }
-
         return entries;
     }
 
@@ -342,6 +333,9 @@ public abstract class ConfigManager extends DefaultConfigValues {
             }
         }
         if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            if (TriviaWildcard.easyTrivia == null || TriviaWildcard.normalTrivia == null || TriviaWildcard.hardTrivia == null) {
+                TriviaWildcard.resetQueue();
+            }
             for (TriviaQuestion question : TriviaWildcard.easyTrivia.tryGetTriviaQuestions()) {
                 List<String> info = new ArrayList<>();
                 info.add("easy");

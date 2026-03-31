@@ -15,8 +15,6 @@ public abstract class Wildcard {
     public abstract Wildcards getType();
 
     public void activate() {
-        WildLife season = getSeason();
-        if (season == null) return;
         active = true;
         Main.LOGGER.info("[WildLife] Activated Wildcard: {}", getType());
         SessionTranscript.activateWildcard(getType());
@@ -24,8 +22,6 @@ public abstract class Wildcard {
     }
 
     public void deactivate() {
-        WildLife season = getSeason();
-        if (season == null) return;
         active = false;
         Main.LOGGER.info("[WildLife] Dectivated Wildcard: {}", getType());
         SessionTranscript.deactivateWildcard(getType());

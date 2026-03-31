@@ -41,32 +41,26 @@ public class WildLifeCommands extends Command {
 
     @Override
     public boolean isAllowed() {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-            return true;
-        }
-        return Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get();
+        return currentSeason.getSeason() != Seasons.UNASSIGNED;
     }
 
     @Override
     public Component getBannedText() {
-        return Component.nullToEmpty("This command is only available in Wild Life or when auto-activate wildcards are enabled.");
+        return Component.nullToEmpty("This command is only available when you have selected a Season.");
     }
 
     public List<String> getAdminCommands() {
         if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
             return List.of("wildcard", "snail", "superpower", "hunger");
         }
-        if (Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
-            return List.of("wildcard", "snail");
-        }
-        return List.of();
+        return List.of("wildcard", "snail");
     }
 
     public List<String> getNonAdminCommands() {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE || Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
             return List.of("snail");
         }
-        return List.of();
+        return List.of("snail");
     }
 
     @Override

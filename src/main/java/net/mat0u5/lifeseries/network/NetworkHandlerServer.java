@@ -285,6 +285,9 @@ public class NetworkHandlerServer {
                 }
                 TriviaQuestionManager manager = null;
                 if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+                    if (TriviaWildcard.easyTrivia == null || TriviaWildcard.normalTrivia == null || TriviaWildcard.hardTrivia == null) {
+                        TriviaWildcard.resetQueue();
+                    }
                     if (type.equalsIgnoreCase("easy")) {
                         manager = TriviaWildcard.easyTrivia;
                     }
@@ -306,6 +309,9 @@ public class NetworkHandlerServer {
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
                     manager.setFileContent(gson.toJson(triviaQuestions));
                 }catch(Exception ignored) {}
+                if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+                    TriviaWildcard.resetQueue();
+                }
             }
         });
 
