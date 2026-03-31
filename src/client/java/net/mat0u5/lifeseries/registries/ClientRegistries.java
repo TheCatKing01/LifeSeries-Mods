@@ -12,8 +12,8 @@ import net.mat0u5.lifeseries.events.ClientEvents;
 import net.mat0u5.lifeseries.events.ClientKeybinds;
 import net.mat0u5.lifeseries.particle.TriviaSpiritParticle;
 
-import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 
 public class ClientRegistries {
     public static void registerModStuff() {
@@ -28,17 +28,17 @@ public class ClientRegistries {
     }
 
     private static void registerEntities() {
-        ModelLayerRegistry.registerModelLayer(SnailModel.SNAIL, SnailModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(SnailModel.SNAIL, SnailModel::getTexturedModelData);
         EntityRendererRegistry.register(MobRegistry.SNAIL, SnailRenderer::new);
 
-        ModelLayerRegistry.registerModelLayer(TriviaBotModel.TRIVIA_BOT, TriviaBotModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(TriviaBotModel.TRIVIA_BOT, TriviaBotModel::getTexturedModelData);
         EntityRendererRegistry.register(MobRegistry.TRIVIA_BOT, TriviaBotRenderer::new);
 
         EntityRendererRegistry.register(MobRegistry.ANGRY_SNOWMAN, AngrySnowmanRenderer::new);
     }
 
     private static void registerParticles() {
-        ParticleProviderRegistry.getInstance().register(
+        ParticleFactoryRegistry.getInstance().register(
                 ParticleRegistry.TRIVIA_SPIRIT,
                 new TriviaSpiritParticle.Provider()
         );

@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.world.entity.monster.illager.Evoker;
-import java.util.List;
 
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
@@ -35,19 +34,19 @@ import net.minecraft.world.entity.EntityType;
 //?}
 
 //? if >= 26.1 {
-import org.spongepowered.asm.mixin.gen.Accessor;
-//?}
+/*import org.spongepowered.asm.mixin.gen.Accessor;
+*///?}
 
 @Mixin(value = Entity.class, priority = 1)
 public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
     //? if >= 26.1 {
-    @Accessor("fluidInteraction")
+    /*@Accessor("fluidInteraction")
     abstract EntityFluidInteraction ls$entityFluidInteraction();
     @Override
     public EntityFluidInteraction ls$getEntityFluidInteraction() {
         return ls$entityFluidInteraction();
     }
-    //?}
+    *///?}
     /*
     private NbtCompound persistentData;
     @Override
@@ -111,14 +110,10 @@ public abstract class EntityMixin implements IEntityDataSaver, IMorph, IEntity {
             Entity entity = (Entity) (Object) this;
             if (entity instanceof Player player && !player.hasEffect(MobEffects.WATER_BREATHING)) {
                 if (!Snails.snails.containsKey(player.getUUID())) return;
-                List<Snail> snails = Snails.snails.get(player.getUUID());
-                if (snails == null) return;
+                Snail snail = Snails.snails.get(player.getUUID());
+                if (snail == null) return;
+                int snailAir = snail.getAirSupply();
                 int initialAir = cir.getReturnValue();
-                int snailAir = initialAir;
-                for (Snail snail : snails) {
-                    if (snail == null) continue;
-                    snailAir = Math.min(snailAir, snail.getAirSupply());
-                }
                 if (snailAir < initialAir) {
                     cir.setReturnValue(snailAir);
                 }

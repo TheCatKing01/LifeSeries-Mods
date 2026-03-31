@@ -142,11 +142,6 @@ public class TriviaBot extends AmbientCreature {
     //?}
 
     @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
-    @Override
     public boolean isInWater() {
         return false;
     }
@@ -158,10 +153,10 @@ public class TriviaBot extends AmbientCreature {
 
     @Override
     //? if <= 1.21.11 {
-    /*public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
-    *///?} else {
-    public boolean updateFluidInteraction() {
-    //?}
+    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
+    //?} else {
+    /*public boolean updateFluidInteraction() {
+    *///?}
         return false;
     }
 

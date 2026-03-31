@@ -23,18 +23,16 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static net.mat0u5.lifeseries.Main.currentSession;
 import static net.mat0u5.lifeseries.Main.server;
 
 public class Snails extends Wildcard {
     public static boolean WILDCARD_SNAILS_RED_LIVES = true;
-    public static int SNAILS_PER_PLAYER = 1;
 
     public static StringListConfig snailNameConfig;
 
-    public static Map<UUID, List<Snail>> snails = new ConcurrentHashMap<>();
+    public static Map<UUID, Snail> snails = new HashMap<>();
     public static Map<UUID, String> snailNames = new HashMap<>();
     public static List<UUID> preventSnails = new ArrayList<>();
     long ticks = 0;
@@ -68,27 +66,14 @@ public class Snails extends Wildcard {
     @Override
     public void tick() {
         ticks++;
-        if (ticks % 20 == 0) {
+        if (ticks % 100 == 0) {
             for (ServerPlayer player : PlayerUtils.getAllFunctioningPlayers()) {
                 if (!canHaveSnail(player)) continue;
                 UUID playerUUID = player.getUUID();
                 if (snails.containsKey(playerUUID)) {
-                    List<Snail> snailList = snails.get(playerUUID);
-                    if (snailList != null) {
-                        int countedSnails = 0;
-                        for (Snail snail : new ArrayList<>(snailList)) {
-                            if (snail == null || !snail.isAlive() || (countedSnails >= SNAILS_PER_PLAYER)) {
-                                snails.get(playerUUID).remove(snail);
-                                if (countedSnails < SNAILS_PER_PLAYER) {
-                                    spawnSnailFor(player);
-                                }
-                            }
-                            else {
-                                countedSnails++;
-                            }
-                        }
-                    }
-                    if (snails.get(playerUUID).size() < SNAILS_PER_PLAYER) {
+                    Snail snail = snails.get(playerUUID);
+                    if (snail == null || !snail.isAlive()) {
+                        snails.remove(playerUUID);
                         spawnSnailFor(player);
                     }
                 }
@@ -116,13 +101,9 @@ public class Snails extends Wildcard {
         }
         else {
             preventSnails.add(player.getUUID());
-            List<Snail> snailsList = snails.remove(player.getUUID());
-            if (snailsList != null) {
-                for (Snail snail : new ArrayList<>(snailsList)) {
-                    if (snail != null) {
-                        snail.serverData.despawn();
-                    }
-                }
+            Snail snail = snails.remove(player.getUUID());
+            if (snail != null) {
+                snail.serverData.despawn();
             }
             return false;
         }
@@ -139,14 +120,7 @@ public class Snails extends Wildcard {
         Snail snail = LevelUtils.spawnEntity(MobRegistry.SNAIL, player.ls$getServerLevel(), pos);
         if (snail != null) {
             snail.serverData.setBoundPlayer(player);
-            if (snails.containsKey(player.getUUID())) {
-                snails.get(player.getUUID()).add(snail);
-            }
-            else {
-                List<Snail> list = new ArrayList<>();
-                list.add(snail);
-                snails.put(player.getUUID(), list);
-            }
+            snails.put(player.getUUID(), snail);
         }
     }
 
@@ -169,22 +143,16 @@ public class Snails extends Wildcard {
     }
 
     public static void reloadSnailNames() {
-        for (List<Snail> snailList : snails.values()) {
-            if (snailList == null) continue;
-            for (Snail snail : snailList) {
-                if (snail == null) continue;
-                snail.serverData.updateSnailName();
-            }
+        for (Snail snail : snails.values()) {
+            if (snail == null) return;
+            snail.serverData.updateSnailName();
         }
     }
 
     public static void reloadSnailSkins() {
-        for (List<Snail> snailList : snails.values()) {
-            if (snailList == null) continue;
-            for (Snail snail : snailList) {
-                if (snail == null) continue;
-                snail.serverData.updateSkin(snail.serverData.getBoundPlayer());
-            }
+        for (Snail snail : snails.values()) {
+            if (snail == null) return;
+            snail.serverData.updateSkin(snail.serverData.getBoundPlayer());
         }
     }
 

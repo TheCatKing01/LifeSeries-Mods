@@ -167,32 +167,25 @@ public class Snail extends Monster {
     }
 
     public boolean isInLavaLocal = false;
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
     //? if <= 1.21.11 {
-    /*@Override
+    @Override
     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
-        boolean returnValue = super.updateFluidHeightAndDoFluidPushing(tag, speed);
         if (FluidTags.LAVA != tag) {
-            return returnValue;
+            return false;
         }
-    *///?} else {
+    //?} else {
+    /*@Override
     public boolean updateFluidInteraction() {
-        boolean returnValue = super.updateFluidInteraction();
         TagKey<Fluid> tag = FluidTags.LAVA;
         if (this instanceof IEntity accessor) {
             if (!accessor.ls$getEntityFluidInteraction().isInFluid(tag)) {
-                return returnValue;
+                return false;
             }
         }
-    //?}
+    *///?}
 
         if (this.touchingUnloadedChunk()) {
-            return returnValue;
+            return false;
         }
         AABB box = this.getBoundingBox().deflate(0.001);
         int i = Mth.floor(box.minX);
@@ -220,7 +213,7 @@ public class Snail extends Monster {
         }
 
         isInLavaLocal = d > 0.0;
-        return returnValue;
+        return false;
     }
 
     @Override

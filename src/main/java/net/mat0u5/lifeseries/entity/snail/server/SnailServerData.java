@@ -35,7 +35,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -158,14 +157,7 @@ public class SnailServerData implements PlayerBoundEntity {
         }
         if (snail.tickCount % 10 == 0) {
             if (!snail.isFromTrivia()) {
-                boolean foundMatch = false;
-                for (List<Snail> snailList : Snails.snails.values()) {
-                    if (snailList.contains(snail)) {
-                        foundMatch = true;
-                        break;
-                    }
-                }
-                if (!foundMatch) {
+                if (!Snails.snails.containsValue(snail)) {
                     despawn();
                     return true;
                 }
@@ -197,15 +189,15 @@ public class SnailServerData implements PlayerBoundEntity {
             //? if <= 1.21.4 {
             /*level.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(snail.blockPosition()), 2, snail.blockPosition());
             *///?} else if <= 1.21.11 {
-            /*level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, LevelUtils.chunkPosFromBlockPos(snail.blockPosition()), 2);
-            *///?}
+            level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, LevelUtils.chunkPosFromBlockPos(snail.blockPosition()), 2);
+            //?}
         }
     }
 
     public void despawn() {
         resetAirPacket();
-        if (boundPlayerUUID != null && snail.isFromTrivia()) {
-            TriviaWildcard.snails.remove(boundPlayerUUID);
+        if (boundPlayerUUID != null) {
+            TriviaWildcard.bots.remove(boundPlayerUUID);
         }
         snail.pathfinding.cleanup();
 
@@ -217,10 +209,6 @@ public class SnailServerData implements PlayerBoundEntity {
              //?}
         }
         snail.discard();
-
-        if (boundPlayerUUID != null&& !snail.isFromTrivia() && Snails.snails.containsKey(boundPlayerUUID)) {
-            Snails.snails.get(boundPlayerUUID).remove(snail);
-        }
     }
 
     public void resetAirPacket() {
