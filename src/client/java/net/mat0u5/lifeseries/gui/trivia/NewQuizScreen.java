@@ -7,7 +7,7 @@ import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,10 +16,8 @@ import net.minecraft.util.FormattedCharSequence;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
- //?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class NewQuizScreen extends Screen {
     private final List<List<FormattedCharSequence>> answers = new ArrayList<>();
@@ -111,15 +109,17 @@ public class NewQuizScreen extends Screen {
         }
     }
 
+    //~ renames_26_1_volatile
     @Override
     //? if <= 1.20 {
-    /*public void renderBackground(GuiGraphics context) {}
+    /*public void extractBackground(GuiGraphicsExtractor context) {}
      *///?} else {
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
     //?}
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    //~ !renames_26_1_volatile
         int quarter1 = this.width / 4;
         int quarter2 = quarter1*2;
         int quarter3 = quarter1*3;

@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.mixin.client;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.features.LifeSkinsClient;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -13,20 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
 //? if <= 1.20
-//import net.minecraft.resources.ResourceLocation;
-//? if > 1.20 <= 1.21.6
-//import net.minecraft.client.resources.PlayerSkin;
-//? if >= 1.21.9
+//import net.minecraft.resources.Identifier;
+//? if > 1.20
 import net.minecraft.world.entity.player.PlayerSkin;
 
 @Mixin(value = AbstractClientPlayer.class, priority = 1)
 public class AbstractClientPlayerMixin {
     //? if <= 1.20 {
     /*@Inject(method = "getSkinTextureLocation", at = @At("HEAD"), cancellable = true)
-    public void getSkinTextures(CallbackInfoReturnable<ResourceLocation> cir) {
-    *///?} else if <= 1.21.6 {
-    /*@Inject(method = "getSkin", at = @At("HEAD"), cancellable = true)
-    public void getSkinTextures(CallbackInfoReturnable<PlayerSkin> cir) {
+    public void getSkinTextures(CallbackInfoReturnable<Identifier> cir) {
     *///?} else {
     @Inject(method = "getSkin", at = @At("HEAD"), cancellable = true)
     public void getSkinTextures(CallbackInfoReturnable<PlayerSkin> cir) {
@@ -35,21 +31,24 @@ public class AbstractClientPlayerMixin {
         AbstractClientPlayer abstrPlayer = (AbstractClientPlayer) (Object) this;
         UUID uuid = abstrPlayer.getUUID();
         if (uuid == null) return;
-        if (!MainClient.playerDisguiseUUIDs.containsKey(uuid)) return;
-        
-        UUID disguisedUUID = MainClient.playerDisguiseUUIDs.get(uuid);
-        if (Minecraft.getInstance().getConnection() == null) {
-            return;
-        }
-        for (PlayerInfo entry : Minecraft.getInstance().getConnection().getOnlinePlayers()) {
-            if (OtherUtils.profileId(entry.getProfile()).equals(disguisedUUID)) {
-                //? if <= 1.20 {
-                /*cir.setReturnValue(entry.getSkinLocation());
-                *///?} else {
-                cir.setReturnValue(entry.getSkin());
-                //?}
-                return;
+        if (MainClient.playerDisguiseUUIDs.containsKey(uuid)) {
+            UUID disguisedUUID = MainClient.playerDisguiseUUIDs.get(uuid);
+            if (LifeSkinsClient.getTexture(disguisedUUID) == null && Minecraft.getInstance().getConnection() != null) {
+                for (PlayerInfo entry : Minecraft.getInstance().getConnection().getOnlinePlayers()) {
+                    if (OtherUtils.profileId(entry.getProfile()).equals(disguisedUUID)) {
+                        //~ if > 1.20 '.getSkinLocation()' -> '.getSkin()' {
+                        cir.setReturnValue(entry.getSkin());
+                        //~}
+                        return;
+                    }
+                }
             }
+            uuid = disguisedUUID;
+        }
+
+        var lifeSkinsLocation = LifeSkinsClient.getTexture(uuid);
+        if (lifeSkinsLocation != null) {
+            cir.setReturnValue(lifeSkinsLocation);
         }
     }
 }

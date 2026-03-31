@@ -2,12 +2,13 @@ package net.mat0u5.lifeseries.mixin.client;
 
 import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.render.ClientRenderer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.ClientUtils;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.world.scores.Team;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +26,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.player.LocalPlayer;
 *///?}
 //? if >= 1.21.2 && <= 1.21.5 {
-/*import net.minecraft.client.renderer.RenderType;
+/*import net.minecraft.client.renderer.rendertype.RenderType;
 import java.util.function.Function;
 *///?}
 //? if >= 1.21.6
@@ -33,14 +34,23 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 //? if >= 1.21
 import net.minecraft.client.DeltaTracker;
 
-//? if <= 1.21.9 {
-/*import net.minecraft.resources.ResourceLocation;
-*///?} else {
 import net.minecraft.resources.Identifier;
-//?}
 
 @Mixin(value = Gui.class, priority = 1)
 public class GuiMixin {
+    //? if <= 1.20.5 {
+    /*@Inject(method = "render", at = @At(value = "TAIL"))
+    public void render(GuiGraphicsExtractor guiGraphics, float f, CallbackInfo ci) {
+    *///?} else if <= 1.21.11 {
+    /*@Inject(method = "render", at = @At(value = "TAIL"))
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    *///?} else {
+    @Inject(method = "extractRenderState", at = @At(value = "TAIL"))
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    //?}
+        ClientRenderer.render(guiGraphics);
+    }
+
     @Unique
     private static final List<String> ls$allowedColors = List.of(
             "aqua","black","blue","dark_aqua","dark_blue","dark_gray","dark_green",
@@ -53,26 +63,27 @@ public class GuiMixin {
     );
 
     //? if <= 1.20 {
-    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"))
-    private void customHearts(GuiGraphics instance, ResourceLocation identifier, int x, int y, int u, int v, int m, int n) {
+    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blit(Lnet/minecraft/resources/Identifier;IIIIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, Identifier identifier, int x, int y, int u, int v, int m, int n) {
     *///?} else if <= 1.21 {
-    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V"))
-    private void customHearts(GuiGraphics instance, ResourceLocation identifier, int x, int y, int u, int v) {
+    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, Identifier identifier, int x, int y, int u, int v) {
     *///?} else if <= 1.21.5 {
-    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Ljava/util/function/Function;Lnet/minecraft/resources/ResourceLocation;IIII)V"))
-    private void customHearts(GuiGraphics instance, Function<ResourceLocation, RenderType> renderLayers, ResourceLocation identifier, int x, int y, int u, int v) {
-    *///?} else if <= 1.21.9 {
-    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIII)V"))
-    private void customHearts(GuiGraphics instance, RenderPipeline renderPipeline, ResourceLocation identifier, int x, int y, int u, int v) {
+    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Ljava/util/function/Function;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, Function<Identifier, RenderType> renderLayers, Identifier identifier, int x, int y, int u, int v) {
+    *///?} else if <= 1.21.11 {
+    /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
     *///?} else {
-    @Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
-    private void customHearts(GuiGraphics instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
+    @Redirect(method = "extractHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
     //?}
 
         String texturePath = identifier.getPath();
-        Team playerTeam = ClientUtils.getPlayerTeam();
-        if (!MainClient.COLORED_HEARTS || playerTeam == null || playerTeam.getColor() == null ||
-                !ls$allowedColors.contains(playerTeam.getColor().getName().toLowerCase(Locale.ROOT)) ||
+        String playerTeamColor = ClientUtils.getPlayerTeamColor();
+        String playerTeamName = ClientUtils.getPlayerTeamName();
+        if (!MainClient.COLORED_HEARTS || playerTeamColor == null || playerTeamName == null ||
+                !ls$allowedColors.contains(playerTeamColor.toLowerCase(Locale.ROOT)) ||
                 !ls$allowedHearts.contains(texturePath) || Main.modFullyDisabled()) {
             if (MainClient.clientCurrentSeason == Seasons.SECRET_LIFE && texturePath.startsWith("hud/heart/container")) {
                 return;
@@ -93,12 +104,12 @@ public class GuiMixin {
             return;
         }
 
-        String color = playerTeam.getColor().getName().toLowerCase(Locale.ROOT);
+        String color = playerTeamColor.toLowerCase(Locale.ROOT);
 
         String heartType = texturePath.replaceFirst("hud/heart/", "");
 
         if (!heartType.startsWith("hardcore_")) {
-            if (MainClient.COLORED_HEARTS_HARDCORE_ALL_LIVES || (playerTeam.getName().equals("lives_1") & MainClient.COLORED_HEARTS_HARDCORE_LAST_LIFE)) {
+            if (MainClient.COLORED_HEARTS_HARDCORE_ALL_LIVES || (playerTeamName.equals("lives_1") & MainClient.COLORED_HEARTS_HARDCORE_LAST_LIFE)) {
                 heartType = "hardcore_"+heartType;
             }
         }
@@ -117,13 +128,11 @@ public class GuiMixin {
 
     @Unique
     //? if <= 1.21 {
-    /*private void ls$afterHeartDraw(GuiGraphics instance, ResourceLocation identifier, int x, int y, int u, int v) {
+    /*private void ls$afterHeartDraw(GuiGraphicsExtractor instance, Identifier identifier, int x, int y, int u, int v) {
     *///?} else if <= 1.21.5 {
-    /*private void ls$afterHeartDraw(GuiGraphics instance, Function<ResourceLocation, RenderType> renderLayers, ResourceLocation identifier, int x, int y, int u, int v) {
-    *///?} else if <= 1.21.9 {
-    /*private void ls$afterHeartDraw(GuiGraphics instance, RenderPipeline renderPipeline, ResourceLocation identifier, int x, int y, int u, int v) {
+    /*private void ls$afterHeartDraw(GuiGraphicsExtractor instance, Function<Identifier, RenderType> renderLayers, Identifier identifier, int x, int y, int u, int v) {
     *///?} else {
-    private void ls$afterHeartDraw(GuiGraphics instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
+    private void ls$afterHeartDraw(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
     //?}
         if (MainClient.clientCurrentSeason != Seasons.SECRET_LIFE || Main.modFullyDisabled()) {
             return;
@@ -156,14 +165,21 @@ public class GuiMixin {
     }
     *///?} else if <= 1.20.5 {
     /*@Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
-    private void stopSleepDarkness(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, float f, CallbackInfo ci) {
+        if (!Main.modDisabled() && MainClient.clientCurrentSeason == Seasons.NICE_LIFE && !(Minecraft.getInstance().screen instanceof InBedChatScreen) && MainClient.hideSleepDarkness) {
+            ci.cancel();
+        }
+    }
+    *///?} else if <= 1.21.11 {
+    /*@Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
+    private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (!Main.modDisabled() && MainClient.clientCurrentSeason == Seasons.NICE_LIFE && !(Minecraft.getInstance().screen instanceof InBedChatScreen) && MainClient.hideSleepDarkness) {
             ci.cancel();
         }
     }
     *///?} else {
-    @Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
-    private void stopSleepDarkness(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    @Inject(method = "extractSleepOverlay", at = @At("HEAD"), cancellable = true)
+    private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (!Main.modDisabled() && MainClient.clientCurrentSeason == Seasons.NICE_LIFE && !(Minecraft.getInstance().screen instanceof InBedChatScreen) && MainClient.hideSleepDarkness) {
             ci.cancel();
         }

@@ -13,6 +13,7 @@ import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
@@ -30,15 +31,11 @@ import net.minecraft.world.level.border.WorldBorder;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
-
-//? if <= 1.21.9
-//import net.minecraft.world.level.GameRules;
-//? if > 1.21.9
-import net.minecraft.world.level.gamerules.GameRules;
 
 public class DoubleLife extends Season {
     public static final String SOULMATE_DAMAGE_IDENTIFIER_NAME = "soulmate";
@@ -276,6 +273,11 @@ public class DoubleLife extends Season {
     public void removeSoulmateTags() {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             List<String> tagsCopy = new ArrayList<>(TagUtils.getTags(player));
+            //? if <= 1.21.11 {
+            /*List<String> tagsCopy = new ArrayList<>(player.getTags());
+            *///?} else {
+            List<String> tagsCopy = new ArrayList<>(player.entityTags());
+            //?}
             for (String tag : tagsCopy) {
                 if (tag.startsWith("soulmate_")) {
                     player.removeTag(tag);
@@ -365,6 +367,10 @@ public class DoubleLife extends Season {
         soulmates.put(player1UUID, player2UUID);
         soulmates.put(player2UUID, player1UUID);
         updateOrderedSoulmates();
+        DatapackIntegration.EVENT_SOULMATE_SET.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player1", player1UUID.toString()),
+                new DatapackIntegration.Events.MacroEntry("Player2", player2UUID.toString())
+        ));
     }
     public void setSoulmate(ServerPlayer player1, ServerPlayer player2) {
         soulmates.put(player1.getUUID(), player2.getUUID());
@@ -372,9 +378,28 @@ public class DoubleLife extends Season {
         SessionTranscript.soulmate(player1, player2);
         syncPlayers(player1, player2);
         updateOrderedSoulmates();
+        DatapackIntegration.EVENT_SOULMATE_SET.trigger(List.of(
+                new DatapackIntegration.Events.MacroEntry("Player1", player1.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Player2", player2.getScoreboardName())
+        ));
     }
 
     public void resetSoulmate(ServerPlayer player) {
+        UUID soulmateUUID = getSoulmateUUID(player.getUUID());
+        ServerPlayer soulmate = getSoulmate(player);
+        if (soulmate != null) {
+            DatapackIntegration.EVENT_SOULMATE_REMOVE.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player1", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("Player2", soulmate.getScoreboardName())
+            ));
+        }
+        else if (soulmateUUID != null){
+            DatapackIntegration.EVENT_SOULMATE_REMOVE.trigger(List.of(
+                    new DatapackIntegration.Events.MacroEntry("Player1", player.getScoreboardName()),
+                    new DatapackIntegration.Events.MacroEntry("Player2", soulmateUUID.toString())
+            ));
+        }
+
         UUID playerUUID = player.getUUID();
         Map<UUID, UUID> newSoulmates = new HashMap<>();
         for (Map.Entry<UUID, UUID> entry : soulmates.entrySet()) {
@@ -436,6 +461,9 @@ public class DoubleLife extends Season {
             });
             triggerFusedLivesRollAfterReveal();
             return;
+        List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
+        if (!playersToRoll.isEmpty()) {
+            DatapackIntegration.EVENT_SOULMATE_ROLL.trigger();
         }
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
         PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
@@ -830,6 +858,11 @@ public class DoubleLife extends Season {
             }
         } finally {
             suppressSplitOnRedDuringDeath.remove(playerId);
+        if (soulmate == null) return;
+        if (!soulmate.isAlive()) return;
+        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
+        if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
+            soulmate.getInventory().clearContent();
         }
     }
 

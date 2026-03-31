@@ -118,6 +118,10 @@ public class NiceLifeConfig extends ConfigManager {
             "nice_list_players", 3, "season.voting",
             "Nice List Player Amount", "Controls the maximum number of players that can be on the nice list."
     );
+    public static final ConfigFileEntry<Boolean> RED_WINTER = new ConfigFileEntry<>(
+            "red_winter", true, "season[new]",
+            "Allow Red Winter", "Controls whether the Red Winter triggers."
+    );
 
     public static final ConfigFileEntry<Object> GROUP_TRIVIA = new ConfigFileEntry<>(
             "group_trivia", null, ConfigTypes.TEXT, "{season.trivia}",
@@ -155,6 +159,7 @@ public class NiceLifeConfig extends ConfigManager {
 				,SLEEP_BEFORE_MIDNIGHT
 				,FREEZE_TIME_AT_MIDNIGHT
 				,FREEZE_TIME_WHILE_SLEEPING
+                ,RED_WINTER
 
                 ,GROUP_TRIVIA
                 ,GROUP_VOTING

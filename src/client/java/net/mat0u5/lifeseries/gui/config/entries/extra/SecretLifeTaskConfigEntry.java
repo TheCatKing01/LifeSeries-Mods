@@ -2,12 +2,11 @@ package net.mat0u5.lifeseries.gui.config.entries.extra;
 
 import net.mat0u5.lifeseries.gui.config.entries.ConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.ModifiableListEntry;
-import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
@@ -15,12 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class SecretLifeTaskConfigEntry extends ModifiableListEntry {
     protected final EditBox textField;
@@ -47,14 +42,16 @@ public class SecretLifeTaskConfigEntry extends ModifiableListEntry {
     }
 
     @Override
-    protected void renderMainEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderMainEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         textField.setY(y+1);
         textField.setX(x + 25);
         textField.setWidth(resetButton.getX()-textField.getX()-10);
-        textField.render(context, mouseX, mouseY, tickDelta);
+        //~ renames_26_1_volatile
+        textField.extractRenderState(context, mouseX, mouseY, tickDelta);
+        //~ !renames_26_1_volatile
     }
     @Override
-    public void renderFirstEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderFirstEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         int textX = x - 5;
         int textY = y;
         RenderUtils.text(Component.literal("Available text replacements:"), textX, textY).colored(TextColors.GRAY).render(context, textRenderer);

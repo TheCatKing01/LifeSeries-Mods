@@ -7,7 +7,7 @@ import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,9 +15,8 @@ import net.minecraft.util.FormattedCharSequence;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class QuizScreen extends DefaultScreen {
 
@@ -118,7 +117,7 @@ public class QuizScreen extends DefaultScreen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY) {
+    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         // X
         int fifth1 = startX + (BG_WIDTH / 5);
         int fifth2 = startX + (BG_WIDTH / 5) * 2;
@@ -202,7 +201,7 @@ public class QuizScreen extends DefaultScreen {
         drawBot(context, startX, startY, mouseX, mouseY, centerX, centerY, 40);
     }
 
-    private void drawBot(GuiGraphics context, int i, int j, int mouseX, int mouseY, int x, int y, int size) {
+    private void drawBot(GuiGraphicsExtractor context, int i, int j, int mouseX, int mouseY, int x, int y, int size) {
         if (minecraft == null) return;
         if (minecraft.level == null) return;
         if (minecraft.player == null) return;
@@ -214,9 +213,9 @@ public class QuizScreen extends DefaultScreen {
         }
         if (bot != null) {
             //? if <= 1.20 {
-            /*InventoryScreen.renderEntityInInventoryFollowsMouse(context, x, y+35, size, 0, 0, bot);
+            /*InventoryScreen.extractEntityInInventoryFollowsMouse(context, x, y+35, size, 0, 0, bot);
             *///?} else {
-            InventoryScreen.renderEntityInInventoryFollowsMouse(context, x-30, y-70, x+30, y+70, size, 0.0625F, centerX, centerY+10, bot);
+            InventoryScreen.extractEntityInInventoryFollowsMouse(context, x-30, y-70, x+30, y+70, size, 0.0625F, centerX, centerY+10, bot);
             //?}
         }
     }

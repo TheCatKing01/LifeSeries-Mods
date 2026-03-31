@@ -38,24 +38,13 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.mat0u5.lifeseries.Main.currentSession;
 
-//? if <= 1.21.9 {
-/*import net.minecraft.resources.ResourceLocation;
- *///?} else {
 import net.minecraft.resources.Identifier;
-//?}
 
 public class Snail extends Monster {
-    //? if <= 1.21.9 {
-    /*public static final ResourceLocation DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
-    public static final ResourceLocation TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
-    public static final ResourceLocation ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
-    public static final ResourceLocation ID = IdentifierHelper.mod("snail");
-    *///?} else {
     public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/snail/default.png");
     public static final Identifier TRIVIA_TEXTURE = IdentifierHelper.mod("textures/entity/snail/trivia.png");
     public static final Identifier ZOMBIE_TEXTURE = IdentifierHelper.mod("textures/entity/snail/zombie.png");
     public static final Identifier ID = IdentifierHelper.mod("snail");
-    //?}
     public static double GLOBAL_SPEED_MULTIPLIER = 1;
     public static boolean SHOULD_DROWN_PLAYER = true;
     public static boolean ALLOW_POTION_EFFECTS = false;
@@ -178,25 +167,32 @@ public class Snail extends Monster {
     }
 
     public boolean isInLavaLocal = false;
-    //?if <= 1.21.11 {
+
     @Override
-    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
-        if (FluidTags.LAVA != tag) {
-            return false;
-        }
-    //?} else {
+    public boolean isPushedByFluid() {
+        return false;
+    }
+
+    //? if <= 1.21.11 {
     /*@Override
+    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
+        boolean returnValue = super.updateFluidHeightAndDoFluidPushing(tag, speed);
+        if (FluidTags.LAVA != tag) {
+            return returnValue;
+        }
+    *///?} else {
     public boolean updateFluidInteraction() {
+        boolean returnValue = super.updateFluidInteraction();
         TagKey<Fluid> tag = FluidTags.LAVA;
         if (this instanceof IEntity accessor) {
             if (!accessor.ls$getEntityFluidInteraction().isInFluid(tag)) {
-                return false;
+                return returnValue;
             }
         }
-    *///?}
+    //?}
 
         if (this.touchingUnloadedChunk()) {
-            return false;
+            return returnValue;
         }
         AABB box = this.getBoundingBox().deflate(0.001);
         int i = Mth.floor(box.minX);
@@ -224,7 +220,7 @@ public class Snail extends Monster {
         }
 
         isInLavaLocal = d > 0.0;
-        return false;
+        return returnValue;
     }
 
     @Override

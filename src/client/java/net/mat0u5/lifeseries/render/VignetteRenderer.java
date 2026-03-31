@@ -2,7 +2,7 @@ package net.mat0u5.lifeseries.render;
 
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 
 //? if <= 1.21 {
@@ -12,26 +12,18 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.ARGB;
 //?}
 //? if >= 1.21.2 && <= 1.21.5
-//import net.minecraft.client.renderer.RenderType;
+//import net.minecraft.client.renderer.rendertype.RenderType;
 //? if >= 1.21.6
 import net.minecraft.client.renderer.RenderPipelines;
 
-//? if <= 1.21.9 {
-/*import net.minecraft.resources.ResourceLocation;
- *///?} else {
 import net.minecraft.resources.Identifier;
-//?}
 
 public class VignetteRenderer {
-    //? if <= 1.21.9 {
-    /*private static final ResourceLocation VIGNETTE_TEXTURE = IdentifierHelper.vanilla("textures/misc/vignette.png");
-    *///?} else {
     private static final Identifier VIGNETTE_TEXTURE = IdentifierHelper.vanilla("textures/misc/vignette.png");
-    //?}
     private static float vignetteDarkness = 0.0F;
     private static long vignetteEnd = 0;
 
-    public static void renderVignette(GuiGraphics context) {
+    public static void renderVignette(GuiGraphicsExtractor context) {
         if (System.currentTimeMillis() >= vignetteEnd && vignetteEnd != -1) return;
 
         Minecraft client = Minecraft.getInstance();

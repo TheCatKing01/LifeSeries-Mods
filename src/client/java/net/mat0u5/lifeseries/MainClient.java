@@ -62,6 +62,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static boolean isAdmin = false;
     public static boolean tripleJumpActive = false;
     public static boolean modDisabledServerSide = false;
+    public static String teamColor = null;
+    public static String teamName = null;
 
     public static ClientConfig clientConfig;
 
@@ -88,7 +90,6 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         ClientRegistries.registerModStuff();
         NetworkHandlerClient.registerClientReceiver();
         NetworkHandlerClient.initializeSimplePacketReceivers();
-        ClientRenderer.onInitialize();
         Main.setClientHelper(this);
 
         clientConfig = new ClientConfig();
@@ -201,6 +202,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         isAdmin = false;
         tripleJumpActive = false;
         modDisabledServerSide = false;
+        teamColor = null;
+        teamName = null;
 
         MorphManager.resetMorphs();
     }

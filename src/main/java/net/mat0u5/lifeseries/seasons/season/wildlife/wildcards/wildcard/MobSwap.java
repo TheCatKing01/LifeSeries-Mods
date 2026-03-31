@@ -24,16 +24,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.currentSession;
 import static net.mat0u5.lifeseries.Main.server;
 
-//? if <= 1.21.9
-//import net.minecraft.world.level.GameRules;
-//? if > 1.21.9
-import net.minecraft.world.level.gamerules.GameRules;
 
 public class MobSwap extends Wildcard {
     public static Time activatedAt = Time.nullTime();
@@ -264,25 +261,16 @@ public class MobSwap extends Wildcard {
                 toKill.add(entity);
             });
 
-            //? if <= 1.21.9 {
-            /*boolean mobLoot = OtherUtils.getBooleanGameRule(level, GameRules.RULE_DOMOBLOOT);
-            if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.RULE_DOMOBLOOT, false);
-            *///?} else {
             boolean mobLoot = OtherUtils.getBooleanGameRule(level, GameRules.MOB_DROPS);
             if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.MOB_DROPS, false);
-            //?}
             for (Entity entity : toKill) {
                 //? if <=1.21 {
                 /*entity.kill();
-                 *///?} else {
+                *///?} else {
                 entity.kill((ServerLevel) entity.level());
                 //?}
             }
-            //? if <= 1.21.9 {
-            /*if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.RULE_DOMOBLOOT, true);
-            *///?} else {
             if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.MOB_DROPS, true);
-            //?}
         }
     }
 
@@ -364,20 +352,15 @@ public class MobSwap extends Wildcard {
                 if (entity instanceof TriviaBot) return;
                 if (entity.hasCustomName()) return;
                 //? if <= 1.21.11 {
-                if (!TagUtils.hasTag(entity, "mobswap")) return;
-                //?} else {
-                /*if (!entity.entityTags().contains("mobswap")) return;
-                *///?}
+                /*if (!entity.getTags().contains("mobswap")) return;
+                *///?} else {
+                if (!entity.entityTags().contains("mobswap")) return;
+                //?}
                 toKill.add(entity);
             });
 
-            //? if <= 1.21.9 {
-            /*boolean mobLoot = OtherUtils.getBooleanGameRule(level, GameRules.RULE_DOMOBLOOT);
-            if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.RULE_DOMOBLOOT, false);
-            *///?} else {
             boolean mobLoot = OtherUtils.getBooleanGameRule(level, GameRules.MOB_DROPS);
             if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.MOB_DROPS, false);
-            //?}
             for (Entity entity : toKill) {
                 //? if <=1.21 {
                 /*entity.kill();
@@ -385,11 +368,7 @@ public class MobSwap extends Wildcard {
                 entity.kill((ServerLevel) entity.level());
                 //?}
             }
-            //? if <= 1.21.9 {
-            /*if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.RULE_DOMOBLOOT, true);
-            *///?} else {
             if (mobLoot) OtherUtils.setBooleanGameRule(level, GameRules.MOB_DROPS, true);
-            //?}
         }
     }
 

@@ -1,9 +1,8 @@
 package net.mat0u5.lifeseries.render;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if > 1.20.5
 import net.minecraft.client.DeltaTracker;
 //? if >= 1.21.2 {
@@ -13,15 +12,11 @@ import org.joml.Vector3f;
 
 public class ClientRenderer {
     public static boolean isGameFullyFrozen = false;
-    public static void onInitialize() {
-        HudRenderCallback.EVENT.register(ClientRenderer::renderText);
-    }
 
-    //? if <= 1.20.5 {
-    /*private static void renderText(GuiGraphics context, float renderTickCounter) {
-    *///?} else {
-    private static void renderText(GuiGraphics context, DeltaTracker renderTickCounter) {
-    //?}
+    public static void render(GuiGraphicsExtractor context) {
+        renderText(context);
+    }
+    private static void renderText(GuiGraphicsExtractor context) {
         TextHud.renderText(context);
         VignetteRenderer.renderVignette(context);
     }

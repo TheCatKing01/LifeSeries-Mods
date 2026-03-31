@@ -6,7 +6,7 @@ import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -119,15 +119,16 @@ public class EmptySleepScreen extends Screen {
         toggleButton.visible = MainClient.isAdmin;
     }
 
+    //~ renames_26_1_volatile
     @Override
     //? if <= 1.20 {
-    /*public void renderBackground(GuiGraphics context) {}
+    /*public void extractBackground(GuiGraphicsExtractor context) {}
      *///?} else {
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
     //?}
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (MainClient.isAdmin) {
             boolean shouldShow = adminControlsOpen || isMouseNearButton(mouseX, mouseY);
 
@@ -140,15 +141,16 @@ public class EmptySleepScreen extends Screen {
             toggleButton.setX(getToggleButtonX());
         }
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         updateCommandButtons();
 
         if (MainClient.isAdmin && buttonSlideOffset < 0.3f && !adminControlsOpen) {
             int sliverX = this.width - SLIVER_WIDTH + 3;
             int sliverY = padding + buttonHeight / 2 - 4;
-            context.drawString(this.font, "<", sliverX, sliverY, TextColors.WHITE);
+            context.text(this.font, "<", sliverX, sliverY, TextColors.WHITE);
         }
     }
+    //~ !renames_26_1_volatile
 
     @Override
     public boolean isPauseScreen() {

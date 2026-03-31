@@ -5,7 +5,7 @@ import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -19,7 +19,7 @@ import java.util.List;
 import net.minecraft.util.ARGB;
 //?}
 //? if >= 1.21.2 && <= 1.21.5 {
-/*import net.minecraft.client.renderer.RenderType;
+/*import net.minecraft.client.renderer.rendertype.RenderType;
 *///?}
 
 //? if <= 1.21.5 {
@@ -31,20 +31,14 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.RenderPipelines;
 //?}
 
-//? if <= 1.21.9 {
-/*import net.minecraft.resources.ResourceLocation;
- *///?} else {
 import net.minecraft.resources.Identifier;
-//?}
 //? if <= 1.20.3 {
 /*public class EffectListConfigEntry extends StringListPopupConfigEntry<MobEffect> {
 *///?} else {
 public class EffectListConfigEntry extends StringListPopupConfigEntry<Holder<MobEffect>> {
 //?}
      //? if <= 1.20 {
-    /*private static final ResourceLocation EFFECT_BACKGROUND_TEXTURE = IdentifierHelper.vanilla("textures/gui/container/inventory.png");
-    *///?} else if <= 1.21.9 {
-    /*private static final ResourceLocation EFFECT_BACKGROUND_TEXTURE = IdentifierHelper.vanilla("hud/effect_background");
+    /*private static final Identifier EFFECT_BACKGROUND_TEXTURE = IdentifierHelper.vanilla("textures/gui/container/inventory.png");
     *///?} else {
     private static final Identifier EFFECT_BACKGROUND_TEXTURE = IdentifierHelper.vanilla("hud/effect_background");
     //?}
@@ -110,9 +104,9 @@ public class EffectListConfigEntry extends StringListPopupConfigEntry<Holder<Mob
 
     @Override
     //? if <= 1.20.3 {
-    /*protected void renderListEntry(GuiGraphics context, MobEffect effectType, int x, int y, int mouseX, int mouseY, float tickDelta) {
+    /*protected void renderListEntry(GuiGraphicsExtractor context, MobEffect effectType, int x, int y, int mouseX, int mouseY, float tickDelta) {
     *///?} else {
-    protected void renderListEntry(GuiGraphics context, Holder<MobEffect> effectType, int x, int y, int mouseX, int mouseY, float tickDelta) {
+    protected void renderListEntry(GuiGraphicsExtractor context, Holder<MobEffect> effectType, int x, int y, int mouseX, int mouseY, float tickDelta) {
     //?}
         //? if <= 1.21 {
         /*MobEffectTextureManager statusEffectSpriteManager = Minecraft.getInstance().getMobEffectTextures();

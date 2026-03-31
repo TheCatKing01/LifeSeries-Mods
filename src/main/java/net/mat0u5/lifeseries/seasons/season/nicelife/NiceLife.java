@@ -19,6 +19,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -40,18 +41,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import static net.mat0u5.lifeseries.Main.*;
 
-//? if <= 1.21.9
-//import net.minecraft.world.level.GameRules;
-import net.minecraft.world.phys.Vec3;
-//? if > 1.21.9
-import net.minecraft.world.level.gamerules.GameRules;
-
 //? if >= 26.1 {
-/*import net.minecraft.world.clock.WorldClocks;
-*///?}
+import net.minecraft.world.clock.WorldClocks;
+//?}
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,6 +65,7 @@ public class NiceLife extends Season {
     public static boolean FREEZE_TIME_AT_MIDNIGHT = true;
     public static boolean SLEEP_BEFORE_MIDNIGHT = false;
     public static boolean FREEZE_TIME_WHILE_SLEEPING = false;
+    public static boolean RED_WINTER = true;
     public Time SNOW_LAYER_INCREASE_INTERVAL = Time.seconds(600);
     public Time snowTicks = Time.zero();
     public double snowLayerTickChance = 1.0 / 43;
@@ -117,6 +115,7 @@ public class NiceLife extends Season {
         *///?} else {
         OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
         //?}
+        OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
         NiceLifeTriviaManager.killAllSnowmen();
         NiceLifeTriviaManager.killAllBots();
         Season.setSkyColor(null, false);
@@ -124,10 +123,10 @@ public class NiceLife extends Season {
         Season.setCloudColor(null, false);
         ServerLevel overworld = server.overworld();
         //? if <= 1.21.11 {
-        overworld.setWeatherParameters(96000, 0, false, false);
-        //?} else {
-        /*server.setWeatherParameters(96000, 0, false, false);
-         *///?}
+        /*overworld.setWeatherParameters(96000, 0, false, false);
+        *///?} else {
+        server.setWeatherParameters(96000, 0, false, false);
+         //?}
     }
 
     @Override
@@ -160,6 +159,7 @@ public class NiceLife extends Season {
         NiceLifeVotingManager.REDS_ON_NAUGHTY_LIST = NiceLifeConfig.ALLOW_REDS_ON_NAUGHTY_LIST.get();
         NiceLifeVotingManager.NAUGHTY_LIST_COUNT = NiceLifeConfig.NAUGHTY_LIST_PLAYERS.get();
         NiceLifeVotingManager.NICE_LIST_COUNT = NiceLifeConfig.NICE_LIST_PLAYERS.get();
+        RED_WINTER = NiceLifeConfig.RED_WINTER.get();
     }
 
     public void updateSnowTick() {
@@ -230,6 +230,15 @@ public class NiceLife extends Season {
 				}
 			}
 		}
+        ServerLevel overworld = server.overworld();
+        //? if <= 1.21.11 {
+        /*overworld.setWeatherParameters(0, 1000, true, false);
+        *///?} else {
+        server.setWeatherParameters(0, 1000, true, false);
+        //?}
+
+        boolean advanceTime = !isMidnight() && (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION);
+        OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
 
         resumeSnailsForAwakePlayers();
 
@@ -247,6 +256,24 @@ public class NiceLife extends Season {
 					}
 				}
 			}
+            //? if <= 1.21.9 {
+            /*int percentage = overworld.getGameRules().getInt(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
+             *///?} else {
+            int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
+            //?}
+            if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
+                if (!NiceLifeTriviaManager.triviaInProgress) {
+                    List<ServerPlayer> triviaPlayers = new ArrayList<>();
+                    for(ServerPlayer player : livesManager.getAlivePlayers()) {
+                        if (player.isSpectator()) continue;
+                        if (!player.isSleeping()) continue;
+                        triviaPlayers.add(player);
+                    }
+                    if (!triviaPlayers.isEmpty()) {
+                        NiceLifeTriviaManager.startTrivia(triviaPlayers);
+                    }
+                }
+            }
         }
         else {
             triviaCannotStartFor.add(Time.ticks(-1));
@@ -359,6 +386,7 @@ public class NiceLife extends Season {
 
     public void triggerRedWinter() {
         TaskScheduler.scheduleTask(20, () -> {
+            DatapackIntegration.EVENT_RED_WINTER_START.trigger();
             PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(),
                     SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_red_winter")),
                     1f, 1);
@@ -380,6 +408,7 @@ public class NiceLife extends Season {
     }
 
     public boolean shouldRedWinter() {
+        if (!RED_WINTER) return false;
         if (currentSession.statusNotStarted()) return false;
         List<ServerPlayer> assignedPlayers = PlayerUtils.getAllFunctioningPlayers();
         assignedPlayers.removeIf(player -> !player.ls$hasAssignedLives());
@@ -389,6 +418,16 @@ public class NiceLife extends Season {
 
     public void sleepThroughNight() {
         if (server == null) return;
+        ServerLevel overworld = server.overworld();
+        //? if <= 1.21.11 {
+        /*long newTime = overworld.getDayTime() + 24000L;
+        overworld.setDayTime(newTime - newTime % 24000L);
+        *///?} else {
+        long newTime = overworld.getOverworldClockTime() + 24000L;
+        overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
+        //?}
+        wakeUpAllPlayers();
+        playedMidnightChimes = false;
         NiceLifeTriviaManager.endTrivia();
         ServerLevel overworld = server.overworld();
         if (overworld instanceof ServerLevelAccessor accessor) {
@@ -454,10 +493,10 @@ public class NiceLife extends Season {
     public boolean isTimeBetween(int minTime, int maxTime) {
         if (server == null) return false;
         //? if <= 1.21.11 {
-        long dayTime = server.overworld().getDayTime() % 24000L;
-        //?} else {
-        /*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
-        *///?}
+        /*long dayTime = server.overworld().getDayTime() % 24000L;
+        *///?} else {
+        long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+        //?}
         return dayTime >= minTime && dayTime <= maxTime;
     }
 
@@ -536,13 +575,8 @@ public class NiceLife extends Season {
 
     private boolean shouldFreeze(ServerLevel level, BlockPos blockPos) {
         boolean darkEnough = level.getBrightness(LightLayer.BLOCK, blockPos) < 10 || !LIGHT_MELTS_SNOW;
-        //? if <= 1.21 {
-        /*int minY = level.getMinBuildHeight();
-        int maxY = level.getMaxBuildHeight();
-        *///?} else {
         int minY = level.getMinY();
         int maxY = level.getMaxY();
-        //?}
         if (blockPos.getY() >= minY && blockPos.getY() < maxY && darkEnough) {
             BlockState blockState = level.getBlockState(blockPos);
             FluidState fluidState = level.getFluidState(blockPos);
@@ -607,13 +641,8 @@ public class NiceLife extends Season {
 
     private boolean shouldSnow(ServerLevel level, BlockPos blockPos) {
         boolean darkEnough = level.getBrightness(LightLayer.BLOCK, blockPos) < 10 || !LIGHT_MELTS_SNOW;
-        //? if <= 1.21 {
-        /*int minY = level.getMinBuildHeight();
-        int maxY = level.getMaxBuildHeight();
-        *///?} else {
         int minY = level.getMinY();
         int maxY = level.getMaxY();
-        //?}
         if (blockPos.getY() >= minY && blockPos.getY() < maxY && darkEnough) {
             BlockState blockState = level.getBlockState(blockPos);
             boolean canSnowOverride = blockState.isAir() ||snowReplacableBlocks.contains(blockState.getBlock());

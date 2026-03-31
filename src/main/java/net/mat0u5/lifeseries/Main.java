@@ -70,6 +70,11 @@ public class Main implements ModInitializer {
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("evil_trivia_bots"), container, Component.nullToEmpty("Evil Trivia Bots"), ResourcePackActivationType.NORMAL);
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("minimal_armor"), container, Component.nullToEmpty("Minimal Armor Resourcepack"), ResourcePackActivationType.NORMAL);
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack"), container, ResourcePackActivationType.ALWAYS_ENABLED);
+			//? if <= 1.20.4 {
+			/*ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack_1.20-1.20.4"), container, ResourcePackActivationType.ALWAYS_ENABLED);
+			*///?} else if <= 1.20.5 {
+			/*ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack_1.20.5"), container, ResourcePackActivationType.ALWAYS_ENABLED);
+			*///?}
 			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("nicelife"), container, Component.nullToEmpty("Nice Life Resourcepack"), ResourcePackActivationType.NORMAL);
 		});
 

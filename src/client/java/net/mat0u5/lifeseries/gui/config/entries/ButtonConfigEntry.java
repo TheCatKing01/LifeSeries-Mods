@@ -1,14 +1,10 @@
 package net.mat0u5.lifeseries.gui.config.entries;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public abstract class ButtonConfigEntry extends ConfigEntry {
     protected final Button button;
@@ -33,11 +29,13 @@ public abstract class ButtonConfigEntry extends ConfigEntry {
     }
 
     @Override
-    protected void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         int entryWidth = getEntryContentWidth(width);
         button.setX(getButtonPosX(x, entryWidth));
         button.setY(getButtonPosY(y, height));
-        button.render(context, mouseX, mouseY, tickDelta);
+        //~ renames_26_1_volatile
+        button.extractRenderState(context, mouseX, mouseY, tickDelta);
+        //~ !renames_26_1_volatile
     }
 
     protected int getButtonPosX(int x, int entryWidth) {

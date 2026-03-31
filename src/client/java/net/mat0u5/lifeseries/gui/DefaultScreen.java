@@ -1,14 +1,11 @@
 package net.mat0u5.lifeseries.gui;
 
-import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public abstract class DefaultScreen extends Screen {
 
@@ -103,14 +100,16 @@ public abstract class DefaultScreen extends Screen {
         super.init();
     }
 
+    //~ renames_26_1_volatile
     @Override
     //? if <= 1.20 {
-    /*public void renderBackground(GuiGraphics context) {}
+    /*public void extractBackground(GuiGraphicsExtractor context) {}
     *///?} else {
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
     //?}
+    //~ !renames_26_1_volatile
 
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY) {
+    public void renderBackground(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         // Thick borders
         context.fill(startX-2, startY-2, endX, endY, TextColors.PURE_WHITE);
         context.fill(startX, startY, endX+2, endY+2, TextColors.GUI_GRAY);
@@ -142,7 +141,7 @@ public abstract class DefaultScreen extends Screen {
         context.fill(endX-1, endY-1, endX, endY, TextColors.GUI_GRAY);
     }
 
-    public void renderClose(GuiGraphics context, int mouseX, int mouseY) {
+    public void renderClose(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         int color = TextColors.BLACK;
         if (isInCloseRegion(mouseX, mouseY)) {
             color = TextColors.GRAY;
@@ -167,13 +166,17 @@ public abstract class DefaultScreen extends Screen {
 
     }
 
+    //~ renames_26_1_volatile
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    //~ !renames_26_1_volatile
         this.renderBackground(context, mouseX, mouseY);
         this.render(context, mouseX, mouseY);
         if (allowCloseButton()) renderClose(context, mouseX, mouseY);
-        super.render(context, mouseX, mouseY, delta);
+    //~ renames_26_1_volatile
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
+    //~ !renames_26_1_volatile
 
-    public abstract void render(GuiGraphics context, int mouseX, int mouseY);
+    public abstract void render(GuiGraphicsExtractor context, int mouseX, int mouseY);
 }

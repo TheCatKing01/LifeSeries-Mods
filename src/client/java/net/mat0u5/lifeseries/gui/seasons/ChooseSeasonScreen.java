@@ -1,21 +1,18 @@
 package net.mat0u5.lifeseries.gui.seasons;
 
 import net.mat0u5.lifeseries.gui.DefaultScreen;
-import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class ChooseSeasonScreen extends DefaultScreen {
 
@@ -150,7 +147,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY) {
+    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         int currentRegion = getRegion(mouseX, mouseY);
 
         // Background + images
@@ -183,7 +180,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
         }
     }
 
-    public static void renderSeasonRegion(GuiGraphics context, SeasonRegion seasonRegion, int currentRegion, int textureSize, float scale) {
+    public static void renderSeasonRegion(GuiGraphicsExtractor context, SeasonRegion seasonRegion, int currentRegion, int textureSize, float scale) {
         Rectangle rect = seasonRegion.bounds;
         if (seasonRegion.id == currentRegion) {
             context.fill(rect.x, rect.y, rect.x+rect.width, rect.y+rect.height, TextColors.LIGHT_GRAY);

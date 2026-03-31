@@ -14,7 +14,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
@@ -115,12 +115,10 @@ import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
-//? if <= 1.21.9 {
-/*import net.minecraft.client.renderer.RenderType;
-*///?} else {
 import net.minecraft.client.renderer.rendertype.RenderType;
+
+//? if >= 1.21.11
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-//?}
 
 public class TriviaSpiritParticle extends Particle {
     protected final TriviaSpiritParticleModel model;
@@ -152,10 +150,10 @@ public class TriviaSpiritParticle extends Particle {
             //? if <= 1.21.9 {
             /*super(modelPart, RenderType::entityCutoutNoCull);
             *///?} else if <= 1.21.11 {
-            super(modelPart, RenderTypes::entityCutoutNoCull);
-            //?} else {
-            /*super(modelPart, RenderTypes::entityCutout);
-            *///?}
+            /*super(modelPart, RenderTypes::entityCutoutNoCull);
+            *///?} else {
+            super(modelPart, RenderTypes::entityCutout);
+            //?}
         }
     }
 

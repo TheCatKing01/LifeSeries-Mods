@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.world.level.gamerules.GameRules;
 import static net.mat0u5.lifeseries.Main.currentSeason;
 
 //? if >= 1.21.2
@@ -43,22 +44,19 @@ import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.ReplaceDisk;
 //?}
 
-//?if <= 1.21.9 {
-/*import net.minecraft.world.level.GameRules;
-*///?} else {
+//? if > 1.21.9
 import net.minecraft.world.level.gamerules.GameRule;
-import net.minecraft.world.level.gamerules.GameRules;
-//?}
-//?if <= 1.21.6 {
+
+//? if <= 1.21.6 {
 /*import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphComponent;
 import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphManager;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.EntityType;
 *///?}
-//?if >= 26.1 {
-/*import net.minecraft.world.entity.Entity;
-*///?}
+//? if >= 26.1 {
+import net.minecraft.world.entity.Entity;
+//?}
 
 @Mixin(value = Player.class, priority = 1)
 public abstract class PlayerMixin implements IPlayer {
@@ -171,7 +169,7 @@ public abstract class PlayerMixin implements IPlayer {
 
     //Located in the ServerPlayer class in < 26.1
     //? if >= 26.1 {
-    /*@Inject(method = "attack", at = @At("HEAD"))
+    @Inject(method = "attack", at = @At("HEAD"))
     private void onAttackEntity(Entity target, CallbackInfo ci) {
         if (Main.modDisabled()) return;
         Player player = (Player) (Object) this;
@@ -179,7 +177,7 @@ public abstract class PlayerMixin implements IPlayer {
             currentSeason.onUpdatedInventory(serverPlayer);
         }
     }
-    *///?}
+    //?}
 
 
 

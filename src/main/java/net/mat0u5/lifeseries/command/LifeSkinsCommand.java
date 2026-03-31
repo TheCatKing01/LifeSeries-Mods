@@ -19,9 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LifeSkinsCommand extends Command {
     @Override
@@ -117,7 +115,7 @@ public class LifeSkinsCommand extends Command {
     public int listLifeSkins(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
 
-        Map<String, Map<Integer, Tuple<Boolean, File>>> skinsCache = LifeSkinsManager.getCache();
+        Map<String, Map<String, Tuple<Boolean, File>>> skinsCache = LifeSkinsManager.getCache();
         if (skinsCache.isEmpty()) {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIFESKINS_LIST_EMPTY.get());
             lifeSkinsInfo(source);
@@ -125,41 +123,51 @@ public class LifeSkinsCommand extends Command {
         }
         else {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIFESKINS_LIST.get());
-            for (Map.Entry<String, Map<Integer, Tuple<Boolean, File>>> holderskins : skinsCache.entrySet()) {
+            for (Map.Entry<String, Map<String, Tuple<Boolean, File>>> holderskins : skinsCache.entrySet()) {
                 String name = holderskins.getKey();
                 List<String> skins = new ArrayList<>();
-                for (Integer skin : holderskins.getValue().keySet()) {
-                    skins.add(String.valueOf(skin));
+                for (Map.Entry<String, Tuple<Boolean, File>> skin : holderskins.getValue().entrySet()) {
+                    String append = "";
+                    if (skin.getValue() != null && skin.getValue().x) {
+                        append = " (slim)";
+                    }
+                    skins.add(skin.getKey().replaceAll("lives_", "") + append);
                 }
+                Collections.sort(skins);
                 OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.LIFESKINS_LIST_PERSON.get(name, skins));
             }
         }
 
         return 1;
     }
+
     public int reloadLifeSkins(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
 
         LifeSkinsManager.reloadAll();
-        OtherUtils.sendCommandFeedback(source, ModifiableText.LIFESKINS_RELOAD.get());
+        OtherUtils.sendCommandFeedback(source, ModifiableText.LIFESKINS_RELOAD_ALL.get());
 
         return 1;
     }
 
     public int setSkin(CommandSourceStack source, ServerPlayer player, String username) {
         if (checkBanned(source)) return -1;
-        ProfileManager.ProfileChange skinChange = (username == null) ? ProfileManager.ProfileChange.ORIGINAL : ProfileManager.ProfileChange.SET.withInfo(username);
-        ProfileManager.modifyProfile(player, skinChange, ProfileManager.ProfileChange.NONE).thenAccept(success -> {
+        ProfileManager.ProfileChange skinChange = (username == null) ? ProfileManager.ProfileChange.original() : ProfileManager.ProfileChange.set(username);
+        ProfileManager.modifyProfile(player, skinChange, ProfileManager.ProfileChange.none()).thenAccept(success -> {
             if (success) {
                 if (username != null) {
                     OtherUtils.sendCommandFeedback(source, ModifiableText.LIFESKINS_SKIN_SET.get(player, username));
+                    ProfileManager.manualSkins.put(player.getUUID(), username);
                 }
                 else {
+                    ProfileManager.manualSkins.remove(player.getUUID());
+                    LifeSkinsManager.refreshLifeSkin(player);
                     OtherUtils.sendCommandFeedback(source, ModifiableText.LIFESKINS_SKIN_RESET.get(player));
                 }
             }
             else {
                 OtherUtils.sendCommandFailure(source, ModifiableText.MOD_ERROR_GENERAL.get());
+                ProfileManager.manualSkins.remove(player.getUUID());
             }
         });
         return 1;
@@ -167,8 +175,8 @@ public class LifeSkinsCommand extends Command {
 
     public int setUsername(CommandSourceStack source, ServerPlayer player, String username) {
         if (checkBanned(source)) return -1;
-        ProfileManager.ProfileChange nameChange = (username == null) ? ProfileManager.ProfileChange.ORIGINAL : ProfileManager.ProfileChange.SET.withInfo(username);
-        ProfileManager.modifyProfile(player, ProfileManager.ProfileChange.NONE, nameChange).thenAccept(success -> {
+        ProfileManager.ProfileChange nameChange = (username == null) ? ProfileManager.ProfileChange.original() : ProfileManager.ProfileChange.set(username);
+        ProfileManager.modifyProfile(player, ProfileManager.ProfileChange.none(), nameChange).thenAccept(success -> {
             if (success) {
                 if (username != null) {
                     OtherUtils.sendCommandFeedback(source, ModifiableText.LIFESKINS_USERNAME_SET.get(player, username));

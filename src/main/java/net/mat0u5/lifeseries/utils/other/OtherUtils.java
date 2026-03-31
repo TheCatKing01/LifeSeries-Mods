@@ -25,7 +25,7 @@ import static net.mat0u5.lifeseries.Main.server;
 import net.minecraft.server.ServerTickRateManager;
 
 //? if <= 1.21.9
-//import net.minecraft.world.level.GameRules;
+//import net.minecraft.world.level.gamerules.GameRules;
 //? if > 1.21.9
 import net.minecraft.world.level.gamerules.GameRule;
 
@@ -174,6 +174,7 @@ public class OtherUtils {
     }
 
     public static UUID profileId(GameProfile profile) {
+        if (profile == null) return null;
         //? if <= 1.21.6 {
         /*return profile.getId();
          *///?} else {
@@ -182,6 +183,7 @@ public class OtherUtils {
     }
 
     public static String profileName(GameProfile profile) {
+        if (profile == null) return null;
         //? if <= 1.21.6 {
         /*return profile.getName();
          *///?} else {
@@ -190,6 +192,7 @@ public class OtherUtils {
     }
 
     public static PropertyMap profileProperties(GameProfile profile) {
+        if (profile == null) return null;
         //? if <= 1.21.6 {
         /*return profile.getProperties();
          *///?} else {

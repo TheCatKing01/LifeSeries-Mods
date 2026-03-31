@@ -1,15 +1,12 @@
 package net.mat0u5.lifeseries.gui.config.entries;
 
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import java.util.Objects;
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public abstract class TextFieldConfigEntry extends ConfigEntry {
     public final EditBox textField;
@@ -54,18 +51,20 @@ public abstract class TextFieldConfigEntry extends ConfigEntry {
     protected void postTextChanged() {
     }
 
-    protected void renderAdditionalContent(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderAdditionalContent(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
     }
 
     @Override
-    protected void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         int entryWidth = getEntryContentWidth(width);
 
         renderAdditionalContent(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
 
         textField.setX(getTextFieldPosX(x, entryWidth));
         textField.setY(getTextFieldPosY(y, height));
-        textField.render(context, mouseX, mouseY, tickDelta);
+        //~ renames_26_1_volatile
+        textField.extractRenderState(context, mouseX, mouseY, tickDelta);
+        //~ !renames_26_1_volatile
 
         if (hasError()) {
             textField.setTextColor(TextColors.PASTEL_RED);

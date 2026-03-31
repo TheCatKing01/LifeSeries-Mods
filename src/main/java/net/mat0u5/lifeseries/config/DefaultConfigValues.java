@@ -279,6 +279,10 @@ public class DefaultConfigValues {
             "secret_society_sound_only_members", false, "global.society",
             "Whisper Sound Only For Members", "Makes the whispering sound only play for Society Members, thus making the Society fully secret."
     );
+    public final ConfigFileEntry<Boolean> SECRET_SOCIETY_ADVANCED_DEATHS = new ConfigFileEntry<>(
+            "secret_society_advanced_deaths", false, "global.society",
+            "Secret Society Advanced Deaths", "Enables the advanced deaths (seen in Past Life), where you actually die by different causes instead of your lives just being changed."
+    );
 
     public final ConfigFileEntry<Boolean> WATCHERS_IN_TAB = new ConfigFileEntry<>(
             "watchers_in_tab", true, "global.watchers",
@@ -345,12 +349,16 @@ public class DefaultConfigValues {
             "Maximum Lives", "The maximum number of lives any player can have after randomization."
     );
     public final ConfigFileEntry<Double> LIVES_RANDOMIZE_MINUTE = new ConfigFileEntry<>(
-            "lives_randomize_time", 1.0, ConfigTypes.MINUTES, "global.lives.random[new]",
+            "lives_randomize_time", 1.0, ConfigTypes.MINUTES, "global.lives.random",
             "Lives Randomize Time", "How many minutes after the session starts the lives get picked."
     );
     public final ConfigFileEntry<Boolean> LIVES_LIFE_DIFF_MESSAGE = new ConfigFileEntry<>(
-            "lives_life_diff_message", false, "global.lives[new]",
+            "lives_life_diff_message", false, "global.lives",
             "Show Life Diff In Death Message", "Shows an indicator of how many lives were lost in the death messages."
+    );
+    public final ConfigFileEntry<Boolean> LIVES_LOSE_KILLS_ONLY = new ConfigFileEntry<>(
+            "lives_lose_kills_only", false, "global.lives",
+            "Only Lose Lives From PvP Kills", "Makes players not lose lives from natural deaths."
     );
 
     public final ConfigFileEntry<Boolean> SIMPLE_LIFE = new ConfigFileEntry<>(

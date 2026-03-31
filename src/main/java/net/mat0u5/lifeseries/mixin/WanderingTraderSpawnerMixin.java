@@ -8,15 +8,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import static net.mat0u5.lifeseries.Main.seasonConfig;
 
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
+import static net.mat0u5.lifeseries.Main.currentSeason;
 //? if <= 1.21.4
 //import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //? if >= 1.21.5
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-//? if <= 1.21.9 {
-/*import net.minecraft.world.entity.npc.WanderingTraderSpawner;
-*///?} else {
-import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
-//?}
 
 @Mixin(value = WanderingTraderSpawner.class, priority = 1)
 public class WanderingTraderSpawnerMixin {

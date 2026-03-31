@@ -3,14 +3,10 @@ package net.mat0u5.lifeseries.gui.seasons;
 import net.mat0u5.lifeseries.gui.DefaultScreen;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-//? if <= 1.21.9 {
-/*import net.minecraft.Util;
- *///?} else {
 import net.minecraft.util.Util;
-//?}
 
 public class PastLifeInfoScreen extends DefaultScreen {
 
@@ -52,7 +48,7 @@ public class PastLifeInfoScreen extends DefaultScreen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY) {
+    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         RenderUtils.text("§0Past Life", centerX, startY + 7).anchorCenter().scaled(2f, 2f).render(context, this.font);
         RenderUtils.text(pastLifeInfoText, startX + 12, startY + 30).colored(TextColors.PASTEL_RED).wrapLines(BG_WIDTH-30, 6).render(context, this.font);
     }

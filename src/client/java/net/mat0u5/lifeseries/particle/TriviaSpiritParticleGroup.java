@@ -23,19 +23,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-//? if <= 1.21.9 {
-/*import net.minecraft.client.renderer.RenderType;
- *///?} else {
 import net.minecraft.client.renderer.rendertype.RenderType;
-//?}
 
-//? if <= 1.21.11 {
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.state.ParticleGroupRenderState;
- //?} else {
-/*import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
-*///?}
 
 public class TriviaSpiritParticleGroup extends ParticleGroup<TriviaSpiritParticle> {
     public TriviaSpiritParticleGroup(final ParticleEngine engine) {

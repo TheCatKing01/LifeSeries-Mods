@@ -14,6 +14,7 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.lists.ListsManager;
+import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.other.MidnightChimes;
@@ -71,22 +72,15 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.*;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
 //? if <= 1.20
 //import net.minecraft.world.scores.Scoreboard;
-//? if <= 1.21.9
-//import net.minecraft.world.level.GameRules;
-//? if > 1.21.9
-import net.minecraft.world.level.gamerules.GameRules;
 //? if > 1.20
 import net.minecraft.world.scores.DisplaySlot;
-//? if <= 1.21.9 {
-/*import net.minecraft.world.entity.monster.WitherSkeleton;
-*///?} else {
-import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-//?}
 
 public abstract class Season {
     public static final String RESOURCEPACK_MAIN_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-main-27d9e98eb6009401319a5256f7695f1bba902412/main.zip";
@@ -112,6 +106,7 @@ public abstract class Season {
     public boolean HIDE_UNJUSTIFIED_KILL_MESSAGES = false;
     public static boolean reloadPlayerTeams = false;
     private static boolean BROADCAST_LIFE_GAIN = false;
+    public boolean LOCATOR_BAR = false;
     private double ADDITIONAL_WITHER_SKULL_RATE = 0.05;
     public static Random rnd = new Random();
     public static Vec3 skyColor = null;
@@ -182,6 +177,7 @@ public abstract class Season {
         Snails.killAllSnails();
         Snails.snails.clear();
         Snails.preventSnails.clear();
+        AdvancedDeathsManager.resetQueuedDeaths();
     }
 
     public void reloadStart() {
@@ -200,29 +196,19 @@ public abstract class Season {
         //?}
 
         if (overworld != null) {
-            //? if <= 1.21.9 {
-            /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_KEEPINVENTORY, seasonConfig.KEEP_INVENTORY.get());
-            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_ANNOUNCE_ADVANCEMENTS, seasonConfig.SHOW_ADVANCEMENTS.get());
-            OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_NATURAL_REGENERATION, getSeason() != Seasons.SECRET_LIFE);
-            *///?} else {
             OtherUtils.setBooleanGameRule(overworld, GameRules.KEEP_INVENTORY, seasonConfig.KEEP_INVENTORY.get());
             OtherUtils.setBooleanGameRule(overworld, GameRules.SHOW_ADVANCEMENT_MESSAGES, seasonConfig.SHOW_ADVANCEMENTS.get());
             OtherUtils.setBooleanGameRule(overworld, GameRules.NATURAL_HEALTH_REGENERATION, getSeason() != Seasons.SECRET_LIFE);
-            //?}
 
             //? if >= 1.21.6 {
-            boolean locatorBarEnabled = seasonConfig.LOCATOR_BAR.get();
+            boolean locatorBarEnabled = LOCATOR_BAR;
             if (!locatorBarEnabled && this instanceof DoubleLife) {
                 locatorBarEnabled = DoubleLife.SOULMATE_LOCATOR_BAR;
             }
             if (!locatorBarEnabled && boogeymanManager.BOOGEYMAN_ENABLED) {
                 locatorBarEnabled = boogeymanManager.BOOGEYMAN_LOCATOR_BAR;
             }
-            //? if <= 1.21.9 {
-            /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_LOCATOR_BAR, locatorBarEnabled);
-            *///?} else {
             OtherUtils.setBooleanGameRule(overworld, GameRules.LOCATOR_BAR, locatorBarEnabled);
-            //?}
             //?}
         }
 
@@ -288,6 +274,7 @@ public abstract class Season {
         WildLifeTriviaHandler.EASY_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_EASY.get();
         WildLifeTriviaHandler.NORMAL_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_NORMAL.get();
         WildLifeTriviaHandler.HARD_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_HARD.get();
+        LOCATOR_BAR = seasonConfig.LOCATOR_BAR.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();
@@ -305,7 +292,7 @@ public abstract class Season {
         DatapackIntegration.reload();
         PlayerUtils.resendCommandTrees();
         SubInManager.reload();
-        LifeSkinsManager.reloadSkinsCache();
+        LifeSkinsManager.reloadCache();
     }
 
     private boolean shouldHandleWildcards() {
@@ -389,6 +376,7 @@ public abstract class Season {
 
     public void reloadAllPlayerTeams() {
         PlayerUtils.getAllPlayers().forEach(this::reloadPlayerTeam);
+        LifeSkinsManager.sendTeamNumUpdates();
     }
 
     public void reloadPlayerTeam(ServerPlayer player) {
@@ -414,6 +402,20 @@ public abstract class Season {
 
     public void playerChangedTeam(ServerPlayer player) {
         Events.updatePlayerListsNextTick = true;
+        updateClientPlayerTeam(player);
+    }
+
+    public static void updateClientPlayerTeam(ServerPlayer player) {
+        LifeSkinsManager.sendTeamNumUpdatesFrom(player);
+        Team team = player.getTeam();
+        if (team != null) {
+            SimplePackets.TEAM_NAME.target(player).sendToClient(team.getName());
+            SimplePackets.TEAM_COLOR.target(player).sendToClient(team.getColor().getName());
+        }
+        else {
+            SimplePackets.TEAM_NAME.target(player).sendToClient("");
+            SimplePackets.TEAM_COLOR.target(player).sendToClient("");
+        }
     }
 
     public String getTeamForPlayer(ServerPlayer player) {
@@ -430,11 +432,7 @@ public abstract class Season {
 
     public void dropItemsOnLastDeath(ServerPlayer player) {
         boolean doDrop = seasonConfig.PLAYERS_DROP_ITEMS_ON_FINAL_DEATH.get();
-        //? if <= 1.21.9 {
-        /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
-        *///?} else {
         boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-        //?}
 
         if (doDrop && keepInventory) {
             for (ItemStack item : PlayerUtils.getPlayerInventory(player)) {
@@ -604,7 +602,9 @@ public abstract class Season {
         }
         DatapackIntegration.EVENT_PLAYER_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
         if (!DatapackIntegration.EVENT_PLAYER_DEATH.isCanceled() && livesManager.canChangeLivesNaturally(player) && player.ls$hasAssignedLives()) {
-            player.ls$removeLife();
+            if (killedByPlayer || !livesManager.LIVES_LOSE_KILLS_ONLY) {
+                player.ls$removeLife();
+            }
         }
     }
 
@@ -637,11 +637,7 @@ public abstract class Season {
         if (player.ls$isAlive()) return;
         for (Map.Entry<Vec3, List<Float>> entry : info.entrySet()) {
             Vec3 pos = entry.getKey();
-            //? if <= 1.21 {
-            /*int minY = player.ls$getServerLevel().getMinBuildHeight();
-            *///?} else {
             int minY = player.ls$getServerLevel().getMinY();
-            //?}
             if (pos.y <= minY) continue;
 
             LevelUtils.teleport(player, player.ls$getServerLevel(), pos, entry.getValue().get(0), entry.getValue().get(1));
@@ -669,6 +665,10 @@ public abstract class Season {
         *///?} else {
         killer.awardKillScore(victim, killer.damageSources().playerAttack(killer));
         //?}
+
+        if (livesManager.LIVES_LOSE_KILLS_ONLY) {
+            victim.ls$removeLife();
+        }
     }
 
     public void tryClaimKillLifeGain(ServerPlayer killer, ServerPlayer victim) {
@@ -792,12 +792,12 @@ public abstract class Season {
         EntityType<?> entityType = entity.getType();
 
         //? if <= 1.21.11 {
-        SpawnEggItem spawnEgg = SpawnEggItem.byId(entityType);
+        /*SpawnEggItem spawnEgg = SpawnEggItem.byId(entityType);
         if (spawnEgg == null) return;
         ItemStack spawnEggItem = spawnEgg.getDefaultInstance();
-        //?} else {
-        /*ItemStack spawnEggItem = SpawnEggItem.byId(entityType).map(ItemStack::new).orElse(null);
-        *///?}
+        *///?} else {
+        ItemStack spawnEggItem = SpawnEggItem.byId(entityType).map(ItemStack::new).orElse(null);
+        //?}
 
         if (spawnEggItem == null) return;
         if (spawnEggItem.isEmpty()) return;

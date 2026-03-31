@@ -9,21 +9,17 @@ import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public abstract class ConfigEntry {
     public static final int PREFFERED_HEIGHT = 20;
@@ -100,7 +96,7 @@ public abstract class ConfigEntry {
         return 0;
     }
 
-    public void render(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void render(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         renderTicks++;
         isHovered = hovered;
         updateHighlightAnimation(tickDelta);
@@ -113,14 +109,18 @@ public abstract class ConfigEntry {
         int textColor = hasError() ? TextColors.PASTEL_RED : TextColors.WHITE;
         int labelX = x + LABEL_OFFSET_X;
         int labelY = y + LABEL_OFFSET_Y + additionalLabelOffsetY();
-        context.drawString(textRenderer, getDisplayName(), labelX, labelY, textColor);
+        //~ renames_26_1_volatile
+        context.text(textRenderer, getDisplayName(), labelX, labelY, textColor);
+        //~ !renames_26_1_volatile
 
         int resetButtonX = x + width - RESET_BUTTON_WIDTH + RESET_BUTTON_OFFSET_X;
         if (hasResetButton()) {
             resetButton.setX(resetButtonX);
             resetButton.setY(y + RESET_BUTTON_OFFSET_Y + additionalResetButtonOffsetY());
             resetButton.active = canReset();
-            resetButton.render(context, mouseX, mouseY, tickDelta);
+            //~ renames_26_1_volatile
+            resetButton.extractRenderState(context, mouseX, mouseY, tickDelta);
+            //~ !renames_26_1_volatile
         }
 
         if (hasError()) {
@@ -147,7 +147,9 @@ public abstract class ConfigEntry {
         }
 
         if (isNew) {
-            context.drawString(textRenderer, "New", 2, labelY, TextColors.LIGHT_GRAY_A128);
+            //~ renames_26_1_volatile
+            context.text(textRenderer, "New", 2, labelY, TextColors.LIGHT_GRAY_A128);
+            //~ !renames_26_1_volatile
         }
 
 
@@ -234,7 +236,7 @@ public abstract class ConfigEntry {
         return PREFFERED_HEIGHT;
     }
 
-    protected abstract void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
+    protected abstract void renderEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
     public abstract void resetToDefault();
 
     public abstract Object getValue();

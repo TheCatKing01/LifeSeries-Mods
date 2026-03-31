@@ -25,9 +25,6 @@ import java.util.*;
 
 import static net.mat0u5.lifeseries.Main.*;
 
-//? if <= 1.20.2
-//import net.minecraft.world.scores.Score;
-//? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
 
 public abstract class ConfigManager extends DefaultConfigValues {
@@ -198,6 +195,8 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WILDCARD_SNAILS_SPEED_MULTIPLIER
                 ,WILDCARD_SNAILS_DROWN_PLAYERS
                 ,WILDCARD_SNAILS_EFFECTS
+                , LIVES_RANDOMIZE_MINUTE
+                ,LIVES_LOSE_KILLS_ONLY
         ));
 
         return entries;

@@ -1,16 +1,14 @@
 package net.mat0u5.lifeseries.gui.config.entries;
 
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public abstract class ModifiableListEntry extends EmptyConfigEntry {
     public final Button deleteEntryButton;
@@ -31,7 +29,7 @@ public abstract class ModifiableListEntry extends EmptyConfigEntry {
     }
 
     @Override
-    protected void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         if (isFirst()) {
             renderFirstEntryExtras(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
             y += firstEntryHeightAdd();
@@ -45,26 +43,30 @@ public abstract class ModifiableListEntry extends EmptyConfigEntry {
         }
     }
 
-    public void renderFirstEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderFirstEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
     }
 
-    public void renderMiddleEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderMiddleEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         deleteEntryButton.setX(x+5);
         deleteEntryButton.setY(y+2);
-        deleteEntryButton.render(context, mouseX, mouseY, tickDelta);
+        //~ renames_26_1_volatile
+        deleteEntryButton.extractRenderState(context, mouseX, mouseY, tickDelta);
+        //~ !renames_26_1_volatile
     }
 
-    protected abstract void renderMainEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
+    protected abstract void renderMainEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta);
 
-    public void renderLastEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderLastEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         addEntryButton.setX(x+10);
         addEntryButton.setY(y+2);
         if (isLast()) {
-            addEntryButton.render(context, mouseX, mouseY, tickDelta);
+            //~ renames_26_1_volatile
+            addEntryButton.extractRenderState(context, mouseX, mouseY, tickDelta);
+            //~ !renames_26_1_volatile
         }
     }
 
-    //?if <= 1.21.6 {
+    //? if <= 1.21.6 {
     /*@Override
     protected boolean mouseClickedEntry(double mouseX, double mouseY, int button) {
         if (deleteEntryButton.mouseClicked(mouseX, mouseY, button) || addEntryButton.mouseClicked(mouseX, mouseY, button)) {

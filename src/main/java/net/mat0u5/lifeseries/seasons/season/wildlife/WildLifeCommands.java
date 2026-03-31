@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
@@ -220,8 +221,20 @@ public class WildLifeCommands extends Command {
                     )
 					.executes(context -> setRandomSuperpowers(context.getSource()))
                 )
-                .then(literal("skipCooldown")
-                    .executes(context -> skipSuperpowerCooldown(context.getSource()))
+                .then(literal("cooldown")
+                        .then(argument("player", EntityArgument.players())
+                                .then(literal("set")
+                                        .then(argument("amount", IntegerArgumentType.integer(0))
+                                                .executes(context -> setSuperpowerCooldown(context.getSource(), EntityArgument.getPlayers(context, "player"), IntegerArgumentType.getInteger(context, "amount")))
+                                        )
+                                )
+                                .then(literal("reset")
+                                        .executes(context -> setSuperpowerCooldown(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
+                                )
+                                .then(literal("get")
+                                        .executes(context -> getSuperpowerCooldown(context.getSource(), EntityArgument.getPlayers(context, "player")))
+                                )
+                        )
                 )
                 .then(literal("force")
                     .then(argument("player", EntityArgument.players())
@@ -254,9 +267,13 @@ public class WildLifeCommands extends Command {
         if (checkSnailCommandDisabled(source)) return -1;
 
         for (ServerPlayer player : targets) {
-            Snail snail = Snails.snails.remove(player.getUUID());
-            if (snail != null) {
-                snail.serverData.despawn();
+            List<Snail> snails = Snails.snails.remove(player.getUUID());
+            if (snails != null) {
+                for (Snail snail : snails) {
+                    if (snail != null) {
+                        snail.serverData.despawn();
+                    }
+                }
             }
         }
 
@@ -492,19 +509,58 @@ public class WildLifeCommands extends Command {
         return 1;
     }
 
-    public int skipSuperpowerCooldown(CommandSourceStack source) {
+    public int setSuperpowerCooldown(CommandSourceStack source, Collection<ServerPlayer> targets, Integer cooldown) {
         if (checkBanned(source)) return -1;
-        ServerPlayer player = source.getPlayer();
-        if (player == null) return -1;
-        Superpower superpower = SuperpowersWildcard.getSuperpowerInstance(player);
-        if (superpower == null) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INACTIVE.get());
+        boolean setAny = false;
+        for (ServerPlayer player : targets) {
+            Superpower superpower = SuperpowersWildcard.getSuperpowerInstance(player);
+            if (superpower == null) {
+                continue;
+            }
+
+            setAny = true;
+            if (cooldown != null) {
+                superpower.cooldown(cooldown*1000);
+            }
+            else {
+                superpower.cooldown(superpower.getCooldownMillis());
+            }
+            superpower.sendCooldownPacket();
+            superpower.sendShowCooldownPacket();
+        }
+        if (!setAny) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INACTIVE_OTHER_ALL.get());
             return -1;
         }
-        superpower.cooldown = 0;
-        SimplePackets.SUPERPOWER_COOLDOWN.target(player).sendToClient(0);
-
-        OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN.get());
+        if (cooldown == null) {
+            if (targets.size() == 1) {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN_RESET_SINGLE.get(targets.iterator().next()));
+            }
+            else {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN_RESET_MULTIPLE.get(targets.size()));
+            }
+        }
+        else {
+            if (targets.size() == 1) {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN_SET_SINGLE.get(targets.iterator().next(), cooldown));
+            }
+            else {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN_SET_MULTIPLE.get(targets.size(), cooldown));
+            }
+        }
+        return 1;
+    }
+    public int getSuperpowerCooldown(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+        for (ServerPlayer player : targets) {
+            Superpower superpower = SuperpowersWildcard.getSuperpowerInstance(player);
+            if (superpower == null) {
+                OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INACTIVE_OTHER.get(player));
+                continue;
+            }
+            long cooldownSeconds = Math.max(0, (superpower.cooldown - System.currentTimeMillis())) / 1000;
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_COOLDOWN_GET.get(player, cooldownSeconds));
+        }
         return 1;
     }
 	

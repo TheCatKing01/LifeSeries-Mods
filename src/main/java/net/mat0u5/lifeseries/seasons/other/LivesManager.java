@@ -38,9 +38,6 @@ import java.util.*;
 import static net.mat0u5.lifeseries.Main.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
-//? if <= 1.20.2
-//import net.minecraft.world.scores.Score;
-//? if > 1.20.2
 import net.minecraft.world.scores.PlayerScoreEntry;
 
 public class LivesManager {
@@ -57,6 +54,7 @@ public class LivesManager {
     public int ROLL_MAX_LIVES = 6;
     public double LIVES_RANDOMIZE_MINUTE = 1.0;
     public boolean SHOW_LIFE_DIFF = false;
+    public boolean LIVES_LOSE_KILLS_ONLY = false;
 
     public boolean assignedLives = false;
     public Random rnd = new Random();
@@ -77,6 +75,7 @@ public class LivesManager {
         ROLL_MIN_LIVES = Math.min(minLivesConfig, maxLivesConfig);
         ROLL_MAX_LIVES = Math.max(minLivesConfig, maxLivesConfig);
         SHOW_LIFE_DIFF = seasonConfig.LIVES_LIFE_DIFF_MESSAGE.get();
+        LIVES_LOSE_KILLS_ONLY = seasonConfig.LIVES_LOSE_KILLS_ONLY.get();
     }
 
     public Map<Integer, PlayerTeam> getLivesTeams() {
@@ -156,10 +155,19 @@ public class LivesManager {
     }
 
     public Integer getTeamGainLives(String teamName) {
-        Integer teamConfig = seasonConfig.getOrCreateInt("team_gainlvies-"+teamName, defaultTeamGainLife(teamName));
+        String keyOld = "team_gainlvies-"+teamName;
+        String key = "team_gainlives-"+teamName;
+
+        String oldValue = seasonConfig.getProperty(keyOld);
+        if (oldValue != null && seasonConfig.getProperty(key) == null) {
+            seasonConfig.removeProperty(keyOld);
+            seasonConfig.setProperty(key, oldValue);
+        }
+
+        Integer teamConfig = seasonConfig.getOrCreateInt(key, defaultTeamGainLife(teamName));
         if (teamConfig <= -1) {
             teamConfig = defaultTeamGainLife(teamName);
-            seasonConfig.setProperty("team_gainlvies-"+teamName, String.valueOf(teamConfig));
+            seasonConfig.setProperty(key, String.valueOf(teamConfig));
         }
         if (teamConfig <= -1) teamConfig = null;
         return teamConfig;
@@ -203,7 +211,7 @@ public class LivesManager {
         if (canKill == null) canKill = -1;
         if (gainLife == null) gainLife = -1;
         seasonConfig.setProperty("team_cankill-"+teamName, String.valueOf(canKill));
-        seasonConfig.setProperty("team_gainlvies-"+teamName, String.valueOf(gainLife));
+        seasonConfig.setProperty("team_gainlives-"+teamName, String.valueOf(gainLife));
     }
 
     public void createTeams() {

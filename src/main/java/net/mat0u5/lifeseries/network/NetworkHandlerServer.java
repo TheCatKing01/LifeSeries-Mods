@@ -41,10 +41,7 @@ import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.other.*;
-import net.mat0u5.lifeseries.utils.player.PermissionManager;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
-import net.mat0u5.lifeseries.utils.player.TeamUtils;
+import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -327,38 +324,7 @@ public class NetworkHandlerServer {
 
     public static void registerPackets() {
         //? if > 1.20.3 {
-        //? if <= 1.21.11 {
-        PayloadTypeRegistry.playS2C().register(NumberPayload.ID, NumberPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(StringPayload.ID, StringPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(StringListPayload.ID, StringListPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(TriviaQuestionPayload.ID, TriviaQuestionPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(LongPayload.ID, LongPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(PlayerDisguisePayload.ID, PlayerDisguisePayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(ConfigPayload.ID, ConfigPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(SidetitlePacket.ID, SidetitlePacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(SnailTexturePacket.ID, SnailTexturePacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(VoteScreenPayload.ID, VoteScreenPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(EmptyPayload.ID, EmptyPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(BooleanPayload.ID, BooleanPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(IntPayload.ID, IntPayload.CODEC);
-
-        PayloadTypeRegistry.playC2S().register(NumberPayload.ID, NumberPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(StringPayload.ID, StringPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(StringListPayload.ID, StringListPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(TriviaQuestionPayload.ID, TriviaQuestionPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(LongPayload.ID, LongPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(PlayerDisguisePayload.ID, PlayerDisguisePayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(ConfigPayload.ID, ConfigPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(SidetitlePacket.ID, SidetitlePacket.CODEC);
-        PayloadTypeRegistry.playC2S().register(SnailTexturePacket.ID, SnailTexturePacket.CODEC);
-        PayloadTypeRegistry.playC2S().register(VoteScreenPayload.ID, VoteScreenPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(EmptyPayload.ID, EmptyPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(BooleanPayload.ID, BooleanPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(IntPayload.ID, IntPayload.CODEC);
-        //?} else {
-        /*PayloadTypeRegistry.clientboundPlay().register(NumberPayload.ID, NumberPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(NumberPayload.ID, NumberPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(StringPayload.ID, StringPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(StringListPayload.ID, StringListPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(HandshakePayload.ID, HandshakePayload.CODEC);
@@ -372,6 +338,7 @@ public class NetworkHandlerServer {
         PayloadTypeRegistry.clientboundPlay().register(EmptyPayload.ID, EmptyPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(BooleanPayload.ID, BooleanPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(IntPayload.ID, IntPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LifeSkinsTexturePayload.ID, LifeSkinsTexturePayload.CODEC);
 
         PayloadTypeRegistry.serverboundPlay().register(NumberPayload.ID, NumberPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(StringPayload.ID, StringPayload.CODEC);
@@ -387,7 +354,7 @@ public class NetworkHandlerServer {
         PayloadTypeRegistry.serverboundPlay().register(EmptyPayload.ID, EmptyPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BooleanPayload.ID, BooleanPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(IntPayload.ID, IntPayload.CODEC);
-        *///?}
+        PayloadTypeRegistry.serverboundPlay().register(LifeSkinsTexturePayload.ID, LifeSkinsTexturePayload.CODEC);
         //?}
     }
     //? if <= 1.20.3 {
@@ -456,10 +423,10 @@ public class NetworkHandlerServer {
 
         ServerLoginConnectionEvents.QUERY_START.register((handler, server, sender, synchronizer) -> {
             //? if <= 1.21.11 {
-            sender.sendPacket(IdentifierHelper.mod("preloginpacket"), PacketByteBufs.create());
-            //?} else {
-            /*sender.sendPacket(IdentifierHelper.mod("preloginpacket"), FriendlyByteBufs.create());
-            *///?}
+            /*sender.sendPacket(IdentifierHelper.mod("preloginpacket"), PacketByteBufs.create());
+            *///?} else {
+            sender.sendPacket(IdentifierHelper.mod("preloginpacket"), FriendlyByteBufs.create());
+            //?}
         });
 
         // Handle the response
@@ -729,6 +696,8 @@ public class NetworkHandlerServer {
 
         SimplePackets.ADMIN_INFO.target(player).sendToClient(PermissionManager.isAdmin(player));
         SimplePackets.MOD_DISABLED.target(player).sendToClient(Main.MOD_DISABLED);
+        Season.updateClientPlayerTeam(player);
+        LifeSkinsManager.sendTeamNumUpdatesTo(player);
     }
 
     public static void sendUpdatePackets() {

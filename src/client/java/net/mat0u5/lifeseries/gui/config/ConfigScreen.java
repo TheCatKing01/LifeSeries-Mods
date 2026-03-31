@@ -13,7 +13,7 @@ import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -25,11 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class ConfigScreen extends Screen {
     private static int HEADER_HEIGHT_SMALL = 55;
@@ -331,34 +328,35 @@ public class ConfigScreen extends Screen {
         }
     }
 
+    //~ renames_26_1_volatile
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        //?if <= 1.20.2 {
-        /*//?if <= 1.20 {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        //? if <= 1.20.2 {
+        /*//? if <= 1.20 {
         /^context.setColor(0.25F, 0.25F, 0.25F, 1.0F);
         ^///?} else {
         context.setColor(0.85F, 0.85F, 0.85F, 1.0F);
         //?}
-        RenderUtils.texture(Screen.BACKGROUND_LOCATION, 0, this.height - FOOTER_HEIGHT, this.width, FOOTER_HEIGHT).textureSize(32, 32).render(context);
+        RenderUtils.texture(Screen.BACKGROUND_LOCATION, 0, this.height - FOOTER_HEIGHT, this.width, FOOTER_HEIGHT).textureSize(32, 32).extractRenderState(context);
         context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         *///?}
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
-        context.drawCenteredString(this.font, this.title, this.width / 2, HEADER_TITLE_Y, TextColors.WHITE);
+        context.centeredText(this.font, this.title, this.width / 2, HEADER_TITLE_Y, TextColors.WHITE);
 
         if (this.categoryNames.size() > 1) {
             this.renderCategoryTabs(context, mouseX, mouseY);
         }
 
-        this.searchField.render(context, mouseX, mouseY, delta);
+        this.searchField.extractRenderState(context, mouseX, mouseY, delta);
 
         updateButtonStates();
         if (this.hasErrors()) {
-            context.drawString(this.font, Component.nullToEmpty("Errors"), 10, HEADER_TITLE_Y, TextColors.LIGHT_RED);
+            context.text(this.font, Component.nullToEmpty("Errors"), 10, HEADER_TITLE_Y, TextColors.LIGHT_RED);
         }
     }
 
-    private void renderCategoryTabs(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderCategoryTabs(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         int tabWidth = Math.min(HEADER_CATEGORY_MIN_WIDTH, this.width / this.categoryNames.size());
         int startX = (this.width - ((tabWidth+HEADER_CATEGORY_GAP) * this.categoryNames.size())) / 2;
 
@@ -375,9 +373,10 @@ public class ConfigScreen extends Screen {
 
             String categoryName = this.categoryNames.get(i);
             int textColor = isSelected ? TextColors.WHITE : TextColors.PASTEL_WHITE;
-            context.drawCenteredString(this.font, categoryName, tabX + tabWidth / 2, tabY + HEADER_CATEGORY_NAME_OFFSET_Y, textColor);
+            context.centeredText(this.font, categoryName, tabX + tabWidth / 2, tabY + HEADER_CATEGORY_NAME_OFFSET_Y, textColor);
         }
     }
+    //~ !renames_26_1_volatile
 
     //? if <= 1.21.6 {
     /*@Override

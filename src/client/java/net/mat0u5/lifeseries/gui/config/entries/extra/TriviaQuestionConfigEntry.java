@@ -11,7 +11,7 @@ import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.mat0u5.lifeseries.utils.interfaces.IEntryGroupHeader;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
@@ -19,12 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-//? if >= 1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-//?}
+//? if >= 1.21.9
+import net.minecraft.client.input.*;
 
 public class TriviaQuestionConfigEntry extends ModifiableListEntry {
     boolean sentToServer = false;
@@ -57,14 +53,16 @@ public class TriviaQuestionConfigEntry extends ModifiableListEntry {
         }
 
         @Override
-        public void renderEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void renderEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             Component questionText = Component.literal("Question:");
             RenderUtils.text(questionText,x + 25, y+6).colored(TextColors.LIGHT_GRAY).render(context, textRenderer);
             textField.setY(y+1);
             textField.setX(x + 25 + textRenderer.width(questionText) + 7);
             int buttonX = resetButton != null ? resetButton.getX() : (x + width);
             textField.setWidth(buttonX-textField.getX()-10);
-            textField.render(context, mouseX, mouseY, tickDelta);
+            //~ renames_26_1_volatile
+            textField.extractRenderState(context, mouseX, mouseY, tickDelta);
+            //~ !renames_26_1_volatile
         }
 
         @Override
@@ -280,7 +278,7 @@ public class TriviaQuestionConfigEntry extends ModifiableListEntry {
     }
 
     @Override
-    protected void renderMainEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderMainEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         renderAsGroup.render(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
     }
 

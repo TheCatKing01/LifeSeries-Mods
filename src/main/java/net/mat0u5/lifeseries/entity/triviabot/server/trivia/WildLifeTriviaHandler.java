@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.UUID;
 import static net.mat0u5.lifeseries.Main.blacklist;
 import static net.mat0u5.lifeseries.Main.server;
+import net.minecraft.world.entity.animal.bee.Bee;
 
 //? if <= 1.20.3 {
 /*import net.minecraft.core.particles.DustParticleOptions;
@@ -59,14 +60,8 @@ import net.minecraft.core.component.DataComponents;
 
 //? if > 1.21.9
 import net.minecraft.world.entity.EntityReference;
-
-//? if <= 1.21.9 {
-/*import net.minecraft.world.entity.animal.Bee;
-import org.apache.http.util.EntityUtils;
-import org.joml.Vector3f;
-*///?} else {
-import net.minecraft.world.entity.animal.bee.Bee;
-//?}
+//? if <= 1.20.3
+//import org.joml.Vector3f;
 
 public class WildLifeTriviaHandler extends TriviaHandler {
     public WildLifeTriviaHandler(TriviaBot bot) {
@@ -304,20 +299,11 @@ public class WildLifeTriviaHandler extends TriviaHandler {
     *///?} else {
     private static final List<Holder<MobEffect>> blessEffects = List.of(
     //?}
-            //? if <= 1.21.4 {
-            /*MobEffects.MOVEMENT_SPEED,
-            MobEffects.DIG_SPEED,
-            MobEffects.DAMAGE_BOOST,
-            MobEffects.JUMP,
-            MobEffects.DAMAGE_RESISTANCE,
-            *///?} else {
             MobEffects.SPEED,
             MobEffects.HASTE,
             MobEffects.STRENGTH,
             MobEffects.JUMP_BOOST,
             MobEffects.RESISTANCE,
-            //?}
-
             MobEffects.REGENERATION,
             MobEffects.FIRE_RESISTANCE,
             MobEffects.WATER_BREATHING,
@@ -350,17 +336,10 @@ public class WildLifeTriviaHandler extends TriviaHandler {
             }
             if (effect == null) continue;
             int amplifier;
-            //? if <= 1.21.4 {
-            /*if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
-                    effect == MobEffects.REGENERATION || effect == MobEffects.DAMAGE_BOOST || effect == MobEffects.HEALTH_BOOST || effect == MobEffects.DAMAGE_RESISTANCE) {
-                amplifier = 0;
-            }
-            *///?} else {
             if (effect == MobEffects.FIRE_RESISTANCE || effect == MobEffects.WATER_BREATHING || effect == MobEffects.NIGHT_VISION ||
                     effect == MobEffects.REGENERATION || effect == MobEffects.STRENGTH || effect == MobEffects.HEALTH_BOOST || effect == MobEffects.RESISTANCE) {
                 amplifier = 0;
             }
-            //?}
             else {
                 amplifier = player.getRandom().nextInt(4);
             }
