@@ -41,20 +41,32 @@ public class WildLifeCommands extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() == Seasons.WILD_LIFE;
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            return true;
+        }
+        return Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get();
     }
 
     @Override
     public Component getBannedText() {
-        return Component.nullToEmpty("This command is only available when playing Wild Life.");
+        return Component.nullToEmpty("This command is only available in Wild Life or when auto-activate wildcards are enabled.");
     }
 
     public List<String> getAdminCommands() {
-        return List.of("wildcard", "snail", "superpower", "hunger");
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            return List.of("wildcard", "snail", "superpower", "hunger");
+        }
+        if (Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            return List.of("wildcard", "snail");
+        }
+        return List.of();
     }
 
     public List<String> getNonAdminCommands() {
-        return List.of("snail");
+        if (currentSeason.getSeason() == Seasons.WILD_LIFE || Main.seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            return List.of("snail");
+        }
+        return List.of();
     }
 
     @Override
@@ -116,6 +128,7 @@ public class WildLifeCommands extends Command {
 	
         dispatcher.register(
             literal("snail")
+                .requires(source -> isAllowed())
                 .then(literal("names")
                     .then(literal("set")
                         .requires(PermissionManager::isAdmin)
@@ -185,7 +198,7 @@ public class WildLifeCommands extends Command {
         );
         dispatcher.register(
             literal("superpower")
-			    .requires(PermissionManager::isAdmin)
+			    .requires(source -> PermissionManager.isAdmin(source) && currentSeason.getSeason() == Seasons.WILD_LIFE)
                 .then(literal("add")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
@@ -236,7 +249,7 @@ public class WildLifeCommands extends Command {
                 
         dispatcher.register(
             literal("hunger")
-                .requires(PermissionManager::isAdmin)
+                .requires(source -> PermissionManager.isAdmin(source) && currentSeason.getSeason() == Seasons.WILD_LIFE)
                 .then(literal("randomizeFood")
                         .executes(context -> randomizeFood(context.getSource()))
                 )
@@ -430,6 +443,15 @@ public class WildLifeCommands extends Command {
     }
 
     public List<String> suggestionsActivateWildcard() {
+        if (WildcardManager.isLimitedWildcards()) {
+            List<String> allowed = new ArrayList<>();
+            for (Wildcards wildcard : WildcardManager.getAllowedWildcardsForSeason()) {
+                if (!WildcardManager.isActiveWildcard(wildcard)) {
+                    allowed.add(wildcard.getStringName());
+                }
+            }
+            return allowed;
+        }
         List<String> allWildcards = Wildcards.getInactiveWildcardsStr();
         allWildcards.add("*");
         return allWildcards;
@@ -695,12 +717,21 @@ public class WildLifeCommands extends Command {
 
     public int deactivateWildcard(CommandSourceStack source, String wildcardName) {
         if (checkBanned(source)) return -1;
+        if (WildcardManager.isLimitedWildcards() && wildcardName.equalsIgnoreCase("*")) {
+            WildcardManager.onSessionEnd();
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_WILDCARD_DEACTIVATE_ALL.get());
+            return 1;
+        }
         if (wildcardName.equalsIgnoreCase("*")) {
             WildcardManager.onSessionEnd();
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_WILDCARD_DEACTIVATE_ALL.get());
             return 1;
         }
         Wildcards wildcard = Wildcards.getFromString(wildcardName);
+        if (!WildcardManager.isWildcardAllowedForSeason(wildcard)) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
+            return -1;
+        }
         if (wildcard == Wildcards.NULL) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
             return -1;
@@ -726,6 +757,10 @@ public class WildLifeCommands extends Command {
     public int activateWildcard(CommandSourceStack source, String wildcardName) {
         if (checkBanned(source)) return -1;
         if (!WildcardManager.ensureClientModeForWildcards()) return -1;
+        if (WildcardManager.isLimitedWildcards() && wildcardName.equalsIgnoreCase("*")) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
+            return -1;
+        }
         if (wildcardName.equalsIgnoreCase("*")) {
             List<Wildcards> inactiveWildcards = Wildcards.getInactiveWildcards();
             for (Wildcards wildcard : inactiveWildcards) {
@@ -749,6 +784,10 @@ public class WildLifeCommands extends Command {
             return 1;
         }
         Wildcards wildcard = Wildcards.getFromString(wildcardName);
+        if (!WildcardManager.isWildcardAllowedForSeason(wildcard)) {
+            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
+            return -1;
+        }
         if (wildcard == Wildcards.NULL) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
             return -1;
@@ -771,6 +810,14 @@ public class WildLifeCommands extends Command {
 
     public int listWildcards(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
+        if (WildcardManager.isLimitedWildcards()) {
+            List<String> allowed = new ArrayList<>();
+            for (Wildcards wildcard : WildcardManager.getAllowedWildcardsForSeason()) {
+                allowed.add(wildcard.getStringName());
+            }
+            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_AVAILABLE.get(allowed));
+            return 1;
+        }
         OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_AVAILABLE.get(Wildcards.getWildcardsStr()));
         return 1;
     }

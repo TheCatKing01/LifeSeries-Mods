@@ -249,6 +249,13 @@ public abstract class ConfigManager extends DefaultConfigValues {
     public void sendConfigTo(ServerPlayer player) {
         int index = 0;
         for (ConfigFileEntry<?> entry : getAllConfigEntries()) {
+            if (currentSeason.getSeason() == Seasons.WILD_LIFE && entry.groupInfo != null) {
+                String groupInfo = entry.groupInfo;
+                if (groupInfo.contains("lifeseries_plus.wildcards.snails")
+                        || groupInfo.contains("lifeseries_plus.wildcards.trivia")) {
+                    continue;
+                }
+            }
             sendConfigEntry(player, entry, index);
             index++;
         }

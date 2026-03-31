@@ -24,6 +24,8 @@ import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.Session;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
@@ -278,6 +280,7 @@ public abstract class Season {
         Snail.GLOBAL_SPEED_MULTIPLIER = seasonConfig.WILDCARD_SNAILS_SPEED_MULTIPLIER.get();
         Snail.SHOULD_DROWN_PLAYER = seasonConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get();
         Snail.ALLOW_POTION_EFFECTS = seasonConfig.WILDCARD_SNAILS_EFFECTS.get();
+        WildcardManager.ACTIVATE_WILDCARD_MINUTE = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();
@@ -469,6 +472,9 @@ public abstract class Season {
         secretSociety.sessionEnd();
         listsManager.resetLists();
         livesManager.assignedLives = false;
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.onSessionEnd();
+        }
 		
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             TriviaWildcard.resetPlayerPunishments(player);
@@ -481,6 +487,9 @@ public abstract class Season {
         listsManager.resetLists();
         addSessionActions();
         livesManager.assignedLives = false;
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.onSessionStart();
+        }
         return true;
     }
 
@@ -493,6 +502,9 @@ public abstract class Season {
         boogeymanManager.tick();
         secretSociety.tick();
         listsManager.tick();
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.tick();
+        }
         if (timer.isMultipleOf(Time.seconds(5)) || reloadPlayerTeams) {
             reloadPlayerTeams = false;
             reloadAllPlayerTeams();
@@ -515,6 +527,9 @@ public abstract class Season {
 			TaskScheduler.scheduleTask(Time.seconds(38), DatapackIntegration.EVENT_MIDNIGHT_CHIMES::trigger);
 			onMidnightChimes();
 		}
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.tickSessionOn();
+        }
 	}
 	
     public void addSessionActions() {
@@ -522,6 +537,30 @@ public abstract class Season {
         secretSociety.addSessionActions();
         listsManager.addSessionActions();
         livesManager.addSessionActions();
+        if (getSeason() == Seasons.WILD_LIFE || !seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            return;
+        }
+        double activateMinute = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
+        currentSession.addSessionActionIfTime(
+                new SessionAction(Time.minutes(activateMinute - 2)) {
+                    @Override
+                    public void trigger() {
+                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
+                            PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_WARNING_2MIN.get());
+                        }
+                    }
+                }
+        );
+        currentSession.addSessionAction(
+                new SessionAction(Time.minutes(activateMinute), ModifiableText.SESSION_ACTION_WILDCARD.getString()) {
+                    @Override
+                    public void trigger() {
+                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
+                            WildcardManager.activateWildcards();
+                        }
+                    }
+                }
+        );
     }
 
     /*
@@ -785,6 +824,9 @@ public abstract class Season {
             }
         });
         listsManager.onPlayerJoin(player);
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.onPlayerJoin(player);
+        }
     }
 
     public boolean shouldBeInSpectator(ServerPlayer player) {
@@ -822,6 +864,9 @@ public abstract class Season {
         }
         boogeymanManager.onPlayerFinishJoining(player);
         livesManager.onPlayerFinishJoining(player);
+        if (getSeason() != Seasons.WILD_LIFE && seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+            WildcardManager.onPlayerFinishJoining(player);
+        }
     }
 
     public void onPlayerDisconnect(ServerPlayer player) {

@@ -275,15 +275,6 @@ public class WildLifeConfig extends ConfigManager {
             "Callback", ""
     );
 
-    public static final ConfigFileEntry<Double> ACTIVATE_WILDCARD_MINUTE = new ConfigFileEntry<>(
-            "activate_wildcard_minute", 2.5, ConfigTypes.MINUTES, "lifeseries_plus.wildcards",
-            "Activate Wildcard Time", "The number of minutes (in the session) after which the wildcard is activated."
-    );
-    public static final ConfigFileEntry<Boolean> WILDCARD_AUTO_ACTIVATE = new ConfigFileEntry<>(
-            "wildcard_auto_activate", true, "lifeseries_plus.wildcards",
-            "Auto-Activate Wildcards", "Controls whether wildcards activate automatically after the set time."
-    );
-
 	public static final ConfigFileEntry<Boolean> WILD_MIDNIGHT_CHIMES = new ConfigFileEntry<>(
             "wild_midnight_chimes", false, "{lifeseries_plus.chimes}",
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
@@ -315,8 +306,6 @@ public class WildLifeConfig extends ConfigManager {
 				,GROUP_POWERS //Group
 
                 //Group stuff
-                ,ACTIVATE_WILDCARD_MINUTE
-                ,WILDCARD_AUTO_ACTIVATE
                 ,WILDCARD_SIZESHIFTING_MIN_SIZE
                 ,WILDCARD_SIZESHIFTING_MAX_SIZE
                 ,WILDCARD_SIZESHIFTING_SIZE_CHANGE_MULTIPLIER
@@ -452,6 +441,7 @@ public class WildLifeConfig extends ConfigManager {
     @Override
     public void instantiateProperties() {
         CUSTOM_ENCHANTER_ALGORITHM.defaultValue = true;
+        WILDCARD_AUTO_ACTIVATE.defaultValue = true;
         BLACKLIST_ITEMS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_ITEMS);
         BLACKLIST_BLOCKS.defaultValue = TextUtils.formatString("[{}]", BLACKLISTED_BLOCKS);
         BLACKLIST_CLAMPED_ENCHANTS_LEVEL_1.defaultValue = TextUtils.formatString("[{}]", CLAMPED_ENCHANTMENTS);

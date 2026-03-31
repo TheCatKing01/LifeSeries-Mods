@@ -137,6 +137,10 @@ public class NetworkHandlerServer {
                     return;
                 }
                 Wildcards wildcard = Wildcards.getFromString(wildcardValue);
+                if (!WildcardManager.isWildcardAllowedForSeason(wildcard)) {
+                    player.ls$message(ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
+                    return;
+                }
                 if (wildcard != null && wildcard != Wildcards.NULL) {
                     WildcardManager.chosenWildcard(wildcard);
                 }

@@ -172,11 +172,12 @@ public class WildLife extends Season {
     @Override
     public void addSessionActions() {
         super.addSessionActions();
-        if (!WildLifeConfig.WILDCARD_AUTO_ACTIVATE.get()) {
+        if (!seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
             return;
         }
+        double activateMinute = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
         currentSession.addSessionActionIfTime(
-                new SessionAction(Time.minutes(WildcardManager.ACTIVATE_WILDCARD_MINUTE-2)) {
+                new SessionAction(Time.minutes(activateMinute - 2)) {
                     @Override
                     public void trigger() {
                         if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
@@ -186,7 +187,7 @@ public class WildLife extends Season {
                 }
         );
         currentSession.addSessionAction(
-                new SessionAction(Time.minutes(WildcardManager.ACTIVATE_WILDCARD_MINUTE), ModifiableText.SESSION_ACTION_WILDCARD.getString()) {
+                new SessionAction(Time.minutes(activateMinute), ModifiableText.SESSION_ACTION_WILDCARD.getString()) {
                     @Override
                     public void trigger() {
                         if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
@@ -241,7 +242,7 @@ public class WildLife extends Season {
         WildLifeTriviaHandler.HARD_TIME = WildLifeConfig.WILDCARD_TRIVIA_SECONDS_HARD.get();
         WindCharge.MAX_MACE_DAMAGE = WildLifeConfig.WILDCARD_SUPERPOWERS_WINDCHARGE_MAX_MACE_DAMAGE.get();
         Superspeed.STEP_UP = WildLifeConfig.WILDCARD_SUPERPOWERS_SUPERSPEED_STEP.get();
-        WildcardManager.ACTIVATE_WILDCARD_MINUTE = WildLifeConfig.ACTIVATE_WILDCARD_MINUTE.get();
+        WildcardManager.ACTIVATE_WILDCARD_MINUTE = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
         SuperpowersWildcard.WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME = WildLifeConfig.WILDCARD_SUPERPOWERS_DISABLE_INTRO_THEME.get();
         SuperpowersWildcard.setBlacklist(WildLifeConfig.WILDCARD_SUPERPOWERS_POWER_BLACKLIST.get());
         SuperpowersWildcard.ZOMBIES_HEALTH = WildLifeConfig.WILDCARD_SUPERPOWERS_ZOMBIES_HEALTH.get();

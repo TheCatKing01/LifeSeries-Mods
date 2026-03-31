@@ -4,6 +4,7 @@ import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.*;
@@ -43,8 +44,27 @@ public class WildcardManager {
         return null;
     }
 
+    public static boolean isLimitedWildcards() {
+        return currentSeason != null && currentSeason.getSeason() != Seasons.WILD_LIFE;
+    }
+
+    public static List<Wildcards> getAllowedWildcardsForSeason() {
+        if (!isLimitedWildcards()) {
+            return Wildcards.getWildcards();
+        }
+        return new ArrayList<>(List.of(Wildcards.SNAILS, Wildcards.TRIVIA));
+    }
+
+    public static boolean isWildcardAllowedForSeason(Wildcards wildcard) {
+        if (wildcard == null) return false;
+        if (wildcard == Wildcards.NULL) return true;
+        if (!isLimitedWildcards()) return true;
+        return wildcard == Wildcards.SNAILS || wildcard == Wildcards.TRIVIA;
+    }
+
     public static void chosenWildcard(Wildcards wildcard) {
         if (wildcard == null) return;
+        if (wildcard != Wildcards.NULL && !isWildcardAllowedForSeason(wildcard)) return;
         WildcardManager.chosenWildcard = wildcard;
         if (wildcard == Wildcards.NULL) return;
         PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_WILDCARD_CHOOSE.get(wildcard));
@@ -56,7 +76,9 @@ public class WildcardManager {
             activeWildcards.put(chosenWildcard, chosenWildcard.getInstance());
             return;
         }
-        Wildcards wildcard = Wildcards.getWildcards().get(rnd.nextInt(Wildcards.getWildcards().size()));
+        List<Wildcards> available = getAllowedWildcardsForSeason();
+        if (available.isEmpty()) return;
+        Wildcards wildcard = available.get(rnd.nextInt(available.size()));
         activeWildcards.put(wildcard, wildcard.getInstance());
     }
 
