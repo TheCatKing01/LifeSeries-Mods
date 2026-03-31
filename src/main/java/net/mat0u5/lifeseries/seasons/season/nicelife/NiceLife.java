@@ -334,7 +334,7 @@ public class NiceLife extends Season {
             if (pausedSnailWildcard != null) {
                 pausedSnailWildcard.deactivate();
             }
-            PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_FADED.get());
+            WildcardManager.fadedWildcard();
             snailsPausedForChimes.clear();
             resumeSnailsAfterResults = true;
         }
@@ -759,6 +759,7 @@ public class NiceLife extends Season {
             TaskScheduler.scheduleTask(90, () -> {
                 WildcardManager.activeWildcards.put(Wildcards.SNAILS, paused);
                 paused.activate();
+                WildcardManager.showCryptTitle("A wildcard is active!");
             });
             return;
         }

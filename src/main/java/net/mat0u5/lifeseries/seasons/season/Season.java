@@ -29,6 +29,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
+import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
@@ -282,6 +283,11 @@ public abstract class Season {
         Snail.SHOULD_DROWN_PLAYER = seasonConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get();
         Snail.ALLOW_POTION_EFFECTS = seasonConfig.WILDCARD_SNAILS_EFFECTS.get();
         WildcardManager.ACTIVATE_WILDCARD_MINUTE = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
+        TriviaBot.CAN_START_RIDING = seasonConfig.WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.get();
+        TriviaWildcard.TRIVIA_BOTS_PER_PLAYER = seasonConfig.WILDCARD_TRIVIA_BOTS_PER_PLAYER.get();
+        WildLifeTriviaHandler.EASY_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_EASY.get();
+        WildLifeTriviaHandler.NORMAL_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_NORMAL.get();
+        WildLifeTriviaHandler.HARD_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_HARD.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();

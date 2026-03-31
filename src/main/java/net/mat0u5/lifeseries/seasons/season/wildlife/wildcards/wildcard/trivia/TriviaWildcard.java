@@ -84,6 +84,9 @@ public class TriviaWildcard extends Wildcard {
         spawnedBotsFor.clear();
         activatedAt = currentSession.getPassedTime();
         bots.clear();
+        if (WildLifeTriviaHandler.itemSpawner == null) {
+            WildLifeTriviaHandler.initializeItemSpawner();
+        }
         WildLifeTriviaHandler.cursedGigantificationPlayers.clear();
         WildLifeTriviaHandler.cursedHeartPlayers.clear();
         WildLifeTriviaHandler.cursedMoonJumpPlayers.clear();

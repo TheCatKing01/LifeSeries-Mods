@@ -46,7 +46,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
     }
 
     protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
-        return new ArrayList<>(List.of(
+        List<ConfigFileEntry<?>> entries = new ArrayList<>(List.of(
                 GROUP_GLOBAL // Group
                 ,GROUP_LIFESERIES_PLUS // Group
                 ,GROUP_SEASON // Group
@@ -195,14 +195,21 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WILDCARD_TRIVIA_SECONDS_EASY
                 ,WILDCARD_TRIVIA_SECONDS_NORMAL
                 ,WILDCARD_TRIVIA_SECONDS_HARD
-                ,GROUP_TRIVIA_QUESTIONS
-				,GROUP_TRIVIA_QUESTIONS_EASY
-				,GROUP_TRIVIA_QUESTIONS_NORMAL
-                ,GROUP_TRIVIA_QUESTIONS_HARD
                 ,WILDCARD_SNAILS_SPEED_MULTIPLIER
                 ,WILDCARD_SNAILS_DROWN_PLAYERS
                 ,WILDCARD_SNAILS_EFFECTS
         ));
+
+        if (currentSeason != null && currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            entries.addAll(List.of(
+                    GROUP_TRIVIA_QUESTIONS
+                    ,GROUP_TRIVIA_QUESTIONS_EASY
+                    ,GROUP_TRIVIA_QUESTIONS_NORMAL
+                    ,GROUP_TRIVIA_QUESTIONS_HARD
+            ));
+        }
+
+        return entries;
     }
 
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
