@@ -462,7 +462,6 @@ public enum ModifiableText {
     ,WILDLIFE_MAKEITWILD_PT3(Seasons.WILD_LIFE, "§cMake §eit")
     ,WILDLIFE_MAKEITWILD_PT4(Seasons.WILD_LIFE, "§cMake §eit §a§lWILD")
     ,WILDLIFE_MAKEITWILD_TRANSCRIPT("The ending is yours... Make it WILD.")
-    ,NICELIFE_SNAILS_IN_BED(Seasons.NICE_LIFE, "I heard snails in bed.")
     ,WILDLIFE_SUPERPOWERS_DEAD(Seasons.WILD_LIFE, "Dead players can't use superpowers!")
     ,WILDLIFE_POWER_MIMIC_ERROR(Seasons.WILD_LIFE, "You cannot mimic that power.")
     ,WILDLIFE_POWER_MIMIC_NOPLAYER(Seasons.WILD_LIFE, "You are not looking at a player.")
@@ -705,6 +704,59 @@ public enum ModifiableText {
     }
 
     public static void registerAllTexts() {
+        final List<String> globalTextKeys = List.of(
+                "wildlife.snail.texture.info",
+                "wildlife.snail.default.name",
+                "wildlife.snail.name.request",
+                "wildlife.snail.name.request.prompt",
+                "wildlife.snail.textures.list",
+                "wildlife.snail.name.set",
+                "wildlife.snail.name.reset.single",
+                "wildlife.snail.name.reset.multiple",
+                "wildlife.snail.name.get",
+                "wildlife.wildcard.deactivate",
+                "wildlife.wildcard.activate",
+                "wildlife.snail.textures.reload",
+                "wildlife.snail.textures.none",
+                "wildlife.wildcard.gui.error",
+                "wildlife.wildcard.gui.open",
+                "wildlife.wildcard.deactivate.all",
+                "wildlife.wildcard.invalid",
+                "wildlife.wildcard.activate.all.title",
+                "wildlife.wildcard.activate.all",
+                "wildlife.wildcard.activate.error",
+                "wildlife.wildcard.implement.error",
+                "wildlife.wildcard.activated.none",
+                "wildlife.trivia.question.invalid",
+                "wildlife.snail.info",
+                "wildlife.trivia.notice.start",
+                "wildlife.trivia.notice",
+                "wildlife.wildcard.warning.2min",
+                "wildlife.wildcard.faded",
+                "wildlife.wildcard.dots.1",
+                "wildlife.wildcard.dots.2",
+                "wildlife.wildcard.dots.3",
+                "wildlife.makeitwild.pt1",
+                "wildlife.makeitwild.pt2",
+                "wildlife.makeitwild.pt3",
+                "wildlife.makeitwild.pt4",
+                "wildlife.makeitwild.transcript",
+                "wildlife.wildcard.available",
+                "wildlife.wildcard.activated",
+                "wildlife.wildcard.choose",
+                "wildlife.trivia.receive.effect",
+                "wildlife.trivia.punishment.set.single",
+                "wildlife.trivia.punishment.set.multiple",
+                "wildlife.trivia.punishment.clear.single",
+                "wildlife.trivia.punishment.clear.multiple",
+                "wildlife.trivia.bot.spawn.single",
+                "wildlife.trivia.bot.spawn.multiple",
+                "wildlife.trivia.set.single",
+                "wildlife.trivia.set.multiple",
+                "wildlife.trivia.reset.single",
+                "wildlife.trivia.reset.multiple",
+                "muted.triviabot"
+        );
         for (ModifiableText modifiableText : ModifiableText.values()) {
             String defaultValue = modifiableText.getRegisterDefaultValue();
 
@@ -727,7 +779,11 @@ public enum ModifiableText {
             }
             */
 
-            if (modifiableText.requiredSeason != null && currentSeason != null && currentSeason.getSeason() != modifiableText.requiredSeason) continue;
+            if (modifiableText.requiredSeason != null && currentSeason != null
+                    && currentSeason.getSeason() != modifiableText.requiredSeason
+                    && !globalTextKeys.contains(modifiableText.name)) {
+                continue;
+            }
             ModifiableTextManager.register(modifiableText.name, defaultValue, modifiableText.getRegisterArgs());
         }
     }

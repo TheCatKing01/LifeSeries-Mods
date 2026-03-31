@@ -1,6 +1,5 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia;
 
-import net.mat0u5.lifeseries.config.DefaultConfigValues;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
@@ -82,12 +81,6 @@ public class TriviaWildcard extends Wildcard {
         usedNormalQuestions.clear();
         usedHardQuestions.clear();
         resetQueue();
-        WildLifeTriviaHandler.initializeItemSpawner();
-        TriviaBot.CAN_START_RIDING = DefaultConfigValues.WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.get();
-        TRIVIA_BOTS_PER_PLAYER = DefaultConfigValues.WILDCARD_TRIVIA_BOTS_PER_PLAYER.get();
-        WildLifeTriviaHandler.EASY_TIME = DefaultConfigValues.WILDCARD_TRIVIA_SECONDS_EASY.get();
-        WildLifeTriviaHandler.NORMAL_TIME = DefaultConfigValues.WILDCARD_TRIVIA_SECONDS_NORMAL.get();
-        WildLifeTriviaHandler.HARD_TIME = DefaultConfigValues.WILDCARD_TRIVIA_SECONDS_HARD.get();
         spawnedBotsFor.clear();
         activatedAt = currentSession.getPassedTime();
         bots.clear();

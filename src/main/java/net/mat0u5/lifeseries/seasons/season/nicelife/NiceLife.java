@@ -85,6 +85,7 @@ public class NiceLife extends Season {
     private final Set<UUID> snailsPausedForChimes = new HashSet<>();
     private int snailsResumeDelayTicks = 0;
     private Wildcard pausedSnailWildcard = null;
+    private boolean resumeSnailsAfterResults = false;
 
     @Override
     public void initialize() {
@@ -110,6 +111,7 @@ public class NiceLife extends Season {
         snailsPausedForChimes.clear();
         snailsResumeDelayTicks = 0;
         pausedSnailWildcard = null;
+        resumeSnailsAfterResults = false;
         //? if <= 1.21.9 {
         /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT, true);
         *///?} else {
@@ -334,12 +336,10 @@ public class NiceLife extends Season {
             }
             PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_FADED.get());
             snailsPausedForChimes.clear();
-            snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks,
-                    NiceLifeVotingManager.getNightResultsDurationTicks() + Time.seconds(5).getTicks());
+            resumeSnailsAfterResults = true;
         }
         else {
             despawnSnailsForMidnightChimes();
-            snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks, NiceLifeVotingManager.getNightResultsDurationTicks());
         }
     }
 
@@ -400,6 +400,11 @@ public class NiceLife extends Season {
 			overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
 			*///?}
             accessor.ls$wakeUpAllPlayers();
+        }
+        if (resumeSnailsAfterResults && pausedSnailWildcard != null) {
+            snailsResumeDelayTicks = Math.max(snailsResumeDelayTicks,
+                    NiceLifeVotingManager.getNightResultsDurationTicks() + Time.seconds(5).getTicks());
+            resumeSnailsAfterResults = false;
         }
         resumeSnailsForAwakePlayers();
     }
