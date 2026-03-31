@@ -131,8 +131,12 @@ public class WildLifeConfig extends ConfigManager {
             "Can Have Potion Effects", "Controls whether snails can have potion effects, like invisibility."
     );
     public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_RED_LIVES = new ConfigFileEntry<>(
-            "wildcard_snails_red_lives", true, "season.snails[new]",
+            "wildcard_snails_red_lives", true, "season.snails",
             "Can Red Players Have Snails", "Controls whether red players have snails or not."
+    );
+    public static final ConfigFileEntry<Integer> WILDCARD_SNAILS_PER_PLAYER = new ConfigFileEntry<>(
+            "wildcard_snails_per_player", 1, "season.snails[new]",
+            "Number of Snails Per Player", "Controls how many snails each player has.\n§cNOTE: Higher numbers can be very laggy, use high number with caution."
     );
 
     public static final ConfigFileEntry<Double> WILDCARD_TIMEDILATION_MIN_SPEED = new ConfigFileEntry<>(
@@ -338,6 +342,7 @@ public class WildLifeConfig extends ConfigManager {
                 ,WILDCARD_SNAILS_DROWN_PLAYERS
                 ,WILDCARD_SNAILS_EFFECTS
                 ,WILDCARD_SNAILS_RED_LIVES
+                ,WILDCARD_SNAILS_PER_PLAYER
 
                 ,WILDCARD_TIMEDILATION_MIN_SPEED
                 ,WILDCARD_TIMEDILATION_MAX_SPEED
