@@ -374,7 +374,7 @@ public class DefaultConfigValues {
             "Complex Life Trades", "Changes the Simple Life trades to be custom Complex Life ones."
     );
     public final ConfigFileEntry<Boolean> MIDNIGHT_CHIMES = new ConfigFileEntry<>(
-            "midnight_chimes", false, "lifeseries_plus",
+			"midnight_chimes", false, "{lifeseries_plus.chimes}",
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
     public final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
