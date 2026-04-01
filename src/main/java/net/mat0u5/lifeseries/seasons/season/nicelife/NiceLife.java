@@ -636,11 +636,11 @@ public class NiceLife extends Season {
     private int getSleepingPercentage() {
         if (server == null) return 100;
         ServerLevel overworld = server.overworld();
-        //? if >= 26.1 {
-        return overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
-        //?} else {
+        //? if <= 1.21.9 {
         /*return overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
-         *///?}
+         *///?} else {
+        return overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
+        //?}
     }
 
     private boolean shouldFreezeTime(int sleepingPercentage) {
