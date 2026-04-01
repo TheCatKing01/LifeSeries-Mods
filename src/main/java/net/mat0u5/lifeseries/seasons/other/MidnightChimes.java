@@ -14,10 +14,10 @@ public class MidnightChimes {
 				return false;
 			}
 
-			//? if <= 1.21.11 && < 26.1 {
-			long dayTime = server.overworld().getDayTime() % 24000L;
+			//? if >= 26.1 {
+			long dayTime = server.overworld().getOverworldClockTime() % 24000L;
 			//?} else {
-			/*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+			/*long dayTime = server.overworld().getDayTime() % 24000L;
 			*///?}
 
 			if (dayTime < minTime) {
