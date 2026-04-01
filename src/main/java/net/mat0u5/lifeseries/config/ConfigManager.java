@@ -105,6 +105,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GROUP_SNAILS
 				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES
+                ,SPAWN_BOTS_AT_MIDNIGHT
 
                 //Group stuff
                 ,SHOW_HEALTH_BELOW_NAME
@@ -174,8 +175,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,NAUGHTY_LIST_IGNORE
                 ,NICE_LIST_FORCE
                 ,NICE_LIST_IGNORE
-
-                ,TRADERS_MAX_AMOUNT
 				
 				,SUBIN_CHANGE_SKIN
                 ,SUBIN_CHANGE_USERNAME

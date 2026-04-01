@@ -157,6 +157,10 @@ public abstract class Season {
     }
 
     protected void onMidnightChimes() {
+        if (Boolean.TRUE.equals(seasonConfig.SPAWN_BOTS_AT_MIDNIGHT.get(seasonConfig))) {
+            TaskScheduler.scheduleTask(Time.seconds(38),
+                    () -> OtherUtils.executeCommand("/trivia bot spawn @a"));
+        }
     }
 	
     public void initialize() {

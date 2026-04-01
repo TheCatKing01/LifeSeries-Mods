@@ -364,6 +364,9 @@ public class WildLifeTriviaHandler extends TriviaHandler {
 
     public void spawnItemForPlayer() {
         if (bot.level().isClientSide()) return;
+        if (itemSpawner == null) {
+            initializeItemSpawner();
+        }
         if (itemSpawner == null) return;
         if (bot.serverData.getBoundPlayer() == null) return;
         Vec3 playerPos = bot.serverData.getBoundPlayer().position();

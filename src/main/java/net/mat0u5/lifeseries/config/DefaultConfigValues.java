@@ -377,6 +377,10 @@ public class DefaultConfigValues {
             "midnight_chimes", false, "lifeseries_plus",
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
+    public final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
+            "spawn_bots_at_midnight", true, "lifeseries_plus.chimes",
+            "Spawn Bots After Chimes", "Controls whether trivia bots spawn after the midnight chimes."
+    );
 
     public static final ConfigFileEntry<Object> GROUP_WILDCARDS = new ConfigFileEntry<>(
             "group_wildcards", null, ConfigTypes.TEXT, "{lifeseries_plus.wildcards}",

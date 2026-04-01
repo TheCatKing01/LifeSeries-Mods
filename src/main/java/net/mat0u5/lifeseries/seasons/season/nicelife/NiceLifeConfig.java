@@ -145,6 +145,13 @@ public class NiceLifeConfig extends ConfigManager {
     }
 
     @Override
+    protected List<ConfigFileEntry<?>> getDefaultConfigEntries() {
+        List<ConfigFileEntry<?>> defaultEntries = super.getDefaultConfigEntries();
+        defaultEntries.remove(SPAWN_BOTS_AT_MIDNIGHT);
+        return defaultEntries;
+    }
+
+    @Override
     protected List<ConfigFileEntry<?>> getSeasonSpecificConfigEntries() {
         return new ArrayList<>(List.of(
 		        SNOW_LAYER_INCREMENT_DELAY

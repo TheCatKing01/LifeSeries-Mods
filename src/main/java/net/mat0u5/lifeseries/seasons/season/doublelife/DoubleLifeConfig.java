@@ -106,7 +106,7 @@ public class DoubleLifeConfig extends ConfigManager {
 
     public static final ConfigFileEntry<Boolean> SOULMATES_SHARE_ROLL = new ConfigFileEntry<>(
 			"soulmates_share_roll", false, "global.lives.random",
-            "Fuse Rolls", "Controls whether the soulmate and roll lives rolled are fused into one."
+            "Fuse Lives/Soulmate Rolls", "Controls whether the soulmate and roll lives rolled are fused into one."
     );
 
     public static final ConfigFileEntry<Boolean> LIVES_RANDOMIZE_SOULMATES_SAME = new ConfigFileEntry<>(
@@ -120,7 +120,7 @@ public class DoubleLifeConfig extends ConfigManager {
     );
     public static final ConfigFileEntry<Boolean> CLEAR_ON_SESSION_END = new ConfigFileEntry<>(
             "clear_on_session_end", false, "season.reroll",
-            "Clear On Session End", "Controls whether soulmates are removed when a session ends."
+            "Clear Soulmates On Session End", "Controls whether soulmates are removed when a session ends."
     );
 	public static final ConfigFileEntry<Boolean> REROLL_MIDSESSION = new ConfigFileEntry<>(
 			"reroll_midsession", false, "{season.reroll.midsession}",
@@ -139,7 +139,7 @@ public class DoubleLifeConfig extends ConfigManager {
             "Only Reroll Unbound Players", "Controls if only players without a soulmate are rerolled. "
     );
 	public static final ConfigFileEntry<Boolean> REROLL_LIVES = new ConfigFileEntry<>(
-			"reroll_lives", true, "season.reroll",
+			"reroll_lives", false, "season.reroll",
             "Reroll Based On Life Count", "Controls if soulbounds are rerolled by based on life counts. "
     );
 
@@ -230,14 +230,6 @@ public class DoubleLifeConfig extends ConfigManager {
                 ,new ConfigFileEntry<>(
                         SPLIT_SOULMATES_WHEN_RED.key, SPLIT_SOULMATES_WHEN_RED.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
                         SPLIT_SOULMATES_WHEN_RED.displayName, SPLIT_SOULMATES_WHEN_RED.description
-                )
-                ,new ConfigFileEntry<>(
-                        SOULMATES_SHARE_ROLL.key, SOULMATES_SHARE_ROLL.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
-                        SOULMATES_SHARE_ROLL.displayName, SOULMATES_SHARE_ROLL.description
-                )
-                ,new ConfigFileEntry<>(
-                        LIVES_RANDOMIZE_SOULMATES_SAME.key, LIVES_RANDOMIZE_SOULMATES_SAME.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
-                        LIVES_RANDOMIZE_SOULMATES_SAME.displayName, LIVES_RANDOMIZE_SOULMATES_SAME.description
                 )
                 ,new ConfigFileEntry<>(
                         GIVELIFE_SOULMATES.key, GIVELIFE_SOULMATES.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",

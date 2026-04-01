@@ -182,7 +182,7 @@ public class DoubleLife extends Season {
             });
         }
         if (REROLL_MIDSESSION) {
-            scheduleMidSessionReroll();
+            scheduleMidSessionReroll(true);
         }
     }
 
@@ -214,6 +214,7 @@ public class DoubleLife extends Season {
         SOULMATES_PVP_ALLOWED = DoubleLifeConfig.SOULMATES_PVP_ALLOWED.get(seasonConfig);
 	    SOULMATES_SHARE_ROLL = DoubleLifeConfig.SOULMATES_SHARE_ROLL.get(seasonConfig);
         SOULBOUND_LIVES = DoubleLifeConfig.SOULBOUND_LIVES.get(seasonConfig);
+        SOULMATES_ASSIGN_MINUTE = DoubleLifeConfig.SOULMATES_ASSIGN_MINUTE.get(seasonConfig);
         CLEAR_ON_SESSION_END = DoubleLifeConfig.CLEAR_ON_SESSION_END.get(seasonConfig);
 		REROLL_MIDSESSION = DoubleLifeConfig.REROLL_MIDSESSION.get(seasonConfig);
 		REROLL_TIME = DoubleLifeConfig.REROLL_TIME.get(seasonConfig);
@@ -1167,13 +1168,17 @@ public class DoubleLife extends Season {
 		return Component.nullToEmpty("§aLives: §f" + safeLives);
 	}
 
-    private void scheduleMidSessionReroll() {
+    private void scheduleMidSessionReroll(boolean initialSchedule) {
         if (!REROLL_MIDSESSION) return;
-        TaskScheduler.scheduleTask(Time.minutes(REROLL_TIME), () -> {
+        double delayMinutes = REROLL_TIME;
+        if (initialSchedule) {
+            delayMinutes += Math.max(0.0, SOULMATES_ASSIGN_MINUTE);
+        }
+        TaskScheduler.scheduleTask(Time.minutes(delayMinutes), () -> {
             if (currentSession == null || !currentSession.statusStarted()) return;
             if (!REROLL_MIDSESSION) return;
             rollSoulmates(true, false, true);
-            scheduleMidSessionReroll();
+            scheduleMidSessionReroll(false);
         });
     }
 	

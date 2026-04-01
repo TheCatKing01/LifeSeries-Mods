@@ -4,7 +4,6 @@ import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
-import net.mat0u5.lifeseries.entity.triviabot.server.trivia.NiceLifeTriviaHandler;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Season;
@@ -18,8 +17,6 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.*;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
-import net.mat0u5.lifeseries.utils.other.OtherUtils;
-import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
@@ -56,9 +53,6 @@ import net.minecraft.server.level.ServerLevel;
 
 
 public class WildLife extends Season {
-	
-    private static final Time MIDNIGHT_SOUND_DURATION = Time.seconds(38);
-    private static final String MIDNIGHT_SPAWN_BOTS_COMMAND = "/trivia bot spawnFor @a";
 
     @Override
     public Seasons getSeason() {
@@ -149,16 +143,6 @@ public class WildLife extends Season {
     public void tickSessionOn(MinecraftServer server) {
         super.tickSessionOn(server);
         WildcardManager.tickSessionOn();
-    }
-
-    @Override
-    protected void onMidnightChimes() {
-        if (seasonConfig instanceof WildLifeConfig config) {
-            if (WildLifeConfig.SPAWN_BOTS_AT_MIDNIGHT.get(config)) {
-                TaskScheduler.scheduleTask(MIDNIGHT_SOUND_DURATION,
-                        () -> OtherUtils.executeCommand(MIDNIGHT_SPAWN_BOTS_COMMAND));
-            }
-        }
     }
 
     @Override

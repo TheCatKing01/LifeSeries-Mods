@@ -289,11 +289,6 @@ public class WildLifeConfig extends ConfigManager {
             "Midnight Chimes", "Controls whether the nice life midnight chimes play at midnight."
     );
 
-    public static final ConfigFileEntry<Boolean> SPAWN_BOTS_AT_MIDNIGHT = new ConfigFileEntry<>(
-            "spawn_bots_at_midnight", true, "lifeseries_plus.chimes",
-            "Spawn Bots After Chimes", "Controls whether trivia bots spawn after the midnight chimes."
-    );
-
     public WildLifeConfig() {
         super("./config/"+ Main.MOD_ID,"wildlife.properties");
     }
@@ -434,7 +429,6 @@ public class WildLifeConfig extends ConfigManager {
 				,WILDCARD_CALLBACK_POWER_STACKING
 				,WILDCARD_CALLBACK_OVERRIDE_TURN_OFF
 				,WILDCARD_CALLBACK_RESET_AT_MAX
-                ,SPAWN_BOTS_AT_MIDNIGHT
 				
 				,new ConfigFileEntry<>(
 				WILDCARD_CALLBACK_POWER_STACKING.key, WILDCARD_CALLBACK_POWER_STACKING.defaultValue, ConfigTypes.BOOLEAN, "{lifeseries_plus.power_stacking}",

@@ -458,6 +458,9 @@ public class NiceLifeTriviaHandler extends TriviaHandler {
     public List<ItemEntity> droppedItems = new ArrayList<>();
     public void spawnItemForPlayer(boolean success) {
         if (bot.level().isClientSide()) return;
+        if (itemSpawner == null) {
+            initializeItemSpawner();
+        }
         if (itemSpawner == null) return;
         if (bot.serverData.getBoundPlayer() == null) return;
         Vec3 pos = bot.position().add(0,1,0);
