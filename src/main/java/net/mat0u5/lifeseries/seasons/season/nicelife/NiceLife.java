@@ -181,11 +181,8 @@ public class NiceLife extends Season {
         super.tick(server);
         timePassed.tick();
         ServerLevel overworld = server.overworld();
-        //? if <= 1.21.9 {
-        /*int percentage = overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
-         *///?} else {
-        //?}
-        boolean freezeTime = shouldFreezeTime(percentage);
+        int sleepingPercentage = getSleepingPercentage();
+        boolean freezeTime = shouldFreezeTime(sleepingPercentage);
         if (!freezeTime && (currentSession.statusStarted() || SNOW_WHEN_NOT_IN_SESSION)) {				
 			snowTicks.tick();
             if (snowTicks.isLarger(SNOW_LAYER_INCREASE_INTERVAL)) {
@@ -233,7 +230,7 @@ public class NiceLife extends Season {
         resumeSnailsForAwakePlayers();
 
         if (triviaCannotStartFor.isSmaller(Time.zero())) {
-			if (canStartTriviaBySleeping(percentage)) {
+			if (canStartTriviaBySleeping(sleepingPercentage)) {
 				if (!NiceLifeTriviaManager.triviaInProgress) {
 					List<ServerPlayer> triviaPlayers = new ArrayList<>();
 					for (ServerPlayer player : livesManager.getAlivePlayers()) {
@@ -246,12 +243,7 @@ public class NiceLife extends Season {
 					}
 				}
 			}
-            //? if <= 1.21.9 {
-            /*int percentage = overworld.getGameRules().getInt(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
-             *///?} else {
-            int percentage = overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
-            //?}
-            if (areEnoughSleeping(percentage) && isMidnight() && currentSession.statusStarted()) {
+            if (areEnoughSleeping(sleepingPercentage) && isMidnight() && currentSession.statusStarted()) {
                 if (!NiceLifeTriviaManager.triviaInProgress) {
                     List<ServerPlayer> triviaPlayers = new ArrayList<>();
                     for(ServerPlayer player : livesManager.getAlivePlayers()) {
@@ -417,12 +409,11 @@ public class NiceLife extends Season {
         overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
         //?}
         wakeUpAllPlayers();
-        playedMidnightChimes = false;
         NiceLifeTriviaManager.endTrivia();
         if (overworld instanceof ServerLevelAccessor accessor) {
 			//? if <= 1.21.11 {
-			long newTime = overworld.getDayTime() + 24000L;
-			overworld.setDayTime(newTime - newTime % 24000L);
+			long newTimeAccessor = overworld.getDayTime() + 24000L;
+			overworld.setDayTime(newTimeAccessor - newTimeAccessor % 24000L);
 			//?} else {
 			/*long newTime = overworld.getOverworldClockTime() + 24000L;
 			overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
@@ -806,13 +797,17 @@ public class NiceLife extends Season {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
             UUID playerUUID = player.getUUID();
             if (snailsPausedForChimes.contains(playerUUID)) continue;
-            Snail snail = Snails.snails.get(playerUUID);
-            if (snail == null) continue;
-            if (!snail.isAlive()) {
-                Snails.snails.remove(playerUUID);
-                continue;
+            List<Snail> snails = Snails.snails.get(playerUUID);
+            if (snails == null || snails.isEmpty()) continue;
+            List<Snail> aliveSnails = new ArrayList<>();
+            for (Snail snail : snails) {
+                if (snail == null) continue;
+                if (!snail.isAlive()) continue;
+                aliveSnails.add(snail);
             }
-            snail.serverData.despawn();
+            for (Snail snail : aliveSnails) {
+                snail.serverData.despawn();
+            }
             Snails.snails.remove(playerUUID);
             snailsPausedForChimes.add(playerUUID);
         }

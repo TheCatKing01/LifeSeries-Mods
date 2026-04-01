@@ -443,10 +443,11 @@ public class DoubleLife extends Season {
         }
         boolean doCountdown = forceCountdown || (currentSession != null && currentSession.statusStarted());
         if (!doCountdown) {
+            List<ServerPlayer> revealPlayers = new ArrayList<>(playersToRoll);
             chooseRandomSoulmates(playersToRoll);
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
+            PlayerUtils.sendTitleToPlayers(revealPlayers, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
             TaskScheduler.scheduleTask(80, () -> {
-                for (ServerPlayer player : playersToRoll) {
+                for (ServerPlayer player : revealPlayers) {
                     Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
                     if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
                         ServerPlayer soulmate = getSoulmate(player);
@@ -462,28 +463,28 @@ public class DoubleLife extends Season {
             triggerFusedLivesRollAfterReveal();
             return;
 	    }
-        playersToRoll = getNonAssignedPlayers();
-        if (!playersToRoll.isEmpty()) {
+        List<ServerPlayer> countdownPlayers = getNonAssignedPlayers();
+        if (!countdownPlayers.isEmpty()) {
             DatapackIntegration.EVENT_SOULMATE_ROLL.trigger();
         }
-        PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-        PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
+        PlayerUtils.playSoundToPlayers(countdownPlayers, SoundEvents.UI_BUTTON_CLICK.value());
+        PlayerUtils.sendTitleToPlayers(countdownPlayers, ModifiableText.COUNTDOWN_GREEN_3.get(), 5, 20, 5);
         TaskScheduler.scheduleTask(25, () -> {
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_2.get(), 5, 20, 5);
+            PlayerUtils.playSoundToPlayers(countdownPlayers, SoundEvents.UI_BUTTON_CLICK.value());
+            PlayerUtils.sendTitleToPlayers(countdownPlayers, ModifiableText.COUNTDOWN_GREEN_2.get(), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(50, () -> {
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_1.get(), 5, 20, 5);
+            PlayerUtils.playSoundToPlayers(countdownPlayers, SoundEvents.UI_BUTTON_CLICK.value());
+            PlayerUtils.sendTitleToPlayers(countdownPlayers, ModifiableText.COUNTDOWN_GREEN_1.get(), 5, 20, 5);
         });
         TaskScheduler.scheduleTask(75, () -> {
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
+            PlayerUtils.sendTitleToPlayers(countdownPlayers, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(), 10, 50, 20);
+            PlayerUtils.playSoundToPlayers(countdownPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
         TaskScheduler.scheduleTask(165, () -> {
-            chooseRandomSoulmates(playersToRoll);
+            chooseRandomSoulmates(countdownPlayers);
 
-            for (ServerPlayer player : playersToRoll) {
+            for (ServerPlayer player : countdownPlayers) {
                 Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
                 if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
                     ServerPlayer soulmate = getSoulmate(player);
