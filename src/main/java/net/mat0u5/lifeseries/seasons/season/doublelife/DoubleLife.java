@@ -272,12 +272,12 @@ public class DoubleLife extends Season {
 
     public void removeSoulmateTags() {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            List<String> tagsCopy = new ArrayList<>(TagUtils.getTags(player));
-            //? if <= 1.21.11 {
-            /*List<String> tagsCopy = new ArrayList<>(player.getTags());
-            *///?} else {
-            List<String> tagsCopy = new ArrayList<>(player.entityTags());
-            //?}
+			List<String> tagsCopy;
+			//? if <= 1.21.11 {
+			tagsCopy = new ArrayList<>(player.getTags());
+			//?} else {
+			tagsCopy = new ArrayList<>(player.entityTags());
+			//?}
             for (String tag : tagsCopy) {
                 if (tag.startsWith("soulmate_")) {
                     player.removeTag(tag);
@@ -462,7 +462,7 @@ public class DoubleLife extends Season {
             triggerFusedLivesRollAfterReveal();
             return;
 	    }
-        List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
+        playersToRoll = getNonAssignedPlayers();
         if (!playersToRoll.isEmpty()) {
             DatapackIntegration.EVENT_SOULMATE_ROLL.trigger();
         }
