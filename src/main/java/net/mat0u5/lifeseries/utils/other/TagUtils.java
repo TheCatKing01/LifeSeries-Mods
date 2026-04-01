@@ -10,7 +10,7 @@ public final class TagUtils {
 
     public static Collection<String> getTags(Entity entity) {
         if (entity == null) return Collections.emptySet();
-        //? if <= 1.21.11 {
+        //? if <= 1.21.11 && < 26.1 {
         return entity.getTags();
         //?} else {
         /*return entity.entityTags();
