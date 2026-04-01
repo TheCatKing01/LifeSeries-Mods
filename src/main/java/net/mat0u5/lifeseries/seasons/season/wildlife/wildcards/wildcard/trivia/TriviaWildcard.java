@@ -8,6 +8,7 @@ import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandle
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.registries.MobRegistry;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.SizeShifting;
@@ -218,7 +219,19 @@ public class TriviaWildcard extends Wildcard {
     }
     public static void spawnBotFor(ServerPlayer player, BlockPos pos) {
         resetPlayerOnBotSpawn(player);
-        TriviaBot bot = LevelUtils.spawnEntity(MobRegistry.TRIVIA_BOT, player.ls$getServerLevel(), pos);
+        boolean forceWildlife = currentSeason.getSeason() == Seasons.NICE_LIFE;
+        if (forceWildlife) {
+            TriviaBot.FORCE_WILDLIFE_BOT_SPAWN = true;
+        }
+        TriviaBot bot;
+        try {
+            bot = LevelUtils.spawnEntity(MobRegistry.TRIVIA_BOT, player.ls$getServerLevel(), pos);
+        }
+        finally {
+            if (forceWildlife) {
+                TriviaBot.FORCE_WILDLIFE_BOT_SPAWN = false;
+            }
+        }
         if (bot != null) {
             SessionTranscript.newTriviaBot(player);
             bot.serverData.setBoundPlayer(player);

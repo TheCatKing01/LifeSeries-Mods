@@ -46,12 +46,15 @@ public class TriviaBot extends AmbientCreature {
     public static final int MAX_DISTANCE = 100;
     public static boolean CAN_START_RIDING = true;
     public static boolean FORCE_SANTA_BOT_SPAWN = false;
+    public static boolean FORCE_WILDLIFE_BOT_SPAWN = false;
 
     public TriviaBotClientData clientData = new TriviaBotClientData(this);
     public TriviaBotServerData serverData = new TriviaBotServerData(this);
     public TriviaBotSounds sounds = new TriviaBotSounds(this);
     public TriviaBotPathfinding pathfinding = new TriviaBotPathfinding(this);
     public TriviaHandler triviaHandler = new WildLifeTriviaHandler(this);
+    private boolean forceSantaBot = false;
+    private boolean forceWildLifeBot = false;
 
     private static final EntityDataAccessor<Boolean> submittedAnswer = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ranOutOfTime = SynchedEntityData.defineId(TriviaBot.class, EntityDataSerializers.BOOLEAN);
@@ -69,18 +72,38 @@ public class TriviaBot extends AmbientCreature {
         if (!level.isClientSide()) {
             setInvulnerable(true);
             setPersistenceRequired();
+            forceSantaBot = FORCE_SANTA_BOT_SPAWN;
+            forceWildLifeBot = FORCE_WILDLIFE_BOT_SPAWN;
             //? if <= 1.20.3 {
             /*this.setMaxUpStep(1.0F);
              *///?}
-            if (currentSeason.getSeason() == Seasons.NICE_LIFE || FORCE_SANTA_BOT_SPAWN) {
+            if (forceSantaBot) {
                 triviaHandler = new NiceLifeTriviaHandler(this);
                 setSantaBot(true);
             }
             else {
-                triviaHandler = new WildLifeTriviaHandler(this);
-                setSantaBot(false);
+                if (forceWildLifeBot) {
+                    triviaHandler = new WildLifeTriviaHandler(this);
+                    setSantaBot(false);
+                }
+                else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+                    triviaHandler = new NiceLifeTriviaHandler(this);
+                    setSantaBot(true);
+                }
+                else {
+                    triviaHandler = new WildLifeTriviaHandler(this);
+                    setSantaBot(false);
+                }
             }
         }
+    }
+
+    public boolean isForceSantaBot() {
+        return forceSantaBot;
+    }
+
+    public boolean isForceWildLifeBot() {
+        return forceWildLifeBot;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
