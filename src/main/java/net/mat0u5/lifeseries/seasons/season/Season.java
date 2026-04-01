@@ -268,6 +268,8 @@ public abstract class Season {
         Snail.GLOBAL_SPEED_MULTIPLIER = seasonConfig.WILDCARD_SNAILS_SPEED_MULTIPLIER.get();
         Snail.SHOULD_DROWN_PLAYER = seasonConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get();
         Snail.ALLOW_POTION_EFFECTS = seasonConfig.WILDCARD_SNAILS_EFFECTS.get();
+        Snails.WILDCARD_SNAILS_RED_LIVES = seasonConfig.WILDCARD_SNAILS_RED_LIVES.get();
+        Snails.SNAILS_PER_PLAYER = Math.max(1, seasonConfig.WILDCARD_SNAILS_PER_PLAYER.get());
         WildcardManager.ACTIVATE_WILDCARD_MINUTE = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
         TriviaBot.CAN_START_RIDING = seasonConfig.WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.get();
         TriviaWildcard.TRIVIA_BOTS_PER_PLAYER = seasonConfig.WILDCARD_TRIVIA_BOTS_PER_PLAYER.get();

@@ -406,6 +406,14 @@ public class DefaultConfigValues {
             "wildcard_snails_effects", false, "lifeseries_plus.wildcards.snails",
             "Can Have Potion Effects", "Controls whether snails can have potion effects, like invisibility."
     );
+    public static final ConfigFileEntry<Boolean> WILDCARD_SNAILS_RED_LIVES = new ConfigFileEntry<>(
+            "wildcard_snails_red_lives", true, "lifeseries_plus.wildcards.snails",
+            "Can Red Players Have Snails", "Controls whether red players have snails or not."
+    );
+    public static final ConfigFileEntry<Integer> WILDCARD_SNAILS_PER_PLAYER = new ConfigFileEntry<>(
+            "wildcard_snails_per_player", 1, "lifeseries_plus.wildcards.snails[new]",
+            "Number of Snails Per Player", "Controls how many snails each player has.\n§cNOTE: Higher numbers can be very laggy, use high number with caution."
+    );
 
     public static final ConfigFileEntry<Boolean> WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS = new ConfigFileEntry<>(
             "wildcard_trivia_bots_can_enter_boats", true, "lifeseries_plus.wildcards.trivia",

@@ -165,14 +165,14 @@ public class TriviaWildcard extends Wildcard {
             Queue<Integer> queue = playerSpawnQueue.get(uuid);
             if (queue != null && !queue.isEmpty()) {
                 if (currentTick >= queue.peek()) {
+                    TriviaBot existingBot = bots.get(uuid);
+                    if (existingBot != null && existingBot.isAlive()) {
+                        continue;
+                    }
                     queue.poll();
-                    if (spawnedBotsFor.containsKey(player.getUUID())) {
-                        spawnedBotsFor.put(player.getUUID(), 1+spawnedBotsFor.get(player.getUUID()));
-                    }
-                    else {
-                        spawnedBotsFor.put(player.getUUID(), 1);
-                    }
-                    if (spawnedBotsFor.get(player.getUUID()) <= getBotsPerPlayer()) {
+                    int newCount = spawnedBotsFor.getOrDefault(uuid, 0) + 1;
+                    spawnedBotsFor.put(uuid, newCount);
+                    if (newCount <= getBotsPerPlayer()) {
                         spawnBotFor(player);
                     }
                 }

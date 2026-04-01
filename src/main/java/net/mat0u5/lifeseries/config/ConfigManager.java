@@ -195,6 +195,8 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,WILDCARD_SNAILS_SPEED_MULTIPLIER
                 ,WILDCARD_SNAILS_DROWN_PLAYERS
                 ,WILDCARD_SNAILS_EFFECTS
+                ,WILDCARD_SNAILS_RED_LIVES
+                ,WILDCARD_SNAILS_PER_PLAYER
                 , LIVES_RANDOMIZE_MINUTE
                 ,LIVES_LOSE_KILLS_ONLY
         ));

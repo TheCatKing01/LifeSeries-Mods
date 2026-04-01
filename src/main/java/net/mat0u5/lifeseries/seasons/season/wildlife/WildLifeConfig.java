@@ -378,19 +378,19 @@ public class WildLifeConfig extends ConfigManager {
                     WILDCARD_TRIVIA_SECONDS_HARD.displayName, WILDCARD_TRIVIA_SECONDS_HARD.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS.key, GROUP_TRIVIA_QUESTIONS.defaultValue, ConfigTypes.GROUP, "{season.trivia.questions}",
+                    GROUP_TRIVIA_QUESTIONS.key, GROUP_TRIVIA_QUESTIONS.defaultValue, ConfigTypes.TEXT, "{season.trivia.questions}",
                     GROUP_TRIVIA_QUESTIONS.displayName, GROUP_TRIVIA_QUESTIONS.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_EASY.key, GROUP_TRIVIA_QUESTIONS_EASY.defaultValue, ConfigTypes.GROUP, "{season.trivia.questions.easy}",
+                    GROUP_TRIVIA_QUESTIONS_EASY.key, GROUP_TRIVIA_QUESTIONS_EASY.defaultValue, ConfigTypes.TEXT, "{season.trivia.questions.easy}",
                     GROUP_TRIVIA_QUESTIONS_EASY.displayName, GROUP_TRIVIA_QUESTIONS_EASY.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_NORMAL.key, GROUP_TRIVIA_QUESTIONS_NORMAL.defaultValue, ConfigTypes.GROUP, "{season.trivia.questions.normal}",
+                    GROUP_TRIVIA_QUESTIONS_NORMAL.key, GROUP_TRIVIA_QUESTIONS_NORMAL.defaultValue, ConfigTypes.TEXT, "{season.trivia.questions.normal}",
                     GROUP_TRIVIA_QUESTIONS_NORMAL.displayName, GROUP_TRIVIA_QUESTIONS_NORMAL.description
 					)
 				,new ConfigFileEntry<>(
-                    GROUP_TRIVIA_QUESTIONS_HARD.key, GROUP_TRIVIA_QUESTIONS_HARD.defaultValue, ConfigTypes.GROUP, "{season.trivia.questions.hard}",
+                    GROUP_TRIVIA_QUESTIONS_HARD.key, GROUP_TRIVIA_QUESTIONS_HARD.defaultValue, ConfigTypes.TEXT, "{season.trivia.questions.hard}",
                     GROUP_TRIVIA_QUESTIONS_HARD.displayName, GROUP_TRIVIA_QUESTIONS_HARD.description
 					)
 
