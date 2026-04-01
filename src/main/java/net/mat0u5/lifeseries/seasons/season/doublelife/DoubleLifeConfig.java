@@ -197,6 +197,52 @@ public class DoubleLifeConfig extends ConfigManager {
 				,GIVELIFE_SOULMATES
                 ,SOULMATES_PVP_ALLOWED
                 ,SOULMATES_ASSIGN_MINUTE
+
+                // Life Series+ mirror entries (extras not in the original mod)
+                ,new ConfigFileEntry<>(
+                        GROUP_REROLL.key, null, ConfigTypes.TEXT, "{lifeseries_plus.reroll}",
+                        GROUP_REROLL.displayName, GROUP_REROLL.description
+                )
+                ,new ConfigFileEntry<>(
+                        REROLL_MIDSESSION.key, REROLL_MIDSESSION.defaultValue, ConfigTypes.BOOLEAN, "{lifeseries_plus.reroll.midsession}",
+                        REROLL_MIDSESSION.displayName, REROLL_MIDSESSION.description
+                )
+                ,new ConfigFileEntry<>(
+                        REROLL_TIME.key, REROLL_TIME.defaultValue, ConfigTypes.MINUTES, "lifeseries_plus.reroll.midsession",
+                        REROLL_TIME.displayName, REROLL_TIME.description
+                )
+                ,new ConfigFileEntry<>(
+                        REROLL_LIVES.key, REROLL_LIVES.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.reroll",
+                        REROLL_LIVES.displayName, REROLL_LIVES.description
+                )
+                ,new ConfigFileEntry<>(
+                        REROLL_UNBOUND.key, REROLL_UNBOUND.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.reroll",
+                        REROLL_UNBOUND.displayName, REROLL_UNBOUND.description
+                )
+                ,new ConfigFileEntry<>(
+                        REROLL_REDS.key, REROLL_REDS.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.reroll",
+                        REROLL_REDS.displayName, REROLL_REDS.description
+                )
+                ,new ConfigFileEntry<>(
+                        CLEAR_ON_SESSION_END.key, CLEAR_ON_SESSION_END.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus.reroll",
+                        CLEAR_ON_SESSION_END.displayName, CLEAR_ON_SESSION_END.description
+                )
+                ,new ConfigFileEntry<>(
+                        SPLIT_SOULMATES_WHEN_RED.key, SPLIT_SOULMATES_WHEN_RED.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+                        SPLIT_SOULMATES_WHEN_RED.displayName, SPLIT_SOULMATES_WHEN_RED.description
+                )
+                ,new ConfigFileEntry<>(
+                        SOULMATES_SHARE_ROLL.key, SOULMATES_SHARE_ROLL.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+                        SOULMATES_SHARE_ROLL.displayName, SOULMATES_SHARE_ROLL.description
+                )
+                ,new ConfigFileEntry<>(
+                        LIVES_RANDOMIZE_SOULMATES_SAME.key, LIVES_RANDOMIZE_SOULMATES_SAME.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+                        LIVES_RANDOMIZE_SOULMATES_SAME.displayName, LIVES_RANDOMIZE_SOULMATES_SAME.description
+                )
+                ,new ConfigFileEntry<>(
+                        GIVELIFE_SOULMATES.key, GIVELIFE_SOULMATES.defaultValue, ConfigTypes.BOOLEAN, "lifeseries_plus",
+                        GIVELIFE_SOULMATES.displayName, GIVELIFE_SOULMATES.description
+                )
         ));
         //? if >= 1.21.6 {
         result.add(SOULMATE_LOCATOR_BAR);
