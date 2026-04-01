@@ -203,29 +203,34 @@ public class TextHud {
         return drawHudText(client, context, timerText, x - client.font.width(actualTimer), y);
     }
 
-    private static long lastPressed = 0;
+	private static long lastPressed = 0;
+	public static long lastPressedSuperpowerKey = 0;
 
-    public static int renderSuperpowerCooldown(Minecraft client, GuiGraphics context, int y) {
-        if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown())
-            lastPressed = System.currentTimeMillis();
-    public static long lastPressedSuperpowerKey = 0;
-    public static int renderSuperpowerCooldown(Minecraft client, GuiGraphicsExtractor context, int y) {
-        if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown()) lastPressedSuperpowerKey = System.currentTimeMillis();
+	public static int renderSuperpowerCooldown(Minecraft client, GuiGraphicsExtractor context, int y) {
+ 	   if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown()) {
+ 	       lastPressedSuperpowerKey = System.currentTimeMillis();
+ 	   }
 
-        if (MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP == 0) return 0;
-        long currentMillis = System.currentTimeMillis();
-        if (currentMillis >= MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP) return 0;
-        long millisLeft = roundTime(MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP) - currentMillis;
-        if (millisLeft > 10000000) return 0;
+  	  if (MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP == 0) return 0;
 
-        long pressedAgo = System.currentTimeMillis() - lastPressedSuperpowerKey;
-        boolean keyPressed = pressedAgo < 500;
-        if (pressedAgo > 6000) return 0;
+ 	   long currentMillis = System.currentTimeMillis();
+ 	   if (currentMillis >= MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP) return 0;
 
-        Component timerText = TextUtils.formatLoosely("{}Superpower cooldown:§f {}", (keyPressed?"§c§n":"§7") , Time.millis(millisLeft).format());
+ 	   long millisLeft = roundTime(MainClient.SUPERPOWER_COOLDOWN_TIMESTAMP) - currentMillis;
+  	  if (millisLeft > 10000000) return 0;
 
-        return drawHudText(client, context, timerText, y);
-    }
+ 	   long pressedAgo = currentMillis - lastPressedSuperpowerKey;
+ 	   boolean keyPressed = pressedAgo < 500;
+  	  if (pressedAgo > 6000) return 0;
+
+ 	   Component timerText = TextUtils.formatLoosely(
+   	     "{}Superpower cooldown:§f {}",
+   	     (keyPressed ? "§c§n" : "§7"),
+   	     Time.millis(millisLeft).format()
+  	  );
+
+  	  return drawHudText(client, context, timerText, y);
+	}
 
     public static int renderMimicryTimer(Minecraft client, GuiGraphicsExtractor context, int y) {
         if (MainClient.MIMICRY_COOLDOWN_TIMESTAMP == 0) return 0;
