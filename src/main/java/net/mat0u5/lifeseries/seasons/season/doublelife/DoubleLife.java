@@ -461,6 +461,7 @@ public class DoubleLife extends Season {
             });
             triggerFusedLivesRollAfterReveal();
             return;
+	    }
         List<ServerPlayer> playersToRoll = getNonAssignedPlayers();
         if (!playersToRoll.isEmpty()) {
             DatapackIntegration.EVENT_SOULMATE_ROLL.trigger();
@@ -856,14 +857,9 @@ public class DoubleLife extends Season {
             } finally {
                 processingLinkedDeath.remove(playerId);
             }
-        } finally {
-            suppressSplitOnRedDuringDeath.remove(playerId);
-        if (soulmate == null) return;
-        if (!soulmate.isAlive()) return;
-        boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
-        if (SOULBOUND_INVENTORIES && server != null && !keepInventory) {
-            soulmate.getInventory().clearContent();
-        }
+	} finally {
+    	suppressSplitOnRedDuringDeath.remove(playerId);
+	}
     }
 
     public void syncAllPlayers() {
@@ -1237,34 +1233,3 @@ public class DoubleLife extends Season {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
