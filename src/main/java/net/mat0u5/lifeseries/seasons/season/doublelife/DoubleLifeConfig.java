@@ -192,10 +192,8 @@ public class DoubleLifeConfig extends ConfigManager {
 				,SOULMATES_PVP_ALLOWED	
 				,SOULMATES_SHARE_ROLL
                 ,LIVES_RANDOMIZE_SOULMATES_SAME
-                ,SOULBOUND_BOOGEYMAN
                 ,SOULBOUND_LIVES
 				,GIVELIFE_SOULMATES
-                ,SOULMATES_PVP_ALLOWED
                 ,SOULMATES_ASSIGN_MINUTE
 
                 // Life Series+ mirror entries (extras not in the original mod)
