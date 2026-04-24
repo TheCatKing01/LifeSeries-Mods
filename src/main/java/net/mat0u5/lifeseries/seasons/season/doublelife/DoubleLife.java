@@ -13,7 +13,6 @@ import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.mat0u5.lifeseries.utils.player.ProfileManager;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
@@ -151,10 +150,8 @@ public class DoubleLife extends Season {
         if (!hasSoulmate(player)) return;
         if (!isSoulmateOnline(player)) return;
 
-        ServerPlayer soulmate = getSoulmate(player);
-        applySoulmateSharedProfile(player, soulmate);
-
         if (shouldShareLives()) {
+            ServerPlayer soulmate = getSoulmate(player);
             if (soulmate != null) {
                 Integer soulmateLives = soulmate.ls$getLives();
                 Integer playerLives = player.ls$getLives();
@@ -379,7 +376,6 @@ public class DoubleLife extends Season {
     public void setSoulmate(ServerPlayer player1, ServerPlayer player2) {
         soulmates.put(player1.getUUID(), player2.getUUID());
         soulmates.put(player2.getUUID(), player1.getUUID());
-        applySoulmateSharedProfile(player1, player2);
         SessionTranscript.soulmate(player1, player2);
         syncPlayers(player1, player2);
         updateOrderedSoulmates();
@@ -414,15 +410,9 @@ public class DoubleLife extends Season {
         }
         soulmates = newSoulmates;
         updateOrderedSoulmates();
-
-        clearSoulmateSharedProfile(player);
-        clearSoulmateSharedProfile(soulmate);
     }
 
     public void resetAllSoulmates() {
-        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            clearSoulmateSharedProfile(player);
-        }
         soulmates = new HashMap<>();
         soulmatesOrdered = new HashMap<>();
         soulmateConfig.resetProperties("-- DO NOT MODIFY --");
@@ -677,7 +667,6 @@ public class DoubleLife extends Season {
         saveSoulmates();
 
         for (ServerPlayer remaining : unpaired) {
-            clearSoulmateSharedProfile(remaining);
             PlayerUtils.broadcastMessageToAdmins(ModifiableText.DOUBLELIFE_UNPAIRED.get(remaining.getDisplayName()));
         }
         soulmatesForce.clear();
@@ -1206,7 +1195,7 @@ public class DoubleLife extends Season {
 
 		return true;
 	}
-    public void resetSoulmatePair(ServerPlayer player) {
+	public void resetSoulmatePair(ServerPlayer player) {
 		if (player == null) return;
 
 		UUID a = player.getUUID();
@@ -1219,58 +1208,11 @@ public class DoubleLife extends Season {
 		updateOrderedSoulmates();
 
 		ServerPlayer other = PlayerUtils.getPlayer(b);
-        clearSoulmateSharedProfile(other);
-        clearSoulmateSharedProfile(player);
 		if (other != null) {
 			syncPlayer(other);
 		}
 		syncPlayer(player);
 	}
-
-    private void applySoulmateSharedProfile(ServerPlayer player1, ServerPlayer player2) {
-        if (player1 == null || player2 == null) return;
-
-        String sharedUsername = chooseSharedSoulmateUsername(player1, player2);
-        if (sharedUsername == null || sharedUsername.isBlank()) return;
-
-        ProfileManager.ProfileChange sharedChange = ProfileManager.ProfileChange.set(sharedUsername);
-        if (!sharedUsername.equalsIgnoreCase(player1.getScoreboardName())) {
-            ProfileManager.modifyProfile(player1, sharedChange, sharedChange);
-        }
-        if (!sharedUsername.equalsIgnoreCase(player2.getScoreboardName())) {
-            ProfileManager.modifyProfile(player2, sharedChange, sharedChange);
-        }
-    }
-
-    private String chooseSharedSoulmateUsername(ServerPlayer player1, ServerPlayer player2) {
-        if (player1 == null || player2 == null) return null;
-
-        List<ServerPlayer> sortedPlayers = new ArrayList<>(List.of(player1, player2));
-        sortedPlayers.sort(Comparator.comparing(ServerPlayer::getUUID));
-        ServerPlayer first = sortedPlayers.get(0);
-        ServerPlayer second = sortedPlayers.get(1);
-
-        UUID firstUUID = first.getUUID();
-        UUID secondUUID = second.getUUID();
-        long seed = firstUUID.getMostSignificantBits()
-                ^ firstUUID.getLeastSignificantBits()
-                ^ secondUUID.getMostSignificantBits()
-                ^ secondUUID.getLeastSignificantBits();
-        Random random = new Random(seed);
-
-        ServerPlayer chosen = random.nextBoolean() ? first : second;
-        return ProfileManager.getOriginalOrCurrentName(chosen);
-    }
-
-    private void clearSoulmateSharedProfile(ServerPlayer player) {
-        if (player == null) return;
-
-        if (SubInManager.isSubbingIn(player.getUUID())) {
-            SubInManager.reloadPlayerProfile(player);
-            return;
-        }
-        ProfileManager.resetPlayer(player);
-    }
 	
 	private void checkRedTransition(ServerPlayer player, @Nullable Integer oldLives) {
 		if (!SPLIT_SOULMATES_WHEN_RED) return;
