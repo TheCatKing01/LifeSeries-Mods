@@ -99,9 +99,8 @@ public abstract class ConfigManager extends DefaultConfigValues {
 
                 ,LISTS // Group
                 ,SIMPLE_LIFE //Group
-                ,GROUP_WILDCARDS
-                ,ACTIVATE_WILDCARD_MINUTE
                 ,WILDCARD_AUTO_ACTIVATE
+                ,ACTIVATE_WILDCARD_MINUTE
                 ,GROUP_SNAILS
 				,GROUP_TRIVIA
                 ,MIDNIGHT_CHIMES
