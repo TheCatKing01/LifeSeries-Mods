@@ -1,10 +1,15 @@
 package net.mat0u5.lifeseries.mixin.client;
 
-import net.mat0u5.lifeseries.Main;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.serialization.Lifecycle;
+import net.mat0u5.lifeseries.LifeSeries;
+import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.config.WorldConfig;
 import net.mat0u5.lifeseries.gui.WorldWarningScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -37,7 +42,7 @@ public abstract class WorldOpenFlowsMixin {
     private LevelStorageSource.LevelStorageAccess verifyWorldOpen(WorldOpenFlows instance, String e, Operation<LevelStorageSource.LevelStorageAccess> originalCall, @Local(argsOnly = true) Screen screen, @Local(argsOnly = true, ordinal = 0) boolean bl,@Local(argsOnly = true, ordinal = 1) boolean bl2) {
         LevelStorageSource.LevelStorageAccess worldAccess = originalCall.call(instance, e);
         if (worldAccess == null) return worldAccess;
-        if (Main.modFullyDisabled()) return worldAccess;
+        if (LifeSeries.modFullyDisabled()) return worldAccess;
         WorldConfig worldConfig = new WorldConfig(worldAccess);
         if (worldConfig.acknowledged()) return worldAccess;
         ls$askForConfirmation(worldAccess, worldAccess.getLevelId(),
@@ -46,7 +51,7 @@ public abstract class WorldOpenFlowsMixin {
                     ls$doLoadLevel(screen, e, bl, bl2);
                 },
                 () -> {
-                    Minecraft.getInstance().setScreen(screen);
+                    Minecraft.getInstance().ls$setScreen(screen);
                 }
         );
         try {
@@ -69,7 +74,7 @@ public abstract class WorldOpenFlowsMixin {
     @Inject(method = "openWorldCheckWorldStemCompatibility", at = @At("HEAD"), cancellable = true)
     private void verifyWorldOpen(LevelStorageSource.LevelStorageAccess worldAccess, WorldStem worldStem, PackRepository packRepository, Runnable onCancel, CallbackInfo ci) {
     //?}
-        if (Main.modFullyDisabled()) return;
+        if (LifeSeries.modFullyDisabled()) return;
         WorldConfig worldConfig = new WorldConfig(worldAccess);
         if (worldConfig.acknowledged()) return;
         ci.cancel();
@@ -93,12 +98,23 @@ public abstract class WorldOpenFlowsMixin {
     }
     //?}
     private void ls$askForConfirmation(final LevelStorageSource.LevelStorageAccess worldAccess, String levelId, final Runnable proceedCallback, final Runnable cancelCallback) {
-        Minecraft.getInstance().setScreen(new WorldWarningScreen(levelId, cancelCallback, disable -> {
+        Minecraft.getInstance().ls$setScreen(new WorldWarningScreen(levelId, cancelCallback, disable -> {
             if (disable) {
-                Main.setDisabled(true);
+                LifeSeries.setDisabled(true);
             }
 
             proceedCallback.run();
         }));
+    }
+
+    //? if <= 1.20.2 {
+    /*@WrapOperation(method = "doLoadLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettingsLifecycle()Lcom/mojang/serialization/Lifecycle;"))
+    *///?} else if <= 1.20.3 {
+    /*@WrapOperation(method = "loadLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettingsLifecycle()Lcom/mojang/serialization/Lifecycle;"))
+    *///?} else {
+    @WrapOperation(method = "openWorldCheckWorldStemCompatibility", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettingsLifecycle()Lcom/mojang/serialization/Lifecycle;"))
+    //?}
+    private Lifecycle noExperimental(WorldData instance, Operation<Lifecycle> original) {
+        return Lifecycle.stable();
     }
 }

@@ -35,7 +35,7 @@ import net.minecraft.world.scores.Scoreboard;
 
 import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
 import net.minecraft.world.scores.PlayerScoreEntry;
@@ -375,11 +375,16 @@ public class LivesManager {
 
     public void addToPlayerLives(ServerPlayer player, int amount) {
         if (amount == 0) return;
+        setPlayerLives(player, getAddLivesResult(player, amount));
+    }
+
+    public int getAddLivesResult(ServerPlayer player, int amount) {
+        if (amount == 0) return 0;
         Integer currentLives = getPlayerLives(player);
         if (currentLives == null) currentLives = 0;
         int lives = currentLives + amount;
         if (lives < 0 && !Necromancy.isRessurectedPlayer(player)) lives = 0;
-        setPlayerLives(player, lives);
+        return lives;
     }
 
     public void addToLivesNoUpdate(ServerPlayer player, int amount) {
@@ -437,8 +442,12 @@ public class LivesManager {
             setScore(substitutedPlayerName, lives);
         }
         if (livesChanged) {
-            LifeSkinsManager.refreshLifeSkin(player);
+            onPlayerLivesChanged(player);
         }
+    }
+
+    public void onPlayerLivesChanged(ServerPlayer player) {
+        LifeSkinsManager.refreshLifeSkin(player);
     }
 
     public void setScore(String playerName, int lives) {

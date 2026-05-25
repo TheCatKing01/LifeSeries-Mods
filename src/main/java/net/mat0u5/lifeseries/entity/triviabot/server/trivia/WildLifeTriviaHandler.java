@@ -6,7 +6,6 @@ import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.entity.triviabot.server.TriviaBotPathfinding;
-import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcard;
@@ -21,7 +20,6 @@ import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -44,8 +42,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import static net.mat0u5.lifeseries.Main.blacklist;
-import static net.mat0u5.lifeseries.Main.server;
+import static net.mat0u5.lifeseries.LifeSeries.blacklist;
+import static net.mat0u5.lifeseries.LifeSeries.server;
 import net.minecraft.world.entity.animal.bee.Bee;
 
 //? if <= 1.20.3 {
@@ -64,6 +62,11 @@ import net.minecraft.world.entity.EntityReference;
 //import org.joml.Vector3f;
 
 public class WildLifeTriviaHandler extends TriviaHandler {
+    private static int AUTO_OPEN_TIME = Time.seconds(120).getTicks();
+    private static int AUTO_OPEN_NEAR_PLAYER_TIME = Time.seconds(15).getTicks();
+    private long ticks = 0;
+    private long ticksNearPlayer = 0;
+
     public WildLifeTriviaHandler(TriviaBot bot) {
         super(bot);
     }
@@ -118,6 +121,30 @@ public class WildLifeTriviaHandler extends TriviaHandler {
             }
             if (snailTransformation > 66) {
                 transformIntoSnail();
+            }
+        }
+
+
+        float distanceToPlayer = 1000;
+        ServerPlayer player = bot.serverData.getBoundPlayer();
+        if (player != null) {
+            distanceToPlayer = bot.distanceTo(player);
+        }
+
+        ticks++;
+        if (distanceToPlayer <= 4) ticksNearPlayer++;
+        if (player != null && !bot.interactedWith()) {
+            if (ticks > AUTO_OPEN_TIME) {
+                if (distanceToPlayer <= 4) {
+                    startTrivia(player);
+                }
+                else {
+                    bot.pathfinding.fakeTeleportToPlayer();
+                    startTrivia(player);
+                }
+            }
+            if (ticksNearPlayer > AUTO_OPEN_NEAR_PLAYER_TIME) {
+                startTrivia(player);
             }
         }
     }

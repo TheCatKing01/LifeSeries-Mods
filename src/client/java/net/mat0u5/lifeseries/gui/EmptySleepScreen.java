@@ -1,15 +1,12 @@
 package net.mat0u5.lifeseries.gui;
 
-import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.LifeSeriesClient;
 import net.mat0u5.lifeseries.utils.ClientUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.CameraType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 public class EmptySleepScreen extends Screen {
@@ -88,7 +85,9 @@ public class EmptySleepScreen extends Screen {
         CameraType currentCamera = minecraft.options.getCameraType();
         if (!currentCamera.isFirstPerson()) {
             minecraft.options.setCameraType(CameraType.FIRST_PERSON);
+            //? if <= 26.1 {
             minecraft.levelRenderer.needsUpdate();
+            //?}
         }
     }
 
@@ -116,7 +115,7 @@ public class EmptySleepScreen extends Screen {
         skipNightButton.visible = adminControlsOpen;
         wakeUpButton.visible = adminControlsOpen;
         wakeUpEveryoneButton.visible = adminControlsOpen;
-        toggleButton.visible = MainClient.isAdmin;
+        toggleButton.visible = LifeSeriesClient.isAdmin;
     }
 
     //~ renames_26_1_volatile
@@ -129,7 +128,7 @@ public class EmptySleepScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        if (MainClient.isAdmin) {
+        if (LifeSeriesClient.isAdmin) {
             boolean shouldShow = adminControlsOpen || isMouseNearButton(mouseX, mouseY);
 
             if (shouldShow) {
@@ -144,7 +143,7 @@ public class EmptySleepScreen extends Screen {
         super.extractRenderState(context, mouseX, mouseY, delta);
         updateCommandButtons();
 
-        if (MainClient.isAdmin && buttonSlideOffset < 0.3f && !adminControlsOpen) {
+        if (LifeSeriesClient.isAdmin && buttonSlideOffset < 0.3f && !adminControlsOpen) {
             int sliverX = this.width - SLIVER_WIDTH + 3;
             int sliverY = padding + buttonHeight / 2 - 4;
             context.text(this.font, "<", sliverX, sliverY, TextColors.WHITE);

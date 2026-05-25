@@ -15,6 +15,7 @@ base {
  archivesName = project.archives_base_name
 }
 loom {
+ accessWidenerPath = rootProject.file("src/main/resources/aw/"+project.property('access_widener'))
  splitEnvironmentSourceSets()
 
  mods {
@@ -44,20 +45,19 @@ repositories {
  }
 }
 
-fabricApi {
- configureDataGeneration()
-}
 dependencies {
  minecraft("com.mojang:minecraft:${property("minecraft_version")}")
  mappings loom.officialMojangMappings()
 
  modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
- modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
  // Compile only for compatibility
  modCompileOnly "maven.modrinth:flashback:z0SX4zNw"
  modCompileOnly "maven.modrinth:replaymod:1.21-2.6.23"
  modCompileOnly "de.maxhenkel.voicechat:voicechat-api:2.5.27" //TODO this is a patch for older versions of SVC
+ modCompileOnly "maven.modrinth:appleskin:3.0.6+mc1.21"
+ modCompileOnly "net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}"
+ //modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}"
 
  // Runtime only QOL mods
  if (isValidVersion(project.carpet_bot_relog_version)) modRuntimeOnly "maven.modrinth:carpet-bot-relog:${project.carpet_bot_relog_version}"
@@ -65,7 +65,8 @@ dependencies {
 
  //Runtime and compile
  if (isValidVersion(project.voicechat_mod_version)) {
-  modImplementation modRuntimeOnly ("maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}")
+  modCompileOnly ("maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}")
+  //modRuntimeOnly ("maven.modrinth:simple-voice-chat:fabric-${project.voicechat_mod_version}")
  }
  else {
   modCompileOnly ("maven.modrinth:simple-voice-chat:fabric-1.21.1-2.5.35")
@@ -84,9 +85,9 @@ processResources {
  filesMatching("fabric.mod.json") {
   expand "version": project.property('mod_version'),
           "targetVersion": project.property('target_version'),
-          "fabricApiVersion": project.property('fabric_api_target_version'),
           "minecraftVersion": project.property('minecraft_version'),
-          "javaVersion": project.property('java_version')
+          "javaVersion": project.property('java_version'),
+          "accessWidenerFile": project.property('access_widener')
  }
  filesMatching("lifeseries.mixins.json") {
   expand "javaVersion": java25 ? "JAVA_25" : java21 ? "JAVA_21" : "JAVA_17"
@@ -164,6 +165,9 @@ publishMods {
 }
 
 stonecutter {
+ replacements.string(stonecutter.eval(stonecutter.current.version, ">=1.20.2"), "!renames_1_20_2") {
+  replace ('net.mat0u5.lifeseries.utils.interfaces.CustomPacketPayload;', 'net.minecraft.network.protocol.common.custom.CustomPacketPayload;')
+ }
  replacements.string(stonecutter.eval(stonecutter.current.version, ">=1.20.3"), "!renames_1_20_3") {
   replace ('net.minecraft.world.scores.Score;', 'net.minecraft.world.scores.PlayerScoreEntry;')
  }
@@ -203,6 +207,8 @@ stonecutter {
  }
  replacements.string(stonecutter.eval(stonecutter.current.version, ">=1.21.11"), "!renames_1_21_11") {
   replace ('ResourceLocation', 'Identifier')
+  replace ('getResourceLocation', 'getResourceLocation')
+  replace ('getIdentifier', 'getIdentifier')
   replace ('IdentifierHelper', 'IdentifierHelper')
   replace ('net.minecraft.Util', 'net.minecraft.util.Util')
   replace ('net.minecraft.client.renderer.RenderType;', 'net.minecraft.client.renderer.rendertype.RenderType;')
@@ -237,7 +243,6 @@ stonecutter {
   replace ('ClientCommandManager.argument', 'ClientCommands.argument')
   replace ('ClientCommandManager.literal', 'ClientCommands.literal')
   replace ('.registerKeyBinding(', '.registerKeyMapping(')
-  replace ('net.fabricmc.fabric.api.client.keybinding.v1', 'net.fabricmc.fabric.api.client.keymapping.v1')
   replace ('KeyBindingHelper', 'KeyMappingHelper')
   replace ('net.minecraft.client.renderer.state.CameraRenderState', 'net.minecraft.client.renderer.state.level.CameraRenderState')
   replace ('net.minecraft.client.renderer.state.ParticleGroupRenderState', 'net.minecraft.client.renderer.state.level.ParticleGroupRenderState')
@@ -255,6 +260,11 @@ stonecutter {
   replace ('renderBackground(', 'extractBackground(')
   replace ('drawString(', 'text(')
   replace ('drawCenteredString(', 'centeredText(')
+ }
+ replacements.string(stonecutter.eval(stonecutter.current.version, ">=26.2"), "!renames_26_2") {
+  replace ('net.minecraft.world.entity.EntityType', 'net.minecraft.world.entity.EntityTypes')
+  replace ('EntityType.', 'EntityTypes.')
+  replace ('EntityType.Builder', 'EntityType.Builder')
  }
 }
 

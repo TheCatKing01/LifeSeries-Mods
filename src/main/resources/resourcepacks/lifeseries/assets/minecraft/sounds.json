@@ -34,11 +34,6 @@
             "doublelife/soulmate_chosen"
         ]
     },
-    "secretlife_task": {
-        "sounds": [
-            "secretlife/task"
-        ]
-    },
     "secretlife_life": {
         "sounds": [
             "secretlife/life"
@@ -49,7 +44,26 @@
             "secretlife/task_totem"
         ]
     },
-
+    "secretlife_task": {
+        "sounds": [
+            "secretlife/task"
+        ]
+    },
+    "secretlife_task_reroll": {
+        "sounds": [
+            "secretlife/task_reroll"
+        ]
+    },
+    "secretlife_task_succeed": {
+        "sounds": [
+            "secretlife/task_succeed"
+        ]
+    },
+    "secretlife_task_fail": {
+        "sounds": [
+            "secretlife/task_fail"
+        ]
+    },
 
     "wildlife_snail_attack1": {
         "sounds": [
@@ -390,6 +404,17 @@
                 "attenuation_distance": 32,
                 "name": "wildlife/trivia/triviabot_incorrect"
             }
+        ]
+    },
+
+    "pastlife_society": {
+        "sounds": [
+            "pastlife/society"
+        ]
+    },
+    "pastlife_society_end_member": {
+        "sounds": [
+            "pastlife/society_end_member"
         ]
     },
 

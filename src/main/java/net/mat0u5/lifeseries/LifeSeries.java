@@ -1,16 +1,12 @@
 package net.mat0u5.lifeseries;
 
-import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.MainConfig;
 import net.mat0u5.lifeseries.events.Events;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
-import net.mat0u5.lifeseries.registries.ModRegistries;
+import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.resources.datapack.DatapackManager;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
@@ -22,13 +18,11 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.HandshakeStatus;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.interfaces.IClientHelper;
-import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.versions.UpdateChecker;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -38,15 +32,14 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 
-public class Main implements ModInitializer {
-	public static final String MOD_VERSION = "1.5.3";
+public class LifeSeries implements ModInitializer {
+	public static final String MOD_VERSION = "1.5.4";
 	public static final String MOD_ID = "lifeseries";
 	public static final String UPDATES_URL = "https://api.github.com/repos/Mat0u5/LifeSeries/releases";
 	public static final boolean DEBUG = false;
 	public static final boolean ISOLATED_ENVIRONMENT = false;
 	public static final Seasons DEFAULT_SEASON = Seasons.UNASSIGNED;
 	public static boolean MOD_DISABLED = false;
-	public static boolean CLIENT_MODE = false;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static ConfigManager config;
@@ -65,38 +58,21 @@ public class Main implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Life Series...");
 
-		FabricLoader.getInstance().getModContainer(Main.MOD_ID).ifPresent(container -> {
-			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries"), container, Component.nullToEmpty("Main Life Series Resourcepack"), ResourcePackActivationType.ALWAYS_ENABLED);
-			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("evil_trivia_bots"), container, Component.nullToEmpty("Evil Trivia Bots"), ResourcePackActivationType.NORMAL);
-			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("minimal_armor"), container, Component.nullToEmpty("Minimal Armor Resourcepack"), ResourcePackActivationType.NORMAL);
-			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack"), container, ResourcePackActivationType.ALWAYS_ENABLED);
-			//? if <= 1.20.4 {
-			/*ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack_1.20-1.20.4"), container, ResourcePackActivationType.ALWAYS_ENABLED);
-			*///?} else if <= 1.20.5 {
-			/*ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("lifeseries_datapack_1.20.5"), container, ResourcePackActivationType.ALWAYS_ENABLED);
-			*///?}
-			ResourceManagerHelper.registerBuiltinResourcePack(IdentifierHelper.mod("nicelife"), container, Component.nullToEmpty("Nice Life Resourcepack"), ResourcePackActivationType.NORMAL);
-		});
-
 		config = new MainConfig();
 		NetworkHandlerServer.reload();
 		ConfigManager.moveOldMainFileIfExists();
 		SnailSkins.createConfig();
 
 		MOD_DISABLED = config.getOrCreateProperty("modDisabled", "false").equalsIgnoreCase("true");
-		CLIENT_MODE = config.getOrCreateProperty("clientMode", "false").equalsIgnoreCase("true");
 		String season = config.getOrCreateProperty("currentSeries", DEFAULT_SEASON.getId());
 
 		parseSeason(season);
 		Seasons.getSeasons().forEach(seasons -> seasons.getSeasonInstance().createConfig());
 
-		ModRegistries.registerModStuff();
+		MobRegistry.registerAttributes();
 		if (!ISOLATED_ENVIRONMENT) {
 			UpdateChecker.checkForMajorUpdates();
 		}
-
-		NetworkHandlerServer.registerPackets();
-		NetworkHandlerServer.registerServerReceiver();
 		NetworkHandlerServer.initializeSimplePacketReceivers();
 	}
 
@@ -125,25 +101,7 @@ public class Main implements ModInitializer {
 		if (!modDisabled()) {
 			fullReload();
 		}
-		SimplePackets.MOD_DISABLED.sendToClient(Main.MOD_DISABLED);
-	}
-
-	public static boolean clientModeEnabled() {
-		if (currentSeason != null && currentSeason.getSeason().requiresClient()) return true;
-		return CLIENT_MODE;
-	}
-
-	public static boolean clientModeForced() {
-		return currentSeason != null && currentSeason.getSeason().requiresClient();
-	}
-
-	public static void setClientMode(boolean enabled) {
-		boolean previous = CLIENT_MODE;
-		CLIENT_MODE = enabled;
-		config.setProperty("clientMode", String.valueOf(CLIENT_MODE));
-		if (!previous && enabled) {
-			PlayerUtils.getAllPlayers().forEach(NetworkHandlerServer::tryKickFailedHandshake);
-		}
+		SimplePackets.MOD_DISABLED.sendToClient(LifeSeries.MOD_DISABLED);
 	}
 
 	public static void fullReload() {
@@ -152,7 +110,7 @@ public class Main implements ModInitializer {
 	}
 
 	public static boolean hasClient() {
-		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+		return clientHelper != null;
 	}
 
 	public static void setClientHelper(IClientHelper helper) {
@@ -167,7 +125,7 @@ public class Main implements ModInitializer {
 	}
 
 	public static boolean isLogicalSide() {
-		if (!hasClient()) return true;
+		if (clientHelper == null) return true;
 		return clientHelper != null && clientHelper.isRunningIntegratedServer();
 	}
 
@@ -179,7 +137,6 @@ public class Main implements ModInitializer {
 	}
 
 	public static boolean isClientPlayer(UUID uuid) {
-		if (!hasClient()) return false;
 		return clientHelper != null && clientHelper.isMainClientPlayer(uuid);
 	}
 
@@ -206,7 +163,6 @@ public class Main implements ModInitializer {
 		currentSeason.reloadStart();
 		seasonConfig.loadProperties();
 		config.loadProperties();
-		CLIENT_MODE = config.getOrCreateProperty("clientMode", "false").equalsIgnoreCase("true");
 		blacklist.reloadBlacklist();
 		currentSeason.reload();
 		NetworkHandlerServer.sendUpdatePackets();
@@ -227,7 +183,7 @@ public class Main implements ModInitializer {
 		currentSeason.boogeymanManager.resetBoogeymen();
 		currentSeason.secretSociety.forceEndSociety();
 		currentSession.sessionEnd();
-		Main.parseSeason(changeTo);
+		LifeSeries.parseSeason(changeTo);
 		currentSeason.initialize();
 		reloadStart();
 		for (ServerPlayer player : PlayerUtils.getAllPlayers()) {

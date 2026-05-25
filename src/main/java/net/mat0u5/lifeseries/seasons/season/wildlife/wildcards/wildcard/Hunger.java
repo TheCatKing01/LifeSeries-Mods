@@ -13,7 +13,6 @@ import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -30,7 +29,7 @@ import net.minecraft.world.item.Items;
 
 import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.currentSession;
+import static net.mat0u5.lifeseries.LifeSeries.currentSession;
 
 //? if >= 1.20.5 {
 import net.minecraft.core.component.DataComponentMap;
@@ -308,10 +307,10 @@ public class Hunger extends Wildcard {
         if (item == null) return;
         if (bannedFoodItems.contains(item)) return;
         //? if <= 1.20.5 {
-        /^components.set(DataComponents.FOOD, new FoodProperties(0, 0, false, 1.6f, List.of()));
-        ^///?} else {
-        components.set(DataComponents.FOOD, new FoodProperties(0, 0, false, 1.6f, Optional.empty(), List.of()));
-        //?}
+        components.set(DataComponents.FOOD, new FoodProperties(0, 0, false, 1.6f, List.of()));
+        //?} else {
+        /^components.set(DataComponents.FOOD, new FoodProperties(0, 0, false, 1.6f, Optional.empty(), List.of()));
+        ^///?}
     }
     *///?} else if > 1.21 {
     public static void defaultFoodComponents(Item item, PatchedDataComponentMap components) {

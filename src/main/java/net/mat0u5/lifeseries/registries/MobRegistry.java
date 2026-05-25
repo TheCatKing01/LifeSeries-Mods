@@ -1,13 +1,16 @@
 package net.mat0u5.lifeseries.registries;
 
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
 import net.mat0u5.lifeseries.entity.angrysnowman.AngrySnowman;
+import net.mat0u5.lifeseries.mixin.DefaultAttributesAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.block.Blocks;
 
 //? if >= 1.21.2 {
@@ -36,10 +39,8 @@ public class MobRegistry {
             EntityType.Builder.of(Snail::new, MobCategory.MONSTER)
                     .sized(0.5f, 0.6f)
                     .clientTrackingRange(512)
-                    //? if <= 1.20.3 {
+                    //? if <= 1.21 {
                     /*.build(Snail.ID.toString())
-                    *///?} else if <= 1.21 {
-                    /*.build()
                     *///?} else {
                     .build(SNAIL_KEY)
                     //?}
@@ -50,11 +51,9 @@ public class MobRegistry {
             EntityType.Builder.of(TriviaBot::new, MobCategory.AMBIENT)
                     .sized(0.65f, 1.8f)
                     .clientTrackingRange(512)
-                    //? if <= 1.20.3 {
+                    //? if <= 1.21 {
                     /*.build(TriviaBot.ID.toString())
-                    *///?} else if <= 1.21 {
-                    /*.build()
-                     *///?} else {
+                    *///?} else {
                     .build(TRIVIA_KEY)
                      //?}
     );
@@ -68,19 +67,27 @@ public class MobRegistry {
                     .eyeHeight(1.7F)
                     //?}
                     .clientTrackingRange(8)
-                    //? if <= 1.20.3 {
+                    //? if <= 1.21 {
                     /*.build(TriviaBot.ID.toString())
-                     *///?} else if <= 1.21 {
-                    /*.build()
                     *///?} else {
                     .build(SNOWMAN_KEY)
                      //?}
     );
 
     public static void registerMobs() {
-        FabricDefaultAttributeRegistry.register(SNAIL, Snail.createAttributes());
-        FabricDefaultAttributeRegistry.register(TRIVIA_BOT, TriviaBot.createAttributes());
-        FabricDefaultAttributeRegistry.register(ANGRY_SNOWMAN, AngrySnowman.createAttributes());
+
+    }
+
+    public static void registerAttributes() {
+        register(SNAIL, Snail.createAttributes().build());
+        register(TRIVIA_BOT, TriviaBot.createAttributes().build());
+        register(ANGRY_SNOWMAN, AngrySnowman.createAttributes().build());
+    }
+
+    public static void register(EntityType<? extends LivingEntity> type, AttributeSupplier container) {
+        if (DefaultAttributesAccessor.getRegistry().put(type, container) != null) {
+            LifeSeries.LOGGER.debug("Overriding existing registration for entity type {}", BuiltInRegistries.ENTITY_TYPE.getKey(type));
+        }
     }
 }
 

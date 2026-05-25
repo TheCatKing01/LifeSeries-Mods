@@ -11,7 +11,6 @@ import net.mat0u5.lifeseries.utils.player.AttributeUtils;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -24,9 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class Necromancy extends Superpower {
+    public static int COOLDOWN_MILLIS = 300000;
+
     private static final List<UUID> ressurectedPlayers = new ArrayList<>();
     private static final List<UUID> queuedRessurectedPlayers = new ArrayList<>();
     public static final List<UUID> clearedPlayers = new ArrayList<>();
@@ -43,7 +44,7 @@ public class Necromancy extends Superpower {
 
     @Override
     public int getCooldownMillis() {
-        return 300000;
+        return COOLDOWN_MILLIS;
     }
 
     @Override

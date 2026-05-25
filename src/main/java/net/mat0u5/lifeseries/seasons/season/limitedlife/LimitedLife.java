@@ -15,28 +15,19 @@ import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import java.util.Collection;
 
+import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.Team;
 
-//? if < 1.20.3 {
-import net.minecraft.world.scores.Score;
-//? } else {
-import net.minecraft.world.scores.PlayerScoreEntry;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.ScoreHolder;
-//? }
-
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class LimitedLife extends Season {
 
@@ -46,7 +37,6 @@ public class LimitedLife extends Season {
     private static Time NEW_KILL_BOOGEYMAN = Time.hours(1);
     public static boolean TICK_OFFLINE_PLAYERS = false;
     public static boolean SHOW_TIME_BELOW_NAME = false;
-    private int TICKS_PER_SECOND = 20;
 
     @Override
     public Seasons getSeason() {
@@ -108,13 +98,15 @@ public class LimitedLife extends Season {
                     if (player.ls$isAlive()) {
                         Integer playerLivesInt = player.ls$getLives();
                         playerLives = playerLivesInt == null ? -1 : playerLivesInt;
-                    } else {
+                    }
+                    else {
                         playerLives = -1;
                     }
                     String livesColor = livesManager.getColorForLives(player).toString();
                     SimplePackets.LIMITED_LIFE_TIMER.target(player).sendToClient(List.of(livesColor, String.valueOf(playerLives)));
                 }
-            } else {
+            }
+            else {
                 MutableComponent fullMessage = Component.empty();
                 if (currentSession.displayTimer.contains(player.getUUID())) {
                     fullMessage.append(message);
@@ -129,59 +121,57 @@ public class LimitedLife extends Season {
     }
 
     private int secondCounter = 0;
-    public int getTicksPerSecond() {
-        return TICKS_PER_SECOND;
+    @Override
+    public void tickSessionOn(MinecraftServer server) {
+        super.tickSessionOn(server);
+        if (!currentSession.statusStarted()) return;
+
+        secondCounter--;
+        if (secondCounter <= 0) {
+            secondCounter = 20;
+            livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
+
+            if (TICK_OFFLINE_PLAYERS) {
+                //? if <= 1.20.2 {
+                /*Collection<Score> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+                for (Score entry : entries) {
+                    if (entry.getScore() <= 0) continue;
+                    if (PlayerUtils.getPlayer(entry.getOwner()) != null) continue;
+                    ScoreboardUtils.setScore(entry.getOwner(), LivesManager.SCOREBOARD_NAME, entry.getScore() - 1);
+                }
+                *///?} else {
+                Collection<PlayerScoreEntry> entries = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
+                for (PlayerScoreEntry entry : entries) {
+                    if (entry.value() <= 0) continue;
+                    if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
+                    ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
+                }
+                //?}
+            }
+        }
     }
-	
-	@Override
-	public void tickSessionOn(MinecraftServer server) {
-		super.tickSessionOn(server);
-		if (!currentSession.statusStarted()) return;
-
-		secondCounter--;
-		if (secondCounter <= 0) {
-			secondCounter = TICKS_PER_SECOND;
-			livesManager.getAlivePlayers().forEach(ServerPlayer::ls$removeLife);
-			displayTimers(server);
-						
-
-			if (TICK_OFFLINE_PLAYERS) {
-				//? if < 1.20.3 {
-					/*Collection<Score> entriesOld = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-					for (Score entry : entriesOld) {
-						if (entry.getScore() <= 0) continue;
-						if (PlayerUtils.getPlayer(entry.getOwner()) != null) continue;
-						ScoreboardUtils.setScore(entry.getOwner(), LivesManager.SCOREBOARD_NAME, entry.getScore() - 1);
-					}
-					
-				*///?} else {
-					Collection<PlayerScoreEntry> entriesNew = ScoreboardUtils.getScores(LivesManager.SCOREBOARD_NAME);
-					for (PlayerScoreEntry entry : entriesNew) {
-						if (entry.value() <= 0) continue;
-						if (PlayerUtils.getPlayer(entry.owner()) != null) continue;
-						ScoreboardUtils.setScore(entry.owner(), LivesManager.SCOREBOARD_NAME, entry.value() - 1);
-					}
-				//?}
-			}
-		}
-	}
 
     @Override
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
         SessionTranscript.onPlayerDeath(player, source);
-        if (source != null && source.getEntity() instanceof ServerPlayer serverAttacker && player != source.getEntity()) {
-            onPlayerKilledByPlayer(player, serverAttacker);
-            return;
+        if (source != null) {
+            if (source.getEntity() instanceof ServerPlayer serverAttacker) {
+                if (player != source.getEntity()) {
+                    onPlayerKilledByPlayer(player, serverAttacker);
+                    return;
+                }
+            }
         }
-
-        if (player.getKillCredit() != null && player.getKillCredit() instanceof ServerPlayer serverAdversary && player != player.getKillCredit()) {
-            onPlayerKilledByPlayer(player, serverAdversary);
-            return;
+        if (player.getKillCredit() != null) {
+            if (player.getKillCredit() instanceof ServerPlayer serverAdversary) {
+                if (player != player.getKillCredit()) {
+                    onPlayerKilledByPlayer(player, serverAdversary);
+                    return;
+                }
+            }
         }
-
         onPlayerDiedNaturally(player, source);
         DatapackIntegration.EVENT_PLAYER_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
-
         if (!DatapackIntegration.EVENT_PLAYER_DEATH.isCanceled() && livesManager.canChangeLivesNaturally(player)) {
             if (!livesManager.LIVES_LOSE_KILLS_ONLY) {
                 player.ls$addLives(NEW_DEATH_NORMAL.getSeconds());
@@ -193,12 +183,12 @@ public class LimitedLife extends Season {
     public void onClaimKill(ServerPlayer killer, ServerPlayer victim) {
         boolean wasBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
         super.onClaimKill(killer, victim);
-
         boolean cancelGain = DatapackIntegration.EVENT_CLAIM_KILL.isCanceled();
         boolean cancelPunishment = DatapackIntegration.EVENT_PLAYER_DEATH.isCanceled();
         if (cancelGain && cancelPunishment) return;
 
         if (wasBoogeyCure && livesManager.canChangeLivesNaturally()) {
+            //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
             boolean wasAlive = victim.ls$isAlive();
             if (wasAlive && !cancelPunishment) {
                 victim.ls$addLives(NEW_DEATH_BOOGEYMAN.diff(NEW_DEATH_NORMAL).getSeconds());
@@ -218,7 +208,7 @@ public class LimitedLife extends Season {
             Integer victimLives = victim.ls$getLives();
             int amount = NEW_KILL_NORMAL.getSeconds();
             if (canGainLife != null && victimLives != null && victimLives > 0) {
-                if (victimLives + amount >= canGainLife) {
+                if (victimLives + amount >= canGainLife) { // +amount because the victim already lost time
                     broadcastLifeGain(killer, victim);
                     killer.ls$addLives(amount);
                 }
@@ -246,7 +236,9 @@ public class LimitedLife extends Season {
 
         if (!wasBoogeyCure && livesManager.canChangeLivesNaturally()) {
             victim.ls$addLives(NEW_DEATH_NORMAL.getSeconds());
-        } else if (livesManager.canChangeLivesNaturally()) {
+        }
+        else if (livesManager.canChangeLivesNaturally()) {
+            //Victim was killed by boogeyman - remove 2 hours from victim and add 1 hour to boogey
             victim.ls$addLives(NEW_DEATH_BOOGEYMAN.getSeconds());
             livesManager.addToLivesNoUpdate(killer, NEW_KILL_BOOGEYMAN.getSeconds());
             currentSeason.reloadPlayerTeam(killer);
@@ -255,7 +247,7 @@ public class LimitedLife extends Season {
 
     @Override
     public void reload() {
-		SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
+        SHOW_TIME_BELOW_NAME = LimitedLifeConfig.SHOW_TIME_BELOW_NAME.get();
         super.reload();
         LimitedLifeLivesManager.DEFAULT_TIME = LimitedLifeConfig.TIME_DEFAULT.get();
         LimitedLifeLivesManager.YELLOW_TIME = LimitedLifeConfig.TIME_YELLOW.get();
@@ -266,8 +258,6 @@ public class LimitedLife extends Season {
         NEW_KILL_BOOGEYMAN = Time.seconds(LimitedLifeConfig.TIME_KILL_BOOGEYMAN.get());
         TICK_OFFLINE_PLAYERS = LimitedLifeConfig.TICK_OFFLINE_PLAYERS.get();
         LimitedLifeLivesManager.BROADCAST_COLOR_CHANGES = LimitedLifeConfig.BROADCAST_COLOR_CHANGES.get();
-        TICKS_PER_SECOND = LimitedLifeConfig.TICKS_PER_SECOND.get();
-        NetworkHandlerServer.sendUpdatePackets();
     }
 
     @Override

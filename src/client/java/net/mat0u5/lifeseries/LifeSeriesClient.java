@@ -1,11 +1,9 @@
 package net.mat0u5.lifeseries;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.mat0u5.lifeseries.config.ClientConfig;
 import net.mat0u5.lifeseries.network.NetworkHandlerClient;
 import net.mat0u5.lifeseries.registries.ClientRegistries;
-import net.mat0u5.lifeseries.render.ClientRenderer;
 import net.mat0u5.lifeseries.render.TextHud;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphManager;
@@ -19,15 +17,11 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-//? if <= 1.20.3 {
-/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-*///?} else {
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
- //?}
 
-public class MainClient implements ClientModInitializer, IClientHelper {
+public class LifeSeriesClient implements ClientModInitializer, IClientHelper {
 
-    public static Seasons clientCurrentSeason = Main.DEFAULT_SEASON;
+    public static Seasons clientCurrentSeason = LifeSeries.DEFAULT_SEASON;
     public static SessionStatus clientSessionStatus = SessionStatus.NOT_STARTED;
     public static List<Wildcards> clientActiveWildcards = new ArrayList<>();
     public static long TIME_DILATION_TIMESTAMP = 0;
@@ -64,6 +58,9 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     public static boolean modDisabledServerSide = false;
     public static String teamColor = null;
     public static String teamName = null;
+    public static List<String> lvl1ClampedEnchants = new ArrayList<>();
+    public static boolean powerInvisParticles = true;
+    public static int powerTripleJumpCount = 3;
 
     public static ClientConfig clientConfig;
 
@@ -88,9 +85,9 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     @Override
     public void onInitializeClient() {
         ClientRegistries.registerModStuff();
-        NetworkHandlerClient.registerClientReceiver();
         NetworkHandlerClient.initializeSimplePacketReceivers();
-        Main.setClientHelper(this);
+
+        LifeSeries.setClientHelper(this);
 
         clientConfig = new ClientConfig();
         reloadConfig();
@@ -136,12 +133,8 @@ public class MainClient implements ClientModInitializer, IClientHelper {
     }
 
     @Override
-    //? if <= 1.20.3 {
-    /*public void sendPacket(FabricPacket payload) {
-    *///?} else {
     public void sendPacket(CustomPacketPayload payload) {
-    //?}
-        ClientPlayNetworking.send(payload);
+        NetworkHandlerClient.send(payload);
     }
 
     @Override
@@ -156,7 +149,11 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         if (RUN_COMMAND.startsWith("/")) {
             RUN_COMMAND = RUN_COMMAND.substring(1);
         }
+        //? if <= 1.20 {
+        /*COLORED_HEARTS = false;
+        *///?} else {
         COLORED_HEARTS = ClientConfig.COLORED_HEARTS.get(clientConfig);
+        //?}
         COLORED_HEARTS_HARDCORE_LAST_LIFE = ClientConfig.COLORED_HEARTS_HARDCORE_LAST_LIFE.get(clientConfig);
         COLORED_HEARTS_HARDCORE_ALL_LIVES = ClientConfig.COLORED_HEARTS_HARDCORE_ALL_LIVES.get(clientConfig);
 
@@ -204,6 +201,9 @@ public class MainClient implements ClientModInitializer, IClientHelper {
         modDisabledServerSide = false;
         teamColor = null;
         teamName = null;
+        lvl1ClampedEnchants = new ArrayList<>();
+        powerInvisParticles = true;
+        powerTripleJumpCount = 3;
 
         MorphManager.resetMorphs();
     }

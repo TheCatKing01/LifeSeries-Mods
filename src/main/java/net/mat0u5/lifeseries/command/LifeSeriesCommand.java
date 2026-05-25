@@ -2,7 +2,7 @@ package net.mat0u5.lifeseries.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ConfigManager;
 import net.mat0u5.lifeseries.config.DefaultConfigValues;
@@ -23,7 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class LifeSeriesCommand extends Command {
 
@@ -124,16 +124,6 @@ public class LifeSeriesCommand extends Command {
                 .then(literal("disable")
                     .requires(PermissionManager::isAdmin)
                     .executes(context -> enableOrDisable(context.getSource(), true))
-                )
-                .then(literal("clientMode")
-                    .requires(PermissionManager::isAdmin)
-                    .executes(context -> clientMode(context.getSource()))
-                    .then(literal("on")
-                        .executes(context -> setClientMode(context.getSource(), true))
-                    )
-                    .then(literal("off")
-                        .executes(context -> setClientMode(context.getSource(), false))
-                    )
                 );
         dispatcher.register(lifeseriesTree);
         dispatcher.register(literal("ls").redirect(lifeseriesTree.build()));
@@ -141,7 +131,7 @@ public class LifeSeriesCommand extends Command {
 
     private int enableOrDisable(CommandSourceStack source, boolean disabled) {
         OtherUtils.sendCommandFeedback(source, ModifiableText.SERIES_DISABLE.get(disabled ? "disabled" : "enabled"));
-        Main.setDisabled(disabled);
+        LifeSeries.setDisabled(disabled);
         return 1;
     }
 
@@ -181,9 +171,7 @@ public class LifeSeriesCommand extends Command {
 
     public void setSeasonFinal(CommandSourceStack source, String setTo) {
         boolean prevTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
-        if (Main.changeSeasonTo(setTo)) {
-			OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
-            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=ComplexLifeTrader]");
+        if (LifeSeries.changeSeasonTo(setTo)) {
             OtherUtils.sendCommandFeedback(source, ModifiableText.SEASON_CHANGING.get(setTo));
             PlayerUtils.broadcastMessage(ModifiableText.SEASON_CHANGED.get(setTo));
             boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
@@ -207,7 +195,7 @@ public class LifeSeriesCommand extends Command {
 
         SimplePackets.CLEAR_CONFIG.target(self).sendToClient();
         if (PermissionManager.isAdmin(self) && currentSeason.getSeason() != Seasons.UNASSIGNED) {
-            Main.seasonConfig.sendConfigTo(self);
+            LifeSeries.seasonConfig.sendConfigTo(self);
             OtherUtils.sendCommandFeedback(source, ModifiableText.CONFIG_GUI_OPENING.get());
         }
         else {
@@ -279,7 +267,7 @@ public class LifeSeriesCommand extends Command {
 
     public int getVersion(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.MOD_VERSION.get(Main.MOD_VERSION));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.MOD_VERSION.get(LifeSeries.MOD_VERSION));
         return 1;
     }
 
@@ -294,27 +282,6 @@ public class LifeSeriesCommand extends Command {
         if (checkBanned(source)) return -1;
         Component text = TextUtils.format("§7Click {}§7 to open the full Life Series Mod Credits", TextUtils.openURLText("https://mat0u5.github.io/LifeSeries-docs/other/credits"));
         OtherUtils.sendCommandFeedbackQuiet(source, text);
-        return 1;
-    }
-    public int clientMode(CommandSourceStack source) {
-        if (checkBanned(source)) return -1;
-        String status = clientModeEnabled() ? "ON" : "OFF";
-        if (clientModeForced()) {
-            OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_FORCED_ON.get());
-        }
-        OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_STATUS.get(status));
-        return 1;
-    }
-
-    public int setClientMode(CommandSourceStack source, boolean enabled) {
-        if (checkBanned(source)) return -1;
-        if (!enabled && clientModeForced()) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_FORCED_ON.get());
-            return -1;
-        }
-        Main.setClientMode(enabled);
-        String status = clientModeEnabled() ? "ON" : "OFF";
-        OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_SET.get(status));
         return 1;
     }
 }

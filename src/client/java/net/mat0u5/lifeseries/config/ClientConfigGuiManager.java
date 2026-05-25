@@ -1,6 +1,6 @@
 package net.mat0u5.lifeseries.config;
 
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.config.entries.*;
 import net.mat0u5.lifeseries.gui.config.ConfigScreen;
 import net.mat0u5.lifeseries.gui.config.entries.ConfigEntry;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class ClientConfigGuiManager {
     public static void openConfig() {
-        ConfigScreen.Builder builder = new ConfigScreen.Builder(Minecraft.getInstance().screen, Component.nullToEmpty("Life Series Config"));
+        ConfigScreen.Builder builder = new ConfigScreen.Builder(Minecraft.getInstance().ls$getScreen(), Component.nullToEmpty("Life Series Config"));
         if (!ClientConfigNetwork.configObjects.isEmpty()) {
             ConfigScreen.Builder.CategoryBuilder categoryGeneral = builder.addCategory("Server");
             addConfig(categoryGeneral, ClientConfigNetwork.configObjects);
@@ -31,11 +31,11 @@ public class ClientConfigGuiManager {
         ConfigScreen.Builder.CategoryBuilder categoryClient = builder.addCategory("Client");
         addConfig(categoryClient, ClientConfigNetwork.clientConfigObjects);
 
-        if (Main.DEBUG) {
+        if (LifeSeries.DEBUG) {
             addTestingCategory(builder);
         }
 
-        Minecraft.getInstance().setScreen(builder.build());
+        Minecraft.getInstance().ls$setScreen(builder.build());
     }
 
     public static void addConfig(ConfigScreen.Builder.CategoryBuilder category, Map<Integer, ConfigObject> allConfigObjects) {
@@ -48,7 +48,7 @@ public class ClientConfigGuiManager {
             String groupInfo = configObject.getGroupInfo();
             ConfigEntry configEntry = handleConfigObject(configObject);
             if (configEntry == null) {
-                Main.LOGGER.error("Config entry is null");
+                LifeSeries.LOGGER.error("Config entry is null");
                 continue;
             }
             if (groupInfo.contains("[new]")) {
@@ -106,14 +106,14 @@ public class ClientConfigGuiManager {
             targetGroup.addChildEntry(configEntry);
         }
         else {
-            Main.LOGGER.error("Could not find parent group {} for entry {}", groupInfo, configEntry.getFieldName());
+            LifeSeries.LOGGER.error("Could not find parent group {} for entry {}", groupInfo, configEntry.getFieldName());
             category.addEntry(configEntry);
         }
     }
 
     private static GroupConfigEntry<?> createGroupEntry(ConfigEntry configEntry, String modifier) {
         if (!(configEntry instanceof IEntryGroupHeader)) {
-            Main.LOGGER.error("Warning: Group entry does not implement IEntryGroupHeader");
+            LifeSeries.LOGGER.error("Warning: Group entry does not implement IEntryGroupHeader");
             return null;
         }
 

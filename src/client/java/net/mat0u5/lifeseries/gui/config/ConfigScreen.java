@@ -2,23 +2,21 @@ package net.mat0u5.lifeseries.gui.config;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.LifeSeriesClient;
 import net.mat0u5.lifeseries.config.ClientConfigNetwork;
 import net.mat0u5.lifeseries.gui.config.entries.ConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.GroupConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.TextFieldConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.extra.TriviaQuestionConfigEntry;
 import net.mat0u5.lifeseries.gui.config.entries.main.TextConfigEntry;
-import net.mat0u5.lifeseries.render.RenderUtils;
+
 import net.mat0u5.lifeseries.utils.TextColors;
-import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
@@ -27,6 +25,8 @@ import java.util.Locale;
 import java.util.Map;
 //? if >= 1.21.9
 import net.minecraft.client.input.*;
+//? if <= 1.20.2
+//import net.mat0u5.lifeseries.render.RenderUtils;
 
 public class ConfigScreen extends Screen {
     private static int HEADER_HEIGHT_SMALL = 55;
@@ -151,6 +151,7 @@ public class ConfigScreen extends Screen {
     }
 
     private void onSearchChanged(String query) {
+        this.listWidget.setScrollAmount(0);
         this.currentSearchQuery = query;
         this.refreshList();
     }
@@ -210,20 +211,64 @@ public class ConfigScreen extends Screen {
             if (entries != null) {
                 String searchQuery = this.currentSearchQuery.trim();
                 if (searchQuery.isEmpty()) {
+                    clearAllSearchFilters(entries);
                     for (ConfigEntry entry : entries) {
                         if (!entry.isSearchable()) continue;
                         this.listWidget.addEntry(entry);
                     }
-                }
-                else {
-                    for (ConfigEntry entry : getFilteredEntries(getAllEntries(entries), searchQuery)) {
-                        if (!entry.isSearchable()) continue;
+                } else {
+                    for (ConfigEntry entry : buildSearchResults(entries, searchQuery)) {
                         this.listWidget.addEntry(entry);
                     }
                 }
             }
         }
         this.updateButtonStates();
+    }
+
+    private void clearAllSearchFilters(List<ConfigEntry> entries) {
+        for (ConfigEntry entry : entries) {
+            if (entry instanceof GroupConfigEntry<?> group) {
+                group.clearSearchFilter();
+                clearAllSearchFilters(group.getChildEntries());
+            }
+        }
+    }
+
+    private List<ConfigEntry> buildSearchResults(List<ConfigEntry> entries, String query) {
+        List<ConfigEntry> result = new ArrayList<>();
+        for (ConfigEntry entry : entries) {
+            if (!entry.isSearchable()) continue;
+
+            if (entry instanceof GroupConfigEntry<?> group) {
+                List<ConfigEntry> qualifyingChildren = buildSearchResults(group.getChildEntries(), query);
+
+                if (!qualifyingChildren.isEmpty()) {
+                    boolean hasQualifyingSubGroup = qualifyingChildren.stream()
+                            .anyMatch(c -> c instanceof GroupConfigEntry);
+                    long leafMatches = qualifyingChildren.stream()
+                            .filter(c -> !(c instanceof GroupConfigEntry))
+                            .count();
+
+                    if (hasQualifyingSubGroup || leafMatches >= 2) {
+                        // Group qualifies: show it with only its matching children
+                        group.setSearchFilter(qualifyingChildren);
+                        result.add(group);
+                    } else {
+                        // Only 1 leaf match, no qualifying sub-group: surface flat
+                        group.clearSearchFilter();
+                        result.addAll(qualifyingChildren);
+                    }
+                } else {
+                    group.clearSearchFilter();
+                }
+            } else {
+                if (matchesSearch(entry, query)) {
+                    result.add(entry);
+                }
+            }
+        }
+        return result;
     }
 
     public void onEntryValueChanged() {
@@ -302,20 +347,20 @@ public class ConfigScreen extends Screen {
             if (entry instanceof GroupConfigEntry) continue;
             ClientConfigNetwork.onConfigSave(entry);
         }
-        MainClient.reloadConfig();
+        LifeSeriesClient.reloadConfig();
 
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.ls$setScreen(this.parent);
     }
 
     @Override
     public void onClose() {
         if (this.hasChanges) {
-            this.minecraft.setScreen(new ConfirmScreen(
+            this.minecraft.ls$setScreen(new ConfirmScreen(
                     confirmed -> {
                         if (confirmed) {
-                            this.minecraft.setScreen(this.parent);
+                            this.minecraft.ls$setScreen(this.parent);
                         } else {
-                            this.minecraft.setScreen(this);
+                            this.minecraft.ls$setScreen(this);
                         }
                     },
                     Component.nullToEmpty("Changes Not Saved"),
@@ -324,7 +369,7 @@ public class ConfigScreen extends Screen {
                     Component.nullToEmpty("Cancel")
             ));
         } else {
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.ls$setScreen(this.parent);
         }
     }
 

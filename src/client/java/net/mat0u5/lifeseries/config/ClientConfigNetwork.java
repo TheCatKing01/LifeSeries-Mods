@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static net.mat0u5.lifeseries.MainClient.clientConfig;
+import static net.mat0u5.lifeseries.LifeSeriesClient.clientConfig;
 
 public class ClientConfigNetwork {
 
@@ -42,7 +42,7 @@ public class ClientConfigNetwork {
 
     public static ConfigObject getConfigEntry(ConfigPayload payload) {
         ConfigTypes configType = ConfigTypes.getFromString(payload.configType());
-        String id = payload.id();
+        String id = payload.configId();
         String name = payload.name();
         String description = payload.description();
         List<String> args = payload.args();

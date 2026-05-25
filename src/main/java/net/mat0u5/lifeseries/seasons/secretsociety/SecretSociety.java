@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.seasons.secretsociety;
 
 import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.*;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class SecretSociety {
     public boolean SOCIETY_ENABLED = false;
@@ -25,6 +26,7 @@ public class SecretSociety {
     public int KILL_COUNT = 2;
     public int PUNISHMENT_LIVES = -2;
     public boolean SOUND_ONLY_MEMBERS = false;
+    public boolean ADVANCED_DEATHS = false;
 
     public static final Time INITIATE_MESSAGE_DELAYS = Time.seconds(15);
     public List<SocietyMember> members = new ArrayList<>();
@@ -45,6 +47,7 @@ public class SecretSociety {
         KILL_COUNT = seasonConfig.SECRET_SOCIETY_KILLS_REQUIRED.get();
         PUNISHMENT_LIVES = seasonConfig.SECRET_SOCIETY_PUNISHMENT_LIVES.get();
         SOUND_ONLY_MEMBERS = seasonConfig.SECRET_SOCIETY_SOUND_ONLY_MEMBERS.get();
+        ADVANCED_DEATHS = seasonConfig.SECRET_SOCIETY_ADVANCED_DEATHS.get();
 
         FORCE_MEMBERS.clear();
         IGNORE_MEMBERS.clear();
@@ -125,21 +128,21 @@ public class SecretSociety {
         SessionTranscript.societyMembersChosen(memberPlayers);
 
         if (!SOUND_ONLY_MEMBERS) {
-            PlayerUtils.playSoundToPlayers(nonMemberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
+            PlayerUtils.playSoundToPlayers(nonMemberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("pastlife_society")));
         }
-        PlayerUtils.playSoundToPlayers(memberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
+        PlayerUtils.playSoundToPlayers(memberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("pastlife_society")));
         PlayerUtils.sendTitleToPlayers(memberPlayers, ModifiableText.SOCIETY_CALLS_PT1.get(), 0, 30, 0);
 
         TaskScheduler.scheduleTask(15, () -> {
             PlayerUtils.sendTitleToPlayers(memberPlayers, ModifiableText.SOCIETY_CALLS_PT2.get(), 0, 30, 0);
         });
-        TaskScheduler.scheduleTask(30, () -> {
+        TaskScheduler.scheduleTask(35, () -> {
             PlayerUtils.sendTitleToPlayers(memberPlayers, ModifiableText.SOCIETY_CALLS_PT3.get(), 0, 30, 0);
         });
-        TaskScheduler.scheduleTask(45, () -> {
+        TaskScheduler.scheduleTask(55, () -> {
             PlayerUtils.sendTitleToPlayers(memberPlayers, ModifiableText.SOCIETY_CALLS_PT4.get(), 0, 45, 30);
         });
-        TaskScheduler.scheduleTask(115, () -> {
+        TaskScheduler.scheduleTask(141, () -> {
             PlayerUtils.sendTitleWithSubtitleToPlayers(memberPlayers, ModifiableText.SOCIETY_CALLS_PT5_TITLE.get(), ModifiableText.SOCIETY_CALLS_PT5_SUBTITLE.get(), 20, 60, 20);
         });
     }
@@ -193,7 +196,7 @@ public class SecretSociety {
     }
 
     public void afterInitiate(ServerPlayer player) {
-        PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.parse("secretlife_task")), 1, 1);
+        PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.parse("pastlife_society")), 1, 1);
 
         int currentTime = 20;
         TaskScheduler.scheduleTask(currentTime, () -> {
@@ -319,10 +322,19 @@ public class SecretSociety {
         societyEnded = true;
         SessionTranscript.societyEnded();
         if (SOUND_ONLY_MEMBERS) {
-            PlayerUtils.playSoundToPlayers(getMembers(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
+            PlayerUtils.playSoundToPlayers(getMembers(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("pastlife_society_end_member")));
         }
         else {
-            PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
+            List<ServerPlayer> memberPlayers = getMembers();
+            List<ServerPlayer> nonMemberPlayers = new ArrayList<>();
+
+            for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+                if (memberPlayers.contains(player)) continue;
+                nonMemberPlayers.add(player);
+            }
+
+            PlayerUtils.playSoundToPlayers(memberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("pastlife_society_end_member")));
+            PlayerUtils.playSoundToPlayers(nonMemberPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("pastlife_society")));
         }
     }
 
@@ -336,7 +348,7 @@ public class SecretSociety {
                 DatapackIntegration.EVENT_SOCIETY_SUCCESS_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", member.getScoreboardName()));
             }
         });
-        TaskScheduler.scheduleTask(150, () -> {
+        TaskScheduler.scheduleTask(135, () -> {
             PlayerUtils.sendTitleWithSubtitleToPlayers(memberPlayers, ModifiableText.SOCIETY_END_SUCCESS_PT3_TITLE.get(), ModifiableText.SOCIETY_END_SUCCESS_PT3_SUBTITLE.get(), 20, 30, 20);
         });
     }
@@ -348,18 +360,17 @@ public class SecretSociety {
         TaskScheduler.scheduleTask(75, () -> {
             PlayerUtils.sendTitleWithSubtitleToPlayers(memberPlayers, ModifiableText.SOCIETY_END_FAIL_PT2_TITLE.get(), ModifiableText.SOCIETY_END_FAIL_PT2_SUBTITLE.get(), 20, 30, 20);
         });
-        TaskScheduler.scheduleTask(110, () -> {
+        TaskScheduler.scheduleTask(ADVANCED_DEATHS ? 165 : 95, () -> {
             for (ServerPlayer member : memberPlayers) {
                 punishPlayer(member);
             }
         });
-        TaskScheduler.scheduleTask(150, () -> {
+        TaskScheduler.scheduleTask(135, () -> {
             PlayerUtils.sendTitleWithSubtitleToPlayers(memberPlayers, ModifiableText.SOCIETY_END_FAIL_PT3_TITLE.get(), ModifiableText.SOCIETY_END_FAIL_PT3_SUBTITLE.get(), 20, 30, 20);
         });
     }
 
     public void punishPlayer(ServerPlayer member) {
-        member.ls$hurt(member.damageSources().playerAttack(member), 0.001f);
         DatapackIntegration.EVENT_SOCIETY_FAIL_REWARD.trigger(new DatapackIntegration.Events.MacroEntry("Player", member.getScoreboardName()));
         if (DatapackIntegration.EVENT_SOCIETY_FAIL_REWARD.isCanceled()) return;
         int punishmentLives = Math.abs(PUNISHMENT_LIVES);
@@ -367,6 +378,13 @@ public class SecretSociety {
         if (currentLives != null) {
             punishmentLives = Math.min(Math.abs(currentLives-1), punishmentLives);
         }
-        member.ls$addLives(-punishmentLives);
+
+        if (ADVANCED_DEATHS && currentLives != null) {
+            AdvancedDeathsManager.setPlayerLives(member, currentLives-punishmentLives);
+        }
+        else {
+            member.ls$hurt(member.damageSources().playerAttack(member), 0.001f);
+            member.ls$addLives(-punishmentLives);
+        }
     }
 }

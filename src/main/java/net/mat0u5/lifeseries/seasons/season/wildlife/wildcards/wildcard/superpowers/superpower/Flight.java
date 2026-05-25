@@ -1,6 +1,5 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
-import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -13,11 +12,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
-import static net.mat0u5.lifeseries.Main.currentSeason;
 
 //? if >= 1.21.2 {
 import net.minecraft.world.item.equipment.Equippable;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
@@ -38,6 +35,9 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 public class Flight extends Superpower {
+    public static int LAUNGH_JUMP_AMPLIFIER = 54;
+    public static boolean ELYTRA_LAUNCH_NEEDED = true;
+    public static int COOLDOWN_MILLIS = 45000;
     public boolean isLaunchedUp = false;
     private int onGroundTicks = 0;
     private Time timer = Time.zero();
@@ -53,7 +53,7 @@ public class Flight extends Superpower {
 
     @Override
     public int getCooldownMillis() {
-        return 45000;
+        return COOLDOWN_MILLIS;
     }
 
     @Override
@@ -66,13 +66,13 @@ public class Flight extends Superpower {
         }
         if (!isLaunchedUp) {
             onGroundTicks = 0;
-            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(true);
+            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(ELYTRA_LAUNCH_NEEDED);
             return;
         }
 
         if (player.onGround()) {
             onGroundTicks++;
-            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(true);
+            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(ELYTRA_LAUNCH_NEEDED);
         }
 
         else {
@@ -95,7 +95,7 @@ public class Flight extends Superpower {
         player.ls$getServerLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.MASTER, 1, 1);
         player.ls$playNotifySound(SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.MASTER, 1, 1);
 
-        MobEffectInstance effect = new MobEffectInstance(MobEffects.JUMP_BOOST, 20, 54, false, false, false);
+        MobEffectInstance effect = new MobEffectInstance(MobEffects.JUMP_BOOST, 20, LAUNGH_JUMP_AMPLIFIER, false, false, false);
         player.addEffect(effect);
         SimplePackets.JUMP.target(player).sendToClient();
 

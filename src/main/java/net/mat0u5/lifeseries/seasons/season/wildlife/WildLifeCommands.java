@@ -3,10 +3,8 @@ package net.mat0u5.lifeseries.seasons.season.wildlife;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
-import net.mat0u5.lifeseries.Main;
 import net.mat0u5.lifeseries.entity.snail.Snail;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
@@ -21,6 +19,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.S
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.ToggleableSuperpower;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
@@ -36,94 +35,90 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static net.mat0u5.lifeseries.Main.currentSeason;
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
 
 public class WildLifeCommands extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() != Seasons.UNASSIGNED;
+        return currentSeason.getSeason() == Seasons.WILD_LIFE;
     }
 
     @Override
     public Component getBannedText() {
-        return Component.nullToEmpty("This command is only available when you have selected a Season.");
+        return Component.nullToEmpty("This command is only available when playing Wild Life.");
     }
 
     public List<String> getAdminCommands() {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-            return List.of("wildcard", "snail", "superpower", "hunger");
-        }
-        return List.of("wildcard", "snail");
+        return List.of("wildcard", "snail", "superpower", "hunger");
     }
 
     public List<String> getNonAdminCommands() {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-            return List.of("snail");
-        }
         return List.of("snail");
     }
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-		
-		literal("wildcard")
-			.requires(PermissionManager::isAdmin)
-
-			.then(literal("list")
-				.executes(context -> listWildcards(context.getSource()))
-			)
-
-			.then(literal("listActive")
-				.executes(context -> listActiveWildcards(context.getSource()))
-			)
-
-			.then(literal("activate")
-				.then(argument("wildcard", StringArgumentType.greedyString())
-					.suggests((context, builder) -> 
-						SharedSuggestionProvider.suggest(suggestionsActivateWildcard(), builder)
-					)
-					.executes(context -> activateWildcard(
-						context.getSource(), StringArgumentType.getString(context, "wildcard")
-					))
-				)
-			)
-
-			.then(literal("deactivate")
-				.then(argument("wildcard", StringArgumentType.greedyString())
-					.suggests((context, builder) -> 
-						SharedSuggestionProvider.suggest(suggestionsDeactivateWildcard(), builder)
-					)
-					.executes(context -> deactivateWildcard(
-						context.getSource(), StringArgumentType.getString(context, "wildcard")
-					))
-				)
-			)
-
-			.then(literal("choose")
-				.requires(source -> NetworkHandlerServer.wasHandshakeSuccessful(source.getPlayer()) 
-									|| source.getEntity() == null)
-				.executes(context -> chooseWildcard(context.getSource()))
-			)
-
-			.then(literal("finale")
-				.executes(context -> activateFinale(context.getSource()))
-			)
-
-			.then(literal("effect")
-				.then(literal("dots")
-					.executes(context -> effectDots(context.getSource()))
-				)
-				.then(literal("makeItWild")
-					.executes(context -> effectMakeItWild(context.getSource()))
-				)
-			)
-		);
-	
+            literal("wildcard")
+                .requires(PermissionManager::isAdmin)
+                .then(literal("list")
+                    .executes(context -> listWildcards(
+                        context.getSource())
+                    )
+                )
+                .then(literal("listActive")
+                    .executes(context -> listActiveWildcards(
+                        context.getSource())
+                    )
+                )
+                .then(literal("activate")
+                    .then(argument("wildcard", StringArgumentType.greedyString())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(suggestionsActivateWildcard(), builder))
+                        .executes(context -> activateWildcard(
+                            context.getSource(), StringArgumentType.getString(context, "wildcard"))
+                        )
+                    )
+                )
+                .then(literal("deactivate")
+                    .then(argument("wildcard", StringArgumentType.greedyString())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(suggestionsDeactivateWildcard(), builder))
+                        .executes(context -> deactivateWildcard(
+                            context.getSource(), StringArgumentType.getString(context, "wildcard"))
+                        )
+                    )
+                )
+                .then(literal("choose")
+                    .requires(source -> (NetworkHandlerServer.wasHandshakeSuccessful(source.getPlayer()) || (source.getEntity() == null)))
+                    .executes(context -> chooseWildcard(
+                        context.getSource())
+                    )
+                )
+                .then(literal("finale")
+                        .executes(context -> activateFinale(
+                                context.getSource())
+                        )
+                )
+                .then(literal("effect")
+                        .then(literal("dots")
+                                .executes(context -> effectDots(
+                                        context.getSource())
+                                )
+                        )
+                        .then(literal("activate")
+                                .executes(context -> effectActivate(
+                                        context.getSource())
+                                )
+                        )
+                        .then(literal("makeItWild")
+                                .executes(context -> effectMakeItWild(
+                                        context.getSource())
+                                )
+                        )
+                )
+        );
         dispatcher.register(
             literal("snail")
-                .requires(source -> isAllowed())
                 .then(literal("names")
                     .then(literal("set")
                         .requires(PermissionManager::isAdmin)
@@ -193,20 +188,12 @@ public class WildLifeCommands extends Command {
         );
         dispatcher.register(
             literal("superpower")
-			    .requires(source -> PermissionManager.isAdmin(source) && currentSeason.getSeason() == Seasons.WILD_LIFE)
-                .then(literal("add")
-                    .then(argument("player", EntityArgument.players())
-                        .then(argument("superpower", StringArgumentType.string())
-                            .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
-                            .executes(context -> setSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), StringArgumentType.getString(context, "superpower")))
-                        )
-                    )
-                )
+                .requires(PermissionManager::isAdmin)
                 .then(literal("set")
                     .then(argument("player", EntityArgument.players())
                         .then(argument("superpower", StringArgumentType.string())
                             .suggests((context, builder) -> SharedSuggestionProvider.suggest(Superpowers.getImplementedStr(), builder))
-                            .executes(context -> setOnlySuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), StringArgumentType.getString(context, "superpower")))
+                            .executes(context -> setSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), StringArgumentType.getString(context, "superpower")))
                         )
                     )
                 )
@@ -215,11 +202,16 @@ public class WildLifeCommands extends Command {
                                 .executes(context -> resetSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                         )
                 )
-                .then(literal("randomise")
+                .then(literal("randomize")
                     .then(argument("player", EntityArgument.players())
                             .executes(context -> setRandomSuperpowers(context.getSource(), EntityArgument.getPlayers(context, "player")))
                     )
-					.executes(context -> setRandomSuperpowers(context.getSource()))
+                    .executes(context -> setRandomSuperpowers(context.getSource()))
+                )
+                .then(literal("get")
+                    .then(argument("player", EntityArgument.player())
+                        .executes(context -> getSuperpower(context.getSource(), EntityArgument.getPlayer(context, "player")))
+                    )
                 )
                 .then(literal("cooldown")
                         .then(argument("player", EntityArgument.players())
@@ -245,18 +237,12 @@ public class WildLifeCommands extends Command {
                         .then(literal("reset")
                                 .executes(context -> assignSuperpower(context.getSource(), EntityArgument.getPlayers(context, "player"), null))
                         )
-					)
-                )
-                .then(literal("count")
-                    .then(argument("player", EntityArgument.players())
-                        .executes(context -> getSuperpowerCount(context.getSource(), EntityArgument.getPlayers(context, "player")))
                     )
                 )
         );
-                
         dispatcher.register(
             literal("hunger")
-                .requires(source -> PermissionManager.isAdmin(source) && currentSeason.getSeason() == Seasons.WILD_LIFE)
+                .requires(PermissionManager::isAdmin)
                 .then(literal("randomizeFood")
                         .executes(context -> randomizeFood(context.getSource()))
                 )
@@ -264,7 +250,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int despawnSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
 
         for (ServerPlayer player : targets) {
             List<Snail> snails = Snails.snails.remove(player.getUUID());
@@ -287,26 +273,7 @@ public class WildLifeCommands extends Command {
         return 1;
     }
     public int spawnSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkSnailCommandDisabled(source)) return -1;
-
-        if (!canSpawnSnails()) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.SNAIL_SPAWN_REQUIRES_CLIENTMODE.get());
-            return -1;
-        }
-        if (!Main.clientModeEnabled()) {
-            ServerPlayer requester = source.getPlayer();
-            if (requester == null) {
-                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_SNAIL.get());
-                return -1;
-            }
-            if (!NetworkHandlerServer.wasHandshakeSuccessful(requester)) {
-                OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_REQUIRE_CLIENT.get());
-                return -1;
-            }
-            NetworkHandlerServer.requestClientModeForSnailSpawn(requester, new ArrayList<>(targets));
-            OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_SNAIL.get());
-            return 1;
-        }
+        if (checkBanned(source)) return -1;
 
         for (ServerPlayer player : targets) {
             Snails.preventSnails.remove(player.getUUID());
@@ -324,7 +291,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int toggleSnailFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
 
 
         if (targets.size() == 1) {
@@ -352,6 +319,17 @@ public class WildLifeCommands extends Command {
         if (checkBanned(source)) return -1;
 
         WildcardManager.showDots();
+
+        return 1;
+    }
+
+    public int effectActivate(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+
+        WildcardManager.showDots();
+        TaskScheduler.scheduleTask(90, () -> {
+            WildcardManager.showCryptTitle(ModifiableText.WILDLIFE_WILDCARD_ACTIVATE_CRYPT_TITLE.get());
+        });
 
         return 1;
     }
@@ -391,7 +369,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int requestSnailName(CommandSourceStack source, String name) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -402,7 +380,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int snailTexturesReload(CommandSourceStack source) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -414,7 +392,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailTexturesInfo(CommandSourceStack source) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         ServerPlayer player = source.getPlayer();
         if (player == null) return -1;
 
@@ -424,7 +402,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailTextures(CommandSourceStack source) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         List<String> textures = SnailSkins.getAllSkins();
         if (textures.isEmpty()) {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SNAIL_TEXTURES_NONE.get());
@@ -454,15 +432,6 @@ public class WildLifeCommands extends Command {
     }
 
     public List<String> suggestionsActivateWildcard() {
-        if (WildcardManager.isLimitedWildcards()) {
-            List<String> allowed = new ArrayList<>();
-            for (Wildcards wildcard : WildcardManager.getAllowedWildcardsForSeason()) {
-                if (!WildcardManager.isActiveWildcard(wildcard)) {
-                    allowed.add(wildcard.getStringName());
-                }
-            }
-            return allowed;
-        }
         List<String> allWildcards = Wildcards.getInactiveWildcardsStr();
         allWildcards.add("*");
         return allWildcards;
@@ -471,20 +440,19 @@ public class WildLifeCommands extends Command {
     public int assignSuperpower(CommandSourceStack source, Collection<ServerPlayer> targets, String name) {
         if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
-		
-		if (name == null) {
-			for (ServerPlayer player : targets) {
-				SuperpowersWildcard.assignedSuperpowers.remove(player.getUUID());
-			}
 
-			if (targets.size() == 1) {
-				OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_RESET_SINGLE.get(targets.iterator().next()));
-			} else {
-				OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_RESET_MULTIPLE.get(targets.size()));
-			}
-
-			return 1;
-		}
+        if (name == null) {
+            for (ServerPlayer player : targets) {
+                SuperpowersWildcard.preAssignedSuperpowers.remove(player.getUUID());
+            }
+            if (targets.size() == 1) {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_RESET_SINGLE.get(targets.iterator().next()));
+            }
+            else {
+                OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_ASSIGN_RESET_MULTIPLE.get(targets.size()));
+            }
+            return 1;
+        }
 
         if (!Superpowers.getImplementedStr().contains(name)) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
@@ -497,7 +465,7 @@ public class WildLifeCommands extends Command {
         }
 
         for (ServerPlayer player : targets) {
-            SuperpowersWildcard.assignedSuperpowers.put(player.getUUID(), superpower);
+            SuperpowersWildcard.preAssignedSuperpowers.put(player.getUUID(), superpower);
         }
 
         if (targets.size() == 1) {
@@ -523,7 +491,12 @@ public class WildLifeCommands extends Command {
                 superpower.cooldown(cooldown*1000);
             }
             else {
-                superpower.cooldown(superpower.getCooldownMillis());
+                if (superpower instanceof ToggleableSuperpower togglePower) {
+                    superpower.cooldown(Math.max(togglePower.activateCooldownMillis(), togglePower.deactivateCooldownMillis()));
+                }
+                else {
+                    superpower.cooldown(superpower.getCooldownMillis());
+                }
             }
             superpower.sendCooldownPacket();
             superpower.sendShowCooldownPacket();
@@ -563,108 +536,25 @@ public class WildLifeCommands extends Command {
         }
         return 1;
     }
-	
-	public int setRandomSuperpowers(CommandSourceStack source) {
-		if (checkBanned(source)) return -1;
-		List<ServerPlayer> players = new ArrayList<>(source.getServer().getPlayerList().getPlayers());
-		int grantedPowers = SuperpowersWildcard.rollRandomSuperpowers(players);
-		if (grantedPowers <= 0) return 1;
-		int count = SuperpowersWildcard.POWERS_PER_ROLL;
-		
-		if (count == 1) {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
-		}
-		else {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(count));
-		}
 
-		return 1;
-	}
-	
-	public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
-		if (checkBanned(source)) return -1;
-		int grantedPowers = SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
-		if (grantedPowers <= 0) return 1;
-		int count = SuperpowersWildcard.POWERS_PER_ROLL;
+    public int setRandomSuperpowers(CommandSourceStack source) {
+        if (checkBanned(source)) return -1;
+        SuperpowersWildcard.rollRandomSuperpowers();
+        OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE.get());
+        return 1;
+    }
 
-		if (targets.size() == 1) {
-			if (count == 1) {
-				OtherUtils.sendCommandFeedback(source,
-					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
-			} else {
-				OtherUtils.sendCommandFeedback(source,
-					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE_MULTIPLE.get(count, targets.iterator().next()));
-			}
-		} else {
-			if (count == 1) {
-				OtherUtils.sendCommandFeedback(source,
-					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTIPLE.get(targets.size()));
-			} else {
-				OtherUtils.sendCommandFeedback(source,
-					ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTI_MULTIPLE.get(count, targets.size()));
-			}
-		}
-
-		return 1;
-	}
-	
-	public int getSuperpowerCount(CommandSourceStack source, Collection<ServerPlayer> targets) {
-		if (checkBanned(source)) return -1;
-		if (targets == null || targets.isEmpty()) return -1;
-
-		if (targets.size() == 1) {
-			ServerPlayer player = targets.iterator().next();
-			int count = SuperpowersWildcard.getSuperpowerCount(player);
-			if (count == 1) {
-				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_SINGLE.get(player, count));				
-				}
-			else {
-				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_MULTIPLE.get(player, count));				
-				}
-							return 1;
-		}
-
-		for (ServerPlayer player : targets) {
-			int count = SuperpowersWildcard.getSuperpowerCount(player);
-			if (count == 1) {
-				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_SINGLE.get(player, count));
-				}
-			else {
-				OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_COUNT_MULTIPLE.get(player, count));
-				}
-		}
-		return 1;
-	}
-
-	public int setOnlySuperpower(CommandSourceStack source, Collection<ServerPlayer> targets, String name) {
-		if (checkBanned(source)) return -1;
-		if (targets == null || targets.isEmpty()) return -1;
-
-		if (!Superpowers.getImplementedStr().contains(name)) {
-			OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
-			return -1;
-		}
-
-		Superpowers superpower = Superpowers.fromString(name);
-		if (superpower == Superpowers.NULL) {
-			OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
-			return -1;
-		}
-
-		for (ServerPlayer player : targets) {
-			SuperpowersWildcard.resetSuperpower(player);
-			SuperpowersWildcard.setSuperpower(player, superpower);
-		}
-
-		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE.get(targets.iterator().next(), name));
-			}
-		else {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_ONLY_MULTIPLE.get(targets.iterator().next(), name));
-			}
-		return 1;
-	}
-
+    public int setRandomSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (checkBanned(source)) return -1;
+        SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(targets));
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE.get(targets.iterator().next()));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE.get(targets.size()));
+        }
+        return 1;
+    }
 
     public int resetSuperpowers(CommandSourceStack source, Collection<ServerPlayer> targets) {
         if (checkBanned(source)) return -1;
@@ -679,7 +569,14 @@ public class WildLifeCommands extends Command {
         }
         else {
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_DEACTIVATE_MULTIPLE.get(targets.size()));
-		}
+        }
+        return 1;
+    }
+
+    public int getSuperpower(CommandSourceStack source, ServerPlayer player) {
+        if (checkBanned(source)) return -1;
+        Superpowers superpower = SuperpowersWildcard.getSuperpower(player);
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_SUPERPOWER_GET.get(player, superpower.getString()));
         return 1;
     }
 
@@ -691,7 +588,6 @@ public class WildLifeCommands extends Command {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_SUPERPOWER_INVALID.get());
             return -1;
         }
-		
 
         Superpowers superpower = Superpowers.fromString(name);
         if (superpower == Superpowers.NULL) {
@@ -699,39 +595,27 @@ public class WildLifeCommands extends Command {
             return -1;
         }
 
-		int successfullyAdded = 0;
-		for (ServerPlayer player : targets) {
-			if (SuperpowersWildcard.setSuperpower(player, superpower)) {
-				successfullyAdded++;
-			}
-		}
-
-		if (successfullyAdded <= 0) return 1;
-		if (targets.size() == 1) {
-			OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(name, targets.iterator().next()));
-		} else {
-			OtherUtils.sendCommandFeedback(
-				source,
-				ModifiableText.WILDLIFE_SUPERPOWER_SET_MULTIPLE.get(
-					name,
-					targets.size()
-				)
-			);
-		}
-
-		return 1;
-
+        for (ServerPlayer player : targets) {
+            SuperpowersWildcard.setSuperpower(player, superpower);
+        }
+        if (targets.size() == 1) {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_SINGLE.get(targets.iterator().next(), name));
+        }
+        else {
+            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SUPERPOWER_SET_MULTIPLE.get(name, targets.size()));
+        }
+        return 1;
     }
 
     public int setSnailName(CommandSourceStack source, ServerPlayer player, String name) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         Snails.setSnailName(player, name);
         OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_SNAIL_NAME_SET.get(player, name));
         return 1;
     }
 
     public int resetSnailName(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
 
         for (ServerPlayer player : targets) {
@@ -750,7 +634,7 @@ public class WildLifeCommands extends Command {
     }
 
     public int getSnailNames(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (checkSnailCommandDisabled(source)) return -1;
+        if (checkBanned(source)) return -1;
         if (targets == null || targets.isEmpty()) return -1;
 
         if (targets.size() == 1) {
@@ -767,21 +651,12 @@ public class WildLifeCommands extends Command {
 
     public int deactivateWildcard(CommandSourceStack source, String wildcardName) {
         if (checkBanned(source)) return -1;
-        if (WildcardManager.isLimitedWildcards() && wildcardName.equalsIgnoreCase("*")) {
-            WildcardManager.onSessionEnd();
-            OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_WILDCARD_DEACTIVATE_ALL.get());
-            return 1;
-        }
         if (wildcardName.equalsIgnoreCase("*")) {
             WildcardManager.onSessionEnd();
             OtherUtils.sendCommandFeedback(source, ModifiableText.WILDLIFE_WILDCARD_DEACTIVATE_ALL.get());
             return 1;
         }
         Wildcards wildcard = Wildcards.getFromString(wildcardName);
-        if (!WildcardManager.isWildcardAllowedForSeason(wildcard)) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
-            return -1;
-        }
         if (wildcard == Wildcards.NULL) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
             return -1;
@@ -792,10 +667,6 @@ public class WildLifeCommands extends Command {
         }
         WildcardManager.fadedWildcard();
         Wildcard wildcardInstance = WildcardManager.activeWildcards.get(wildcard);
-        if (wildcard == Wildcards.SUPERPOWERS) {
-            SuperpowersWildcard.externalResetAllPowers();
-            currentSeason.reloadAllPlayerTeams();
-        }
         wildcardInstance.deactivate();
         WildcardManager.activeWildcards.remove(wildcard);
 
@@ -806,11 +677,6 @@ public class WildLifeCommands extends Command {
 
     public int activateWildcard(CommandSourceStack source, String wildcardName) {
         if (checkBanned(source)) return -1;
-        if (!WildcardManager.ensureClientModeForWildcards()) return -1;
-        if (WildcardManager.isLimitedWildcards() && wildcardName.equalsIgnoreCase("*")) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
-            return -1;
-        }
         if (wildcardName.equalsIgnoreCase("*")) {
             List<Wildcards> inactiveWildcards = Wildcards.getInactiveWildcards();
             for (Wildcards wildcard : inactiveWildcards) {
@@ -834,10 +700,6 @@ public class WildLifeCommands extends Command {
             return 1;
         }
         Wildcards wildcard = Wildcards.getFromString(wildcardName);
-        if (!WildcardManager.isWildcardAllowedForSeason(wildcard)) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
-            return -1;
-        }
         if (wildcard == Wildcards.NULL) {
             OtherUtils.sendCommandFailure(source, ModifiableText.WILDLIFE_WILDCARD_INVALID.get());
             return -1;
@@ -860,40 +722,17 @@ public class WildLifeCommands extends Command {
 
     public int listWildcards(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        if (WildcardManager.isLimitedWildcards()) {
-            List<String> allowed = new ArrayList<>();
-            for (Wildcards wildcard : WildcardManager.getAllowedWildcardsForSeason()) {
-                allowed.add(wildcard.getStringName());
-            }
-            OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_AVAILABLE.get(allowed));
-            return 1;
-        }
         OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_AVAILABLE.get(Wildcards.getWildcardsStr()));
         return 1;
     }
 
     public int listActiveWildcards(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
-        List<String> activeWildcards = Wildcards.getActiveWildcardsStr();
-        if (activeWildcards.isEmpty()) {
+        if (Wildcards.getActiveWildcardsStr().isEmpty()) {
             OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED_NONE.get());
             return 1;
         }
-        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED.get(activeWildcards));
+        OtherUtils.sendCommandFeedbackQuiet(source, ModifiableText.WILDLIFE_WILDCARD_ACTIVATED.get(Wildcards.getActiveWildcardsStr()));
         return 1;
-    }
-
-    private boolean checkSnailCommandDisabled(CommandSourceStack source) {
-        if (Main.modDisabled()) {
-            OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
-            return true;
-        }
-        return false;
-    }
-
-    private boolean canSpawnSnails() {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) return true;
-        if (currentSeason.getSeason() == Seasons.NICE_LIFE) return true;
-        return !currentSeason.getSeason().requiresClient();
     }
 }

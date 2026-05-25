@@ -1,6 +1,5 @@
 package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower;
 
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.registries.MobRegistry;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -10,11 +9,15 @@ import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.List;
 
 public class SuperPunch extends ToggleableSuperpower {
+    public static double KNOCKBACK_STRENGTH = 3.0;
+    public static double THORNS_DAMAGE = 1.0;
+    public static int COOLDOWN_MILLIS = 1000;
     private Time timer = Time.zero();
     private Entity riding = null;
     private static final List<EntityType<?>> bannedSittingEntities = List.of(MobRegistry.SNAIL, MobRegistry.TRIVIA_BOT);
@@ -26,6 +29,11 @@ public class SuperPunch extends ToggleableSuperpower {
     @Override
     public Superpowers getSuperpower() {
         return Superpowers.SUPER_PUNCH;
+    }
+
+    @Override
+    public int deactivateCooldownMillis() {
+        return COOLDOWN_MILLIS;
     }
 
     @Override
@@ -96,7 +104,12 @@ public class SuperPunch extends ToggleableSuperpower {
     private void syncEntityPassengers(Entity entity, ServerLevel level) {
         ClientboundSetPassengersPacket passengersPacket = new ClientboundSetPassengersPacket(entity);
 
-        for (ServerPlayer trackingPlayer : PlayerLookup.tracking(level, entity.blockPosition())) {
+        //? if <= 1.21.11 {
+        /*List<ServerPlayer> players = level.getChunkSource().chunkMap.getPlayers(new ChunkPos(entity.blockPosition()), false);
+        *///?} else {
+        List<ServerPlayer> players = level.getChunkSource().chunkMap.getPlayers(ChunkPos.containing(entity.blockPosition()), false);
+        //?}
+        for (ServerPlayer trackingPlayer : players) {
             trackingPlayer.connection.send(passengersPacket);
         }
 

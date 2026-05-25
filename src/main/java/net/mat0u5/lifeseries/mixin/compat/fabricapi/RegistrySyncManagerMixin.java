@@ -1,4 +1,4 @@
-package net.mat0u5.lifeseries.mixin;
+package net.mat0u5.lifeseries.mixin.compat.fabricapi;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -7,14 +7,14 @@ import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import static net.mat0u5.lifeseries.Main.currentSeason;
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
 
 //? if <= 1.20 {
 /*import net.minecraft.server.level.ServerPlayer;
@@ -48,8 +48,8 @@ public class RegistrySyncManagerMixin {
     //?}
         if (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.NEVER ||
                 (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.LOGIN && NetworkHandlerServer.preLoginHandshake.contains(profileUUID)) ||
-                (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.SEASON && Main.clientModeEnabled())) {
-            Main.LOGGER.info("Sending unmodified registry entries to client");
+                (NetworkHandlerServer.REGISTRY_OVERRIDE_BEHAVIOR == NetworkHandlerServer.RegistryOverrideBahaviours.SEASON && currentSeason.getSeason().requiresClient())) {
+            LifeSeries.LOGGER.info("Sending unmodified registry entries to client");
             return originalValue;
         }
 
@@ -59,7 +59,7 @@ public class RegistrySyncManagerMixin {
                 Object2IntMap<Identifier> registry = originalValue.get(location);
 
                 registry.keySet().removeIf(value -> {
-                    if (value.getNamespace().equalsIgnoreCase(Main.MOD_ID)) {
+                    if (value.getNamespace().equalsIgnoreCase(LifeSeries.MOD_ID)) {
                         removedEntries.add(location.getPath()+":"+value);
                         return true;
                     }
@@ -69,7 +69,7 @@ public class RegistrySyncManagerMixin {
             }
         }
 
-        Main.LOGGER.info("Sending modified registry entries to client. Removed: "+String.join(", ", removedEntries));
+        LifeSeries.LOGGER.info("Sending modified registry entries to client. Removed: "+String.join(", ", removedEntries));
         return originalValue;
     }
 

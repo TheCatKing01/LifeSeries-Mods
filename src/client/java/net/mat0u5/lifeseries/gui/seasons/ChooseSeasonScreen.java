@@ -35,13 +35,13 @@ public class ChooseSeasonScreen extends DefaultScreen {
     public void init() {
         super.init();
         addSeasonRegions();
-        hasAprilFoolsSeasons = !Seasons.getAprilFoolsSeasons().isEmpty();
+        hasAprilFoolsSeasons = !Seasons.getSpecialSeasons().isEmpty();
     }
 
     public void addSeasonRegions() {
         seasonRegions.clear();
         List<Seasons> seasons = Seasons.getSeasons();
-        seasons.removeAll(Seasons.getAprilFoolsSeasons());
+        seasons.removeAll(Seasons.getSpecialSeasons());
 
         List<List<Seasons>> rows = splitIntoRows(seasons, ROWS);
         int currentRegionIndex = 1;
@@ -117,7 +117,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
     //?}
             int region = getRegion((int) mouseX, (int) mouseY);
             if (region == -1 && this.minecraft != null) {
-                this.minecraft.setScreen(new ChooseExtraSeasonScreen(hasSelectedBefore));
+                this.minecraft.ls$setScreen(new ChooseExtraSeasonScreen(hasSelectedBefore));
                 return true;
             }
             else if (region != 0) {
@@ -136,7 +136,7 @@ public class ChooseSeasonScreen extends DefaultScreen {
         for (SeasonRegion seasonRegion : seasonRegions) {
             if (seasonRegion.id() == region) {
                 if (hasSelectedBefore && this.minecraft != null) {
-                    this.minecraft.setScreen(new ConfirmSeasonAnswerScreen(this, seasonRegion.season()));
+                    this.minecraft.ls$setScreen(new ConfirmSeasonAnswerScreen(this, seasonRegion.season()));
                 }
                 else {
                     SimplePackets.SET_SEASON.sendToServer(seasonRegion.season().getName());

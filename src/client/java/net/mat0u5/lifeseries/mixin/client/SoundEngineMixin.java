@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.client.sounds.SoundEngine;
 
 //? if >= 1.20.3 {
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.util.Mth;
@@ -28,10 +28,12 @@ public class SoundEngineMixin {
     );
     @Inject(method = "calculatePitch", at = @At("HEAD"), cancellable = true)
     private void getAdjustedPitch(SoundInstance sound, CallbackInfoReturnable<Float> cir) {
+        //~ !renames_1_21_11
         //~ if > 1.21.9 '.getLocation()' -> '.getIdentifier()' {
         String name = sound.getIdentifier().getPath();
         //~}
-        if (ls$nonAdjustedSounds.contains(name) || Main.modFullyDisabled()) return;
+        //~ renames_1_21_11
+        if (ls$nonAdjustedSounds.contains(name) || LifeSeries.modFullyDisabled()) return;
         Minecraft client = Minecraft.getInstance();
         if (client.level != null) {
             TickRateManager tickManager = client.level.tickRateManager();

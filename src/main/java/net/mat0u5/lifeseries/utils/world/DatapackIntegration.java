@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.utils.world;
 
+import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.secretlife.TaskTypes;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.LifeSeries.seasonConfig;
 
 public class DatapackIntegration {
     private static final String SCOREBOARD_WILDCARDS = "Wildcards";
@@ -221,6 +222,9 @@ public class DatapackIntegration {
     }
     public static void setSessionTimePassed(Time time) {
         ScoreboardUtils.setScore("PassedTime", SCOREBOARD_SESSION_INFO, time.getTicks());
+    }
+    public static void setSeason(Seasons season) {
+        ScoreboardUtils.setScore("Season", SCOREBOARD_SESSION_INFO, season.getIndex());
     }
 
     public static final List<String> events = new ArrayList<>();

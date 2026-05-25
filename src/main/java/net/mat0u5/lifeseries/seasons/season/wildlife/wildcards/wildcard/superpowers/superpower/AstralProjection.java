@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 /*import net.mat0u5.lifeseries.entity.fakeplayer.FakePlayer;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
-import static net.mat0u5.lifeseries.Main.server;
+import static net.mat0u5.lifeseries.LifeSeries.server;
 *///?}
 //? if > 1.20.5 && <= 1.21.6
 //import net.minecraft.network.DisconnectionDetails;
@@ -34,6 +34,9 @@ import net.minecraft.world.item.component.ResolvableProfile;
 //?}
 
 public class AstralProjection extends ToggleableSuperpower {
+    public static boolean DAMAGE_CANCELS = true;
+    public static int COOLDOWN_MILLIS = 5000;
+
     //? if <= 1.21.6 {
     /*@Nullable
     public FakePlayer clone;
@@ -73,7 +76,7 @@ public class AstralProjection extends ToggleableSuperpower {
 
     @Override
     public int deactivateCooldownMillis() {
-        return 5000;
+        return COOLDOWN_MILLIS;
     }
 
     public void resetParams() {
@@ -198,13 +201,20 @@ public class AstralProjection extends ToggleableSuperpower {
      *///?} else {
     public void onDamageClone(ServerLevel level, DamageSource source, float amount) {
     //?}
-        deactivate();
         ServerPlayer player = getPlayer();
-        if (player == null) return;
-        //? if <= 1.21 {
-        /*player.ls$hurt(source, amount);
-         *///?} else {
-        player.ls$hurt(level, source, amount);
-        //?}
+        if (player != null) {
+            //? if <= 1.21 {
+            /*player.ls$hurt(source, amount);
+             *///?} else {
+            player.ls$hurt(level, source, amount);
+            //?}
+        }
+        if (DAMAGE_CANCELS) {
+            deactivate();
+        }
+    }
+
+    public void onChangeLives() {
+        deactivate();
     }
 }

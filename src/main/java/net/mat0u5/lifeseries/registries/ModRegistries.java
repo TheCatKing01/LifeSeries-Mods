@@ -1,47 +1,15 @@
 package net.mat0u5.lifeseries.registries;
 
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.mat0u5.lifeseries.command.manager.CommandManager;
-import net.mat0u5.lifeseries.events.Events;
-import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
-import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
 public class ModRegistries {
-	
-	public static final ResourceKey<WorldPreset> SIMPLE = ResourceKey.create(
-            Registries.WORLD_PRESET,
-            IdentifierHelper.mod("simple")
-    );
-
-    public static final ResourceKey<WorldPreset> SIMPLE_LIFE = ResourceKey.create(
-            Registries.WORLD_PRESET,
-            IdentifierHelper.mod("simple_life")
-    );
-	
-	
-    public static final ResourceKey<WorldPreset> COMPLEX_LIFE = ResourceKey.create(
-            Registries.WORLD_PRESET,
-            IdentifierHelper.mod("complex_life")
-    );
-
+    /**
+     * Other server-side registries in:
+     * {@link net.mat0u5.lifeseries.mixin.CommandsMixin}
+     */
     public static void registerModStuff() {
-        registerCommands();
-        registerEvents();
         TextUtils.setEmotes();
         MobRegistry.registerMobs();
         ParticleRegistry.registerParticles();
-    }
-
-    private static void registerCommands() {
-        CommandRegistrationCallback.EVENT.register(CommandManager::registerAllCommands);
-    }
-
-    private static void registerEvents() {
-        Events.register();
-        TaskScheduler.registerTickHandler();
     }
 }

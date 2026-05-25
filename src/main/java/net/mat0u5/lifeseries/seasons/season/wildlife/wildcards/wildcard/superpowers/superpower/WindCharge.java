@@ -24,6 +24,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.util.Unit;
 
 public class WindCharge extends ToggleableSuperpower {
+    public static double EXPLOSION_POWER = 3.0;
+    public static int COOLDOWN_MILLIS = 1000;
     public static int MAX_MACE_DAMAGE = 2;
 
     public WindCharge(ServerPlayer player) {
@@ -33,6 +35,11 @@ public class WindCharge extends ToggleableSuperpower {
     @Override
     public Superpowers getSuperpower() {
         return Superpowers.WIND_CHARGE;
+    }
+
+    @Override
+    public int deactivateCooldownMillis() {
+        return COOLDOWN_MILLIS;
     }
 
     @Override
@@ -87,6 +94,7 @@ public class WindCharge extends ToggleableSuperpower {
             mace.set(DataComponents.MAX_DAMAGE, 1);
             mace.set(DataComponents.DAMAGE, 1);
             ItemStackUtils.setCustomComponentBoolean(mace, "IgnoreBlacklist", true);
+            ItemStackUtils.setCustomComponentBoolean(mace, "NoModifications", true);
             ItemStackUtils.setCustomComponentBoolean(mace, "FromSuperpower", true);
             ItemStackUtils.setCustomComponentBoolean(mace, "WindChargeSuperpower", true);
             player.getInventory().add(mace);

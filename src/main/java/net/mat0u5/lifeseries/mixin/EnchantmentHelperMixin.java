@@ -1,13 +1,9 @@
 package net.mat0u5.lifeseries.mixin;
 
 import com.google.common.collect.Lists;
-import net.mat0u5.lifeseries.Main;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -23,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.Optional;
 
-import static net.mat0u5.lifeseries.Main.blacklist;
-import static net.mat0u5.lifeseries.Main.seasonConfig;
+import static net.mat0u5.lifeseries.LifeSeries.blacklist;
+import static net.mat0u5.lifeseries.LifeSeries.seasonConfig;
 //? if >= 1.21.2
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 //? if <= 1.20.5 {
@@ -53,8 +49,8 @@ public class EnchantmentHelperMixin {
     *///?} else {
     private static void getPossibleEntries(int level, ItemStack stack, Stream<Holder<Enchantment>> possibleEnchantments, CallbackInfoReturnable<List<EnchantmentInstance>> cir) {
     //?}
-        if (Main.isClientOrDisabled()) return;
-        if (Main.server == null) return;
+        if (LifeSeries.isClientOrDisabled()) return;
+        if (LifeSeries.server == null) return;
 
         if (ItemStackUtils.hasCustomComponentEntry(stack, "NoEnchants") || ItemStackUtils.hasCustomComponentEntry(stack, "NoModifications")) {
             cir.setReturnValue(Lists.<EnchantmentInstance>newArrayList());
@@ -242,33 +238,4 @@ public class EnchantmentHelperMixin {
         cir.setReturnValue(list);
     }
     //?}
-
-    //? if <= 1.20.5 {
-    /*@Inject(
-            method = "doPostDamageEffects", at = @At("HEAD")
-    )
-    private static void onTargetDamaged(LivingEntity victimEntity, Entity sourceEntity, CallbackInfo ci) {
-    *///?} else {
-    @Inject(
-            method = "doPostAttackEffects(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At("HEAD")
-    )
-    private static void onTargetDamaged(ServerLevel level, Entity victimEntity, DamageSource damageSource, CallbackInfo ci) {
-    //?}
-        if (Main.isClientOrDisabled()) return;
-        if (!(victimEntity instanceof ServerPlayer victim)) return;
-        //? if <= 1.20.5 {
-        /*if (sourceEntity == null) return;
-        if (!SuperpowersWildcard.hasActivatedPower(victim, Superpowers.SUPER_PUNCH)) return;
-        sourceEntity.hurt(victim.damageSources().thorns(victim), 1F);
-        *///?} else {
-        if (damageSource == null) return;
-        if (damageSource.getEntity() == null) return;
-        if (!SuperpowersWildcard.hasActivatedPower(victim, Superpowers.SUPER_PUNCH)) return;
-        //? if <= 1.21 {
-        /*damageSource.getEntity().hurt(victim.damageSources().thorns(victim), 1F);
-        *///?} else {
-        damageSource.getEntity().hurtServer(victim.ls$getServerLevel(), victim.damageSources().thorns(victim), 1F);
-        //?}
-        //?}
-    }
 }

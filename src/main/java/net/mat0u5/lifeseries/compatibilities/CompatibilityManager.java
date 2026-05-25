@@ -4,6 +4,10 @@ import net.fabricmc.loader.api.FabricLoader;
 
 public class CompatibilityManager {
 
+    public static boolean fabricApiLoaded() {
+        return isModLoaded("fabric-api");
+    }
+
     public static boolean voicechatLoaded() {
         return isModLoaded("voicechat");
     }
@@ -14,6 +18,10 @@ public class CompatibilityManager {
 
     public static boolean replayModLoaded() {
         return isModLoaded("replaymod");
+    }
+
+    public static boolean appleSkinLoaded() {
+        return isModLoaded("appleskin");
     }
 
     public static boolean isModLoaded(String modId) {

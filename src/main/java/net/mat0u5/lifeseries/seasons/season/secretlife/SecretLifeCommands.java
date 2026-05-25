@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static net.mat0u5.lifeseries.Main.currentSeason;
-import static net.mat0u5.lifeseries.Main.currentSession;
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
+import static net.mat0u5.lifeseries.LifeSeries.currentSession;
 
 public class SecretLifeCommands extends Command {
 
@@ -264,6 +264,7 @@ public class SecretLifeCommands extends Command {
             if (TaskManager.removePlayersTaskBook(player) || inSession) {
                 TaskManager.assignRandomTaskToPlayer(player, taskType);
                 AnimationUtils.playSecretLifeTotemAnimation(player, taskType == TaskTypes.RED);
+                PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.parse("secretlife_task_totem")));
                 if (targets.size() == 1) {
                     OtherUtils.sendCommandFeedback(source, ModifiableText.SECRETLIFE_TASK_SET.get(player));
                 }

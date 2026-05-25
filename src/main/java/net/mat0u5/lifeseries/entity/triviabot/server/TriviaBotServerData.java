@@ -2,26 +2,23 @@ package net.mat0u5.lifeseries.entity.triviabot.server;
 
 import net.mat0u5.lifeseries.entity.PlayerBoundEntity;
 import net.mat0u5.lifeseries.entity.triviabot.TriviaBot;
-import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
-import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
 
-import static net.mat0u5.lifeseries.Main.clientModeEnabled;
-import static net.mat0u5.lifeseries.Main.currentSeason;
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
+
+//? if <= 1.21.4
+//import net.minecraft.world.level.ChunkPos;
 
 public class TriviaBotServerData implements PlayerBoundEntity {
     private TriviaBot bot;
@@ -59,15 +56,7 @@ public class TriviaBotServerData implements PlayerBoundEntity {
 
     public void tick() {
         if (bot.level().isClientSide()) return;
-        if (bot.isForceSantaBot()) {
-            bot.setSantaBot(true);
-        }
-        else if (bot.isForceWildLifeBot()) {
-            bot.setSantaBot(false);
-        }
-        else {
-            bot.setSantaBot(currentSeason.getSeason() == Seasons.NICE_LIFE);
-        }
+        bot.setSantaBot(currentSeason.getSeason() == Seasons.NICE_LIFE);
         if (despawnChecks()) return;
         bot.pathfinding.tick();
         bot.triviaHandler.tick();
@@ -87,27 +76,19 @@ public class TriviaBotServerData implements PlayerBoundEntity {
             return true;
         }
         if (bot.tickCount % 10 == 0) {
-            boolean isTrackedWildLifeBot = TriviaWildcard.bots.containsValue(bot);
-            boolean isTrackedNiceLifeBot = NiceLifeTriviaManager.bots.containsValue(bot);
             if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
-                if (!isTrackedWildLifeBot) {
-                    despawn();
-                    return true;
-                }
-            }
-            else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
-                if (!isTrackedNiceLifeBot && !isTrackedWildLifeBot) {
-                    despawn();
-                    return true;
-                }
-            }
-            else if (clientModeEnabled()) {
                 if (!TriviaWildcard.bots.containsValue(bot)) {
                     despawn();
                     return true;
                 }
             }
-            else if (!isTrackedWildLifeBot && !isTrackedNiceLifeBot) {
+            else if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+                if (!NiceLifeTriviaManager.bots.containsValue(bot)) {
+                    despawn();
+                    return true;
+                }
+            }
+            else {
                 despawn();
                 return true;
             }
@@ -139,7 +120,6 @@ public class TriviaBotServerData implements PlayerBoundEntity {
     public void despawn() {
         if (getBoundPlayerUUID() != null) {
             TriviaWildcard.bots.remove(getBoundPlayerUUID());
-            NiceLifeTriviaManager.bots.remove(getBoundPlayerUUID());
         }
         if (!bot.level().isClientSide()) {
             //? if <= 1.21 {

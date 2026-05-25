@@ -1,20 +1,18 @@
 package net.mat0u5.lifeseries.network.packets;
 //? if <= 1.20.3 {
-/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
+/*import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record TriviaQuestionPayload(String question, int difficulty, long timestamp, int timeToComplete, List<String> answers, boolean niceLifeStyle) implements FabricPacket {
+public record TriviaQuestionPayload(String question, int difficulty, long timestamp, int timeToComplete, List<String> answers) implements CustomPacketPayload {
 
     public static final Identifier ID = IdentifierHelper.mod("triviaquestion");
-    public static final PacketType<TriviaQuestionPayload> TYPE = PacketType.create(ID, TriviaQuestionPayload::read);
 
+    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeUtf(question);
         buf.writeInt(difficulty);
@@ -24,7 +22,6 @@ public record TriviaQuestionPayload(String question, int difficulty, long timest
         for (String answer : answers) {
             buf.writeUtf(answer);
         }
-        buf.writeBoolean(niceLifeStyle);
     }
 
     public static TriviaQuestionPayload read(FriendlyByteBuf buf) {
@@ -37,19 +34,12 @@ public record TriviaQuestionPayload(String question, int difficulty, long timest
         for (int i = 0; i < answersSize; i++) {
             answers.add(buf.readUtf());
         }
-        boolean niceLifeStyle = buf.readBoolean();
-        return new TriviaQuestionPayload(question, difficulty, timestamp, timeToComplete, answers, niceLifeStyle);
-    }
-
-    public FriendlyByteBuf toFriendlyByteBuf() {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        write(buf);
-        return buf;
+        return new TriviaQuestionPayload(question, difficulty, timestamp, timeToComplete, answers);
     }
 
     @Override
-    public PacketType<?> getType() {
-        return TYPE;
+    public Identifier id() {
+        return ID;
     }
 }
 *///?} else {
@@ -61,7 +51,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.List;
 
-public record TriviaQuestionPayload(String question, int difficulty, long timestamp, int timeToComplete, List<String> answers, boolean niceLifeStyle) implements CustomPacketPayload {
+public record TriviaQuestionPayload(String question, int difficulty, long timestamp, int timeToComplete, List<String> answers) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<TriviaQuestionPayload> ID = new CustomPacketPayload.Type<>(IdentifierHelper.mod("triviaquestion"));
     public static final StreamCodec<RegistryFriendlyByteBuf, TriviaQuestionPayload> CODEC = StreamCodec.composite(
@@ -70,7 +60,6 @@ public record TriviaQuestionPayload(String question, int difficulty, long timest
             ByteBufCodecs.VAR_LONG, TriviaQuestionPayload::timestamp,
             ByteBufCodecs.INT, TriviaQuestionPayload::timeToComplete,
             ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), TriviaQuestionPayload::answers,
-            ByteBufCodecs.BOOL, TriviaQuestionPayload::niceLifeStyle,
             TriviaQuestionPayload::new
     );
 

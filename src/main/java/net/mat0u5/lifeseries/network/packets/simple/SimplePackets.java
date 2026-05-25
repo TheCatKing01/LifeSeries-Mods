@@ -22,6 +22,7 @@ public class SimplePackets {
     public static final SimpleStringListPacket CONFIG_TRIVIA = new SimpleStringListPacket("CONFIG_TRIVIA");
     public static final SimpleStringListPacket ACTIVE_WILDCARDS = new SimpleStringListPacket("ACTIVE_WILDCARDS");
     public static final SimpleStringListPacket LIFESKINS_PLAYER = new SimpleStringListPacket("LIFESKINS_PLAYER");
+    public static final SimpleStringListPacket LVL1_CLAMPED_ENCHANTS = new SimpleStringListPacket("LVL1_CLAMPED_ENCHANTS");
 
     public static final SimpleStringPacket CURRENT_SEASON = new SimpleStringPacket("CURRENT_SEASON");
     public static final SimpleStringPacket SESSION_STATUS = new SimpleStringPacket("SESSION_STATUS");
@@ -45,8 +46,7 @@ public class SimplePackets {
     public static final SimpleBooleanPacket ADMIN_INFO = new SimpleBooleanPacket("ADMIN_INFO");
     public static final SimpleBooleanPacket TRIPLE_JUMP = new SimpleBooleanPacket("TRIPLE_JUMP");
     public static final SimpleBooleanPacket MOD_DISABLED = new SimpleBooleanPacket("MOD_DISABLED");
-    public static final SimpleBooleanPacket CLIENT_MODE_TRIVIA_RESPONSE = new SimpleBooleanPacket("CLIENT_MODE_TRIVIA_RESPONSE");
-    public static final SimpleBooleanPacket CLIENT_MODE_SNAIL_RESPONSE = new SimpleBooleanPacket("CLIENT_MODE_SNAIL_RESPONSE");
+    public static final SimpleBooleanPacket POWER_INVISIBILITY_PARTICLES = new SimpleBooleanPacket("POWER_INVISIBILITY_PARTICLES");
 
     public static final SimpleNumberPacket PLAYER_MIN_MSPT = new SimpleNumberPacket("PLAYER_MIN_MSPT");
     public static final SimpleNumberPacket SIZESHIFTING_CHANGE = new SimpleNumberPacket("SIZESHIFTING_CHANGE");
@@ -57,8 +57,6 @@ public class SimplePackets {
     public static final SimpleLongPacket MIMICRY_COOLDOWN = new SimpleLongPacket("MIMICRY_COOLDOWN");
     public static final SimpleLongPacket TIME_DILATION = new SimpleLongPacket("TIME_DILATION");
     public static final SimpleLongPacket SESSION_TIMER = new SimpleLongPacket("SESSION_TIMER");
-    public static final SimpleLongPacket LISTS_TIMER = new SimpleLongPacket("LISTS_TIMER");
-    public static final SimpleLongPacket TICKS_PER_SECOND = new SimpleLongPacket("TICKS_PER_SECOND");
 
     public static final SimpleIntegerPacket TRIVIA_ANSWER = new SimpleIntegerPacket("TRIVIA_ANSWER");
     public static final SimpleIntegerPacket SNAIL_AIR = new SimpleIntegerPacket("SNAIL_AIR");
@@ -66,6 +64,7 @@ public class SimplePackets {
     public static final SimpleIntegerPacket TAB_LIST_LIVES_CUTOFF = new SimpleIntegerPacket("TAB_LIST_LIVES_CUTOFF");
     public static final SimpleIntegerPacket TRIVIA_TIMER = new SimpleIntegerPacket("TRIVIA_TIMER");
     public static final SimpleIntegerPacket VOTING_TIME = new SimpleIntegerPacket("VOTING_TIME");
+    public static final SimpleIntegerPacket POWER_TJ_JUMPS = new SimpleIntegerPacket("POWER_TJ_JUMPS");
 
     public static final SimpleEmptyPacket HOLDING_JUMP = new SimpleEmptyPacket("HOLDING_JUMP");
     public static final SimpleEmptyPacket SUPERPOWER_KEY = new SimpleEmptyPacket("SUPERPOWER_KEY");
@@ -80,8 +79,6 @@ public class SimplePackets {
     public static final SimpleEmptyPacket TRIVIA_ALL_WRONG = new SimpleEmptyPacket("TRIVIA_ALL_WRONG");
     public static final SimpleEmptyPacket STOP_TRIVIA_SOUNDS = new SimpleEmptyPacket("STOP_TRIVIA_SOUNDS");
     public static final SimpleEmptyPacket REMOVE_SLEEP_SCREENS = new SimpleEmptyPacket("REMOVE_SLEEP_SCREENS");
-    public static final SimpleEmptyPacket CLIENT_MODE_TRIVIA_PROMPT = new SimpleEmptyPacket("CLIENT_MODE_TRIVIA_PROMPT");
-    public static final SimpleEmptyPacket CLIENT_MODE_SNAIL_PROMPT = new SimpleEmptyPacket("CLIENT_MODE_SNAIL_PROMPT");
     public static final SimpleEmptyPacket SUPERPOWER_SHOW_COOLDOWN = new SimpleEmptyPacket("SUPERPOWER_SHOW_COOLDOWN");
     public static final SimpleEmptyPacket LIFESKINS_RELOAD_START = new SimpleEmptyPacket("LIFESKINS_RELOAD_START");
 

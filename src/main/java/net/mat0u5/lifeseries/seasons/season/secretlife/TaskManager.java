@@ -1,6 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season.secretlife;
 
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.config.StringListConfig;
 import net.mat0u5.lifeseries.config.StringListManager;
@@ -11,7 +11,6 @@ import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -29,7 +28,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 //? if <= 1.20.3 {
 /*import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -244,25 +243,27 @@ public class TaskManager {
             }
         }
         PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.SECRETLIFE_TASK_TITLE.get(),20,35,0);
+        PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
 
-        TaskScheduler.scheduleTask(40, () -> {
+        TaskScheduler.scheduleTask(50, () -> {
             PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_3.get(),0,35,0);
         });
-        TaskScheduler.scheduleTask(70, () -> {
+        TaskScheduler.scheduleTask(80, () -> {
+            PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_2.get(),0,35,0);
-            PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")));
         });
-        TaskScheduler.scheduleTask(105, () -> {
+        TaskScheduler.scheduleTask(115, () -> {
+            PlayerUtils.playSoundToPlayers(allowedPlayers, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitleToPlayers(allowedPlayers, ModifiableText.COUNTDOWN_RED_1.get(),0,35,0);
         });
-        TaskScheduler.scheduleTask(130, () -> {
+        TaskScheduler.scheduleTask(140, () -> {
             for (ServerPlayer player : allowedPlayers) {
                 boolean redTask = type == TaskTypes.RED || (type == null && player.ls$isOnLastLife(false));
                 AnimationUtils.playSecretLifeTotemAnimation(player, redTask);
             }
         });
-        TaskScheduler.scheduleTask(165, () -> {
+        TaskScheduler.scheduleTask(175, () -> {
             assignRandomTasks(allowedPlayers, type);
             secretKeeperBeingUsed = false;
         });
@@ -457,9 +458,11 @@ public class TaskManager {
         secretKeeperBeingUsed = true;
 
         Vec3 centerPos = itemSpawnerPos.getCenter();
-        AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 40);
-        server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")), SoundSource.PLAYERS, 1.0F, 1.0F);
-        TaskScheduler.scheduleTask(Time.seconds(3), () -> {
+        server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task_succeed")), SoundSource.PLAYERS, 1.0F, 1.0F);
+        TaskScheduler.scheduleTask(60, () -> {
+            AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 45);
+        });
+        TaskScheduler.scheduleTask(130, () -> {
             //? if < 1.21 {
             /*server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.PLAYERS, 1.0F, 1.0F);
             *///?} else {
@@ -510,23 +513,26 @@ public class TaskManager {
                 return;
             }
 
+            PlayerUtils.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(IdentifierHelper.parse("secretlife_task_reroll")));
             PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
             PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT1.get(),20,35,0);
 
-            TaskScheduler.scheduleTask(50, () -> {
+            TaskScheduler.scheduleTask(35, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
                 PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT2.get(),20,35,0);
             });
-            TaskScheduler.scheduleTask(100, () -> {
+            TaskScheduler.scheduleTask(70, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
                 PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT3.get(),20,35,0);
             });
-            TaskScheduler.scheduleTask(150, () -> {
+            TaskScheduler.scheduleTask(105, () -> {
                 PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
                 PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT4.get(),20,30,0);
             });
-            TaskScheduler.scheduleTask(200, () -> AnimationUtils.playSecretLifeTotemAnimation(player, false));
-            TaskScheduler.scheduleTask(240, () -> {
+            TaskScheduler.scheduleTask(140, () -> {
+                AnimationUtils.playSecretLifeTotemAnimation(player, false);
+            });
+            TaskScheduler.scheduleTask(175, () -> {
                 assignRandomTaskToPlayer(player, newType);
                 secretKeeperBeingUsed = false;
             });
@@ -564,14 +570,12 @@ public class TaskManager {
         secretKeeperBeingUsed = true;
 
         Vec3 centerPos = itemSpawnerPos.getCenter();
-        AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 40);
-        server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task")), SoundSource.PLAYERS, 1.0F, 1.0F);
-        TaskScheduler.scheduleTask(Time.seconds(3), () -> {
-            //? if < 1.21 {
-            /*server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 1.0F, 1.0F);
-            *///?} else {
-            server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.PLAYERS, 1.0F, 1.0F);
-            //?}
+
+        server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("secretlife_task_fail")), SoundSource.PLAYERS, 1.0F, 1.0F);
+        TaskScheduler.scheduleTask(60, () -> {
+            AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 45);
+        });
+        TaskScheduler.scheduleTask(140, () -> {
             AnimationUtils.spawnFireworkBall(server.overworld(), centerPos, 40, 0.3, new Vector3f(1, 0, 0));
             if (type == TaskTypes.EASY) {
                 showHeartTitle(player, EASY_FAIL);
@@ -733,7 +737,7 @@ public class TaskManager {
         if (secretKeeperBeingUsedFor > 500) {
             secretKeeperBeingUsed = false;
             secretKeeperBeingUsedFor = 0;
-            Main.LOGGER.error("Resetting Secret Keeper.");
+            LifeSeries.LOGGER.error("Resetting Secret Keeper.");
         }
     }
 }

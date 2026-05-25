@@ -23,12 +23,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffects;
 import java.util.*;
-import static net.mat0u5.lifeseries.Main.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static net.mat0u5.lifeseries.LifeSeries.*;
 //? if >= 1.21.2
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.CreakingPower;
 
 public class WildcardManager {
-    public static final Map<Wildcards, Wildcard> activeWildcards = new HashMap<>();
+    public static final Map<Wildcards, Wildcard> activeWildcards = new ConcurrentHashMap<>();
     public static final Random rnd = new Random();
     public static double ACTIVATE_WILDCARD_MINUTE = 2.5;
     public static boolean FINALE = false;
@@ -123,7 +125,7 @@ public class WildcardManager {
                 if (wildcard.active) continue;
                 wildcard.activate();
             }
-            showCryptTitle("A wildcard is active!");
+            showCryptTitle(ModifiableText.WILDLIFE_WILDCARD_ACTIVATE_CRYPT_TITLE.get());
         });
         TaskScheduler.scheduleTask(92, NetworkHandlerServer::sendUpdatePackets);
     }
@@ -147,25 +149,58 @@ public class WildcardManager {
         });
     }
 
-    public static void showCryptTitle(String text) {
+    public static void showCryptTitle(Component component) {
         PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ZOMBIE_VILLAGER_CURE, 0.2f, 1);
-        String colorCrypt = "§r§6§l§k";
-        String colorNormal = "§r§6§l";
+        String textRaw = component.getString();
+        String textClean = "";
+        String text = "";
+        int charsBeforeColor = 0;
+        char lastColor = '6';
+        for (int i = 0; i < textRaw.length(); i++) {
+            char ch = textRaw.charAt(i);
+            if (ch == '§') {
+                charsBeforeColor = 2;
+                if ((i+1) < textRaw.length()) {
+                    lastColor = textRaw.charAt(i+1);
+                }
+            }
+            else if (charsBeforeColor == 0) {
+                text += "§" + lastColor;
+            }
+            else {
+                charsBeforeColor--;
+            }
+            if (charsBeforeColor == 0) {
+                textClean += ch;
+            }
+            text += ch;
+        }
 
         List<Integer> encryptedIndexes = new ArrayList<>();
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0; i < textClean.length(); i++) {
             encryptedIndexes.add(i);
         }
 
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0; i < textClean.length(); i++) {
             if (!encryptedIndexes.isEmpty()) {
                 encryptedIndexes.remove(rnd.nextInt(encryptedIndexes.size()));
             }
 
             StringBuilder result = new StringBuilder();
-            for (int j = 0; j < text.length(); j++) {
-                result.append(encryptedIndexes.contains(j) ? colorCrypt : colorNormal);
-                result.append(text.charAt(j));
+            for (int j = 0; j < textClean.length(); j++) {
+                boolean encrypted = encryptedIndexes.contains(j);
+                result.append("§r");
+                if (j*3+2 < text.length()) {
+                    result.append("§"+text.charAt(j*3+1));
+                }
+                result.append("§l");
+                if (encrypted) {
+                    result.append("§k");
+                }
+                if (j*3+2 < text.length()) {
+                    char ch = text.charAt(j*3+2);
+                    result.append(ch);
+                }
             }
 
             TaskScheduler.scheduleTask((i + 1) * 4, () -> PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), Component.literal(String.valueOf(result)), 0, 30, 20));

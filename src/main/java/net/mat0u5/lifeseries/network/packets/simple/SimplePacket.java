@@ -1,23 +1,15 @@
 package net.mat0u5.lifeseries.network.packets.simple;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-//? if <= 1.20.3 {
-/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-*///?} else {
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-//?}
 import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-//? if <= 1.20.3 {
-/*public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends FabricPacket> {
-*///?} else {
 public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends CustomPacketPayload> {
-//?}
     private List<ServerPlayer> targets = null;
     protected final String name;
     private BiConsumer<ServerPlayer, U> serverReceive = null;
@@ -26,7 +18,7 @@ public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends Custo
     protected SimplePacket(String name) {
         this.name = name;
         if (SimplePackets.registeredPackets.containsKey(this.name)) {
-            Main.LOGGER.error("Simple packet duplicate key: "+this.name);
+            LifeSeries.LOGGER.error("Simple packet duplicate key: "+this.name);
         }
         SimplePackets.registeredPackets.put(this.name, this);
     }
@@ -39,11 +31,7 @@ public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends Custo
         this.serverReceive = serverReceive;
     }
 
-    //? if <= 1.20.3 {
-    /*public void receiveClient(FabricPacket payload) {
-    *///?} else {
     public void receiveClient(CustomPacketPayload payload) {
-    //?}
         if (clientReceive == null) return;
         try {
             U uPayload = (U) payload;
@@ -53,11 +41,7 @@ public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends Custo
         }
     }
 
-    //? if <= 1.20.3 {
-    /*public void receiveServer(ServerPlayer context, FabricPacket payload) {
-    *///?} else {
     public void receiveServer(ServerPlayer context, CustomPacketPayload payload) {
-    //?}
         if (serverReceive == null) return;
         try {
             U uPayload = (U) payload;
@@ -79,30 +63,22 @@ public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends Custo
         return (T) this;
     }
 
-    //? if <= 1.20.3 {
-    /*protected void sendPacketToServer(FabricPacket packet) {
-    *///?} else {
     protected void sendPacketToServer(CustomPacketPayload packet) {
-    //?}
         if (packet == null) {
-            Main.LOGGER.error("Packet was not initialized correctly.");
+            LifeSeries.LOGGER.error("Packet was not initialized correctly.");
             targets = null;
             return;
         }
 
-        if (Main.hasClient() && Main.clientHelper != null) {
-            Main.clientHelper.sendPacket(packet);
+        if (LifeSeries.clientHelper != null) {
+            LifeSeries.clientHelper.sendPacket(packet);
         }
         targets = null;
     }
 
-    //? if <= 1.20.3 {
-    /*protected void sendPacketToClient(FabricPacket packet) {
-    *///?} else {
     protected void sendPacketToClient(CustomPacketPayload packet) {
-    //?}
         if (packet == null) {
-            Main.LOGGER.error("Packet was not initialized correctly.");
+            LifeSeries.LOGGER.error("Packet was not initialized correctly.");
             targets = null;
             return;
         }
@@ -112,7 +88,7 @@ public abstract class SimplePacket<T extends SimplePacket<T, U>, U extends Custo
         }
         for (ServerPlayer player : targets) {
             if (player == null) continue;
-            ServerPlayNetworking.send(player, packet);
+            NetworkHandlerServer.sendPacket(player, packet);
         }
         targets = null;
     }

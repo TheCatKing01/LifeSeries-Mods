@@ -4,7 +4,7 @@ import net.mat0u5.lifeseries.utils.other.IdentifierHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -19,7 +19,7 @@ import net.minecraft.resources.Identifier;
 
 import net.minecraft.world.entity.animal.golem.SnowGolem;
 
-import static net.mat0u5.lifeseries.Main.livesManager;
+import static net.mat0u5.lifeseries.LifeSeries.livesManager;
 
 public class AngrySnowman extends SnowGolem {
     public static final SoundEvent HURT_SOUND = SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("nicelife_snowman_hit"));

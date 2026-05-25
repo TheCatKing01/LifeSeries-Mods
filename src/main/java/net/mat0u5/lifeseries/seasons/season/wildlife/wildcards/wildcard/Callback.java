@@ -9,9 +9,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
-import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 
@@ -19,15 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.mat0u5.lifeseries.Main.currentSession;
+import static net.mat0u5.lifeseries.LifeSeries.currentSession;
 
 public class Callback extends Wildcard {
     private static final Random rnd = new Random();
     private static int activatedAt = -1;
 
     public static double TURN_OFF = 0.75; // When all wildcards stop
-    private static final Time INITIAL_ACTIVATION_INTERVAL = Time.minutes(5);
-    private static final Time INITIAL_DEACTIVATION_INTERVAL = Time.seconds(30);
+    public static final int INITIAL_ACTIVATION_INTERVAL_DEFAULT = 300*20;
+    public static int INITIAL_ACTIVATION_INTERVAL = 300*20;
+    public static int INITIAL_DEACTIVATION_INTERVAL = 30*20;
     public static boolean NERFED_WILDCARDS = true;
 
     private int nextActivationTick = -1;
@@ -62,7 +61,7 @@ public class Callback extends Wildcard {
         double sessionProgress = (passedTimeTicks - activatedAt) / (double) (sessionLengthTicks - activatedAt);
 
         if (nextActivationTick == -1) {
-            nextActivationTick = passedTimeTicks + 20 * 60 * 5; // First activation after 5 minutes
+            nextActivationTick = passedTimeTicks + INITIAL_ACTIVATION_INTERVAL; // First activation after 5 minutes
         }
 
         if (sessionProgress >= TURN_OFF && active) {
@@ -104,11 +103,11 @@ public class Callback extends Wildcard {
             activateRandomWildcard();
 
             double progressFactor = 1.0 - sessionProgress;
-            int activationIntervalTicks = (int)(INITIAL_ACTIVATION_INTERVAL.getTicks() * Math.max(0.5, progressFactor));
+            int activationIntervalTicks = (int)(INITIAL_ACTIVATION_INTERVAL * Math.max(0.5, progressFactor));
             nextActivationTick = passedTimeTicks + activationIntervalTicks;
 
             double deactivationProgressFactor = 1 + (sessionProgress / TURN_OFF) * 4;
-            int deactivationIntervalTicks = (int)(INITIAL_DEACTIVATION_INTERVAL.getTicks() * OtherUtils.clamp(deactivationProgressFactor, 1, 5));
+            int deactivationIntervalTicks = (int)(INITIAL_DEACTIVATION_INTERVAL * OtherUtils.clamp(deactivationProgressFactor, 1, 5));
             nextDeactivationTick = passedTimeTicks + deactivationIntervalTicks;
         }
 

@@ -1,6 +1,6 @@
 package net.mat0u5.lifeseries.seasons.season;
 
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.command.manager.CommandManager;
 import net.mat0u5.lifeseries.config.ConfigManager;
@@ -13,36 +13,26 @@ import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
-import net.mat0u5.lifeseries.seasons.lists.ListsManager;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
-import net.mat0u5.lifeseries.seasons.other.MidnightChimes;
-import net.mat0u5.lifeseries.seasons.season.aprilfools.simplelife.WandingTraders;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.limitedlife.LimitedLife;
-import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.CreakingPower;
 import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.Session;
-import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.snails.Snails;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
-import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
-import net.mat0u5.lifeseries.utils.other.TagUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +40,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -74,7 +64,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.*;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 
 //? if <= 1.20
@@ -83,14 +73,14 @@ import static net.mat0u5.lifeseries.seasons.other.WatcherManager.isWatcher;
 import net.minecraft.world.scores.DisplaySlot;
 
 public abstract class Season {
-    public static final String RESOURCEPACK_MAIN_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-main-27d9e98eb6009401319a5256f7695f1bba902412/main.zip";
-    public static final String RESOURCEPACK_MAIN_SHA = "6b3b1e6225156de119926dd32003060b42dbab82";
+    public static final String RESOURCEPACK_MAIN_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-main-42337c925d3356b32b14b7747b1d199b9a4ade58/main.zip";
+    public static final String RESOURCEPACK_MAIN_SHA = "d1b0317e0ee96b02f9e2a93f67a8c45157fc2c4c";
     public static final String RESOURCEPACK_SECRETLIFE_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-secretlife-fc0fa2a3efe2aefdba5a3c0deda61039fc43a008/secretlife.zip";
     public static final String RESOURCEPACK_SECRETLIFE_SHA = "1befd668fa775f2b8715b348172e1ba776e57294";
     public static final String RESOURCEPACK_MINIMAL_ARMOR_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-minimal_armor-27d9e98eb6009401319a5256f7695f1bba902412/minimal_armor.zip";
     public static final String RESOURCEPACK_MINIMAL_ARMOR_SHA = "e078d9085ea74891ebc4f8ec5686c4da08176a38";
-    public static final String RESOURCEPACK_COMBINED_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-combined-27d9e98eb6009401319a5256f7695f1bba902412/combined.zip";
-    public static final String RESOURCEPACK_COMBINED_SHA = "d9ef5b0c1074c006820494ca0524de8f8810a77c";
+    public static final String RESOURCEPACK_COMBINED_URL = "https://github.com/Mat0u5/LifeSeries-Resources/releases/download/release-combined-42337c925d3356b32b14b7747b1d199b9a4ade58/combined.zip";
+    public static final String RESOURCEPACK_COMBINED_SHA = "96007440a16c04153378fbd2ea7cb6e71d869e10";
 
     public int GIVELIFE_MAX_LIVES = 99;
     public boolean TAB_LIST_SHOW_DEAD_PLAYERS = true;
@@ -119,8 +109,6 @@ public abstract class Season {
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
     public LivesManager livesManager = createLivesManager();
-	private final WandingTraders traders = new WandingTraders();
-	private final MidnightChimes midnightChimes = new MidnightChimes();
 
     public abstract Seasons getSeason();
     public abstract ConfigManager createConfig();
@@ -135,7 +123,6 @@ public abstract class Season {
     public SecretSociety createSecretSociety() {
         return new SecretSociety();
     }
-	public ListsManager listsManager = new ListsManager();
 
     public LivesManager createLivesManager() {
         return new LivesManager();
@@ -148,21 +135,6 @@ public abstract class Season {
         return seasonConfig.DEFAULT_LIVES.get();
     }
 
-    protected int getMidnightChimesStartTime() {
-        return 18000;
-    }
-
-    protected int getMidnightChimesEndTime() {
-        return 20000;
-    }
-
-    protected void onMidnightChimes() {
-        if (Boolean.TRUE.equals(seasonConfig.SPAWN_BOTS_AT_MIDNIGHT.get(seasonConfig))) {
-            TaskScheduler.scheduleTask(Time.seconds(38),
-                    () -> OtherUtils.executeCommand("/trivia bot spawn @a"));
-        }
-    }
-	
     public void initialize() {
         ModifiableTextManager.initialize();
         reload();
@@ -174,13 +146,6 @@ public abstract class Season {
         }
     }
     public void switchOutOfSeason(Seasons changedTo) {
-        NiceLifeTriviaManager.killAllBots();
-        NiceLifeTriviaManager.killAllSnowmen();
-        TriviaWildcard.killAllBots();
-        TriviaWildcard.killAllTriviaSnails();
-        Snails.killAllSnails();
-        Snails.snails.clear();
-        Snails.preventSnails.clear();
         AdvancedDeathsManager.resetQueuedDeaths();
     }
 
@@ -249,6 +214,10 @@ public abstract class Season {
                 ScoreboardUtils.setObjectiveInSlot(belowNameSlot, null);
             }
         }
+
+        if (getSeason() != Seasons.SIMPLE_LIFE) {
+            OtherUtils.executeCommand("/kill @e[type=wandering_trader,tag=SimpleLifeTrader]");
+        }
     }
 
     public void reload() {
@@ -269,23 +238,11 @@ public abstract class Season {
         Session.SESSION_START_COUNTDOWN = seasonConfig.SESSION_START_COUNTDOWN.get();
         BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get();
         ADDITIONAL_WITHER_SKULL_RATE = seasonConfig.ADDITIONAL_WITHER_SKULL_RATE.get();
-        Snail.GLOBAL_SPEED_MULTIPLIER = seasonConfig.WILDCARD_SNAILS_SPEED_MULTIPLIER.get();
-        Snail.SHOULD_DROWN_PLAYER = seasonConfig.WILDCARD_SNAILS_DROWN_PLAYERS.get();
-        Snail.ALLOW_POTION_EFFECTS = seasonConfig.WILDCARD_SNAILS_EFFECTS.get();
-        Snails.WILDCARD_SNAILS_RED_LIVES = seasonConfig.WILDCARD_SNAILS_RED_LIVES.get();
-        Snails.SNAILS_PER_PLAYER = Math.max(1, seasonConfig.WILDCARD_SNAILS_PER_PLAYER.get());
-        WildcardManager.ACTIVATE_WILDCARD_MINUTE = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
-        TriviaBot.CAN_START_RIDING = seasonConfig.WILDCARD_TRIVIA_BOTS_CAN_ENTER_BOATS.get();
-        TriviaWildcard.TRIVIA_BOTS_PER_PLAYER = seasonConfig.WILDCARD_TRIVIA_BOTS_PER_PLAYER.get();
-        WildLifeTriviaHandler.EASY_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_EASY.get();
-        WildLifeTriviaHandler.NORMAL_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_NORMAL.get();
-        WildLifeTriviaHandler.HARD_TIME = seasonConfig.WILDCARD_TRIVIA_SECONDS_HARD.get();
         LOCATOR_BAR = seasonConfig.LOCATOR_BAR.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();
         secretSociety.onReload();
-        listsManager.onReload();
         createTeams();
         createScoreboards();
         updateStuff();
@@ -299,13 +256,7 @@ public abstract class Season {
         PlayerUtils.resendCommandTrees();
         SubInManager.reload();
         LifeSkinsManager.reloadCache();
-    }
-
-    private boolean shouldHandleWildcards() {
-        if (getSeason() == Seasons.WILD_LIFE) return false;
-        return seasonConfig.WILDCARD_AUTO_ACTIVATE.get()
-                || !WildcardManager.activeWildcards.isEmpty()
-                || WildcardManager.chosenWildcard != null;
+        DatapackIntegration.setSeason(getSeason());
     }
 
     public static void setSkyColor(Vec3 color, boolean setMode) {
@@ -360,9 +311,11 @@ public abstract class Season {
     public void createTeams() {
         Collection<PlayerTeam> allTeams = TeamUtils.getAllTeams();
         if (allTeams != null) {
-            for (PlayerTeam team : allTeams) {
-                if (team.getName().startsWith("creaking_")) {
-                    TeamUtils.deleteTeam(team.getName());
+            if (currentSeason.getSeason() != Seasons.WILD_LIFE || CreakingPower.allCreatedEntities.isEmpty() || !SuperpowersWildcard.anyoneHasActivatedPower(Superpowers.CREAKING)) {
+                for (PlayerTeam team : allTeams) {
+                    if (team.getName().startsWith("creaking_")) {
+                        TeamUtils.deleteTeam(team.getName());
+                    }
                 }
             }
         }
@@ -456,12 +409,6 @@ public abstract class Season {
     }
 
     public boolean isAllowedToAttack(ServerPlayer attacker, ServerPlayer victim, boolean allowSelfDefense) {
-        if (TagUtils.hasTag(victim, "nice")) {
-            return false;
-        }
-        if (TagUtils.hasTag(victim, "naughty")) {
-            return true;
-        }
         if (attacker.ls$isOnLastLife(false)) {
             return true;
         }
@@ -488,26 +435,14 @@ public abstract class Season {
     public void sessionEnd() {
         boogeymanManager.sessionEnd();
         secretSociety.sessionEnd();
-        listsManager.resetLists();
         livesManager.assignedLives = false;
-        if (shouldHandleWildcards()) {
-            WildcardManager.onSessionEnd();
-        }
-		
-        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-            TriviaWildcard.resetPlayerPunishments(player);
-        }
     }
 
     public boolean sessionStart() {
         boogeymanManager.resetBoogeymen();
         secretSociety.resetMembers();
-        listsManager.resetLists();
         addSessionActions();
         livesManager.assignedLives = false;
-        if (shouldHandleWildcards()) {
-            WildcardManager.onSessionStart();
-        }
         return true;
     }
 
@@ -519,66 +454,16 @@ public abstract class Season {
         timer.tick();
         boogeymanManager.tick();
         secretSociety.tick();
-        listsManager.tick();
-        if (shouldHandleWildcards()) {
-            WildcardManager.tick();
-        }
         if (timer.isMultipleOf(Time.seconds(5)) || reloadPlayerTeams) {
             reloadPlayerTeams = false;
             reloadAllPlayerTeams();
         }
     }
-	
-	public void tickSessionOn(MinecraftServer server) {
-		traders.tickSessionOn(server);
-		Boolean norm = seasonConfig.MIDNIGHT_CHIMES.get(seasonConfig);
-
-		boolean wild = false;
-		if (seasonConfig instanceof net.mat0u5.lifeseries.seasons.season.wildlife.WildLifeConfig wlc) {
-			wild = Boolean.TRUE.equals(wlc.WILD_MIDNIGHT_CHIMES.get(wlc));
-		}
-
-		boolean enabled = Boolean.TRUE.equals(norm) || wild;
-
-		if (enabled && midnightChimes.tick(server, true,
-				getMidnightChimesStartTime(), getMidnightChimesEndTime())) {
-			TaskScheduler.scheduleTask(Time.seconds(38), DatapackIntegration.EVENT_MIDNIGHT_CHIMES::trigger);
-			onMidnightChimes();
-		}
-        if (shouldHandleWildcards()) {
-            WildcardManager.tickSessionOn();
-        }
-	}
-	
+    public void tickSessionOn(MinecraftServer server) {}
     public void addSessionActions() {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
-        listsManager.addSessionActions();
         livesManager.addSessionActions();
-        if (getSeason() == Seasons.WILD_LIFE || !seasonConfig.WILDCARD_AUTO_ACTIVATE.get()) {
-            return;
-        }
-        double activateMinute = seasonConfig.ACTIVATE_WILDCARD_MINUTE.get();
-        currentSession.addSessionActionIfTime(
-                new SessionAction(Time.minutes(activateMinute - 2)) {
-                    @Override
-                    public void trigger() {
-                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
-                            PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_WARNING_2MIN.get());
-                        }
-                    }
-                }
-        );
-        currentSession.addSessionAction(
-                new SessionAction(Time.minutes(activateMinute), ModifiableText.SESSION_ACTION_WILDCARD.getString()) {
-                    @Override
-                    public void trigger() {
-                        if (WildcardManager.activeWildcards.isEmpty() && WildcardManager.chosenWildcard != Wildcards.NULL) {
-                            WildcardManager.activateWildcards();
-                        }
-                    }
-                }
-        );
     }
 
     /*
@@ -790,10 +675,10 @@ public abstract class Season {
         if (entity instanceof Snail) return;
         if (entity instanceof TriviaBot) return;
         //? if <= 1.21.11 {
-        if (TagUtils.hasTag(entity, "notNatural") && onlyNatural) return;
-        //?} else {
-        /*if (entity.entityTags().contains("notNatural") && onlyNatural) return;
-        *///?}
+        /*if (entity.getTags().contains("notNatural") && onlyNatural) return;
+        *///?} else {
+        if (entity.entityTags().contains("notNatural") && onlyNatural) return;
+        //?}
 
         EntityType<?> entityType = entity.getType();
 
@@ -843,10 +728,6 @@ public abstract class Season {
                 SubInManager.reloadPlayerProfile(player);
             }
         });
-        listsManager.onPlayerJoin(player);
-        if (shouldHandleWildcards()) {
-            WildcardManager.onPlayerJoin(player);
-        }
     }
 
     public boolean shouldBeInSpectator(ServerPlayer player) {
@@ -869,7 +750,7 @@ public abstract class Season {
     }
 
     public void onPlayerFinishJoining(ServerPlayer player) {
-        if (getSeason() != Seasons.UNASSIGNED && SHOW_LOGIN_COMMAND_INFO && !Main.modDisabled()) {
+        if (getSeason() != Seasons.UNASSIGNED && SHOW_LOGIN_COMMAND_INFO && !LifeSeries.modDisabled()) {
             if (PermissionManager.isAdmin(player)) {
                 player.ls$message(ModifiableText.SEASON_COMMANDS_ADMIN.get(getSeason().getName(), getAdminCommands()));
             }
@@ -879,14 +760,11 @@ public abstract class Season {
         }
 
         learnRecipes();
-        if (currentSession.statusNotStarted() && PermissionManager.isAdmin(player) && !Main.modDisabled()) {
+        if (currentSession.statusNotStarted() && PermissionManager.isAdmin(player) && !LifeSeries.modDisabled()) {
             player.ls$message(ModifiableText.SESSION_START_PROMPT.get());
         }
         boogeymanManager.onPlayerFinishJoining(player);
         livesManager.onPlayerFinishJoining(player);
-        if (shouldHandleWildcards()) {
-            WildcardManager.onPlayerFinishJoining(player);
-        }
     }
 
     public void onPlayerDisconnect(ServerPlayer player) {
@@ -908,9 +786,3 @@ public abstract class Season {
 
     }
 }
-
-
-
-
-
-

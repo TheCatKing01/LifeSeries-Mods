@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Locale;
 
-import static net.mat0u5.lifeseries.Main.currentSeason;
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
 
 public enum ModifiableText {
     MOD_VERSION("Mod version: {}", List.of("version"))
@@ -17,12 +17,6 @@ public enum ModifiableText {
     ,MOD_SVC_MISSING_ALL("None of the targets have Simple Voice Chat installed")
     ,MOD_RELOAD("§7Reloading the Life Series...")
     ,MOD_DISABLED_ERROR("The Life Series mod is disabled!\nEnable with \"/lifeseries enable\"")
-    ,CLIENT_MODE_FORCED_ON("Client mode is forced ON for this series")
-    ,CLIENT_MODE_STATUS("Client mode is currently {}", List.of("status"))
-    ,CLIENT_MODE_SET("Client mode set to {}", List.of("status"))
-    ,CLIENT_MODE_OFF_SPAWN_TRIVIA("Client mode is off use /lifeseries clientMode on to allow trivia bots to spawn")
-    ,CLIENT_MODE_REQUIRE_CLIENT("You must have the Life Series mod installed client-side to enable client mode")
-    ,TRIVIA_BOT_SPAWN_REQUIRES_CLIENTMODE("Trivia bots can only be spawned in Wild Life or when client mode is enabled")
     ,TRANSCRIPT_COPY("§7Click {}§7 to copy the session transcript.", List.of("ClickHere"))
     ,CONFIG_UPDATED("§7Config has been successfully updated.")
     ,CONFIG_GUI_OPENING("§7Opening the config GUI...")
@@ -89,7 +83,7 @@ public enum ModifiableText {
     ,SESSION_ACTION_ASSIGN_SOULMATES(Seasons.DOUBLE_LIFE, "Assign Soulmates if necessary")
     ,SESSION_ACTION_RANDOM_TP(Seasons.DOUBLE_LIFE, "Random teleport distribution")
     ,SESSION_ACTION_TASKS(Seasons.SECRET_LIFE, "Assign Tasks")
-    ,SESSION_ACTION_WILDCARD("Activate Wildcard")
+    ,SESSION_ACTION_WILDCARD(Seasons.WILD_LIFE, "Activate Wildcard")
     ,TICK_FREEZE("§7The game is frozen")
     ,TICK_UNFREEZE("§7The game is no longer frozen.")
 
@@ -112,8 +106,6 @@ public enum ModifiableText {
     ,LIVES_RANDOMIZE_MULTIPLE("§7Assigning random lives to {}§7 targets...", List.of("number of targets"))
     ,LIVES_RANDOMIZE_RESULT("{}§a {}.", List.of("amount", "life/lives"))
     ,LIVES_RANDOMIZE_TITLE("§7You will have...")
-    ,DOUBLELIFE_LIVES_RANDOMIZE_TITLE_BOTH(Seasons.DOUBLE_LIFE, "§7And you both will have...")
-    ,DOUBLELIFE_LIVES_RANDOMIZE_TITLE_SOLO(Seasons.DOUBLE_LIFE, "§7And you will have...")
     ,LIVES_SHOW_DIFF_GAIN(Formatted.LOOSELY_STYLED, " §a[+{}]", List.of("amount"))
     ,LIVES_SHOW_DIFF_LOSS(Formatted.LOOSELY_STYLED, " §c[-{}]", List.of("amount"))
     ,FINAL_DEATH("{} ran out of lives.", List.of("Player"))
@@ -307,8 +299,6 @@ public enum ModifiableText {
     ,DOUBLELIFE_SOULMATE_ROLLING(Seasons.DOUBLE_LIFE, "§7Rolling soulmates...")
     ,DOUBLELIFE_UNPAIRED(Seasons.DOUBLE_LIFE, "[Double Life] {} was not paired with anyone.", List.of("Player"))
     ,DOUBLELIFE_SOULMATE_TITLE(Seasons.DOUBLE_LIFE, "§aYour soulmate is...")
-    ,DOUBLELIFE_SOULMATE_SPLIT_SELF(Seasons.DOUBLE_LIFE, "§cYou have become red, so your soulbound with your soulmate has been broken.")
-    ,DOUBLELIFE_SOULMATE_SPLIT_OTHER(Seasons.DOUBLE_LIFE, "§cYour soulmate has become red, so your soulbound with them has been broken.")
     ,DOUBLELIFE_LASTPAIR_PT1_TITLE(Seasons.DOUBLE_LIFE, "")
     ,DOUBLELIFE_LASTPAIR_PT1_SUBTITLE(Seasons.DOUBLE_LIFE, "§aYour fate is your own...")
     ,DOUBLELIFE_LASTPAIR_PT2_TITLE(Seasons.DOUBLE_LIFE, "")
@@ -384,68 +374,56 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_REROLL_PT3(Seasons.SECRET_LIFE, "§e§lLet me open the door")
     ,SECRETLIFE_TASK_REROLL_PT4(Seasons.SECRET_LIFE, "§c§lAccept your fate")
 
-,WILDLIFE_SNAIL_TEXTURE_INFO("§fClick {}§f to open the Snail Textures info page on the Wiki.", List.of("ClickHere"))
-,WILDLIFE_SNAIL_DEFAULT_NAME(Formatted.PLAIN,"{}'s Snail", List.of("Player"))
-,WILDLIFE_SNAIL_NAME_REQUEST("{}§7 requests their snail name to be §f{}§7", List.of("Player", "name"))
-,WILDLIFE_SNAIL_NAME_REQUEST_PROMPT("§7Click {}§7 to accept.", List.of("ClickHere"))
-,WILDLIFE_SNAIL_TEXTURES_LIST("§7The following skins have been found: §f{}", List.of("list"))
-,WILDLIFE_SNAIL_NAME_SET("Set {}'s snail name to {}", List.of("Player", "name"))
-,WILDLIFE_SNAIL_NAME_RESET_SINGLE("Reset {}'s snail name to {}", List.of("Player", "name"))
-,WILDLIFE_SNAIL_NAME_RESET_MULTIPLE("Reset the snail name for {} targets", List.of("number of targets"))
-,WILDLIFE_SNAIL_NAME_GET("{}'s snail is called {}", List.of("Player", "name"))
+    ,WILDLIFE_SNAIL_TEXTURE_INFO(Seasons.WILD_LIFE,"§fClick {}§f to open the Snail Textures info page on the Wiki.", List.of("ClickHere"))
+    ,WILDLIFE_SNAIL_DEFAULT_NAME(Seasons.WILD_LIFE, Formatted.PLAIN,"{}'s Snail", List.of("Player"))
+    ,WILDLIFE_SNAIL_NAME_REQUEST(Seasons.WILD_LIFE, "{}§7 requests their snail name to be §f{}§7", List.of("Player", "name"))
+    ,WILDLIFE_SNAIL_NAME_REQUEST_PROMPT(Seasons.WILD_LIFE, "§7Click {}§7 to accept.", List.of("ClickHere"))
+    ,WILDLIFE_SNAIL_TEXTURES_LIST(Seasons.WILD_LIFE, "§7The following skins have been found: §f{}", List.of("list"))
+    ,WILDLIFE_SNAIL_NAME_SET(Seasons.WILD_LIFE, "Set {}'s snail name to {}", List.of("Player", "name"))
+    ,WILDLIFE_SNAIL_NAME_RESET_SINGLE(Seasons.WILD_LIFE, "Reset {}'s snail name to {}", List.of("Player", "name"))
+    ,WILDLIFE_SNAIL_NAME_RESET_MULTIPLE(Seasons.WILD_LIFE, "Reset the snail name for {} targets", List.of("number of targets"))
+    ,WILDLIFE_SNAIL_NAME_GET(Seasons.WILD_LIFE, "{}'s snail is called {}", List.of("Player", "name"))
     ,WILDLIFE_SUPERPOWER_ASSIGN_RESET_SINGLE(Seasons.WILD_LIFE, "Reset {}'s superpower assignment", List.of("Player"))
     ,WILDLIFE_SUPERPOWER_ASSIGN_RESET_MULTIPLE(Seasons.WILD_LIFE, "Reset the superpower assignment of {} targets", List.of("number of targets"))
-    ,WILDLIFE_SUPERPOWER_ASSIGN_SINGLE(Seasons.WILD_LIFE, "Forced one of {}'s superpowers to be {} when the next superpower randomization happens", List.of("Player", "power"))
-    ,WILDLIFE_SUPERPOWER_ASSIGN_MULTIPLE(Seasons.WILD_LIFE, "Forced one of the superpowers of {} targets to be {} when the next superpower randomization happens", List.of("number of targets", "power"))
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE(Seasons.WILD_LIFE, "Added a random superpower to all players")
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE(Seasons.WILD_LIFE, "Added {} random superpowers to all players", List.of("count"))
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE(Seasons.WILD_LIFE, "Added a random superpower to {}", List.of("Player"))
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE_MULTIPLE(Seasons.WILD_LIFE, "Added {} random superpowers to {}", List.of("count", "Player"))
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTIPLE(Seasons.WILD_LIFE, "Added a random superpower to {} targets", List.of("number of targets"))
-    ,WILDLIFE_SUPERPOWER_RANDOMIZE_TARGET_MULTI_MULTIPLE(Seasons.WILD_LIFE, "Added {} random superpowers to {} targets", List.of("count", "number of targets"))
-    ,WILDLIFE_SUPERPOWER_DEACTIVATE_SINGLE(Seasons.WILD_LIFE, "Deactivated all of {}'s superpowers", List.of("Player"))
-    ,WILDLIFE_SUPERPOWER_DEACTIVATE_MULTIPLE(Seasons.WILD_LIFE, "Deactivated all superpowers from {} targets", List.of("number of targets"))
-    ,WILDLIFE_SUPERPOWER_SET_SINGLE(Seasons.WILD_LIFE, "Added the {} superpower to {}", List.of("power", "Player"))
-    ,WILDLIFE_SUPERPOWER_SET_MULTIPLE(Seasons.WILD_LIFE, "Added the {} superpower to {} targets", List.of("power", "number of targets"))
-    ,WILDLIFE_SUPERPOWER_SET_ONLY_SINGLE(Seasons.WILD_LIFE, "Set {}'s superpower to {}", List.of("Player", "power"))
-    ,WILDLIFE_SUPERPOWER_SET_ONLY_MULTIPLE(Seasons.WILD_LIFE, "Set the superpower to {} for {} targets", List.of("power", "number of targets"))
-    ,WILDLIFE_SUPERPOWER_COUNT_SINGLE(Seasons.WILD_LIFE, "{} has {} superpower", List.of("Player", "count"))
-    ,WILDLIFE_SUPERPOWER_COUNT_MULTIPLE(Seasons.WILD_LIFE, "{} has {} superpowers", List.of("Player", "count"))
-    ,WILDLIFE_SUPERPOWER_MAX_ROLL_SINGLE(Seasons.WILD_LIFE, "{} has reached max superpowers so didn't receive all of the rolled powers", List.of("Player"))
-    ,WILDLIFE_SUPERPOWER_MAX_ROLL_MULTIPLE(Seasons.WILD_LIFE, "{} players have reached max superpowers so didn't receive all of the rolled powers: ", List.of("number of players"))
-    ,WILDLIFE_SUPERPOWER_ALREADY_HAS(Seasons.WILD_LIFE, "{} already has {} and cannot receive it again", List.of("Player", "power"))
-    ,WILDLIFE_SUPERPOWER_MAX_SET_SINGLE(Seasons.WILD_LIFE, "{} has reached max superpowers so didn't receive {}", List.of("Player", "power"))
+    ,WILDLIFE_SUPERPOWER_ASSIGN_SINGLE(Seasons.WILD_LIFE, "Forced {}'s superpower to be {} when the next superpower randomization happens", List.of("Player", "power"))
+    ,WILDLIFE_SUPERPOWER_ASSIGN_MULTIPLE(Seasons.WILD_LIFE, "Forced the superpower of {} targets to be {} when the next superpower randomization happens", List.of("number of targets", "power"))
+    ,WILDLIFE_SUPERPOWER_RANDOMIZE_SINGLE(Seasons.WILD_LIFE, "Randomized {}'s superpower", List.of("Player"))
+    ,WILDLIFE_SUPERPOWER_RANDOMIZE_MULTIPLE(Seasons.WILD_LIFE, "Randomized the superpower of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SUPERPOWER_DEACTIVATE_SINGLE(Seasons.WILD_LIFE, "Deactivated {}'s superpower", List.of("Player"))
+    ,WILDLIFE_SUPERPOWER_DEACTIVATE_MULTIPLE(Seasons.WILD_LIFE, "Deactivated the superpower of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SUPERPOWER_GET(Seasons.WILD_LIFE, "{}'s superpower is: {}", List.of("Player", "power"))
+    ,WILDLIFE_SUPERPOWER_SET_SINGLE(Seasons.WILD_LIFE, "Set {}'s superpower to {}", List.of("Player", "power"))
+    ,WILDLIFE_SUPERPOWER_SET_MULTIPLE(Seasons.WILD_LIFE, "Set the superpower to {} for {} targets", List.of("power", "number of targets"))
     ,WILDLIFE_POWER_MIMIC(Seasons.WILD_LIFE, "Mimicked superpower of {}", List.of("Player"))
-    ,WILDLIFE_POWER_PLAYERDISGUISE(Seasons.WILD_LIFE, "Copied DNA of {} Ã¢â‚¬â€ Press again to disguise", List.of("Player"))
-    ,WILDLIFE_WILDCARD_DEACTIVATE("Deactivated {}", List.of("wildcard"))
-    ,WILDLIFE_WILDCARD_ACTIVATE("Activated {}", List.of("wildcard"))
-    ,WILDLIFE_WILDCARD_AVAILABLE("Available Wildcards: {}", List.of("list"))
-    ,WILDLIFE_WILDCARD_ACTIVATED("Activated Wildcards: {}", List.of("list"))
-    ,WILDLIFE_WILDCARD_CHOOSE("The {} wildcard has been selected for this session.\n§7Use the §f'/wildcard choose' §7 command if you want to change it.", List.of("wildcard"))
-    ,WILDLIFE_TRIVIA_RECEIVE_EFFECT(Formatted.LOOSELY_STYLED, " §a§l+ §7{}§6 {}", List.of("effect name", "amplifier"))
-    ,WILDLIFE_TRIVIA_PUNISHMENT_SET_SINGLE( "Punished {} with {}", List.of("Player", "punishment"))
-    ,WILDLIFE_TRIVIA_PUNISHMENT_SET_MULTIPLE( "Punished {} targets with {}", List.of("number of targets", "punishment"))
-    ,WILDLIFE_TRIVIA_PUNISHMENT_CLEAR_SINGLE( "Cleared {}'s trivia punishments", List.of("Player"))
-    ,WILDLIFE_TRIVIA_PUNISHMENT_CLEAR_MULTIPLE( "Cleared trivia punishments for {} targets", List.of("number of targets"))
-    ,WILDLIFE_TRIVIA_BOT_SPAWN_SINGLE( "Spawned a trivia bot for {}", List.of("Player"))
-    ,WILDLIFE_TRIVIA_BOT_SPAWN_MULTIPLE( "Spawned a trivia bot for {} targets", List.of("number of targets"))
-    ,WILDLIFE_TRIVIA_SET_SINGLE( "Assigned {}'s trivia", List.of("Player"))
-    ,WILDLIFE_TRIVIA_SET_MULTIPLE( "Assigned trivia of {} targets", List.of("number of targets"))
-    ,WILDLIFE_TRIVIA_RESET_SINGLE( "Reset {}'s assigned trivia", List.of("Player"))
-    ,WILDLIFE_TRIVIA_RESET_MULTIPLE( "Reset assigned trivia of {} targets", List.of("number of targets"))
-    ,MUTED_TRIVIABOT( "<Trivia Bot> No phoning a friend allowed!")
+    ,WILDLIFE_POWER_PLAYERDISGUISE(Seasons.WILD_LIFE, "Copied DNA of {} — Press again to disguise", List.of("Player"))
+    ,WILDLIFE_WILDCARD_DEACTIVATE(Seasons.WILD_LIFE, "Deactivated {}", List.of("wildcard"))
+    ,WILDLIFE_WILDCARD_ACTIVATE(Seasons.WILD_LIFE, "Activated {}", List.of("wildcard"))
+    ,WILDLIFE_WILDCARD_AVAILABLE(Seasons.WILD_LIFE, "Available Wildcards: {}", List.of("list"))
+    ,WILDLIFE_WILDCARD_ACTIVATED(Seasons.WILD_LIFE, "Activated Wildcards: {}", List.of("list"))
+    ,WILDLIFE_WILDCARD_CHOOSE(Seasons.WILD_LIFE, "The {} wildcard has been selected for this session.\n§7Use the §f'/wildcard choose' §7 command if you want to change it.", List.of("wildcard"))
+    ,WILDLIFE_TRIVIA_RECEIVE_EFFECT(Seasons.WILD_LIFE, Formatted.LOOSELY_STYLED, " §a§l+ §7{}§6 {}", List.of("effect name", "amplifier"))
+    ,WILDLIFE_TRIVIA_PUNISHMENT_SET_SINGLE(Seasons.WILD_LIFE, "Punished {} with {}", List.of("Player", "punishment"))
+    ,WILDLIFE_TRIVIA_PUNISHMENT_SET_MULTIPLE(Seasons.WILD_LIFE, "Punished {} targets with {}", List.of("number of targets", "punishment"))
+    ,WILDLIFE_TRIVIA_PUNISHMENT_CLEAR_SINGLE(Seasons.WILD_LIFE, "Cleared {}'s trivia punishments", List.of("Player"))
+    ,WILDLIFE_TRIVIA_PUNISHMENT_CLEAR_MULTIPLE(Seasons.WILD_LIFE, "Cleared trivia punishments for {} targets", List.of("number of targets"))
+    ,WILDLIFE_TRIVIA_BOT_SPAWN_SINGLE(Seasons.WILD_LIFE, "Spawned a trivia bot for {}", List.of("Player"))
+    ,WILDLIFE_TRIVIA_BOT_SPAWN_MULTIPLE(Seasons.WILD_LIFE, "Spawned a trivia bot for {} targets", List.of("number of targets"))
+    ,WILDLIFE_TRIVIA_SET_SINGLE(Seasons.WILD_LIFE, "Assigned {}'s trivia", List.of("Player"))
+    ,WILDLIFE_TRIVIA_SET_MULTIPLE(Seasons.WILD_LIFE, "Assigned trivia of {} targets", List.of("number of targets"))
+    ,WILDLIFE_TRIVIA_RESET_SINGLE(Seasons.WILD_LIFE, "Reset {}'s assigned trivia", List.of("Player"))
+    ,WILDLIFE_TRIVIA_RESET_MULTIPLE(Seasons.WILD_LIFE, "Reset assigned trivia of {} targets", List.of("number of targets"))
+    ,MUTED_TRIVIABOT(Seasons.WILD_LIFE, "<Trivia Bot> No phoning a friend allowed!")
     ,WILDLIFE_FINALE(Seasons.WILD_LIFE, "All wildcards will act as if the finale (so the Callback wildcard) was activated.")
     ,WILDLIFE_HUNGER_INACTIVE(Seasons.WILD_LIFE, "The Hunger wildcard is not active right now.")
     ,WILDLIFE_HUNGER_RANDOMIZE_TITLE(Seasons.WILD_LIFE, "")
     ,WILDLIFE_HUNGER_RANDOMIZE_SUBTITLE(Seasons.WILD_LIFE, "§7Food is about to be randomised...")
     ,WILDLIFE_HUNGER_RANDOMIZE_MANUAL(Seasons.WILD_LIFE, "§7Randomizing food...")
-    ,WILDLIFE_SNAIL_TEXTURES_RELOAD("§7Reloading snail textures...")
-    ,WILDLIFE_SNAIL_TEXTURES_NONE("§7No snail skins have been added yet. Run '§f/snail textures info§7' to learn how to add them.")
-    ,WILDLIFE_WILDCARD_GUI_ERROR("You must have the Life Series mod installed §nclient-side§c to open the wildcard GUI")
-    ,WILDLIFE_WILDCARD_GUI_OPEN("§7Opening the Wildcard selection GUI...")
+    ,WILDLIFE_SNAIL_TEXTURES_RELOAD(Seasons.WILD_LIFE, "§7Reloading snail textures...")
+    ,WILDLIFE_SNAIL_TEXTURES_NONE(Seasons.WILD_LIFE, "§7No snail skins have been added yet. Run '§f/snail textures info§7' to learn how to add them.")
+    ,WILDLIFE_WILDCARD_GUI_ERROR(Seasons.WILD_LIFE, "You must have the Life Series mod installed §nclient-side§c to open the wildcard GUI")
+    ,WILDLIFE_WILDCARD_GUI_OPEN(Seasons.WILD_LIFE, "§7Opening the Wildcard selection GUI...")
     ,WILDLIFE_SUPERPOWER_INVALID(Seasons.WILD_LIFE, "That superpower doesn't exist")
     ,WILDLIFE_SUPERPOWER_INACTIVE(Seasons.WILD_LIFE, "You do not have an active superpower")
-    ,WILDLIFE_SUPERPOWER_COOLDOWN(Seasons.WILD_LIFE, "Your superpower cooldown has been skipped")
     ,WILDLIFE_SUPERPOWER_INACTIVE_OTHER(Seasons.WILD_LIFE, "{} does not have an active superpower")
     ,WILDLIFE_SUPERPOWER_INACTIVE_OTHER_ALL(Seasons.WILD_LIFE, "No targets have an active superpower")
     ,WILDLIFE_SUPERPOWER_COOLDOWN_GET(Seasons.WILD_LIFE, "{}'s superpower cooldown is {} seconds", List.of("Player", "amount"))
@@ -453,27 +431,27 @@ public enum ModifiableText {
     ,WILDLIFE_SUPERPOWER_COOLDOWN_SET_MULTIPLE(Seasons.WILD_LIFE, "Set superpower cooldown of {} targets to {} seconds", List.of("number of targets", "amount"))
     ,WILDLIFE_SUPERPOWER_COOLDOWN_RESET_SINGLE(Seasons.WILD_LIFE, "Reset {}'s superpower cooldown", List.of("Player"))
     ,WILDLIFE_SUPERPOWER_COOLDOWN_RESET_MULTIPLE(Seasons.WILD_LIFE, "Reset superpower cooldown of {} targets", List.of("number of targets"))
-    ,WILDLIFE_WILDCARD_DEACTIVATE_ALL("Deactivated all wildcards")
-    ,WILDLIFE_WILDCARD_INVALID("That Wildcard doesn't exist")
-    ,WILDLIFE_WILDCARD_ACTIVATE_ALL_TITLE("All wildcards are active!")
-    ,WILDLIFE_WILDCARD_ACTIVATE_ALL("Activated all wildcards (Except Callback)")
-    ,WILDLIFE_WILDCARD_ACTIVATE_ERROR("That Wildcard is already active")
-    ,WILDLIFE_WILDCARD_IMPLEMENT_ERROR("That Wildcard has not been implemented yet")
-    ,WILDLIFE_WILDCARD_ACTIVATED_NONE("§7There are no active Wildcards right now. \nYou will be able to select a Wildcard when you start a session, or you can use '§f/wildcard activate <wildcard>§7' to activate a specific Wildcard right now.")
-    ,WILDLIFE_TRIVIA_QUESTION_INVALID( "Could not find trivia with that question.")
-    ,WILDLIFE_SNAIL_INFO("§7Use the §f'/snail ...'§7 command to modify snail names and to get info on how to change snail textures.")
-    ,WILDLIFE_TRIVIA_NOTICE_START( "§7You must start a session for trivia bots to spawn!")
-    ,WILDLIFE_TRIVIA_NOTICE( "§7You can modify the trivia questions in the config files (./config/lifeseries/wildlife/*-trivia)")
-    ,WILDLIFE_WILDCARD_WARNING_2MIN("§7A Wildcard will be activated in 2 minutes!")
-    ,WILDLIFE_WILDCARD_FADED("§7A Wildcard has faded...")
-    ,WILDLIFE_WILDCARD_DOTS_1("§a§l,")
-    ,WILDLIFE_WILDCARD_DOTS_2("§a§l, §e§l,")
-    ,WILDLIFE_WILDCARD_DOTS_3("§a§l, §e§l, §c§l,")
+    ,WILDLIFE_SUPERPOWER_RANDOMIZE(Seasons.WILD_LIFE, "Randomized everyone's superpowers")
+    ,WILDLIFE_WILDCARD_DEACTIVATE_ALL(Seasons.WILD_LIFE, "Deactivated all wildcards")
+    ,WILDLIFE_WILDCARD_INVALID(Seasons.WILD_LIFE, "That Wildcard doesn't exist")
+    ,WILDLIFE_WILDCARD_ACTIVATE_ALL_TITLE(Seasons.WILD_LIFE, "All wildcards are active!")
+    ,WILDLIFE_WILDCARD_ACTIVATE_ALL(Seasons.WILD_LIFE, "Activated all wildcards (Except Callback)")
+    ,WILDLIFE_WILDCARD_ACTIVATE_ERROR(Seasons.WILD_LIFE, "That Wildcard is already active")
+    ,WILDLIFE_WILDCARD_IMPLEMENT_ERROR(Seasons.WILD_LIFE, "That Wildcard has not been implemented yet")
+    ,WILDLIFE_WILDCARD_ACTIVATED_NONE(Seasons.WILD_LIFE, "§7There are no active Wildcards right now. \nYou will be able to select a Wildcard when you start a session, or you can use '§f/wildcard activate <wildcard>§7' to activate a specific Wildcard right now.")
+    ,WILDLIFE_TRIVIA_QUESTION_INVALID(Seasons.WILD_LIFE, "Could not find trivia with that question.")
+    ,WILDLIFE_SNAIL_INFO(Seasons.WILD_LIFE, "§7Use the §f'/snail ...'§7 command to modify snail names and to get info on how to change snail textures.")
+    ,WILDLIFE_TRIVIA_NOTICE_START(Seasons.WILD_LIFE, "§7You must start a session for trivia bots to spawn!")
+    ,WILDLIFE_TRIVIA_NOTICE(Seasons.WILD_LIFE, "§7You can modify the trivia questions in the config files (./config/lifeseries/wildlife/*-trivia)")
+    ,WILDLIFE_WILDCARD_WARNING_2MIN(Seasons.WILD_LIFE, "§7A Wildcard will be activated in 2 minutes!")
+    ,WILDLIFE_WILDCARD_FADED(Seasons.WILD_LIFE, "§7A Wildcard has faded...")
+    ,WILDLIFE_WILDCARD_DOTS_1(Seasons.WILD_LIFE, "§a§l,")
+    ,WILDLIFE_WILDCARD_DOTS_2(Seasons.WILD_LIFE, "§a§l, §e§l,")
+    ,WILDLIFE_WILDCARD_DOTS_3(Seasons.WILD_LIFE, "§a§l, §e§l, §c§l,")
     ,WILDLIFE_MAKEITWILD_PT1(Seasons.WILD_LIFE, "§7The ending is §cyours§7...")
     ,WILDLIFE_MAKEITWILD_PT2(Seasons.WILD_LIFE, "§cMake")
     ,WILDLIFE_MAKEITWILD_PT3(Seasons.WILD_LIFE, "§cMake §eit")
     ,WILDLIFE_MAKEITWILD_PT4(Seasons.WILD_LIFE, "§cMake §eit §a§lWILD")
-    ,WILDLIFE_MAKEITWILD_TRANSCRIPT("The ending is yours... Make it WILD.")
     ,WILDLIFE_SUPERPOWERS_DEAD(Seasons.WILD_LIFE, "Dead players can't use superpowers!")
     ,WILDLIFE_POWER_MIMIC_ERROR(Seasons.WILD_LIFE, "You cannot mimic that power.")
     ,WILDLIFE_POWER_MIMIC_NOPLAYER(Seasons.WILD_LIFE, "You are not looking at a player.")
@@ -481,18 +459,16 @@ public enum ModifiableText {
     ,WILDLIFE_POWER_NECROMANCY_ERROR(Seasons.WILD_LIFE, "There are no dead players.")
     ,WILDLIFE_POWER_PLAYERDISGUISE_ERROR(Seasons.WILD_LIFE, "You are not looking at a player.")
     ,WILDLIFE_POWER_TELEPORTATION_ERROR(Seasons.WILD_LIFE, "There is nothing to teleport to.")
-,WILDLIFE_SNAIL_TRIVIA_SNAIL_NAME("VHSnail")
+    ,WILDLIFE_SNAIL_TRIVIA_SNAIL_NAME(Seasons.WILD_LIFE, "VHSnail")
+    ,WILDLIFE_WILDCARD_ACTIVATE_CRYPT_TITLE(Seasons.WILD_LIFE, "§6A wildcard is active!")
 
-,WILDLIFE_SNAIL_SPAWN_SINGLE("Spawned {}'s snail", List.of("Player"))
-,WILDLIFE_SNAIL_SPAWN_MULTIPLE("Spawned snail of {} targets", List.of("number of targets"))
-,WILDLIFE_SNAIL_DESPAWN_SINGLE("Despawned {}'s snail", List.of("Player"))
-,WILDLIFE_SNAIL_DESPAWN_MULTIPLE("Despawned snail of {} targets", List.of("number of targets"))
-,WILDLIFE_SNAIL_SPAWN_PREVENT("Prevented {}'s snail from spawning", List.of("Player"))
-,WILDLIFE_SNAIL_SPAWN_ALLOW("Allowed {}'s snail to spawn", List.of("Player"))
-,WILDLIFE_SNAIL_SPAWN_TOGGLE_MULTIPLE("Toggled snail spawn state for {} targets", List.of("number of targets"))
-
-    ,CLIENT_MODE_OFF_SPAWN_SNAIL("Client mode is off use /lifeseries clientMode on to allow snails to spawn")
-    ,SNAIL_SPAWN_REQUIRES_CLIENTMODE("Snails can only be spawned in Wild Life or when client mode is enabled")
+    ,WILDLIFE_SNAIL_SPAWN_SINGLE(Seasons.WILD_LIFE, "Spawned {}'s snail", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_MULTIPLE(Seasons.WILD_LIFE, "Spawned snail of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SNAIL_DESPAWN_SINGLE(Seasons.WILD_LIFE, "Despawned {}'s snail", List.of("Player"))
+    ,WILDLIFE_SNAIL_DESPAWN_MULTIPLE(Seasons.WILD_LIFE, "Despawned snail of {} targets", List.of("number of targets"))
+    ,WILDLIFE_SNAIL_SPAWN_PREVENT(Seasons.WILD_LIFE, "Prevented {}'s snail from spawning", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_ALLOW(Seasons.WILD_LIFE, "Allowed {}'s snail to spawn", List.of("Player"))
+    ,WILDLIFE_SNAIL_SPAWN_TOGGLE_MULTIPLE(Seasons.WILD_LIFE, "Toggled snail spawn state for {} targets", List.of("number of targets"))
 
     ,PASTLIFE_SESSION_START(Seasons.PAST_LIFE, "§7Past Life session started:\n§7 Type §f\"/pastlife boogeyman\"§7 to have the Boogeyman in this session.\n§7 Type §f\"/pastlife society\"§7 to have the Secret Society in this session.\n§7 Or type §f\"/pastlife pickRandom\"§7 if you want the game to pick randomly.\n")
     ,BOOGEYMAN_PASTLIFE_MESSAGE_PT1(Seasons.PAST_LIFE, "§7You are the boogeyman.")
@@ -530,17 +506,6 @@ public enum ModifiableText {
     ,NICELIFE_NICELIST_ADD_MULTIPLE(Seasons.NICE_LIFE, "Added {} targets to the Nice List", List.of("number of targets"))
     ,NICELIFE_NICELIST_REMOVE_SINGLE(Seasons.NICE_LIFE, "Removed {} from the Nice List", List.of("Player"))
     ,NICELIFE_NICELIST_REMOVE_MULTIPLE(Seasons.NICE_LIFE, "Removed {} targets from the Nice List", List.of("number of targets"))
-	,LISTS_NICELIST_START_INFO("§7You have been chosen to be on the §dnice list§7. You have {}§7 minutes to vote using {}§7 to agree with the other §dpinks§7 on a §2non-pink§7 to gain a life. Within that time you are unable to be targeted by all players including §cred names§7.", List.of("minutes", "ClickHere"))
-	,LISTS_NICELIST_VOTE("\n §6[§e!§6]§7 You voted for {}§7.\n", List.of("Player"))
-	,LISTS_NICELIST_VOTE_REMINDER("\n§7Don't forget to {}§7!\n", List.of("ClickHere"))
-    ,LISTS_NICELIST_VOTE_TITLE("Vote for who should get a life")
-	,LISTS_NAUGHTYLIST_START_INFO("§7You have been chosen to be on the §5naughty list§7. As a purple name all players are able to target and kill you until the {}§7 minute timer ends. When it ends you revert back to your previous colour.", List.of("minutes"))
-    ,LISTS_ROLLING_REVEAL_TITLE("§eYou are on...")
-    ,LISTS_NO_LIST_TITLE("§eNo List")
-    ,LISTS_NICELIST_TITLE("§aThe Nice List")
-    ,LISTS_NAUGHTYLIST_TITLE("§cThe Naughty List")
-    ,LISTS_NOTICE_ADDED("§6[NOTICE] You were added to the {} list.", List.of("list"))
-    ,LISTS_NOTICE_REMOVED("§c[NOTICE] You are no longer on the naughty/nice list.")
     ,NICELIFE_NAUGHTYLIST_START_TITLE_PT1(Seasons.NICE_LIFE, "§cThese players are on...")
     ,NICELIFE_NAUGHTYLIST_START_TITLE_PT2(Seasons.NICE_LIFE, "§cTHE NAUGHTY LIST")
     ,NICELIFE_NAUGHTYLIST_START_INFO_PT1(Seasons.NICE_LIFE, Formatted.LOOSELY_STYLED,"\n §6[§e!§6]§7 You have voted for {} {} to be on the §cNAUGHTY LIST§7.\n", List.of("count", "person/people"))
@@ -577,19 +542,12 @@ public enum ModifiableText {
     ,NICELIFE_REDWINTER_PT2(Seasons.NICE_LIFE, "§cRed winter is here..")
     ,NICELIFE_NAUGHTYLIST_END_TITLE(Seasons.NICE_LIFE, "§cPlayers return to normal in...")
     ,NICELIFE_NICELIST_VOTE_END_TITLE(Seasons.NICE_LIFE, "§cThe nice vote will end in...")
-	,LISTS_VOTE_END_TITLE("§cThe lists will end in...")
-	,LISTS_VOTE_COUNTDOWN_3("§23..")
-	,LISTS_VOTE_COUNTDOWN_2("§e2..")
-	,LISTS_VOTE_COUNTDOWN_1("§c1..")
-	,LISTS_NICELIST_VOTE_ERROR_INSUFFICIENT("§cInsufficient votes")
-    ,LISTS_NICELIST_VOTE_ERROR_AGREEMENT("§cNo agreement reached")
     ,NICELIFE_VOTE_COUNTDOWN_3(Seasons.NICE_LIFE, "§23..")
     ,NICELIFE_VOTE_COUNTDOWN_2(Seasons.NICE_LIFE, "§e2..")
     ,NICELIFE_VOTE_COUNTDOWN_1(Seasons.NICE_LIFE, "§c1..")
     ,NICELIFE_NICELIST_VOTE_ERROR_INSUFFICIENT(Seasons.NICE_LIFE, "§cInsufficient votes")
     ,NICELIFE_NICELIST_VOTE_ERROR_AGREEMENT(Seasons.NICE_LIFE, "§cNo agreement reached")
     ,NICELIFE_NICELIST_VOTE_RESULT(Seasons.NICE_LIFE, "§2The winner is...")
-    ,LISTS_VOTE_RESULT("§2The vote winner is...")
 
 //ModifiableText.NAME.get(
 
@@ -716,59 +674,6 @@ public enum ModifiableText {
     }
 
     public static void registerAllTexts() {
-        final List<String> globalTextKeys = List.of(
-                "wildlife.snail.texture.info",
-                "wildlife.snail.default.name",
-                "wildlife.snail.name.request",
-                "wildlife.snail.name.request.prompt",
-                "wildlife.snail.textures.list",
-                "wildlife.snail.name.set",
-                "wildlife.snail.name.reset.single",
-                "wildlife.snail.name.reset.multiple",
-                "wildlife.snail.name.get",
-                "wildlife.wildcard.deactivate",
-                "wildlife.wildcard.activate",
-                "wildlife.snail.textures.reload",
-                "wildlife.snail.textures.none",
-                "wildlife.wildcard.gui.error",
-                "wildlife.wildcard.gui.open",
-                "wildlife.wildcard.deactivate.all",
-                "wildlife.wildcard.invalid",
-                "wildlife.wildcard.activate.all.title",
-                "wildlife.wildcard.activate.all",
-                "wildlife.wildcard.activate.error",
-                "wildlife.wildcard.implement.error",
-                "wildlife.wildcard.activated.none",
-                "wildlife.trivia.question.invalid",
-                "wildlife.snail.info",
-                "wildlife.trivia.notice.start",
-                "wildlife.trivia.notice",
-                "wildlife.wildcard.warning.2min",
-                "wildlife.wildcard.faded",
-                "wildlife.wildcard.dots.1",
-                "wildlife.wildcard.dots.2",
-                "wildlife.wildcard.dots.3",
-                "wildlife.makeitwild.pt1",
-                "wildlife.makeitwild.pt2",
-                "wildlife.makeitwild.pt3",
-                "wildlife.makeitwild.pt4",
-                "wildlife.makeitwild.transcript",
-                "wildlife.wildcard.available",
-                "wildlife.wildcard.activated",
-                "wildlife.wildcard.choose",
-                "wildlife.trivia.receive.effect",
-                "wildlife.trivia.punishment.set.single",
-                "wildlife.trivia.punishment.set.multiple",
-                "wildlife.trivia.punishment.clear.single",
-                "wildlife.trivia.punishment.clear.multiple",
-                "wildlife.trivia.bot.spawn.single",
-                "wildlife.trivia.bot.spawn.multiple",
-                "wildlife.trivia.set.single",
-                "wildlife.trivia.set.multiple",
-                "wildlife.trivia.reset.single",
-                "wildlife.trivia.reset.multiple",
-                "muted.triviabot"
-        );
         for (ModifiableText modifiableText : ModifiableText.values()) {
             String defaultValue = modifiableText.getRegisterDefaultValue();
 
@@ -787,15 +692,11 @@ public enum ModifiableText {
                 args = modifiableText.getRegisterArgs().size();
             }
             if (argsInValue != args) {
-                Main.LOGGER.error("Args count mismatch in " + modifiableText.name);
+                LifeSeries.LOGGER.error("Args count mismatch in " + modifiableText.name);
             }
             */
 
-            if (modifiableText.requiredSeason != null && currentSeason != null
-                    && currentSeason.getSeason() != modifiableText.requiredSeason
-                    && !globalTextKeys.contains(modifiableText.name)) {
-                continue;
-            }
+            if (modifiableText.requiredSeason != null && currentSeason != null && currentSeason.getSeason() != modifiableText.requiredSeason) continue;
             ModifiableTextManager.register(modifiableText.name, defaultValue, modifiableText.getRegisterArgs());
         }
     }
@@ -810,15 +711,3 @@ public enum ModifiableText {
         return null;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

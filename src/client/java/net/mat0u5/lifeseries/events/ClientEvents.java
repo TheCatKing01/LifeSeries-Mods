@@ -1,12 +1,7 @@
 package net.mat0u5.lifeseries.events;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.mat0u5.lifeseries.Main;
-import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.LifeSeries;
+import net.mat0u5.lifeseries.LifeSeriesClient;
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.FlashbackCompatibility;
 import net.mat0u5.lifeseries.compatibilities.ReplayModCompatibility;
@@ -20,7 +15,6 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.TextHud;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.Wildcards;
-import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.TimeDilation;
 import net.mat0u5.lifeseries.utils.ClientSounds;
 import net.mat0u5.lifeseries.utils.ClientTaskScheduler;
 import net.mat0u5.lifeseries.utils.ClientUtils;
@@ -29,7 +23,6 @@ import net.mat0u5.lifeseries.utils.versions.UpdateChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
@@ -60,16 +53,11 @@ public class ClientEvents {
     public static long onGroundFor = 0;
     private static boolean hasShownUpdateScreen = false;
 
-    public static void registerClientEvents() {
-        ClientPlayConnectionEvents.JOIN.register(ClientEvents::onClientJoin);
-        ClientPlayConnectionEvents.DISCONNECT.register(ClientEvents::onClientDisconnect);
-        ClientLifecycleEvents.CLIENT_STARTED.register(ClientEvents::onClientStart);
-        ScreenEvents.AFTER_INIT.register(ClientEvents::onScreenOpen);
-        ServerLifecycleEvents.SERVER_STARTING.register(ClientEvents::onServerStart);
-        ServerLifecycleEvents.SERVER_STARTED.register(ClientEvents::onServerStart);
+    public static void onServerStarting(MinecraftServer server) {
+        checkReplayServer(server);
     }
 
-    private static void onServerStart(MinecraftServer server) {
+    public static void onServerStart(MinecraftServer server) {
         checkReplayServer(server);
     }
 
@@ -77,46 +65,46 @@ public class ClientEvents {
         boolean isReplay = false;
         if (CompatibilityManager.flashbackLoaded()) {
             if (FlashbackCompatibility.isReplayServer(server)) {
-                Main.LOGGER.info("Detected Flashback Replay");
+                LifeSeries.LOGGER.info("Detected Flashback Replay");
                 isReplay = true;
             }
         }
         if (CompatibilityManager.replayModLoaded()) {
             if (ReplayModCompatibility.isReplayServer()) {
-                Main.LOGGER.info("Detected ReplayMod Replay");
+                LifeSeries.LOGGER.info("Detected ReplayMod Replay");
                 isReplay = true;
             }
         }
-        MainClient.isReplay = isReplay;
+        LifeSeriesClient.isReplay = isReplay;
     }
 
-    public static void onClientJoin(ClientPacketListener handler, PacketSender sender, Minecraft client) {
+    public static void onClientJoin() {
         checkReplayServer(null);
         ClientTaskScheduler.schedulePriorityTask(20, () -> {
-            if (MainClient.serverHandshake == HandshakeStatus.WAITING) {
-                Main.LOGGER.info("Disabling the Life Series on the client.");
-                MainClient.serverHandshake = HandshakeStatus.NOT_RECEIVED;
+            if (LifeSeriesClient.serverHandshake == HandshakeStatus.WAITING) {
+                LifeSeries.LOGGER.info("Disabling the Life Series on the client.");
+                LifeSeriesClient.serverHandshake = HandshakeStatus.NOT_RECEIVED;
             }
         });
-        if (Main.modDisabled()) return;
+        if (LifeSeries.modDisabled()) return;
     }
 
-    public static void onClientDisconnect(ClientPacketListener handler, Minecraft client) {
+    public static void onClientDisconnect() {
         checkReplayServer(null);
-        Main.LOGGER.info("Client disconnected from server, clearing some client data.");
-        MainClient.resetClientData();
-        if (Main.modDisabled()) return;
+        LifeSeries.LOGGER.info("Client disconnected from server, clearing some client data.");
+        LifeSeriesClient.resetClientData();
+        if (LifeSeries.modDisabled()) return;
     }
 
     public static void onScreenOpen(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
-        if (Main.modDisabled()) return;
+        if (LifeSeries.modDisabled()) return;
         if (UpdateChecker.updateAvailable) {
-            int disableVersion = MainClient.clientConfig.getOrCreateInt("ignore_update", 0);
+            int disableVersion = LifeSeriesClient.clientConfig.getOrCreateInt("ignore_update", 0);
             if (UpdateChecker.version == disableVersion && !UpdateChecker.TEST_UPDATE_FAKE && !UpdateChecker.TEST_UPDATE_LAST) return;
 
             if (screen instanceof TitleScreen && !hasShownUpdateScreen) {
                 client.execute(() -> {
-                    client.setScreen(new UpdateInfoScreen(UpdateChecker.versionName, UpdateChecker.versionDescription));
+                    client.ls$setScreen(new UpdateInfoScreen(UpdateChecker.versionName, UpdateChecker.versionDescription));
                     hasShownUpdateScreen = true;
                 });
             }
@@ -124,11 +112,14 @@ public class ClientEvents {
     }
 
     public static void onClientStart(Minecraft client) {
-        if (Main.modDisabled()) return;
+        if (LifeSeries.modDisabled()) return;
+    }
+    public static void onClientStopping(Minecraft client) {
+
     }
 
     public static void onClientTickStart() {
-        if (Main.modDisabled()) return;
+        if (LifeSeries.modDisabled()) return;
         Minecraft client = Minecraft.getInstance();
         LocalPlayer player = client.player;
         if (player != null) {
@@ -139,19 +130,19 @@ public class ClientEvents {
     public static void onClientTickEnd() {
         try {
             ClientTaskScheduler.onClientTick();
-            if (Main.modFullyDisabled()) return;
+            if (LifeSeries.modFullyDisabled()) return;
             Minecraft client = Minecraft.getInstance();
             LocalPlayer player = client.player;
 
             spawnInvisibilityParticles(client);
 
-            if (Main.modDisabled()) return;
+            if (LifeSeries.modDisabled()) return;
 
             if (player != null) {
                 tryTripleJump(player);
                 checkOnGroundFor(player);
-                if (!player.isSleeping() && (client.screen instanceof EmptySleepScreen || client.screen instanceof NewQuizScreen || (client.screen instanceof VotingScreen votingScreen && votingScreen.requiresSleep))) {
-                    client.setScreen(null);
+                if (!player.isSleeping() && (client.ls$getScreen() instanceof EmptySleepScreen || client.ls$getScreen() instanceof NewQuizScreen || (client.ls$getScreen() instanceof VotingScreen votingScreen && votingScreen.requiresSleep))) {
+                    client.ls$setScreen(null);
                 }
             }
             ClientKeybinds.tick();
@@ -173,6 +164,7 @@ public class ClientEvents {
     }
 
     public static void spawnInvisibilityParticles(Minecraft client) {
+        if (!LifeSeriesClient.powerInvisParticles) return;
         if (client.level == null) return;
         //? if <= 1.20.3 {
         /*if (client.level.random.nextInt(30) != 0) return;
@@ -180,8 +172,8 @@ public class ClientEvents {
         if (client.level.getRandom().nextInt(15) != 0) return;
         //?}
         for (Player player : client.level.players()) {
-            if (MainClient.invisiblePlayers.containsKey(player.getUUID())) {
-                long time = MainClient.invisiblePlayers.get(player.getUUID());
+            if (LifeSeriesClient.invisiblePlayers.containsKey(player.getUUID())) {
+                long time = LifeSeriesClient.invisiblePlayers.get(player.getUUID());
                 if (time > System.currentTimeMillis() || time == -1) {
                     ParticleEngine particleManager = client.particleEngine;
 
@@ -206,7 +198,7 @@ public class ClientEvents {
 
     public static void sendPackets(LocalPlayer player) {
         //? if > 1.20.3 {
-        if (MainClient.clientCurrentSeason == Seasons.WILD_LIFE && MainClient.clientActiveWildcards.contains(Wildcards.SIZE_SHIFTING)) {
+        if (LifeSeriesClient.clientCurrentSeason == Seasons.WILD_LIFE && LifeSeriesClient.clientActiveWildcards.contains(Wildcards.SIZE_SHIFTING)) {
             //? if <= 1.21 {
             /*boolean jumping = player.input.jumping;
             *///?} else {
@@ -214,12 +206,12 @@ public class ClientEvents {
              //?}
             if (jumping) {
 
-                if (MainClient.FIX_SIZECHANGING_BUGS) {
+                if (LifeSeriesClient.FIX_SIZECHANGING_BUGS) {
                     EntityDimensions oldEntityDimensions = player.getDefaultDimensions(player.getPose()).scale(player.getScale());
                     AABB oldBoundingBox = oldEntityDimensions.makeBoundingBox(player.position());
                     Vec3 velocity = player.getDeltaMovement();
 
-                    float newScale = player.getScale() + MainClient.SIZESHIFTING_CHANGE * 10;
+                    float newScale = player.getScale() + LifeSeriesClient.SIZESHIFTING_CHANGE * 10;
                     EntityDimensions newEntityDimensions = player.getDefaultDimensions(player.getPose()).scale(newScale);
                     AABB newBoundingBox = newEntityDimensions.makeBoundingBox(player.position());
 
@@ -262,7 +254,7 @@ public class ClientEvents {
             return;
         }
 
-        if (jumpedInAir >= 2) return;
+        if ((jumpedInAir+1) >= LifeSeriesClient.powerTripleJumpCount) return;
 
         boolean shouldJump = false;
         //? if <= 1.21 {
@@ -279,7 +271,7 @@ public class ClientEvents {
         if (jumpCooldown > 0) return;
 
         if (!hasTripleJumpEffect(player)) return;
-        if (!MainClient.tripleJumpActive) return;
+        if (!LifeSeriesClient.tripleJumpActive) return;
         jumpedInAir++;
         player.jumpFromGround();
         //? if < 1.21 {
