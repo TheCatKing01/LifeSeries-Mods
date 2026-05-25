@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "SGS",
+    "PSP"
+  ],
+  "key": {
+    "P": "minecraft:paper",
+    "S": "minecraft:sand",
+    "G": "minecraft:gunpowder"
+  },
+  "result": {
+    "id": "minecraft:tnt"
+  }
+}

@@ -1,0 +1,127 @@
+[
+	{
+		"question": "Which pair was out first in Double Life?",
+		"answers": ["Jimmy and Tango", "Joel and Etho", "Grian and Scar"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "What did the Southlanders say when using a spyglass in Last Life?",
+		"answers": ["Aha!", "Oho!", "Hee-hee!"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "Who was Etho's favorite son in Limited Life?",
+		"answers": ["Bdubs", "Scar", "He didn't play favorites"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "In Secret Life, who failed the 100-block-high water bucket clutch? ",
+		"answers": ["Grian", "Joel", "Martyn"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "In Limited Life, which player went AFK for a whole session because they were sick?",
+		"answers": ["Pearl", "Grian", "Cleo"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "What did Scott and Martyn call themselves in Limited Life?",
+		"answers": ["Mean Gills", "LGB-SEA", "H2-bros"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "What was the name of Pearl's dog in Double Life?",
+		"answers": ["Tilly", "Milly", "Billy"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "Which of these was NOT a Life Series Season?",
+		"answers": ["Second Life", "Limited Life", "Real Life"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "Where did Grian and Mumbo hide their diamonds in Last Life?",
+		"answers": ["Right here!", "In a hidden chest below Mumbo's bunker", "In an enderchest"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "In what season did Scar take care of Jellie Pandas?",
+		"answers": ["Last Life", "Double Life", "Secret Life"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "Of these pairs, who got married in Third Life?",
+		"answers": ["Ren and Martyn", "Etho and Bdubs", "Jimmy and Scott"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "Who was Pearl's soulmate in Double Life?",
+		"answers": ["Scott", "Cleo", "Martyn"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "In Third Life, who declared \"Red winter is coming!\" when they turned red?",
+		"answers": ["Ren", "Martyn", "Skizz"],
+		"correct_answer_index": 0
+	},
+	{
+		"question": "What was the name of Etho and Joel's base in Double Life?",
+		"answers": ["The Pirate-ship", "The Big Barge", "The Relation-ship"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "What season is Team TIES from? ",
+		"answers": ["Last Life", "Secret Life", "Limited Life"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "Who was Bdubs' soulmate Double Life?",
+		"answers": ["Ren", "Etho", "Impulse"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "What item was stolen from the front of BigB's Third Life base? ",
+		"answers": ["Enchanter", "Giant cookie", "Doors"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "Which two mobs fought against each other for a task in Secret Life?",
+		"answers": ["Warden vs Guardian", "Warden vs Wither", "Wither vs Ender Dragon"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "\"The 3 G's\" are an alliance consisting of Cleo, Scott, and Pearl. In which season did this alliance form?",
+		"answers": ["Limited Life", "Double Life", "Last Life"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "Where was the Enchanter located originally in Double Life? ",
+		"answers": ["Spawn", "Ancient City", "A mangrove forest"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "Who won Real Life?",
+		"answers": ["Scott", "Cleo", "Pearl"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "What was the name of Gem, Impulse, and Scott's band? ",
+		"answers": ["Gem and the Boys", "Cherryblossoms", "Gem and the Scotts"],
+		"correct_answer_index": 2
+	},
+	{
+		"question": "Why was Bdubs' house upside down in Secret Life?",
+		"answers": ["It was an inside joke with his team", "It was his task", "He wanted to try something new"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "What happened when you failed a hard task in Secret Life?",
+		"answers": ["You died", "You lost 10 hearts", "Nothing happened"],
+		"correct_answer_index": 1
+	},
+	{
+		"question": "If I had a nickel for every life series Jimmy won, how many nickel would I have?",
+		"answers": ["1, which isn't a lot, but at least it's something", "2, which isn't a lot, but it's weird it happened twice", "0, which really means nothing"],
+		"correct_answer_index": 2
+	}
+]

@@ -292,3 +292,14 @@ task runClientNamed {
  }
  finalizedBy 'runClient'
 }
+
+def defaultBuildVersion = "1.21.11"
+def buildVersionProjects = subprojects.findAll { it.name ==~ /(1\..+|26\..+)/ }.collect { it.path }
+
+if (project == rootProject) {
+ tasks.register("buildAllVersions") {
+  group = "build"
+  description = "Builds every configured Stonecutter version target (run with -PallVersions=true)."
+  dependsOn buildVersionProjects.collect { "${it}:build" }
+ }
+}

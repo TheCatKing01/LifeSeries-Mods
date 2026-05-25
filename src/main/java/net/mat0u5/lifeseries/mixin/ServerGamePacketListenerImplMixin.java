@@ -52,12 +52,12 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.PositionMoveRotation;
 *///?}
 //? if >= 26.1 {
-import com.llamalad7.mixinextras.sugar.Local;
+/*import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-//?}
+*///?}
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 1)
 public class ServerGamePacketListenerImplMixin {
@@ -217,23 +217,23 @@ public class ServerGamePacketListenerImplMixin {
     }
 
     //? if >= 26.1 {
-    @Inject(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), cancellable = true)
+    /*@Inject(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), cancellable = true)
     public void handleInteract(ServerboundInteractPacket packet, CallbackInfo info, @Local(name = "target") Entity target) {
         Level level = player.level();
 
         //? if <= 1.21.11 {
-        /*EntityHitResult hitResult = new EntityHitResult(target, packet.location().add(target.getX(), target.getY(), target.getZ()));
-        InteractionResult result = Events.onRightClickEntity(player, level, packet.hand(), target, hitResult);
-        *///?} else {
         EntityHitResult hitResult = new EntityHitResult(target, packet.location().add(target.getX(), target.getY(), target.getZ()));
         InteractionResult result = Events.onRightClickEntity(player, level, packet.hand(), target, hitResult);
-        //?}
+        //?} else {
+        /^EntityHitResult hitResult = new EntityHitResult(target, packet.location().add(target.getX(), target.getY(), target.getZ()));
+        InteractionResult result = Events.onRightClickEntity(player, level, packet.hand(), target, hitResult);
+        ^///?}
 
         if (result != InteractionResult.PASS) {
             info.cancel();
         }
     }
-    //?}
+    *///?}
 
     @Inject(method = "onDisconnect", at = @At("HEAD"))
     //? if <= 1.20.5 {

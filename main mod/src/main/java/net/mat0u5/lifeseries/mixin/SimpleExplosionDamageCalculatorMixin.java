@@ -1,0 +1,40 @@
+package net.mat0u5.lifeseries.mixin;
+
+//? if < 1.21 {
+/*import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(value = MinecraftServer.class)
+public interface SimpleExplosionDamageCalculatorMixin {
+    //Empty class to avoid mixin errors
+}
+*///?} else {
+import net.mat0u5.lifeseries.LifeSeries;
+import net.mat0u5.lifeseries.seasons.season.Seasons;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpowers;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.WindCharge;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.SimpleExplosionDamageCalculator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
+@Mixin(value = SimpleExplosionDamageCalculator.class, priority = 1)
+public class SimpleExplosionDamageCalculatorMixin {
+    @Inject(method = "getKnockbackMultiplier", at = @At("RETURN"), cancellable = true)
+    public void getKnockbackModifier(Entity entity, CallbackInfoReturnable<Float> cir) {
+        if (LifeSeries.isClientOrDisabled()) return;
+        if (entity instanceof ServerPlayer player) {
+            if (currentSeason.getSeason() != Seasons.WILD_LIFE) return;
+            if (player.getAbilities().flying) return;
+            if (SuperpowersWildcard.hasActivatedPower(player, Superpowers.WIND_CHARGE)) {
+                cir.setReturnValue((float) WindCharge.EXPLOSION_POWER); // Default is 1.22f
+            }
+        }
+    }
+}
+//?}

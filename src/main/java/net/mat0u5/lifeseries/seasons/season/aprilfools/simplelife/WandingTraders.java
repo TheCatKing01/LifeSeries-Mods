@@ -26,14 +26,14 @@ import net.minecraft.world.item.trading.ItemCost;
 //?}
 
 //? if <= 1.21.9 {
-/*import net.minecraft.world.entity.animal.horse.TraderLlama;
-import net.minecraft.world.entity.npc.WanderingTrader;
+/*import net.minecraft.world.entity.animal.equine.TraderLlama;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 *///?} else {
 import net.minecraft.world.entity.animal.equine.TraderLlama;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 //?}
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class WandingTraders {
 

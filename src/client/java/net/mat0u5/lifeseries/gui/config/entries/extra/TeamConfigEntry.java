@@ -9,7 +9,7 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.mat0u5.lifeseries.utils.enums.ConfigTypes;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -81,7 +81,7 @@ public class TeamConfigEntry extends ModifiableListEntry {
     }
 
     @Override
-    protected void renderMainEntry(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    protected void renderMainEntry(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         int field1X = x+40;
         int field2X = x+80;
         int field3X = x+170;
@@ -100,11 +100,11 @@ public class TeamConfigEntry extends ModifiableListEntry {
         textFieldGainLife.setX(field5X);
 
         //~ renames_26_1_volatile
-        textFieldLives.extractRenderState(context, mouseX, mouseY, tickDelta);
-        textFieldName.extractRenderState(context, mouseX, mouseY, tickDelta);
-        textFieldColor.extractRenderState(context, mouseX, mouseY, tickDelta);
-        textFieldAllowedKill.extractRenderState(context, mouseX, mouseY, tickDelta);
-        textFieldGainLife.extractRenderState(context, mouseX, mouseY, tickDelta);
+        textFieldLives.render(context, mouseX, mouseY, tickDelta);
+        textFieldName.render(context, mouseX, mouseY, tickDelta);
+        textFieldColor.render(context, mouseX, mouseY, tickDelta);
+        textFieldAllowedKill.render(context, mouseX, mouseY, tickDelta);
+        textFieldGainLife.render(context, mouseX, mouseY, tickDelta);
         //~ !renames_26_1_volatile
         textFieldLives.setEditable(!isDefaultTeam());
 
@@ -136,7 +136,7 @@ public class TeamConfigEntry extends ModifiableListEntry {
     }
 
     @Override
-    public void renderFirstEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderFirstEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         int field1X = x+40;
         int field2X = x+80;
         int field3X = x+170;
@@ -179,11 +179,11 @@ public class TeamConfigEntry extends ModifiableListEntry {
             }
         }
     }
-    public void renderLastEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderLastEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         super.renderLastEntryExtras(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
         addEntryButton.active = LifeSeriesClient.clientCurrentSeason != Seasons.LIMITED_LIFE;
     }
-    public void renderMiddleEntryExtras(GuiGraphicsExtractor context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void renderMiddleEntryExtras(GuiGraphics context, int x, int y, int width, int height, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         super.renderMiddleEntryExtras(context, x, y, width, height, mouseX, mouseY, hovered, tickDelta);
         deleteEntryButton.active = !isDefaultTeam();
     }

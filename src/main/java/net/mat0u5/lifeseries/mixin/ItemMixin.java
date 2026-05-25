@@ -26,13 +26,13 @@ import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.world.food.Foods;
 *///?}
 //? if <= 1.21.11
-//import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 //? if <= 1.21.11 {
-/*@Mixin(value = Item.class, priority = 1)
-*///?} else {
-@Mixin(value = ItemStack.class, priority = 2)
-//?}
+@Mixin(value = Item.class, priority = 1)
+//?} else {
+/*@Mixin(value = ItemStack.class, priority = 2)
+*///?}
 public abstract class ItemMixin {
     //? if < 1.20.5 {
     /*@Accessor("foodProperties")
@@ -40,15 +40,15 @@ public abstract class ItemMixin {
     *///?}
     //? if >= 1.20.5 {
     //? if <= 1.21.11 {
-    /*@Accessor("components")
+    @Accessor("components")
     public abstract DataComponentMap normalComponents();
-    *///?}
+    //?}
 
     //? if <= 1.21.11 {
-    /*@Inject(method = "components", at = @At("HEAD"), cancellable = true)
-    *///?} else {
-    @Inject(method = "getComponents", at = @At("HEAD"), cancellable = true)
-    //?}
+    @Inject(method = "components", at = @At("HEAD"), cancellable = true)
+    //?} else {
+    /*@Inject(method = "getComponents", at = @At("HEAD"), cancellable = true)
+    *///?}
     public void getComponents(CallbackInfoReturnable<DataComponentMap> cir) {
         if (LifeSeries.modDisabled()) return;
         boolean isLogicalSide = LifeSeries.isLogicalSide();
@@ -67,17 +67,17 @@ public abstract class ItemMixin {
         }
         if (hungerActive) {
             //? if <= 1.21.11 {
-            /*Item item = (Item) (Object) this;
-             *///?} else {
-            ItemStack itemStack = (ItemStack) (Object) this;
+            Item item = (Item) (Object) this;
+             //?} else {
+            /*ItemStack itemStack = (ItemStack) (Object) this;
             Item item = itemStack.getItem();
-            //?}
+            *///?}
             if (!Hunger.nonEdible.contains(item)) {
                 //? if <= 1.21.11 {
-                /*PatchedDataComponentMap components = new PatchedDataComponentMap(normalComponents());
-                *///?} else {
-                PatchedDataComponentMap components = new PatchedDataComponentMap(item.builtInRegistryHolder().components());
-                //?}
+                PatchedDataComponentMap components = new PatchedDataComponentMap(normalComponents());
+                //?} else {
+                /*PatchedDataComponentMap components = new PatchedDataComponentMap(item.builtInRegistryHolder().components());
+                *///?}
                 Hunger.defaultFoodComponents(item, components);
                 cir.setReturnValue(components);
             }
@@ -120,26 +120,26 @@ public abstract class ItemMixin {
 
     @Inject(method = "finishUsingItem", at = @At("HEAD"))
     //? if <= 1.21.11 {
-    /*public void finishUsing(ItemStack stack, Level level, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-    *///?} else {
-    public void finishUsing(Level level, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-    //?}
+    public void finishUsing(ItemStack stack, Level level, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
+    //?} else {
+    /*public void finishUsing(Level level, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
+    *///?}
         if (LifeSeries.isClientOrDisabled()) return;
         if (currentSeason instanceof WildLife && WildcardManager.isActiveWildcard(Wildcards.HUNGER)) {
             //? if <= 1.21.11 {
-            /*Item item = (Item) (Object) this;
-            *///?} else {
-            ItemStack itemStack = (ItemStack) (Object) this;
+            Item item = (Item) (Object) this;
+            //?} else {
+            /*ItemStack itemStack = (ItemStack) (Object) this;
             Item item = itemStack.getItem();
-            //?}
+            *///?}
 
             //? if < 1.20.5 {
             /*Hunger.finishUsing(item, ls$foodProperties() != null, user);
             *///?} else if <= 1.21.11 {
-            /*Hunger.finishUsing(item, normalComponents(), user);
-            *///?} else {
-            Hunger.finishUsing(item, item.builtInRegistryHolder().components(), user);
-            //?}
+            Hunger.finishUsing(item, normalComponents(), user);
+            //?} else {
+            /*Hunger.finishUsing(item, item.builtInRegistryHolder().components(), user);
+            *///?}
         }
     }
 }

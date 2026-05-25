@@ -1,0 +1,287 @@
+package net.mat0u5.lifeseries.seasons.season.wildlife.wildcards;
+
+import net.mat0u5.lifeseries.config.ModifiableText;
+import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
+import net.mat0u5.lifeseries.network.NetworkHandlerServer;
+import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
+import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
+import net.mat0u5.lifeseries.seasons.season.wildlife.morph.MorphManager;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.*;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.Superpower;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.SuperpowersWildcard;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.AstralProjection;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.Invisibility;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.PlayerDisguise;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.TimeControl;
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
+import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
+import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.player.PlayerUtils;
+import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static net.mat0u5.lifeseries.LifeSeries.*;
+//? if >= 1.21.2
+import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpowers.superpower.CreakingPower;
+
+public class WildcardManager {
+    public static final Map<Wildcards, Wildcard> activeWildcards = new ConcurrentHashMap<>();
+    public static final Random rnd = new Random();
+    public static double ACTIVATE_WILDCARD_MINUTE = 2.5;
+    public static boolean FINALE = false;
+
+    public static Wildcards chosenWildcard = null;
+
+    public static WildLife getSeason() {
+        if (currentSeason instanceof WildLife wildLife) return wildLife;
+        return null;
+    }
+
+    public static void chosenWildcard(Wildcards wildcard) {
+        PlayerUtils.broadcastMessageToAdmins(ModifiableText.WILDLIFE_WILDCARD_CHOOSE.get(wildcard));
+        WildcardManager.chosenWildcard = wildcard;
+    }
+
+    public static void chooseRandomWildcard() {
+        if (chosenWildcard != null) {
+            activeWildcards.put(chosenWildcard, chosenWildcard.getInstance());
+            return;
+        }
+        Wildcards wildcard = Wildcards.getWildcards().get(rnd.nextInt(Wildcards.getWildcards().size()));
+        activeWildcards.put(wildcard, wildcard.getInstance());
+    }
+
+    public static void onPlayerJoin(ServerPlayer player) {
+        if (!isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
+            //? if > 1.20.3 {
+            if (SizeShifting.getPlayerSize(player) != 1 && !WildLifeTriviaHandler.cursedGigantificationPlayers.contains(player.getUUID())) {
+                SizeShifting.setPlayerSize(player, 1);
+            }
+            //?}
+        }
+        if (!isActiveWildcard(Wildcards.HUNGER)) {
+            player.removeEffect(MobEffects.HUNGER);
+        }
+        if (!isActiveWildcard(Wildcards.TRIVIA)) {
+            TriviaWildcard.resetPlayerOnBotSpawn(player);
+        }
+        TaskScheduler.scheduleTask(1, () -> {
+            for (ServerPlayer onlinePlayer : PlayerUtils.getAllPlayers()) {
+                Superpower power = SuperpowersWildcard.getSuperpowerInstance(onlinePlayer);
+                if (power != null) {
+                    if (power instanceof PlayerDisguise playerDisguise) playerDisguise.sendDisguisePacket();
+                    if (power instanceof AstralProjection astralProjection) astralProjection.sendDisguisePacket();
+                    if (power instanceof Invisibility invisibility) invisibility.sendInvisibilityPacket();
+                }
+            }
+        });
+
+        MorphManager.resetMorph(player);
+    }
+
+    public static void onPlayerFinishJoining(ServerPlayer player) {
+        if (isActiveWildcard(Wildcards.SUPERPOWERS) && !SuperpowersWildcard.hasPower(player) && ((IPlayer) player).ls$isAlive()) {
+            SuperpowersWildcard.rollRandomSuperpowers(new ArrayList<>(List.of(player)));
+        }
+    }
+
+    public static void activateWildcards() {
+        showDots();
+        TaskScheduler.scheduleTask(90, () -> {
+            if (activeWildcards.isEmpty()) {
+                chooseRandomWildcard();
+            }
+            for (Wildcard wildcard : activeWildcards.values()) {
+                if (wildcard.active) continue;
+                wildcard.activate();
+            }
+            showCryptTitle(ModifiableText.WILDLIFE_WILDCARD_ACTIVATE_CRYPT_TITLE.get());
+        });
+        TaskScheduler.scheduleTask(92, NetworkHandlerServer::sendUpdatePackets);
+    }
+
+    public static void fadedWildcard() {
+        PlayerUtils.broadcastMessage(ModifiableText.WILDLIFE_WILDCARD_FADED.get());
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.BEACON_DEACTIVATE);
+    }
+
+    public static void showDots() {
+        List<ServerPlayer> players = PlayerUtils.getAllPlayers();
+        PlayerUtils.playSoundToPlayers(players, SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), 0.4f, 1);
+        PlayerUtils.sendTitleToPlayers(players, ModifiableText.WILDLIFE_WILDCARD_DOTS_1.get(),0,40,0);
+        TaskScheduler.scheduleTask(30, () -> {
+            PlayerUtils.playSoundToPlayers(players, SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), 0.4f, 1);
+            PlayerUtils.sendTitleToPlayers(players, ModifiableText.WILDLIFE_WILDCARD_DOTS_2.get(),0,40,0);
+        });
+        TaskScheduler.scheduleTask(60, () -> {
+            PlayerUtils.playSoundToPlayers(players, SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), 0.4f, 1);
+            PlayerUtils.sendTitleToPlayers(players, ModifiableText.WILDLIFE_WILDCARD_DOTS_3.get(),0,40,0);
+        });
+    }
+
+    public static void showCryptTitle(Component component) {
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ZOMBIE_VILLAGER_CURE, 0.2f, 1);
+        String textRaw = component.getString();
+        String textClean = "";
+        String text = "";
+        int charsBeforeColor = 0;
+        char lastColor = '6';
+        for (int i = 0; i < textRaw.length(); i++) {
+            char ch = textRaw.charAt(i);
+            if (ch == '§') {
+                charsBeforeColor = 2;
+                if ((i+1) < textRaw.length()) {
+                    lastColor = textRaw.charAt(i+1);
+                }
+            }
+            else if (charsBeforeColor == 0) {
+                text += "§" + lastColor;
+            }
+            else {
+                charsBeforeColor--;
+            }
+            if (charsBeforeColor == 0) {
+                textClean += ch;
+            }
+            text += ch;
+        }
+
+        List<Integer> encryptedIndexes = new ArrayList<>();
+        for (int i = 0; i < textClean.length(); i++) {
+            encryptedIndexes.add(i);
+        }
+
+        for (int i = 0; i < textClean.length(); i++) {
+            if (!encryptedIndexes.isEmpty()) {
+                encryptedIndexes.remove(rnd.nextInt(encryptedIndexes.size()));
+            }
+
+            StringBuilder result = new StringBuilder();
+            for (int j = 0; j < textClean.length(); j++) {
+                boolean encrypted = encryptedIndexes.contains(j);
+                result.append("§r");
+                if (j*3+2 < text.length()) {
+                    result.append("§"+text.charAt(j*3+1));
+                }
+                result.append("§l");
+                if (encrypted) {
+                    result.append("§k");
+                }
+                if (j*3+2 < text.length()) {
+                    char ch = text.charAt(j*3+2);
+                    result.append(ch);
+                }
+            }
+
+            TaskScheduler.scheduleTask((i + 1) * 4, () -> PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), Component.literal(String.valueOf(result)), 0, 30, 20));
+        }
+    }
+
+    private static final List<String> allColorCodes = List.of("6","9","a","b","c","d","e");
+    public static void showRainbowCryptTitle(String text) {
+        PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), SoundEvents.ZOMBIE_VILLAGER_CURE, 0.2f, 1);
+        String colorCrypt = "§r§_§l§k";
+        String colorNormal = "§r§_§l";
+
+        List<Integer> encryptedIndexes = new ArrayList<>();
+        for (int i = 0; i < text.length(); i++) {
+            encryptedIndexes.add(i);
+        }
+
+        for (int i = 0; i < text.length()+24; i++) {
+            if (!encryptedIndexes.isEmpty()) {
+                encryptedIndexes.remove(rnd.nextInt(encryptedIndexes.size()));
+            }
+
+            StringBuilder result = new StringBuilder();
+            for (int j = 0; j < text.length(); j++) {
+                String randomColor = allColorCodes.get(rnd.nextInt(allColorCodes.size()));
+                result.append(encryptedIndexes.contains(j) ? colorCrypt.replace("_", randomColor) : colorNormal.replace("_", randomColor));
+                result.append(text.charAt(j));
+            }
+
+            TaskScheduler.scheduleTask((i + 1) * 2, () -> PlayerUtils.sendTitleToPlayers(PlayerUtils.getAllPlayers(), Component.literal(String.valueOf(result)), 0, 4, 4));
+        }
+    }
+
+    public static void tick() {
+        SuperpowersWildcard.onTick();
+        for (Wildcard wildcard : activeWildcards.values()) {
+            wildcard.softTick();
+            if (!wildcard.active) continue;
+            wildcard.tick();
+        }
+        //? if > 1.20.3 {
+        SizeShifting.resetSizesTick(isActiveWildcard(Wildcards.SIZE_SHIFTING));
+        //?}
+        if (server != null && server.getTickCount() % 200 == 0) {
+            if (!isActiveWildcard(Wildcards.MOB_SWAP)) {
+                MobSwap.killMobSwapMobs();
+            }
+            //? if >= 1.21.2 {
+            CreakingPower.killUnassignedMobs();
+            //?}
+        }
+
+        if (TimeControl.changedSpeedFor > 0) TimeControl.changedSpeedFor--;
+        if (!isActiveWildcard(Wildcards.TIME_DILATION) && TimeControl.changedSpeedFor <= 0) {
+            if (TimeDilation.getWorldSpeed() != 20) {
+                TimeDilation.setWorldSpeed(20);
+            }
+        }
+
+        for (UUID uuid : WildLifeTriviaHandler.cursedSliding) {
+            ServerPlayer player = PlayerUtils.getPlayer(uuid);
+            SimplePackets.CURSE_SLIDING.target(player).sendToClient(System.currentTimeMillis());
+        }
+    }
+
+    public static void tickSessionOn() {
+        for (Wildcard wildcard : activeWildcards.values()) {
+            if (!wildcard.active) continue;
+            wildcard.tickSessionOn();
+        }
+    }
+
+    public static void onSessionStart() {
+        if (chosenWildcard == null && activeWildcards.isEmpty()) {
+            for (ServerPlayer player : PlayerUtils.getAdminPlayers()) {
+                SimplePackets.SELECT_WILDCARDS.target(player).sendToClient();
+            }
+        }
+    }
+
+    public static void onSessionEnd() {
+        FINALE = false;
+        if (!activeWildcards.isEmpty()) {
+            fadedWildcard();
+        }
+        if (isActiveWildcard(Wildcards.CALLBACK)) {
+            if (activeWildcards.get(Wildcards.CALLBACK) instanceof Callback callback) {
+                callback.deactivate();
+                activeWildcards.remove(Wildcards.CALLBACK);
+            }
+        }
+        for (Wildcard wildcard : activeWildcards.values()) {
+            wildcard.deactivate();
+        }
+        activeWildcards.clear();
+        DatapackIntegration.initWildcards();
+        SuperpowersWildcard.resetAllSuperpowers();
+        NetworkHandlerServer.sendUpdatePackets();
+        chosenWildcard = null;
+    }
+
+    public static boolean isActiveWildcard(Wildcards wildcard) {
+        return activeWildcards.containsKey(wildcard);
+    }
+
+    public static void onUseItem(ServerPlayer player) {
+        Hunger.onUseItem(player);
+    }
+}

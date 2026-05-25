@@ -14,6 +14,7 @@ import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.blacklist.Blacklist;
 import net.mat0u5.lifeseries.seasons.boogeyman.BoogeymanManager;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
+import net.mat0u5.lifeseries.seasons.lists.ListsManager;
 import net.mat0u5.lifeseries.seasons.other.LivesManager;
 import net.mat0u5.lifeseries.seasons.other.WatcherManager;
 import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
@@ -109,6 +110,7 @@ public abstract class Season {
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
     public LivesManager livesManager = createLivesManager();
+    public ListsManager listsManager = createListsManager();
 
     public abstract Seasons getSeason();
     public abstract ConfigManager createConfig();
@@ -126,6 +128,9 @@ public abstract class Season {
 
     public LivesManager createLivesManager() {
         return new LivesManager();
+    }
+    public ListsManager createListsManager() {
+        return new ListsManager();
     }
 
     public Integer getDefaultLives() {
@@ -243,6 +248,7 @@ public abstract class Season {
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();
         secretSociety.onReload();
+        listsManager.onReload();
         createTeams();
         createScoreboards();
         updateStuff();
@@ -454,6 +460,7 @@ public abstract class Season {
         timer.tick();
         boogeymanManager.tick();
         secretSociety.tick();
+        listsManager.tick();
         if (timer.isMultipleOf(Time.seconds(5)) || reloadPlayerTeams) {
             reloadPlayerTeams = false;
             reloadAllPlayerTeams();
@@ -464,6 +471,7 @@ public abstract class Season {
         boogeymanManager.addSessionActions();
         secretSociety.addSessionActions();
         livesManager.addSessionActions();
+        listsManager.addSessionActions();
     }
 
     /*
@@ -610,6 +618,13 @@ public abstract class Season {
     public void onPlayerHeal(ServerPlayer player, float amount) {
     }
 
+    protected int getMidnightChimesStartTime() {
+        return -1;
+    }
+
+    protected void onMidnightChimes() {
+    }
+
     public void onPlayerKilledByPlayer(ServerPlayer victim, ServerPlayer killer) {
         boolean isAllowedToAttack = isAllowedToAttack(killer, victim, false);
         boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
@@ -675,20 +690,20 @@ public abstract class Season {
         if (entity instanceof Snail) return;
         if (entity instanceof TriviaBot) return;
         //? if <= 1.21.11 {
-        /*if (entity.getTags().contains("notNatural") && onlyNatural) return;
-        *///?} else {
-        if (entity.entityTags().contains("notNatural") && onlyNatural) return;
-        //?}
+        if (entity.getTags().contains("notNatural") && onlyNatural) return;
+        //?} else {
+        /*if (entity.entityTags().contains("notNatural") && onlyNatural) return;
+        *///?}
 
         EntityType<?> entityType = entity.getType();
 
         //? if <= 1.21.11 {
-        /*SpawnEggItem spawnEgg = SpawnEggItem.byId(entityType);
+        SpawnEggItem spawnEgg = SpawnEggItem.byId(entityType);
         if (spawnEgg == null) return;
         ItemStack spawnEggItem = spawnEgg.getDefaultInstance();
-        *///?} else {
-        ItemStack spawnEggItem = SpawnEggItem.byId(entityType).map(ItemStack::new).orElse(null);
-        //?}
+        //?} else {
+        /*ItemStack spawnEggItem = SpawnEggItem.byId(entityType).map(ItemStack::new).orElse(null);
+        *///?}
 
         if (spawnEggItem == null) return;
         if (spawnEggItem.isEmpty()) return;
@@ -765,6 +780,7 @@ public abstract class Season {
         }
         boogeymanManager.onPlayerFinishJoining(player);
         livesManager.onPlayerFinishJoining(player);
+        listsManager.onPlayerJoin(player);
     }
 
     public void onPlayerDisconnect(ServerPlayer player) {

@@ -40,6 +40,7 @@ public class LifeSeries implements ModInitializer {
 	public static final boolean ISOLATED_ENVIRONMENT = false;
 	public static final Seasons DEFAULT_SEASON = Seasons.UNASSIGNED;
 	public static boolean MOD_DISABLED = false;
+	public static boolean CLIENT_MODE = false;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static ConfigManager config;
@@ -88,6 +89,14 @@ public class LifeSeries implements ModInitializer {
 	public static boolean modFullyDisabled() {
 		if (clientHelper == null) return false;
 		return clientHelper.serverHandshake() == HandshakeStatus.NOT_RECEIVED;
+	}
+
+	public static boolean clientModeEnabled() {
+		return CLIENT_MODE;
+	}
+
+	public static void setClientMode(boolean enabled) {
+		CLIENT_MODE = enabled;
 	}
 
 	public static void setDisabled(boolean disabled) {

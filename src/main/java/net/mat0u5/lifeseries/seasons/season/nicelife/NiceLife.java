@@ -21,6 +21,7 @@ import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,8 +48,8 @@ import net.minecraft.world.level.gamerules.GameRules;
 import static net.mat0u5.lifeseries.LifeSeries.*;
 
 //? if >= 26.1 {
-import net.minecraft.world.clock.WorldClocks;
-//?}
+/*import net.minecraft.world.clock.WorldClocks;
+*///?}
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -111,10 +112,10 @@ public class NiceLife extends Season {
         pausedSnailWildcard = null;
         resumeSnailsAfterResults = false;
         //? if >= 26.1 {
+        /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
+        *///?} else {
         OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
-        //?} else {
-        /*OtherUtils.setBooleanGameRule(server.overworld(), GameRules.RULE_DAYLIGHT, true);
-        *///?}
+        //?}
         OtherUtils.setBooleanGameRule(server.overworld(), GameRules.ADVANCE_TIME, true);
         NiceLifeTriviaManager.killAllSnowmen();
         NiceLifeTriviaManager.killAllBots();
@@ -123,10 +124,10 @@ public class NiceLife extends Season {
         Season.setCloudColor(null, false);
         ServerLevel overworld = server.overworld();
         //? if >= 26.1 {
-        server.setWeatherParameters(96000, 0, false, false);
-        //?} else {
-        /*overworld.setWeatherParameters(96000, 0, false, false);
-        *///?}
+        /*server.setWeatherParameters(96000, 0, false, false);
+        *///?} else {
+        overworld.setWeatherParameters(96000, 0, false, false);
+        //?}
     }
 
     @Override
@@ -197,27 +198,27 @@ public class NiceLife extends Season {
         }
         if (freezeTime) {
 			//? if >= 26.1 {
-			server.setWeatherParameters(0, 1000, false, false);
-			//?} else {
-			/*overworld.setWeatherParameters(0, 1000, false, false);
-			*///?}
+			/*server.setWeatherParameters(0, 1000, false, false);
+			*///?} else {
+			overworld.setWeatherParameters(0, 1000, false, false);
+			//?}
         }
         else {
 			//? if >= 26.1 {
-			server.setWeatherParameters(0, 1000, true, false);
-			//?} else {
-			/*overworld.setWeatherParameters(0, 1000, true, false);
-			*///?}
+			/*server.setWeatherParameters(0, 1000, true, false);
+			*///?} else {
+			overworld.setWeatherParameters(0, 1000, true, false);
+			//?}
         }
 
         boolean advanceTime = (currentSession.statusStarted() || ADVANCE_TIME_WHEN_NOT_IN_SESSION)
 				&& !freezeTime
                 && !NiceLifeTriviaManager.triviaInProgress;
         //? if >= 26.1 {
+        /*OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
+        *///?} else {
         OtherUtils.setBooleanGameRule(overworld, GameRules.ADVANCE_TIME, advanceTime);
-        //?} else {
-        /*OtherUtils.setBooleanGameRule(overworld, GameRules.RULE_DAYLIGHT, advanceTime);
-        *///?}
+        //?}
 		
         if (!NiceLifeTriviaManager.triviaInProgress && (!isNight() || !isAfterMidnight())) {
 			for(ServerPlayer serverPlayer : PlayerUtils.getAllPlayers()) {
@@ -402,22 +403,22 @@ public class NiceLife extends Season {
         if (server == null) return;
         ServerLevel overworld = server.overworld();
         //? if >= 26.1 {
-        long newTime = overworld.getOverworldClockTime() + 24000L;
+        /*long newTime = overworld.getOverworldClockTime() + 24000L;
         overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTime - newTime % 24000L);
-        //?} else {
-        /*long newTime = overworld.getDayTime() + 24000L;
+        *///?} else {
+        long newTime = overworld.getDayTime() + 24000L;
         overworld.setDayTime(newTime - newTime % 24000L);
-        *///?}
+        //?}
         wakeUpAllPlayers();
         NiceLifeTriviaManager.endTrivia();
         if (overworld instanceof ServerLevelAccessor accessor) {
 			//? if >= 26.1 {
-			long newTimeAccessor = overworld.getOverworldClockTime() + 24000L;
+			/*long newTimeAccessor = overworld.getOverworldClockTime() + 24000L;
 			overworld.clockManager().setTotalTicks(overworld.registryAccess().getOrThrow(WorldClocks.OVERWORLD), newTimeAccessor - newTimeAccessor % 24000L);
-			//?} else {
-			/*long newTimeAccessor = overworld.getDayTime() + 24000L;
+			*///?} else {
+			long newTimeAccessor = overworld.getDayTime() + 24000L;
 			overworld.setDayTime(newTimeAccessor - newTimeAccessor % 24000L);
-			*///?}
+			//?}
             accessor.ls$wakeUpAllPlayers();
         }
         if (resumeSnailsAfterResults && pausedSnailWildcard != null) {
@@ -473,10 +474,10 @@ public class NiceLife extends Season {
     public boolean isTimeBetween(int minTime, int maxTime) {
         if (server == null) return false;
         //? if >= 26.1 {
-        long dayTime = server.overworld().getOverworldClockTime() % 24000L;
-        //?} else {
-        /*long dayTime = server.overworld().getDayTime() % 24000L;
-        *///?}
+        /*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+        *///?} else {
+        long dayTime = server.overworld().getDayTime() % 24000L;
+        //?}
         return dayTime >= minTime && dayTime <= maxTime;
     }
 
@@ -637,7 +638,7 @@ public class NiceLife extends Season {
         if (server == null) return 100;
         ServerLevel overworld = server.overworld();
         //? if <= 1.21.9 {
-        /*return overworld.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+        /*return overworld.getGameRules().getInt(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
          *///?} else {
         return overworld.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
         //?}
@@ -666,10 +667,10 @@ public class NiceLife extends Season {
         if (server == null) return false;
 
         //? if >= 26.1 {
-        long dayTime = server.overworld().getOverworldClockTime() % 24000L;
-        //?} else {
-        /*long dayTime = server.overworld().getDayTime() % 24000L;
-        *///?}
+        /*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+        *///?} else {
+        long dayTime = server.overworld().getDayTime() % 24000L;
+        //?}
 
         return dayTime >= 18000;
     }
@@ -745,10 +746,10 @@ public class NiceLife extends Season {
 		if (server == null) return false;
 
 		//? if >= 26.1 {
-		long dayTime = server.overworld().getOverworldClockTime() % 24000L;
-		//?} else {
-		/*long dayTime = server.overworld().getDayTime() % 24000L;
-		*///?}
+		/*long dayTime = server.overworld().getOverworldClockTime() % 24000L;
+		*///?} else {
+		long dayTime = server.overworld().getDayTime() % 24000L;
+		//?}
 
 		return dayTime >= 13000 && dayTime <= 23000;
 		}
@@ -768,7 +769,7 @@ public class NiceLife extends Season {
             TaskScheduler.scheduleTask(90, () -> {
                 WildcardManager.activeWildcards.put(Wildcards.SNAILS, paused);
                 paused.activate();
-                WildcardManager.showCryptTitle("A wildcard is active!");
+                WildcardManager.showCryptTitle(Component.literal("A wildcard is active!"));
             });
             return;
         }

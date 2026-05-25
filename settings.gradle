@@ -11,10 +11,32 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
 plugins {
 	id "dev.kikugie.stonecutter" version "0.9"
 	// https://maven.kikugie.dev/#/releases/dev/kikugie/stonecutter
 	// https://maven.kikugie.dev/#/snapshots/dev/kikugie/stonecutter
+}
+
+def allVersionsEnabled = (gradle.startParameter.projectProperties["allVersions"] ?: "false").toString().toBoolean()
+if (!allVersionsEnabled) {
+	def defaultVersionProject = "1.21.11"
+	def defaultScopedTasks = [
+		"clean",
+		"build",
+		"assemble",
+		"check",
+		"test",
+		"runClient",
+		"runClientNamed"
+	] as Set
+	def rewritten = gradle.startParameter.taskNames.collect { taskName ->
+		if (!taskName.contains(":") && defaultScopedTasks.contains(taskName)) {
+			return ":${defaultVersionProject}:${taskName}".toString()
+		}
+		return taskName.toString()
+	}
+	gradle.startParameter.setTaskNames(rewritten)
 }
 
 stonecutter {

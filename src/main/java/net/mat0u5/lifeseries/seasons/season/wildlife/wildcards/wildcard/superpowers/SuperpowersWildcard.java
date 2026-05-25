@@ -75,6 +75,10 @@ public class SuperpowersWildcard extends Wildcard {
         DatapackIntegration.initSuperpowers();
     }
 
+    public static void externalResetAllPowers() {
+        resetAllSuperpowers();
+    }
+
     public static void rollRandomSuperpowers() {
         rollRandomSuperpowers(livesManager.getAlivePlayers());
     }

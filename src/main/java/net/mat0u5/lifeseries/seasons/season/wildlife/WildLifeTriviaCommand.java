@@ -6,7 +6,7 @@ import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.compatibilities.CompatibilityManager;
 import net.mat0u5.lifeseries.compatibilities.voicechat.VoicechatMain;
 import net.mat0u5.lifeseries.config.ModifiableText;
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.entity.triviabot.server.trivia.WildLifeTriviaHandler;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -252,7 +252,7 @@ public class WildLifeTriviaCommand extends Command {
     }
 
     public int spawnBotFor(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        if (Main.modDisabled()) {
+        if (LifeSeries.modDisabled()) {
             OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
             return -1;
         }
@@ -261,7 +261,7 @@ public class WildLifeTriviaCommand extends Command {
             return -1;
         }
 
-        if (!Main.clientModeEnabled()) {
+        if (!LifeSeries.clientModeEnabled()) {
             ServerPlayer requester = source.getPlayer();
             if (requester == null) {
                 OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_TRIVIA.get());
@@ -271,9 +271,8 @@ public class WildLifeTriviaCommand extends Command {
                 OtherUtils.sendCommandFailure(source, ModifiableText.CLIENT_MODE_REQUIRE_CLIENT.get());
                 return -1;
             }
-            NetworkHandlerServer.requestClientModeForTriviaSpawn(requester, new ArrayList<>(targets));
+            LifeSeries.setClientMode(true);
             OtherUtils.sendCommandFeedback(source, ModifiableText.CLIENT_MODE_OFF_SPAWN_TRIVIA.get());
-            return 1;
         }
 
         for (ServerPlayer player : targets) {

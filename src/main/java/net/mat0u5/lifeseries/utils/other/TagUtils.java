@@ -11,10 +11,10 @@ public final class TagUtils {
     public static Collection<String> getTags(Entity entity) {
         if (entity == null) return Collections.emptySet();
         //? if >= 26.1 {
-        return entity.entityTags();
-        //?} else {
-        /*return entity.getTags();
-        *///?}
+        /*return entity.entityTags();
+        *///?} else {
+        return entity.getTags();
+        //?}
     }
 
     public static boolean hasTag(Entity entity, String tag) {

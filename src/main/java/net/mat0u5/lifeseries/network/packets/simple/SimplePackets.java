@@ -57,6 +57,7 @@ public class SimplePackets {
     public static final SimpleLongPacket MIMICRY_COOLDOWN = new SimpleLongPacket("MIMICRY_COOLDOWN");
     public static final SimpleLongPacket TIME_DILATION = new SimpleLongPacket("TIME_DILATION");
     public static final SimpleLongPacket SESSION_TIMER = new SimpleLongPacket("SESSION_TIMER");
+    public static final SimpleLongPacket LISTS_TIMER = new SimpleLongPacket("LISTS_TIMER");
 
     public static final SimpleIntegerPacket TRIVIA_ANSWER = new SimpleIntegerPacket("TRIVIA_ANSWER");
     public static final SimpleIntegerPacket SNAIL_AIR = new SimpleIntegerPacket("SNAIL_AIR");

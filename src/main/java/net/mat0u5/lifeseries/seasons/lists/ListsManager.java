@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 
 import java.util.*;
 
-import static net.mat0u5.lifeseries.Main.*;
+import static net.mat0u5.lifeseries.LifeSeries.*;
 
 public class ListsManager {
 

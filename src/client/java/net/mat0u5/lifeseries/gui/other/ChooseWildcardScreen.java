@@ -1,11 +1,11 @@
 package net.mat0u5.lifeseries.gui.other;
 
-import net.mat0u5.lifeseries.MainClient;
+import net.mat0u5.lifeseries.LifeSeriesClient;
 import net.mat0u5.lifeseries.gui.DefaultScreen;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.render.RenderUtils;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -18,7 +18,7 @@ public class ChooseWildcardScreen extends DefaultScreen {
     @Override
     protected void init() {
         super.init();
-        boolean limitedWildcards = MainClient.clientCurrentSeason != Seasons.WILD_LIFE;
+        boolean limitedWildcards = LifeSeriesClient.clientCurrentSeason != Seasons.WILD_LIFE;
         if (limitedWildcards) {
             int center = startX + BG_WIDTH / 2;
             this.addRenderableWidget(
@@ -134,7 +134,7 @@ public class ChooseWildcardScreen extends DefaultScreen {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+    public void render(GuiGraphics context, int mouseX, int mouseY) {
         String prompt = "Select the Wildcard for this session.";
         RenderUtils.text(prompt, centerX, startY + 20).anchorCenter().render(context, this.font);
     }

@@ -3,7 +3,7 @@ package net.mat0u5.lifeseries.seasons.season.nicelife;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.mat0u5.lifeseries.command.manager.Command;
-import net.mat0u5.lifeseries.Main;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -328,7 +328,7 @@ public class NiceLifeCommands extends Command {
     }
 
     private int vote(CommandSourceStack source) {
-        if (Main.modDisabled()) {
+        if (LifeSeries.modDisabled()) {
             OtherUtils.sendCommandFailure(source, ModifiableText.MOD_DISABLED_ERROR.get());
             return -1;
         }

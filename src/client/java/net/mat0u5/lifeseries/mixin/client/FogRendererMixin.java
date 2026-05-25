@@ -25,7 +25,7 @@ import org.joml.Vector4f;
 //? if <= 1.21
 //import org.spongepowered.asm.mixin.injection.Redirect;
 //? if > 1.21 <= 1.21.11
-//import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 //? if <= 1.21
 //import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -79,21 +79,21 @@ public class FogRendererMixin {
         RenderSystem.setShaderFogColor((float) result.x, (float) result.y, (float) result.z);
     }
     *///?} else if <= 1.21.11{
-    /*@ModifyReturnValue(method = "computeFogColor", at = @At("RETURN"))
+    @ModifyReturnValue(method = "computeFogColor", at = @At("RETURN"))
     private static Vector4f customFogColor(Vector4f original) {
         Vector4f result = ClientRenderer.modifyColor(original, LifeSeriesClient.fogColor, LifeSeriesClient.fogColorSetMode, null);
         LifeSeriesClient.cachedFogRenderColor = new Vec3(result.x, result.y, result.z);
         return result;
     }
-    *///?} else {
-    @WrapOperation(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lorg/joml/Vector4f;set(FFFF)Lorg/joml/Vector4f;"))
+    //?} else {
+    /*@WrapOperation(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lorg/joml/Vector4f;set(FFFF)Lorg/joml/Vector4f;"))
     private static Vector4f customFogColor(Vector4f instance, float x, float y, float z, float w, Operation<Vector4f> original) {
         Vector4f originalColor = new Vector4f(x, y, z, w);
         Vector4f result = ClientRenderer.modifyColor(originalColor, LifeSeriesClient.fogColor, LifeSeriesClient.fogColorSetMode, null);
         LifeSeriesClient.cachedFogRenderColor = new Vec3(result.x, result.y, result.z);
         return original.call(instance, result.x, result.y, result.z, result.w);
     }
-    //?}
+    *///?}
 
 
 }

@@ -34,9 +34,9 @@ import static net.mat0u5.lifeseries.LifeSeries.currentSeason;
 
 import net.minecraft.resources.Identifier;
 //? if <= 1.21.11 {
-/*import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.tags.TagKey;
-*///?}
+//?}
 
 public class TriviaBot extends AmbientCreature {
     public static final Identifier DEFAULT_TEXTURE = IdentifierHelper.mod("textures/entity/triviabot/triviabot.png");
@@ -184,10 +184,10 @@ public class TriviaBot extends AmbientCreature {
 
     @Override
     //? if <= 1.21.11 {
-    /*public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
-    *///?} else {
-    public boolean updateFluidInteraction() {
-    //?}
+    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed) {
+    //?} else {
+    /*public boolean updateFluidInteraction() {
+    *///?}
         return false;
     }
 

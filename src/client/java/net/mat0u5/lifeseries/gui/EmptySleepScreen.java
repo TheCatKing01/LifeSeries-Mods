@@ -4,7 +4,7 @@ import net.mat0u5.lifeseries.LifeSeriesClient;
 import net.mat0u5.lifeseries.utils.ClientUtils;
 import net.mat0u5.lifeseries.utils.TextColors;
 import net.minecraft.client.CameraType;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -121,13 +121,13 @@ public class EmptySleepScreen extends Screen {
     //~ renames_26_1_volatile
     @Override
     //? if <= 1.20 {
-    /*public void extractBackground(GuiGraphicsExtractor context) {}
+    /*public void renderBackground(GuiGraphics context) {}
      *///?} else {
-    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
     //?}
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (LifeSeriesClient.isAdmin) {
             boolean shouldShow = adminControlsOpen || isMouseNearButton(mouseX, mouseY);
 
@@ -140,13 +140,13 @@ public class EmptySleepScreen extends Screen {
             toggleButton.setX(getToggleButtonX());
         }
 
-        super.extractRenderState(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
         updateCommandButtons();
 
         if (LifeSeriesClient.isAdmin && buttonSlideOffset < 0.3f && !adminControlsOpen) {
             int sliverX = this.width - SLIVER_WIDTH + 3;
             int sliverY = padding + buttonHeight / 2 - 4;
-            context.text(this.font, "<", sliverX, sliverY, TextColors.WHITE);
+            context.drawString(this.font, "<", sliverX, sliverY, TextColors.WHITE);
         }
     }
     //~ !renames_26_1_volatile

@@ -171,7 +171,7 @@ public abstract class PlayerMixin implements IPlayer {
 
     //Located in the ServerPlayer class in < 26.1
     //? if >= 26.1 {
-    @Inject(method = "attack", at = @At("HEAD"))
+    /*@Inject(method = "attack", at = @At("HEAD"))
     private void onAttackEntity(Entity target, CallbackInfo ci) {
         if (LifeSeries.modDisabled()) return;
         Player player = (Player) (Object) this;
@@ -179,7 +179,7 @@ public abstract class PlayerMixin implements IPlayer {
             currentSeason.onUpdatedInventory(serverPlayer);
         }
     }
-    //?}
+    *///?}
 
 
 

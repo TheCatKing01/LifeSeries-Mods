@@ -275,10 +275,10 @@ public class DoubleLife extends Season {
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
 			List<String> tagsCopy;
 			//? if >= 26.1 {
-			tagsCopy = new ArrayList<>(player.entityTags());
-			//?} else {
-			/*tagsCopy = new ArrayList<>(player.getTags());
-			*///?}
+			/*tagsCopy = new ArrayList<>(player.entityTags());
+			*///?} else {
+			tagsCopy = new ArrayList<>(player.getTags());
+			//?}
             for (String tag : tagsCopy) {
                 if (tag.startsWith("soulmate_")) {
                     player.removeTag(tag);
@@ -826,7 +826,7 @@ public class DoubleLife extends Season {
 
             try {
                 //? if <= 1.21.9 {
-                /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.RULE_KEEPINVENTORY);
+                /*boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
                 *///?} else {
                 boolean keepInventory = OtherUtils.getBooleanGameRule(player.ls$getServerLevel(), GameRules.KEEP_INVENTORY);
                 //?}

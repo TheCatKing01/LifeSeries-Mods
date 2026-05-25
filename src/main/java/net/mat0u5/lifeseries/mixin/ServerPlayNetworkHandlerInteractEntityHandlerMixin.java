@@ -1,6 +1,6 @@
 package net.mat0u5.lifeseries.mixin;
 //? if <= 1.21.11 {
-/*import net.mat0u5.lifeseries.events.Events;
+import net.mat0u5.lifeseries.events.Events;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,12 +53,12 @@ public abstract class ServerPlayNetworkHandlerInteractEntityHandlerMixin impleme
         }
     }
 }
-*///?} else {
-import net.minecraft.server.MinecraftServer;
+//?} else {
+/*import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = MinecraftServer.class)
 public interface ServerPlayNetworkHandlerInteractEntityHandlerMixin {
 }
-//?}
+*///?}
 

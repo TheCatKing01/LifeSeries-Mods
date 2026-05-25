@@ -10,12 +10,12 @@ import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public class TextHud {
-    public static void renderText(GuiGraphicsExtractor context) {
+    public static void renderText(GuiGraphics context) {
         Minecraft client = Minecraft.getInstance();
         //? if <= 26.1 {
         if (client.options.hideGui) return;
@@ -43,7 +43,7 @@ public class TextHud {
     }
 
     public static int sideTitleRemainTicks = 0;
-    public static int renderSidetitle(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderSidetitle(Minecraft client, GuiGraphics context, int y) {
         if (LifeSeriesClient.sideTitle == null) return 0;
         if (LifeSeriesClient.sideTitle.getString().isEmpty()) return 0;
         if (sideTitleRemainTicks <= 0) return 0;
@@ -51,7 +51,7 @@ public class TextHud {
         return drawHudText(client, context, LifeSeriesClient.sideTitle, y);
     }
 
-    public static int renderGameNotBroken(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderGameNotBroken(Minecraft client, GuiGraphics context, int y) {
         if (client.player == null) return 0;
         if (!ClientRenderer.isGameFullyFrozen) return 0;
         long currentMillis = System.currentTimeMillis();
@@ -102,7 +102,7 @@ public class TextHud {
     public static long lastSessionSeconds = 0;
     public static long sessionSeconds = -1;
     public static boolean sessionSecondChanged = true;
-    public static int renderSessionTimer(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderSessionTimer(Minecraft client, GuiGraphics context, int y) {
         sessionSecondChanged = true;
         sessionSeconds = -1;
         if (!LifeSeriesClient.SESSION_TIMER) return 0;
@@ -131,7 +131,7 @@ public class TextHud {
     }
 
     private static long limitedLifeTime = -1;
-    public static int renderLimitedLifeTimer(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderLimitedLifeTimer(Minecraft client, GuiGraphics context, int y) {
         if (LifeSeriesClient.clientCurrentSeason != Seasons.LIMITED_LIFE) return 0;
         if (System.currentTimeMillis()- LifeSeriesClient.limitedLifeTimeLastUpdated > 15000) return 0;
 
@@ -158,7 +158,7 @@ public class TextHud {
     }
 
     private static int triviaTimer = -1;
-    public static int renderTriviaTimer(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderTriviaTimer(Minecraft client, GuiGraphics context, int y) {
         if (!Trivia.isDoingTrivia()) return 0;
         if (LifeSeriesClient.clientCurrentSeason == Seasons.NICE_LIFE) return 0;
 
@@ -182,7 +182,7 @@ public class TextHud {
     }
 
     public static long lastPressedSuperpowerKey = 0;
-    public static int renderSuperpowerCooldown(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderSuperpowerCooldown(Minecraft client, GuiGraphics context, int y) {
         if (ClientKeybinds.superpower != null && ClientKeybinds.superpower.isDown()) lastPressedSuperpowerKey = System.currentTimeMillis();
 
         if (LifeSeriesClient.SUPERPOWER_COOLDOWN_TIMESTAMP == 0) return 0;
@@ -200,7 +200,7 @@ public class TextHud {
         return drawHudText(client, context, timerText, y);
     }
 
-    public static int renderMimicryTimer(Minecraft client, GuiGraphicsExtractor context, int y) {
+    public static int renderMimicryTimer(Minecraft client, GuiGraphics context, int y) {
         if (LifeSeriesClient.MIMICRY_COOLDOWN_TIMESTAMP == 0) return 0;
         long currentMillis = System.currentTimeMillis();
         if (currentMillis >= LifeSeriesClient.MIMICRY_COOLDOWN_TIMESTAMP) return 0;
@@ -212,17 +212,17 @@ public class TextHud {
         return drawHudText(client, context, timerText, y);
     }
 
-    public static int drawHudText(Minecraft client, GuiGraphicsExtractor context, Component text, int y) {
+    public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int y) {
         int screenWidth = client.getWindow().getGuiScaledWidth();
         int x = screenWidth - 5;
         return drawHudText(client, context, text, x, y);
     }
 
-    public static int drawHudText(Minecraft client, GuiGraphicsExtractor context, Component text, int x, int y) {
+    public static int drawHudText(Minecraft client, GuiGraphics context, Component text, int x, int y) {
         return drawHudText(client, context, TextColors.DEFAULT, text, x, y);
     }
 
-    public static int drawHudText(Minecraft client, GuiGraphicsExtractor context, int color, Component text, int x, int y) {
+    public static int drawHudText(Minecraft client, GuiGraphics context, int color, Component text, int x, int y) {
         if (LifeSeriesClient.TEXT_HUD_SCALE != 1) {
             float scaleX = (float) LifeSeriesClient.TEXT_HUD_SCALE;
             float scaleY = (float) LifeSeriesClient.TEXT_HUD_SCALE;
