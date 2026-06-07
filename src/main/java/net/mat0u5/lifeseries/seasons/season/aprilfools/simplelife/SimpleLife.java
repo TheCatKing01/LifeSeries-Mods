@@ -172,9 +172,9 @@ public class SimpleLife extends ThirdLife {
 					return true;
 									}
 								}
-
-								return false;
 							}
+
+							return false;
 						}
         }
     }
