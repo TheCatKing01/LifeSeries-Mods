@@ -118,9 +118,14 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					
 					//? if >= 26.2 {
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), SULFUR_CUBE_BUCKET, 0, 999999, 0, 0, 0));
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), HAPPY_GHAST_SPAWN_EGG, 0, 999999, 0, 0, 0));
+					//?}
 					
-					ItemStack ghastegg = new ItemStack(Items.HAPPY_GHAST_SPAWN_EGG);
-					ItemStack sulfurbucket = new ItemStack(Items.SULFUR_CUBE_BUCKET);
+					//? if >= 26.2 {
+					
+					//ItemStack ghastegg = new ItemStack(Items.HAPPY_GHAST_SPAWN_EGG);
+					//ItemStack sulfurbucket = new ItemStack(Items.SULFUR_CUBE_BUCKET);
 
 					//ghastegg.applyComponents(
 						//DataComponentPatch.builder()
@@ -152,8 +157,8 @@ public class SimpleLife extends ThirdLife {
 						//	.build()
 					//);
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),sulfurbucket,0,999999,0,0,0));
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),ghastegg,0,999999,0,0,0));
+					//offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),sulfurbucket,0,999999,0,0,0));
+					//offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),ghastegg,0,999999,0,0,0));
 					
 					//?}
 					
