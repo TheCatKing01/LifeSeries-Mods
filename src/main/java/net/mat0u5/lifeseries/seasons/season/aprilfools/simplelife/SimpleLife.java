@@ -116,15 +116,8 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
-
-                    int rand = rnd.nextInt(2);
-                    if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    //?}
+					
+					//? if >= 26.2 {
 					
 					ItemStack ghastegg = new ItemStack(Items.HAPPY_GHAST_SPAWN_EGG);
 					ItemStack sulfurbucket = new ItemStack(Items.SULFUR_CUBE_BUCKET);
@@ -159,8 +152,20 @@ public class SimpleLife extends ThirdLife {
 							.build()
 					);
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(),ghastegg,0,999999,0,0,0));
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(),sulfurbucket,0,999999,0,0,0));
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),sulfurbucket,0,999999,0,0,0));
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40),Optional.empty(),ghastegg,0,999999,0,0,0));
+					
+					//?}
+					
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
+                    int rand = rnd.nextInt(2);
+                    if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					//?}
 					
 					wanderingTraderEntity.overrideOffers(offers);
 					wanderingTraderEntity.addTag("SimpleLifeTrader");
