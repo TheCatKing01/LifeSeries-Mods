@@ -170,12 +170,10 @@ public class SimpleLife extends ThirdLife {
 					wanderingTraderEntity.overrideOffers(offers);
 					wanderingTraderEntity.addTag("SimpleLifeTrader");
 					return true;
-									}
-								}
+				}
+			}
 
-								return false;
-							}
-						}
+			return false;
         }
     }
 
