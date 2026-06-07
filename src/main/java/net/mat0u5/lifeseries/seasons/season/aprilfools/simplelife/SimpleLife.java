@@ -161,6 +161,10 @@ public class SimpleLife extends ThirdLife {
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(),ghastegg,0,999999,0,0,0));
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1),Optional.empty(),sulfurbucket,0,999999,0,0,0));
+					
+					wanderingTraderEntity.overrideOffers(offers);
+					wanderingTraderEntity.addTag("SimpleLifeTrader");
+					return true;
 
             return false;
         }
