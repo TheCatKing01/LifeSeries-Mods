@@ -25,6 +25,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.commands.arguments.item.ItemParser;
+import com.mojang.brigadier.StringReader;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -121,8 +122,8 @@ public class SimpleLife extends ThirdLife {
 					//? if >= 26.2 {
 					/*
 					ItemStack sulfurCube = ItemParser.parse(
-						level.registryAccess(),
-						"minecraft:sulfur_cube_bucket[sulfur_cube_content={id:\"minecraft:tnt\",count:1}]"
+						new StringReader("minecraft:sulfur_cube_bucket[sulfur_cube_content={id:\"minecraft:tnt\",count:1}]"),
+						level.registryAccess()
 					).getItem();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
@@ -134,8 +135,8 @@ public class SimpleLife extends ThirdLife {
 					//? if >= 26.2 {
 					/*
 					ItemStack happyGhastEgg = ItemParser.parse(
-						level.registryAccess(),
-						"minecraft:happy_ghast_spawn_egg[entity_data={equipment:{body:{id:\"minecraft:red_harness\",count:1}}}]"
+						new StringReader("minecraft:happy_ghast_spawn_egg[entity_data={equipment:{body:{id:\"minecraft:red_harness\",count:1}}}]"),
+						level.registryAccess()
 					).getItem();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
