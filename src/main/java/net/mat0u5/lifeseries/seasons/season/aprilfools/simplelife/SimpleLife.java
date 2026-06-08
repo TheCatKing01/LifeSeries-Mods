@@ -121,17 +121,8 @@ public class SimpleLife extends ThirdLife {
 
 					//? if >= 26.2 {
 
-					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
-
 					offers.add(new MerchantOffer(
 						new ItemCost(Items.DIRT, 40),
-						Optional.empty(),
-						sulfurCube,
-						0, 999999, 0, 0, 0
-					));
-
-					offers.add(new MerchantOffer(
-						new ItemCost(Items.DIRT, 1),
 						Optional.empty(),
 						Items.SAND.getDefaultInstance(),
 						0, 999999, 0, 0, 0
@@ -145,22 +136,30 @@ public class SimpleLife extends ThirdLife {
 					));
 
 					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
+					LivingEntity ghast = null;
 
-					LivingEntity ghast = EntityType.HAPPY_GHAST.create(level);
+					try {
+						ghast = EntityType.HAPPY_GHAST.create(level, EntitySpawnReason.EVENT);
+					} catch (Throwable ignored) {
+					}
+
 					if (ghast != null) {
 
-						ghast.setItemSlot(EquipmentSlot.BODY, new ItemStack(Items.RED_HARNESS));
+						ItemStack harness = Items.RED_HARNESS.getDefaultInstance();
+						ghast.setItemSlot(EquipmentSlot.BODY, harness);
 
-						MobEffectInstance resistance = new MobEffectInstance(
-							MobEffects.DAMAGE_RESISTANCE,
-							Integer.MAX_VALUE,
-							254,
-							false,
-							false,
-							false
-						);
-
-						ghast.addEffect(resistance);
+						try {
+							MobEffectInstance effect = new MobEffectInstance(
+								MobEffects.DAMAGE_RESISTANCE,
+								Integer.MAX_VALUE,
+								255,
+								false,
+								false,
+								false
+							);
+							ghast.addEffect(effect);
+						} catch (Throwable ignored) {
+						}
 
 						ItemStack result = ghast.getPickResult();
 						if (result != null) {
@@ -175,37 +174,6 @@ public class SimpleLife extends ThirdLife {
 						0, 999999, 0, 0, 0
 					));
 
-					offers.add(new MerchantOffer(
-						new ItemCost(Items.DIRT, 5),
-						Optional.empty(),
-						Items.GOLD_INGOT.getDefaultInstance(),
-						0, 999999, 0, 0, 0
-					));
-
-					offers.add(new MerchantOffer(
-						new ItemCost(Items.DIRT, 1),
-						Optional.empty(),
-						Items.REDSTONE.getDefaultInstance(),
-						0, 999999, 0, 0, 0
-					));
-
-					int rand = rnd.nextInt(2);
-					if (rand == 0) {
-						offers.add(new MerchantOffer(
-							new ItemCost(Items.DIRT, 32),
-							Optional.empty(),
-							Items.OAK_SAPLING.getDefaultInstance(),
-							0, 999999, 0, 0, 0
-						));
-					} else {
-						offers.add(new MerchantOffer(
-							new ItemCost(Items.DIRT, 32),
-							Optional.empty(),
-							Items.SPRUCE_SAPLING.getDefaultInstance(),
-							0, 999999, 0, 0, 0
-						));
-					}
-
 					//?}
 
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
@@ -214,7 +182,6 @@ public class SimpleLife extends ThirdLife {
                     int rand = rnd.nextInt(2);
                     if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					//?}
 					
 					wanderingTraderEntity.overrideOffers(offers);
 					wanderingTraderEntity.addTag("SimpleLifeTrader");
