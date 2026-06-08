@@ -121,27 +121,76 @@ public class SimpleLife extends ThirdLife {
 					
 					//? if >= 26.2 {
 					/*
-					ItemStack sulfurCube = ItemParser.parse(
-						new StringReader("minecraft:sulfur_cube_bucket[sulfur_cube_content={id:\"minecraft:tnt\",count:1}]"),
-						level.registryAccess()
-					).getItem();
+					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
+					CompoundTag sulfurTag = new CompoundTag();
+					sulfurTag.putString("id", "minecraft:tnt");
+					sulfurTag.putInt("count", 1);
+
+					sulfurCube.applyComponents(
+						DataComponentPatch.builder()
+							.set(DataComponents.SULFUR_CUBE_CONTENT, CustomData.of(sulfurTag))
+							.build()
+					);
+
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 40),
+						Optional.empty(),
+						sulfurCube,
+						0, 999999, 0, 0, 0
+					));
 					*///?}
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 1),
+						Optional.empty(),
+						Items.SAND.getDefaultInstance(),
+						0, 999999, 0, 0, 0
+					));
+
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 1),
+						Optional.empty(),
+						Items.GRAVEL.getDefaultInstance(),
+						0, 999999, 0, 0, 0
+					));
 
 					//? if >= 26.2 {
 					/*
-					ItemStack happyGhastEgg = ItemParser.parse(
-						new StringReader("minecraft:happy_ghast_spawn_egg[entity_data={equipment:{body:{id:\"minecraft:red_harness\",count:1}}}]"),
-						level.registryAccess()
-					).getItem();
+					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
+					CompoundTag ghastTag = new CompoundTag();
+					ghastTag.put("equipment",
+						new CompoundTag() {{
+							put("body", new CompoundTag() {{
+								putString("id", "minecraft:red_harness");
+								putInt("count", 1);
+							}});
+						}}
+					);
+
+					ghastTag.put("ActiveEffects", new net.minecraft.nbt.ListTag() {{
+						add(new CompoundTag() {{
+							putByte("Id", (byte) 11);
+							putInt("Amplifier", 255);
+							putInt("Duration", Integer.MAX_VALUE);
+							putByte("ShowParticles", (byte) 0);
+						}});
+					}});
+
+					happyGhastEgg.applyComponents(
+						DataComponentPatch.builder()
+							.set(DataComponents.ENTITY_DATA, CustomData.of(ghastTag))
+							.build()
+					);
+
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 32),
+						Optional.empty(),
+						happyGhastEgg,
+						0, 999999, 0, 0, 0
+					));
 					*///?}
-
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
