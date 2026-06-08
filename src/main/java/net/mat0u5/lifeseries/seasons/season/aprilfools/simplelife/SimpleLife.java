@@ -118,20 +118,10 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					
+
 					//? if >= 26.2 {
-					/*
+
 					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
-
-					CompoundTag sulfurTag = new CompoundTag();
-					sulfurTag.putString("id", "minecraft:tnt");
-					sulfurTag.putInt("count", 1);
-
-					sulfurCube.applyComponents(
-						DataComponentPatch.builder()
-							.set(DataComponents.SULFUR_CUBE_CONTENT, CustomData.of(sulfurTag))
-							.build()
-					);
 
 					offers.add(new MerchantOffer(
 						new ItemCost(Items.DIRT, 40),
@@ -139,7 +129,6 @@ public class SimpleLife extends ThirdLife {
 						sulfurCube,
 						0, 999999, 0, 0, 0
 					));
-					*///?}
 
 					offers.add(new MerchantOffer(
 						new ItemCost(Items.DIRT, 1),
@@ -155,34 +144,29 @@ public class SimpleLife extends ThirdLife {
 						0, 999999, 0, 0, 0
 					));
 
-					//? if >= 26.2 {
-					/*
 					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
 
-					CompoundTag ghastTag = new CompoundTag();
-					ghastTag.put("equipment",
-						new CompoundTag() {{
-							put("body", new CompoundTag() {{
-								putString("id", "minecraft:red_harness");
-								putInt("count", 1);
-							}});
-						}}
-					);
+					LivingEntity ghast = EntityType.HAPPY_GHAST.create(level);
+					if (ghast != null) {
 
-					ghastTag.put("ActiveEffects", new net.minecraft.nbt.ListTag() {{
-						add(new CompoundTag() {{
-							putByte("Id", (byte) 11);
-							putInt("Amplifier", 255);
-							putInt("Duration", Integer.MAX_VALUE);
-							putByte("ShowParticles", (byte) 0);
-						}});
-					}});
+						ghast.setItemSlot(EquipmentSlot.BODY, new ItemStack(Items.RED_HARNESS));
 
-					happyGhastEgg.applyComponents(
-						DataComponentPatch.builder()
-							.set(DataComponents.ENTITY_DATA, CustomData.of(ghastTag))
-							.build()
-					);
+						MobEffectInstance resistance = new MobEffectInstance(
+							MobEffects.DAMAGE_RESISTANCE,
+							Integer.MAX_VALUE,
+							254,
+							false,
+							false,
+							false
+						);
+
+						ghast.addEffect(resistance);
+
+						ItemStack result = ghast.getPickResult();
+						if (result != null) {
+							happyGhastEgg = result;
+						}
+					}
 
 					offers.add(new MerchantOffer(
 						new ItemCost(Items.DIRT, 32),
@@ -190,7 +174,40 @@ public class SimpleLife extends ThirdLife {
 						happyGhastEgg,
 						0, 999999, 0, 0, 0
 					));
-					*///?}
+
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 5),
+						Optional.empty(),
+						Items.GOLD_INGOT.getDefaultInstance(),
+						0, 999999, 0, 0, 0
+					));
+
+					offers.add(new MerchantOffer(
+						new ItemCost(Items.DIRT, 1),
+						Optional.empty(),
+						Items.REDSTONE.getDefaultInstance(),
+						0, 999999, 0, 0, 0
+					));
+
+					int rand = rnd.nextInt(2);
+					if (rand == 0) {
+						offers.add(new MerchantOffer(
+							new ItemCost(Items.DIRT, 32),
+							Optional.empty(),
+							Items.OAK_SAPLING.getDefaultInstance(),
+							0, 999999, 0, 0, 0
+						));
+					} else {
+						offers.add(new MerchantOffer(
+							new ItemCost(Items.DIRT, 32),
+							Optional.empty(),
+							Items.SPRUCE_SAPLING.getDefaultInstance(),
+							0, 999999, 0, 0, 0
+						));
+					}
+
+					//?}
+
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
