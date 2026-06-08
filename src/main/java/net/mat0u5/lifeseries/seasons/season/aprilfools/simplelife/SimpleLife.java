@@ -118,14 +118,30 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					
 					//? if >= 26.2 {
-					/*offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.SULFUR_CUBE_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-=					*///?}
-					
+					/*
+					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
+					CompoundTag sulfurTag = new CompoundTag();
+					sulfurTag.putString("contained_block", "minecraft:tnt");
+					sulfurCube.set(DataComponents.CUSTOM_DATA, CustomData.of(sulfurTag));
+
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
+					*///?}
+
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
-                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+
 					//? if >= 26.2 {
-					/*offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					/*
+					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
+
+					CompoundTag ghastTag = new CompoundTag();
+					CompoundTag entityTag = new CompoundTag();
+					entityTag.putString("HarnessColor", "red");
+					ghastTag.put("EntityTag", entityTag);
+
+					happyGhastEgg.set(DataComponents.CUSTOM_DATA, CustomData.of(ghastTag));
+
+					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
 					*///?}
 					
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
