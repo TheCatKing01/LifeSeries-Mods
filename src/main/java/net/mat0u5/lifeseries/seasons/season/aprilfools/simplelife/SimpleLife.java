@@ -120,9 +120,15 @@ public class SimpleLife extends ThirdLife {
 					//? if >= 26.2 {
 					/*
 					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
+
 					CompoundTag sulfurTag = new CompoundTag();
-					sulfurTag.putString("contained_block", "minecraft:tnt");
-					sulfurCube.set(DataComponents.CUSTOM_DATA, CustomData.of(sulfurTag));
+					sulfurTag.putString("id", "minecraft:tnt");
+					sulfurTag.putInt("count", 1);
+
+					sulfurCube.set(
+						DataComponents.SULFUR_CUBE_CONTENT,
+						CustomData.of(sulfurTag)
+					);
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
 					*///?}
@@ -134,12 +140,19 @@ public class SimpleLife extends ThirdLife {
 					/*
 					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
 
-					CompoundTag ghastTag = new CompoundTag();
-					CompoundTag entityTag = new CompoundTag();
-					entityTag.putString("HarnessColor", "red");
-					ghastTag.put("EntityTag", entityTag);
+					CompoundTag bodyTag = new CompoundTag();
+					bodyTag.putString("id", "minecraft:red_harness");
+					bodyTag.putInt("count", 1);
 
-					happyGhastEgg.set(DataComponents.CUSTOM_DATA, CustomData.of(ghastTag));
+					CompoundTag equipmentTag = new CompoundTag();
+					equipmentTag.put("body", bodyTag);
+
+					happyGhastEgg.set(
+						DataComponents.ENTITY_DATA,
+						CustomData.of(new CompoundTag() {{
+							put("equipment", equipmentTag);
+						}})
+					);
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
 					*///?}
