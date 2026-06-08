@@ -24,6 +24,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.commands.arguments.item.ItemParser;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -119,15 +120,10 @@ public class SimpleLife extends ThirdLife {
 					
 					//? if >= 26.2 {
 					/*
-					ItemStack sulfurCube = Items.SULFUR_CUBE_BUCKET.getDefaultInstance();
-
-					CompoundTag sulfurTag = new CompoundTag();
-					sulfurTag.putString("id", "minecraft:tnt");
-					sulfurTag.putInt("count", 1);
-
-					sulfurCube.applyComponents(DataComponentPatch.builder()
-						.set(DataComponents.SULFUR_CUBE_CONTENT, SulfurCubeContent.CODEC.parse(NbtOps.INSTANCE, sulfurTag).result().orElse(null))
-						.build());
+					ItemStack sulfurCube = ItemParser.parseForItem(
+						level.registryAccess(),
+						"minecraft:sulfur_cube_bucket[sulfur_cube_content={id:\"minecraft:tnt\",count:1}]"
+					).result().get().value();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
 					*///?}
@@ -137,21 +133,10 @@ public class SimpleLife extends ThirdLife {
 
 					//? if >= 26.2 {
 					/*
-					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
-
-					CompoundTag bodyTag = new CompoundTag();
-					bodyTag.putString("id", "minecraft:red_harness");
-					bodyTag.putInt("count", 1);
-
-					CompoundTag equipmentTag = new CompoundTag();
-					equipmentTag.put("body", bodyTag);
-
-					CompoundTag entityTag = new CompoundTag();
-					entityTag.put("equipment", equipmentTag);
-
-					happyGhastEgg.applyComponents(DataComponentPatch.builder()
-						.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag))
-						.build());
+					ItemStack happyGhastEgg = ItemParser.parseForItem(
+						level.registryAccess(),
+						"minecraft:happy_ghast_spawn_egg[entity_data={equipment:{body:{id:\"minecraft:red_harness\",count:1}}}]"
+					).result().get().value();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
 					*///?}
