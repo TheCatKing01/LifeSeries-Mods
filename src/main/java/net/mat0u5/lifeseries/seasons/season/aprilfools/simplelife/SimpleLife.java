@@ -123,36 +123,37 @@ public class SimpleLife extends ThirdLife {
 					/*if >= 26.2 {
 
 					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
-					LivingEntity ghast = null;
 
-					try {
-						ghast = EntityType.HAPPY_GHAST.create(level, EntitySpawnReason.EVENT);
-					} catch (Throwable ignored) {
-					}
+					CompoundTag entityTag = new CompoundTag();
 
-					if (ghast != null) {
+					entityTag.putBoolean("PersistenceRequired", true);
 
-						ItemStack harness = Items.RED_HARNESS.getDefaultInstance();
-						ghast.setItemSlot(EquipmentSlot.BODY, harness);
+					// Resistance 255 without particles/icons
+					CompoundTag effectTag = new CompoundTag();
+					effectTag.putString("id", "minecraft:resistance");
+					effectTag.putInt("amplifier", 255);
+					effectTag.putInt("duration", Integer.MAX_VALUE);
+					effectTag.putBoolean("show_particles", false);
+					effectTag.putBoolean("show_icon", false);
+					effectTag.putBoolean("ambient", false);
 
-						try {
-							MobEffectInstance effect = new MobEffectInstance(
-								MobEffects.DAMAGE_RESISTANCE,
-								Integer.MAX_VALUE,
-								255,
-								false,
-								false,
-								false
-							);
-							ghast.addEffect(effect);
-						} catch (Throwable ignored) {
-						}
+					ListTag effects = new ListTag();
+					effects.add(effectTag);
 
-						ItemStack result = ghast.getPickResult();
-						if (result != null) {
-							happyGhastEgg = result;
-						}
-					}
+					entityTag.put("active_effects", effects);
+
+					// Red harness
+					CompoundTag harnessTag = new CompoundTag();
+					harnessTag.putString("id", "minecraft:red_harness");
+					harnessTag.putInt("count", 1);
+
+					entityTag.put("body_armor_item", harnessTag);
+
+					// Apply entity data to spawn egg
+					happyGhastEgg.set(
+						DataComponents.ENTITY_DATA,
+						CustomData.of(entityTag)
+					);
 
 					offers.add(new MerchantOffer(
 						new ItemCost(Items.DIRT, 32),
