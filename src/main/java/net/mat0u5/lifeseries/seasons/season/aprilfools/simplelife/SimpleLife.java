@@ -125,10 +125,9 @@ public class SimpleLife extends ThirdLife {
 					sulfurTag.putString("id", "minecraft:tnt");
 					sulfurTag.putInt("count", 1);
 
-					sulfurCube.set(
-						DataComponents.SULFUR_CUBE_CONTENT,
-						CustomData.of(sulfurTag)
-					);
+					sulfurCube.applyComponents(DataComponentPatch.builder()
+						.set(DataComponents.SULFUR_CUBE_CONTENT, SulfurCubeContent.CODEC.parse(NbtOps.INSTANCE, sulfurTag).result().orElse(null))
+						.build());
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
 					*///?}
@@ -147,12 +146,12 @@ public class SimpleLife extends ThirdLife {
 					CompoundTag equipmentTag = new CompoundTag();
 					equipmentTag.put("body", bodyTag);
 
-					happyGhastEgg.set(
-						DataComponents.ENTITY_DATA,
-						CustomData.of(new CompoundTag() {{
-							put("equipment", equipmentTag);
-						}})
-					);
+					CompoundTag entityTag = new CompoundTag();
+					entityTag.put("equipment", equipmentTag);
+
+					happyGhastEgg.applyComponents(DataComponentPatch.builder()
+						.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag))
+						.build());
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
 					*///?}
