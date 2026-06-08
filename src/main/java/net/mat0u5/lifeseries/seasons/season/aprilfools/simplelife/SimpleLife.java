@@ -120,15 +120,14 @@ public class SimpleLife extends ThirdLife {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-					/*if >= 26.2 {
+					if >= 26.2 {
 
-					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
+					/*ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
 
 					CompoundTag entityTag = new CompoundTag();
 
 					entityTag.putBoolean("PersistenceRequired", true);
 
-					// Resistance 255 without particles/icons
 					CompoundTag effectTag = new CompoundTag();
 					effectTag.putString("id", "minecraft:resistance");
 					effectTag.putInt("amplifier", 255);
@@ -142,14 +141,12 @@ public class SimpleLife extends ThirdLife {
 
 					entityTag.put("active_effects", effects);
 
-					// Red harness
 					CompoundTag harnessTag = new CompoundTag();
 					harnessTag.putString("id", "minecraft:red_harness");
 					harnessTag.putInt("count", 1);
 
 					entityTag.put("body_armor_item", harnessTag);
 
-					// Apply entity data to spawn egg
 					happyGhastEgg.set(
 						DataComponents.ENTITY_DATA,
 						CustomData.of(entityTag)
