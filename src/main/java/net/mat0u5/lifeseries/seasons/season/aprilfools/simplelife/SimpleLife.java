@@ -120,10 +120,10 @@ public class SimpleLife extends ThirdLife {
 					
 					//? if >= 26.2 {
 					/*
-					ItemStack sulfurCube = ItemParser.parseForItem(
+					ItemStack sulfurCube = ItemParser.parse(
 						level.registryAccess(),
 						"minecraft:sulfur_cube_bucket[sulfur_cube_content={id:\"minecraft:tnt\",count:1}]"
-					).result().get().value();
+					).getItem();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), sulfurCube, 0, 999999, 0, 0, 0));
 					*///?}
@@ -133,14 +133,14 @@ public class SimpleLife extends ThirdLife {
 
 					//? if >= 26.2 {
 					/*
-					ItemStack happyGhastEgg = ItemParser.parseForItem(
+					ItemStack happyGhastEgg = ItemParser.parse(
 						level.registryAccess(),
 						"minecraft:happy_ghast_spawn_egg[entity_data={equipment:{body:{id:\"minecraft:red_harness\",count:1}}}]"
-					).result().get().value();
+					).getItem();
 
 					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), happyGhastEgg, 0, 999999, 0, 0, 0));
 					*///?}
-					
+
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
