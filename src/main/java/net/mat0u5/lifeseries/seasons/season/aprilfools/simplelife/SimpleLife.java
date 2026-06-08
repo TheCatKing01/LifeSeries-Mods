@@ -32,9 +32,9 @@ import java.util.Optional;
 import java.util.Random;
 
 //? if <= 1.20.3 {
-/*import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.NaturalSpawner;
-*///?} else {
+//?} else {
 import net.minecraft.world.item.trading.ItemCost;
 //?}
 
