@@ -112,6 +112,8 @@ public class SimpleLife extends ThirdLife {
 					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
 					int rand = rnd.nextInt(2);
+					//?}
+					
 					if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					*///?} else {
