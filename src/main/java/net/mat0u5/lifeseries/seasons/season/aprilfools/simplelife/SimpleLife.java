@@ -103,7 +103,7 @@ public class SimpleLife extends ThirdLife {
                     MerchantOffers offers = wanderingTraderEntity.getOffers();
                     offers.clear();
 					//? if <= 1.20.3 {
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					/*offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
@@ -114,12 +114,13 @@ public class SimpleLife extends ThirdLife {
 					int rand = rnd.nextInt(2);
 					if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					//?} else {
+					*///?} else {
+						
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-					/*//? if >= 26.2 {
+					/*if >= 26.2 {
 
 					ItemStack happyGhastEgg = Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance();
 					LivingEntity ghast = null;
@@ -160,8 +161,7 @@ public class SimpleLife extends ThirdLife {
 						0, 999999, 0, 0, 0
 					));
 
-					//?}
-					*/
+					*///?}
 
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
