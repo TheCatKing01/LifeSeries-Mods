@@ -48,7 +48,6 @@ public class SeasonChanger {
 			currentSession = new Session();
 			int configSessionLength = LifeSeries.getMainConfig().getOrCreateInt("session_length", Time.hours(2).getTicks());
 			currentSession.setSessionLength(Time.ticks(configSessionLength));
-			DatapackIntegration.setSessionLength(currentSession.getSessionLength());
 		}
 
 		livesManager = currentSeason.livesManager;
@@ -94,5 +93,19 @@ public class SeasonChanger {
 		}
 		SessionTranscript.resetStats();
 		return true;
+	}
+
+	public static void preChangeEvent(Seasons preSeason, Seasons postSeason) {
+		DatapackIntegration.EVENT_SEASON_CHANGE_PRE.trigger(List.of(
+				new DatapackIntegration.Events.MacroEntry("PreviousSeasonIndex", String.valueOf(preSeason.getIndex())),
+				new DatapackIntegration.Events.MacroEntry("NextSeasonIndex", String.valueOf(postSeason.getIndex()))
+		));
+	}
+
+	public static void postChangeEvent(Seasons preSeason, Seasons postSeason) {
+		DatapackIntegration.EVENT_SEASON_CHANGE_POST.trigger(List.of(
+				new DatapackIntegration.Events.MacroEntry("PreviousSeasonIndex", String.valueOf(preSeason.getIndex())),
+				new DatapackIntegration.Events.MacroEntry("NextSeasonIndex", String.valueOf(postSeason.getIndex()))
+		));
 	}
 }

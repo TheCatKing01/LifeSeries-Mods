@@ -29,7 +29,7 @@ import net.minecraft.world.entity.decoration.Mannequin;
 import net.mat0u5.lifeseries.mixin.MannequinAccessor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.component.ResolvableProfile;
 //?}
@@ -97,8 +97,6 @@ public class AstralProjection extends ToggleableSuperpower {
         ((IPlayer) player).ls$playNotifySound(SoundEvents.TRIAL_SPAWNER_OMINOUS_ACTIVATE, SoundSource.MASTER, 0.3f, 1);
         //?}
 
-        String fakePlayerName = "`"+player.getScoreboardName();
-
         startedPos = player.position();
         startedLooking[0] = player.getYRot();
         startedLooking[1] = player.getXRot();
@@ -110,13 +108,15 @@ public class AstralProjection extends ToggleableSuperpower {
         Inventory inv = player.getInventory();
 
         //? if <= 1.21.6 {
-        /*FakePlayer.createFake(fakePlayerName, server, startedPos, startedLooking[0], startedLooking[1], ((IPlayer) player).ls$getServerLevel().dimension(),
+        /*String fakePlayerName = "`"+player.getScoreboardName();
+        if (fakePlayerName.length() > 16) fakePlayerName = fakePlayerName.substring(0,16);
+        FakePlayer.createFake(fakePlayerName, server, startedPos, startedLooking[0], startedLooking[1], ((IPlayer) player).ls$getServerLevel().dimension(),
                 startedGameMode, false, inv, player.getUUID()).thenAccept((fakePlayer) -> {
             clone = fakePlayer;
             sendDisguisePacket();
         });
         *///?} else {
-        clone = EntityType.MANNEQUIN.create(startedLevel, EntitySpawnReason.COMMAND);
+        clone = EntityTypes.MANNEQUIN.create(startedLevel, EntitySpawnReason.COMMAND);
         if (clone == null) return;
 
         clone.setPosRaw(player.getX(), player.getY(), player.getZ());

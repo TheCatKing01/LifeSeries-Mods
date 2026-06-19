@@ -47,7 +47,7 @@ import net.minecraft.world.item.component.CustomData;
 //?}
 
 //? if >= 1.21.9 {
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.component.TypedEntityData;
 //?}
 
@@ -243,9 +243,9 @@ public class SecretLife extends Season {
         skeletonHorse.set(DataComponents.ENTITY_DATA, nbtSkeleton);
         camel.set(DataComponents.ENTITY_DATA, nbtCamel);
         *///?} else if > 1.21.6 {
-        zombieHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.ZOMBIE, nbtZombie.copyTag()));
-        skeletonHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.SKELETON, nbtSkeleton.copyTag()));
-        camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityType.CAMEL, nbtCamel.copyTag()));
+        zombieHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityTypes.ZOMBIE, nbtZombie.copyTag()));
+        skeletonHorse.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityTypes.SKELETON, nbtSkeleton.copyTag()));
+        camel.set(DataComponents.ENTITY_DATA, TypedEntityData.of(EntityTypes.CAMEL, nbtCamel.copyTag()));
         //?}
         itemSpawner.addItem(zombieHorse, 10);
         itemSpawner.addItem(skeletonHorse, 10);
@@ -366,20 +366,29 @@ public class SecretLife extends Season {
     @Override
     public void onPlayerKilledByPlayer(ServerPlayer victim, ServerPlayer killer) {
         super.onPlayerKilledByPlayer(victim, killer);
-        if (((IPlayer) killer).ls$isOnLastLife(false)) {
-            double amountGained = Math.min(Math.max(MAX_KILL_HEALTH, MAX_HEALTH) - getPlayerHealth(killer), 20);
-            if (amountGained > 0) {
-                addPlayerHealth(killer, amountGained);
-                int roundedGained = (int) Math.ceil(amountGained);
-                double roundedHearts = Math.abs(roundedGained) / 2.0;
-                String roundedHeartsStr = String.valueOf(roundedHearts);
-                if (roundedGained % 2 == 0) roundedHeartsStr = String.valueOf((int)roundedHearts);
-                if (roundedGained >= 0) {
-                    PlayerUtils.sendTitle(killer, ModifiableText.SECRETLIFE_HEART_ADD.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
-                }
-                else {
-                    PlayerUtils.sendTitle(killer, ModifiableText.SECRETLIFE_HEART_REMOVE.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
-                }
+        checkKillHeartGain(killer);
+    }
+
+    @Override
+    public void onClaimKill(ServerPlayer killer, ServerPlayer victim) {
+        super.onClaimKill(killer, victim);
+        checkKillHeartGain(killer);
+    }
+
+    public void checkKillHeartGain(ServerPlayer player) {
+        if (!((IPlayer) player).ls$isOnLastLife(false)) return;
+        double amountGained = Math.min(Math.max(MAX_KILL_HEALTH, MAX_HEALTH) - getPlayerHealth(player), 20);
+        if (amountGained > 0) {
+            addPlayerHealth(player, amountGained);
+            int roundedGained = (int) Math.ceil(amountGained);
+            double roundedHearts = Math.abs(roundedGained) / 2.0;
+            String roundedHeartsStr = String.valueOf(roundedHearts);
+            if (roundedGained % 2 == 0) roundedHeartsStr = String.valueOf((int)roundedHearts);
+            if (roundedGained >= 0) {
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_ADD.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
+            }
+            else {
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_REMOVE.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
             }
         }
     }

@@ -98,6 +98,13 @@ public class LifeSeriesCommand extends Command {
                                 .requires(PermissionManager::isAdmin)
                                 .executes(context -> configChanges(context.getSource()))
                         )
+                        .then(literal("get")
+                                .requires(PermissionManager::isAdmin)
+                                .then(argument("key", StringArgumentType.string())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(seasonConfig.getAvailableConfigKeys(), builder))
+                                        .executes(context -> configGet(context.getSource(), StringArgumentType.getString(context, "key")))
+                                )
+                        )
                 )
                 .then(literal("wiki")
                         .executes(context -> wiki(context.getSource()))
@@ -211,12 +218,15 @@ public class LifeSeriesCommand extends Command {
     public void setSeasonFinal(CommandSourceStack source, String setTo, String argsStr) {
         boolean prevTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
 
+        Seasons currentSeason = LifeSeries.getSeason();
         Seasons season = Seasons.getSeasonFromStringName(setTo);
         SeasonChanger.ChangeSeasonArgs args = SeasonChanger.parseChangeSeasonArgs(argsStr);
 
         if (args.showChatMessage()) sendCommandFeedback(source, ModifiableText.SEASON_CHANGING.get(setTo));
 
+        SeasonChanger.preChangeEvent(currentSeason, season);
         if (SeasonChanger.changeSeasonTo(season, args)) {
+            SeasonChanger.postChangeEvent(currentSeason, season);
             if (args.showChatMessage()) PlayerUtils.broadcastMessage(ModifiableText.SEASON_CHANGED.get(setTo));
             boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
             if (prevTickFreeze != currentTickFreeze) {
@@ -258,17 +268,31 @@ public class LifeSeriesCommand extends Command {
         return 1;
     }
 
+    public int configGet(CommandSourceStack source, String key) {
+        if (checkBanned(source)) return 0;
+        String value = seasonConfig.getProperty(key);
+        boolean nullValue = value == null;
+        if (nullValue) value = "null";
+        sendCommandFeedbackQuiet(source, ModifiableText.CONFIG_GET.get(key, value));
+
+        try {
+            return Integer.parseInt(value);
+        }catch(Exception ignored) {}
+
+        return nullValue ? 0 : 1;
+    }
+
     public int configChanges(CommandSourceStack source) {
         if (checkBanned(source)) return -1;
 
         if (NetworkHandlerServer.configChanges.isEmpty()) {
-            sendCommandFailure(source, Component.literal("No recent config changes."));
+            sendCommandFailure(source, ModifiableText.CONFIG_MODIFY_NONE.get());
             return -1;
         }
 
-        MutableComponent changes = Component.literal("\nRecent config changes:\n");
+        MutableComponent changes = ModifiableText.CONFIG_MODIFY_HEADER.get().copy();
         for (Component component : NetworkHandlerServer.configChanges) {
-            changes.append(component).append("\n");
+            changes.append(component);
         }
 
         sendCommandFeedbackQuiet(source, changes);

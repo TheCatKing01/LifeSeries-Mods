@@ -1,4 +1,6 @@
-Improved Secret Life task picking logic, and added '/task resetUsed'
-Snail skins now defaults to the new format.
+Updated to Minecraft 26.2
+Improved Secret Life task picking.
+Switched snails skins to the new format and model.
+Fixed some Forge and NeoForge issues.
+Bug and crash fixes.
 New configs.
-Bug fixes.

@@ -13,23 +13,27 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains(".client.") || mixinClassName.startsWith("client.")) {
-            return LifeSeries.platform().isClient();
-        }
-
+        boolean isClient = LifeSeries.platform().isClient();
         //? if fabric {
         if (mixinClassName.contains("compat.fabricapi")) {
-            return CompatibilityManager.fabricApiLoaded();
+            boolean ret = CompatibilityManager.fabricApiLoaded();
+            LifeSeries.LOGGER.info("[Life Series] Compat - Fabric API - " + ret);
+            return ret;
         }
         //?}
-        if (LifeSeries.hasClient()) {
+        if (isClient) {
             if (mixinClassName.contains("client.compat.appleskin")) {
                 //? if <= 1.20 {
-                /*return false;
+                /*boolean ret = false;
                  *///?} else {
-                return CompatibilityManager.appleSkinLoaded();
+                boolean ret = CompatibilityManager.appleSkinLoaded();
                 //?}
+                LifeSeries.LOGGER.info("[Life Series] Compat - Appleskin - " + ret);
+                return ret;
             }
+        }
+        if (mixinClassName.contains(".client.") || mixinClassName.startsWith("client.")) {
+            return isClient;
         }
         return true;
     }

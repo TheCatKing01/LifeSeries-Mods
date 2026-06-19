@@ -43,7 +43,6 @@ import net.mat0u5.lifeseries.utils.other.*;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.versions.VersionControl;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -57,10 +56,10 @@ import net.minecraft.network.DisconnectionDetails;
  //?}
 
 //? if <= 26.1 {
-import net.minecraft.ChatFormatting;
- //?} else {
-/*import net.minecraft.world.scores.TeamColor;
-*///?}
+/*import net.minecraft.ChatFormatting;
+ *///?} else {
+import net.minecraft.world.scores.TeamColor;
+//?}
 
 //? if <= 1.20.3 {
 /*import net.minecraft.network.FriendlyByteBuf;
@@ -187,10 +186,13 @@ public class NetworkHandlerServer {
         });
         SimplePackets.SET_SEASON.setServerReceive((player, payload) -> {
             if (PermissionManager.isAdmin(player) || currentSeason.getSeason() == Seasons.UNASSIGNED) {
+                Seasons currentSeason = LifeSeries.getSeason();
                 Seasons newSeason = Seasons.getSeasonFromStringName(payload.value());
                 if (newSeason == Seasons.UNASSIGNED) return;
                 boolean prevTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
+                SeasonChanger.preChangeEvent(currentSeason, newSeason);
                 if (SeasonChanger.changeSeasonTo(newSeason)) {
+                    SeasonChanger.postChangeEvent(currentSeason, newSeason);
                     boolean currentTickFreeze = Session.TICK_FREEZE_NOT_IN_SESSION;
                     PlayerUtils.broadcastMessage(ModifiableText.SEASON_CHANGE.get(payload.value()));
                     if (prevTickFreeze != currentTickFreeze) {
@@ -244,12 +246,12 @@ public class NetworkHandlerServer {
                 String packetGainLifeKill = payload.value().get(5);
 
                 //? if <= 26.1 {
-                ChatFormatting newTeamColor = ChatFormatting.getByName(packetTeamColor);
+                /*ChatFormatting newTeamColor = ChatFormatting.getByName(packetTeamColor);
                 if (newTeamColor == null) newTeamColor = ChatFormatting.WHITE;
-                //?} else {
-                /*TeamColor newTeamColor = TeamColor.byName(packetTeamColor);
+                *///?} else {
+                TeamColor newTeamColor = TeamColor.byName(packetTeamColor);
                 if (newTeamColor == null) newTeamColor = TeamColor.WHITE;
-                *///?}
+                //?}
 
                 Integer allowedKill = null;
                 Integer gainLife = null;
@@ -271,12 +273,12 @@ public class NetworkHandlerServer {
                     if (!teamName.equals(packetTeamName)) continue;
 
                     //? if <= 26.1 {
-                    livesTeam.setColor(newTeamColor);
+                    /*livesTeam.setColor(newTeamColor);
                     livesTeam.setDisplayName(Component.literal(packetTeamDisplayName).withStyle(newTeamColor));
-                    //?} else {
-                    /*livesTeam.setColor(Optional.of(newTeamColor));
+                    *///?} else {
+                    livesTeam.setColor(Optional.of(newTeamColor));
                     livesTeam.setDisplayName(Component.literal(packetTeamDisplayName).withColor(newTeamColor.textColor()));
-                    *///?}
+                    //?}
                     livesManager.updateTeamConfig(teamName, allowedKill, gainLife);
                     teamModified = true;
                 }
@@ -471,7 +473,7 @@ public class NetworkHandlerServer {
                 configChanges.clear();
             }
             if (!Objects.equals(oldValue, newValue))  {
-                configChanges.add(ModifiableText.CONFIG_MODIFY.get(id, oldValue, newValue));
+                configChanges.add(ModifiableText.CONFIG_MODIFY_KEY.get(id, oldValue, newValue));
             }
 
             if (updatedConfigThisTick && DefaultConfigValues.RELOAD_NEEDED.contains(id)) {
@@ -717,7 +719,8 @@ public class NetworkHandlerServer {
 
     public static boolean wasHandshakeSuccessful(ServerPlayer player) {
         if (player == null) return false;
-        return wasHandshakeSuccessful(player.getUUID());
+        UUID uuid = ProfileManager.getRealUUID(player).get();
+        return handshakeSuccessful.contains(uuid) || preLoginHandshake.contains(uuid);
     }
 
     public static boolean wasHandshakeSuccessful(UUID uuid) {

@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.config;
 import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
 import net.mat0u5.lifeseries.network.packets.ConfigPayload;
+import net.mat0u5.lifeseries.seasons.season.secretlife.SecretLifeUsedTasks;
 import net.mat0u5.lifeseries.seasons.util.LivesManager;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
@@ -27,8 +28,8 @@ import static net.mat0u5.lifeseries.LifeSeries.*;
 
 import net.minecraft.world.scores.PlayerScoreEntry;
 //? if >= 26.2 {
-/*import net.minecraft.world.scores.TeamColor;
-*///?}
+import net.minecraft.world.scores.TeamColor;
+//?}
 
 public abstract class ConfigManager extends DefaultConfigValues {
 
@@ -252,10 +253,10 @@ public abstract class ConfigManager extends DefaultConfigValues {
             String validKillStr = validKill != null ? String.valueOf(validKill) : "";
             String gainLifeStr = gainLife != null ? String.valueOf(gainLife) : "";
             //? if <= 26.1 {
-            String teamColorName = team.getColor().getName();
-            //?} else {
-            /*String teamColorName = team.getColor().orElse(TeamColor.WHITE).getSerializedName();
-            *///?}
+            /*String teamColorName = team.getColor().getName();
+            *///?} else {
+            String teamColorName = team.getColor().orElse(TeamColor.WHITE).getSerializedName();
+            //?}
 
             ConfigFileEntry<Object> teamEntry = new ConfigFileEntry<>(
                     "dynamic_teams_"+ UUID.randomUUID(), null, ConfigTypes.TEAM_ENTRY, "teams",
@@ -273,10 +274,12 @@ public abstract class ConfigManager extends DefaultConfigValues {
             index++;
         }
         if (currentSeason.getSeason() == Seasons.SECRET_LIFE) {
+            List<String> alreadySelected = SecretLifeUsedTasks.getUsedTasks(TaskManager.usedTasksConfig);
             for (String easyTask : TaskManager.easyTasks_all) {
+
                 ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
                         "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.easy",
-                        "", "", List.of("easy", easyTask), true
+                        "", "", List.of("easy", easyTask, String.valueOf(alreadySelected.contains(easyTask))), true
                 );
                 sendConfigEntry(player, taskEntry, index);
                 index++;
@@ -284,7 +287,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             for (String hardTask : TaskManager.hardTasks_all) {
                 ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
                         "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.hard",
-                        "", "", List.of("hard", hardTask), true
+                        "", "", List.of("hard", hardTask, String.valueOf(alreadySelected.contains(hardTask))), true
                 );
                 sendConfigEntry(player, taskEntry, index);
                 index++;
@@ -292,7 +295,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             for (String redTask : TaskManager.redTasks_all) {
                 ConfigFileEntry<Object> taskEntry = new ConfigFileEntry<>(
                         "dynamic_task_entry_"+ UUID.randomUUID(), null, ConfigTypes.SECRET_TASK, "season.tasks.red",
-                        "", "", List.of("red", redTask), true
+                        "", "", List.of("red", redTask, "false"), true
                 );
                 sendConfigEntry(player, taskEntry, index);
                 index++;

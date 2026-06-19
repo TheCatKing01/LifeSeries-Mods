@@ -61,7 +61,11 @@ stonecutter {
 
 		if (env("GRADLE_ONLY_SNAPSHOT") == "true") {
 			// Only the snapshot
-			match("26.2", "fabric")
+			//match("26.3", "fabric")
+		}
+		else if (env("GRADLE_ONLY_26_2") == "true") {
+			// 26.2 all platform
+			match("26.2", "fabric", "forge", "neoforge")
 		}
 		else if (env("GRADLE_ONLY_26_1") == "true") {
 			// 26.1 all platform
@@ -69,6 +73,7 @@ stonecutter {
 		}
 		else if (env("GRADLE_ONLY_IMPORTANT_FABRIC") == "true") {
 			// Main Fabric versions, this is the recommended setting for development
+			//match("26.3", "fabric")
 			match("26.2", "fabric")
 			match("26.1", "fabric")
 			match("1.21.11", "fabric")
@@ -76,6 +81,7 @@ stonecutter {
 		}
 		else if (env("GRADLE_ONLY_FABRIC") == "true") {
 			// All Fabric versions
+			//match("26.3", "fabric")
 			match("26.2", "fabric")
 			match("26.1", "fabric")
 
@@ -93,6 +99,7 @@ stonecutter {
 			match("1.20", "fabric")
 		}
 		else if (env("GRADLE_ONLY_FORGE") == "true") {
+			match("26.2", "forge")
 			match("26.1", "forge")
 
 			match("1.21.11", "forge")
@@ -107,7 +114,9 @@ stonecutter {
 			match("1.20", "forge")
 		}
 		else if (env("GRADLE_ONLY_NEOFORGE") == "true") {
+			match("26.2", "neoforge")
 			match("26.1", "neoforge")
+
 			match("1.21.11", "neoforge")
 			match("1.21.9", "neoforge")
 			match("1.21.6", "neoforge")
@@ -122,7 +131,8 @@ stonecutter {
 		}
 		else {
 			// All versions
-			match("26.2", "fabric")
+			//match("26.3", "fabric")
+			match("26.2", "fabric", "forge", "neoforge")
 			match("26.1", "fabric", "forge", "neoforge")
 
 			match("1.21.11", "fabric", "forge", "neoforge")
@@ -140,16 +150,16 @@ stonecutter {
 		}
 
 		if (env("GRADLE_ONLY_SNAPSHOT") == "true") {
-			vcsVersion = "26.2-fabric"
+			//vcsVersion = "26.3-fabric"
 		}
 		else if (env("GRADLE_ONLY_FORGE") == "true") {
-			vcsVersion = "26.1-forge"
+			vcsVersion = "26.2-forge"
 		}
 		else if (env("GRADLE_ONLY_NEOFORGE") == "true") {
-			vcsVersion = "26.1-neoforge"
+			vcsVersion = "26.2-neoforge"
 		}
 		else {
-			vcsVersion = "26.1-fabric"
+			vcsVersion = "26.2-fabric"
 		}
 	}
 }

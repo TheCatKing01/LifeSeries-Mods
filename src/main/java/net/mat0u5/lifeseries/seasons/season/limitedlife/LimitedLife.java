@@ -12,10 +12,12 @@ import net.mat0u5.lifeseries.seasons.secretsociety.SecretSociety;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.utils.enums.SessionTimerStates;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
+import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -80,20 +82,7 @@ public class LimitedLife extends Season {
         }
 
         for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
-
-            if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
-                long timestamp = SessionTimerStates.OFF.getValue();
-                if (currentSession.statusNotStarted()) timestamp = SessionTimerStates.NOT_STARTED.getValue();
-                else if (currentSession.statusPaused()) timestamp = SessionTimerStates.PAUSED.getValue();
-                else if (currentSession.statusFinished()) timestamp = SessionTimerStates.ENDED.getValue();
-                else if (currentSession.validTime()) {
-                    Time remainingTime = currentSession.getRemainingTime();
-                    timestamp = Time.now().add(remainingTime).getMillis();
-                }
-                if (timestamp != SessionTimerStates.OFF.getValue()) {
-                    SimplePackets.SESSION_TIMER.target(player).sendToClient(timestamp);
-                }
-
+            try {
                 if (((IPlayer) player).ls$hasAssignedLives() && ((IPlayer) player).ls$getLives() != null) {
                     long playerLives;
                     if (((IPlayer) player).ls$isAlive()) {
@@ -103,20 +92,39 @@ public class LimitedLife extends Season {
                     else {
                         playerLives = -1;
                     }
-                    String livesColor = livesManager.getColorForLives(player).toString();
+                    //? if <= 26.1 {
+                    /*String livesColor = livesManager.getColorForLives(player).toString();
+                    *///?} else {
+                    String livesColor = TextUtils.getColorCode(livesManager.getColorForLives(player).textColor());
+                    //?}
                     SimplePackets.LIMITED_LIFE_TIMER.target(player).sendToClient(List.of(livesColor, String.valueOf(playerLives)));
                 }
-            }
-            else {
-                MutableComponent fullMessage = Component.empty();
-                if (currentSession.displayTimer.contains(player.getUUID())) {
-                    fullMessage.append(message);
+                if (NetworkHandlerServer.wasHandshakeSuccessful(player)) {
+                    long timestamp = SessionTimerStates.OFF.getValue();
+                    if (currentSession.statusNotStarted()) timestamp = SessionTimerStates.NOT_STARTED.getValue();
+                    else if (currentSession.statusPaused()) timestamp = SessionTimerStates.PAUSED.getValue();
+                    else if (currentSession.statusFinished()) timestamp = SessionTimerStates.ENDED.getValue();
+                    else if (currentSession.validTime()) {
+                        Time remainingTime = currentSession.getRemainingTime();
+                        timestamp = Time.now().add(remainingTime).getMillis();
+                    }
+                    if (timestamp != SessionTimerStates.OFF.getValue()) {
+                        SimplePackets.SESSION_TIMER.target(player).sendToClient(timestamp);
+                    }
                 }
-                if (((IPlayer) player).ls$hasAssignedLives()) {
-                    if (!fullMessage.getString().isEmpty()) fullMessage.append(ModifiableText.LIMITEDLIFE_SESSION_DISPLAY_DIVIDER.get());
-                    fullMessage.append(livesManager.getFormattedLives(player));
+                else {
+                    MutableComponent fullMessage = Component.empty();
+                    if (currentSession.displayTimer.contains(player.getUUID())) {
+                        fullMessage.append(message);
+                    }
+                    if (((IPlayer) player).ls$hasAssignedLives()) {
+                        if (!fullMessage.getString().isEmpty()) fullMessage.append(ModifiableText.LIMITEDLIFE_SESSION_DISPLAY_DIVIDER.get());
+                        fullMessage.append(livesManager.getFormattedLives(player));
+                    }
+                    ((IPlayer) player).ls$message(fullMessage, true);
                 }
-                ((IPlayer) player).ls$message(fullMessage, true);
+            }catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -18,6 +18,9 @@ public class VersionControl {
         if (string.contains("-pre")) {
             string = string.split("-pre")[0];
         }
+        if (string.contains("-rc")) {
+            string = string.split("-rc")[0];
+        }
         string = string.replaceAll("[^\\d.]", ""); //Remove all non-digit and non-dot characters.
         string = string.replaceAll("^\\.+|\\.+$", ""); //Remove all leading or trailing dots.
         while (string.contains("..")) string = string.replace("..",".");
@@ -53,6 +56,13 @@ public class VersionControl {
                 }catch(Exception ignored) {}
             }
 
+            if (originalVersion.contains("-rc")) {
+                build = -10;
+                try {
+                    build += Integer.parseInt(originalVersion.split("-rc")[1]);
+                }catch(Exception ignored) {}
+            }
+
             /*
                 Supports up to:
                  213 major versions
@@ -63,6 +73,7 @@ public class VersionControl {
                  So 213.99.99.999 is a valid version for example.
 
                  Pre-releases act as if 900 build versions are already added, so 100 pre-releases are supported
+                 Release candidates act as if 990 build versions are already added, so 10 rc's are supported
              */
 
             return (major * 10_000_000) + (minor * 100_000) + (patch * 1_000) + build;
@@ -90,7 +101,7 @@ public class VersionControl {
         *   1.3.5.8     -   1.3.5.16
         *   1.3.5.17    -   1.3.5.23
         *   1.3.5.24    -   1.3.5.29
-        *   1.3.6       -   1.3.6.7     (clientCompatibility stayed)
+        *   1.3.6       -   1.3.6.7
         *   1.3.6.8     -   1.3.6.26
         *   1.3.6.27    -   1.3.6.37
         *   1.3.7       -   1.3.7.11
@@ -134,18 +145,20 @@ public class VersionControl {
         *   1.5.5       -   1.5.5.4
         *   1.5.5.5
         *   1.5.5.6
-        *   1.5.5.7     -   *
+        *   1.5.5.7     -   1.5.5.17
+        *   1.5.6-pre1  -   1.5.6-rc1
+        *   1.5.6       -   *
      */
 
     public static String clientCompatibilityMin() {
         // This is the version that the SERVER needs to have for the current client.
         if (LifeSeries.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.5.5.7-dev";
+        return "1.5.6";
     }
 
     public static String serverCompatibilityMin() {
         // This is the version that the CLIENT needs to have for the current server.
         if (LifeSeries.ISOLATED_ENVIRONMENT) return MOD_VERSION;
-        return "1.5.5.7-dev";
+        return "1.5.6";
     }
 }
