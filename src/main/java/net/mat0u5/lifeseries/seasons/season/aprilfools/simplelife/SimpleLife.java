@@ -121,7 +121,7 @@ public class SimpleLife extends ThirdLife {
                     if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     //?}
 					
-					//? if == 26.2 {
+					//? if 26.2 {
 					/*offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.SULFUR_CUBE_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
 					*///?}
