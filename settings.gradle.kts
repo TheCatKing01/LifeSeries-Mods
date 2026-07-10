@@ -1,3 +1,5 @@
+GRADLE_ONLY_26_2=true
+
 pluginManagement {
 	repositories {
 		mavenLocal()
