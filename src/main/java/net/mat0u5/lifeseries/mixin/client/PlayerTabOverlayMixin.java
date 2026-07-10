@@ -39,7 +39,7 @@ public class PlayerTabOverlayMixin {
             int score = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
             if (objective.getName().equals(LivesManager.SCOREBOARD_NAME)) {
                 Component renderOverride = null;
-                if (LifeSeriesClient.clientCurrentSeason != Seasons.LIMITED_LIFE) {
+                if (!LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
                     if (score >= LifeSeriesClient.TAB_LIST_LIVES_CUTOFF && !LifeSeriesClient.TAB_LIST_SHOW_EXACT_LIVES && !LifeSeries.DEBUG) {
                         renderOverride = Component.literal(LifeSeriesClient.TAB_LIST_LIVES_CUTOFF+"+").withStyle(ChatFormatting.YELLOW);
                     }
@@ -81,7 +81,7 @@ public class PlayerTabOverlayMixin {
 
         if (objective != null && objective.getName().equals(LivesManager.SCOREBOARD_NAME)) {
             int score = readableScoreboardScore.value();
-            if (LifeSeriesClient.clientCurrentSeason != Seasons.LIMITED_LIFE) {
+            if (!LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
                 if (score >= LifeSeriesClient.TAB_LIST_LIVES_CUTOFF && !LifeSeriesClient.TAB_LIST_SHOW_EXACT_LIVES && !LifeSeries.DEBUG) {
                     return Component.literal(LifeSeriesClient.TAB_LIST_LIVES_CUTOFF+"+").setStyle(originalText.getStyle());
                 }
@@ -116,8 +116,10 @@ public class PlayerTabOverlayMixin {
         if (entry == null) return;
         PlayerTeam team = entry.getTeam();
         if (team == null) return;
+        String name = team.getDisplayName().getString();
+        if (name == null || name.isEmpty()) return;
         //~ if >= 26.2 '.withStyle(team.getColor())' -> '.withColor(team.getColor().orElse(TeamColor.WHITE).textColor())' {
-        cir.setReturnValue(TextUtils.format("[{}] ", team.getDisplayName().getString()).withColor(team.getColor().orElse(TeamColor.WHITE).textColor()).append(original));
+        cir.setReturnValue(TextUtils.format("[{}] ", name).withColor(team.getColor().orElse(TeamColor.WHITE).textColor()).append(original));
         //~}
     }
 }

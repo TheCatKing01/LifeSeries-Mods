@@ -83,7 +83,7 @@ public class VoicechatMain implements VoicechatPlugin {
                 if (!tempMutedPlayers.contains(player.getUUID())) {
                     tempMutedPlayers.add(player.getUUID());
                 }
-                SimplePackets.MIC_MUTED.target(player).sendToClient(true);
+                SimplePackets.MIC_MUTED.sendToClient(true, player);
             }
         }
     }
@@ -97,7 +97,7 @@ public class VoicechatMain implements VoicechatPlugin {
                 if (player != null) {
                     if (!player.isSleeping()) {
                         tempMutedPlayers.remove(playerUUID);
-                        SimplePackets.MIC_MUTED.target(player).sendToClient(false);
+                        SimplePackets.MIC_MUTED.sendToClient(false, player);
                     }
                 }
             }
@@ -119,7 +119,7 @@ public class VoicechatMain implements VoicechatPlugin {
         }
     }
     private void roboticVoice(MicrophonePacketEvent event) {
-        if (currentSeason.getSeason() != Seasons.WILD_LIFE) {
+        if (!LifeSeries.isSeason(Seasons.WILD_LIFE)) {
             return;
         }
         if (!WildcardManager.isActiveWildcard(Wildcards.TRIVIA)) {
@@ -143,7 +143,7 @@ public class VoicechatMain implements VoicechatPlugin {
     }
 
     private void listeningPower(MicrophonePacketEvent event) {
-        if (currentSeason.getSeason() != Seasons.WILD_LIFE) {
+        if (!LifeSeries.isSeason(Seasons.WILD_LIFE)) {
             return;
         }
         if (Listening.listeningPlayers.isEmpty()) {

@@ -133,12 +133,13 @@ public class PlayerUtils {
     }
 
     public static List<ServerPlayer> getAllPlayers() {
+        LifeSeries.requireMainThread();
         List<ServerPlayer> result = new ArrayList<>();
         if (server == null) return result;
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (isFakePlayer(player)) continue;
-			result.add(player);
+            result.add(player);
         }
         return result;
     }
@@ -165,13 +166,14 @@ public class PlayerUtils {
         return server.getPlayerList().getPlayer(uuid);
     }
 
-    public static void applyResourcepack(ServerPlayer player) {
-        if (NetworkHandlerServer.wasHandshakeSuccessful(player)) return;
-        applyServerResourcepack(player);
+    public static void applyResourcepack(UUID uuid) {
+        if (NetworkHandlerServer.wasHandshakeSuccessful(uuid)) return;
+        applyServerResourcepack(uuid);
     }
 
-    public static void applyServerResourcepack(ServerPlayer player) {
+    public static void applyServerResourcepack(UUID uuid) {
         if (server == null) return;
+        ServerPlayer player = getPlayer(uuid);
         if (player == null) return;
         applySingleResourcepack(player, Season.RESOURCEPACK_MAIN_URL, Season.RESOURCEPACK_MAIN_SHA, "Life Series Resourcepack.");
         applySingleResourcepack(player, Season.RESOURCEPACK_MINIMAL_ARMOR_URL, Season.RESOURCEPACK_MINIMAL_ARMOR_SHA, "Life Series Resourcepack.");

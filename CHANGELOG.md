@@ -1,6 +1,5 @@
-Updated to Minecraft 26.2
-Improved Secret Life task picking.
-Switched snails skins to the new format and model.
-Fixed some Forge and NeoForge issues.
-Bug and crash fixes.
-New configs.
+A LOT of various crash fixes.
+Rewrote packet handling to hopefully improve stability.
+Fixed Flashback compatibility issues.
+Bug fixes.
+New Configs.

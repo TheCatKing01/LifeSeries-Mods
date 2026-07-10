@@ -1,6 +1,7 @@
 package net.mat0u5.lifeseries.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Season;
@@ -12,6 +13,7 @@ import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -83,7 +85,7 @@ public class GivelifeCommand extends Command {
         }
 
         int giveAmount = 1;
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
             giveAmount = -LimitedLife.NEW_DEATH_NORMAL.getSeconds();
         }
 
@@ -115,7 +117,8 @@ public class GivelifeCommand extends Command {
         ((IPlayer) self).ls$addLives(-giveAmount);
         livesManager.addToLivesNoUpdate(target, giveAmount);
         AnimationUtils.playTotemAnimation(self);
-        TaskScheduler.scheduleTask(Time.seconds(2), () -> livesManager.receiveLifeFromOtherPlayer(currentPlayerName, target, isRevive));
+        PlayerReference ref = PlayerReference.of(target);
+        TaskScheduler.scheduleTask(Time.seconds(2), () -> livesManager.receiveLifeFromOtherPlayer(currentPlayerName, ref.get(), isRevive));
 
         if (currentSeason instanceof DoubleLife doubleLife) {
             doubleLife.syncSoulboundLives(self);

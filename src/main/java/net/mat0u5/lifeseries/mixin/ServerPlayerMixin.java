@@ -12,6 +12,7 @@ import net.mat0u5.lifeseries.seasons.season.doublelife.DoubleLife;
 import net.mat0u5.lifeseries.seasons.season.nicelife.NiceLifeTriviaManager;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.player.NicknameManager;
 import net.minecraft.core.BlockPos;
@@ -48,6 +49,11 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import java.util.Collection;
 //? if <= 1.21.6
 //import net.mat0u5.lifeseries.entity.fakeplayer.FakePlayer;
+//? if >= 26.3 {
+/*import net.minecraft.world.attribute.BedRule;
+import net.minecraft.world.level.block.AbstractBedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+*///?}
 
 @Mixin(value = ServerPlayer.class, priority = 1)
 public class ServerPlayerMixin implements IPlayer {
@@ -57,10 +63,14 @@ public class ServerPlayerMixin implements IPlayer {
         if (LifeSeries.isClientOrDisabled()) return;
         ServerPlayer player = ls$get();
         if (blacklist == null) return;
-        
+
+        PlayerReference ref = PlayerReference.of(player);
         TaskScheduler.scheduleTask(1, () -> {
-            player.containerMenu.getItems().forEach(itemStack -> blacklist.processItemStack(player, itemStack));
-            PlayerUtils.updatePlayerInventory(player);
+            ServerPlayer playerNew = ref.get();
+            if (playerNew != null) {
+                playerNew.containerMenu.getItems().forEach(itemStack -> blacklist.processItemStack(playerNew, itemStack));
+                PlayerUtils.updatePlayerInventory(playerNew);
+            }
         });
     }
 
@@ -270,8 +280,12 @@ public class ServerPlayerMixin implements IPlayer {
 
 
     @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
+    //? if <= 26.2 {
     private void cancelStartSleep(BlockPos blockPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        if (LifeSeries.isLogicalNonDisabled() && currentSeason.getSeason() == Seasons.NICE_LIFE) {
+    //?} else {
+    /*private void cancelStartSleep(AbstractBedBlock bedBlock, BlockState bedBlockState, BedRule rule, BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+    *///?}
+        if (LifeSeries.isLogicalNonDisabled() && LifeSeries.isSeason(Seasons.NICE_LIFE)) {
             if (NiceLifeTriviaManager.triviaInProgress) {
                 cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
                 ((IPlayer)ls$get()).ls$message(ModifiableText.NICELIFE_SLEEP_FAIL_LATE.get(), true);

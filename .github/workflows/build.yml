@@ -3,9 +3,11 @@
 name: build
 
 on:
+
   push:
     branches:
       - sky-life
+  push
 
 jobs:
   notify:

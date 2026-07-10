@@ -59,7 +59,6 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,DEFAULT_LIVES
                 ,ONLY_TAKE_LIVES_IN_SESSION
                 ,TAB_LIST_SHOW_LIVES // Group
-                , LIVES_SYSTEM_DISABLED
 
                 ,MAX_PLAYER_HEALTH // Group
                 ,KEEP_INVENTORY
@@ -94,14 +93,19 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,GIVELIFE_COMMAND_ENABLED // Group
                 ,GROUP_FINAL_DEATH // Group
                 ,CUSTOM_ENCHANTER_ALGORITHM
-                ,MUTE_DEAD_PLAYERS
                 ,TAB_LIST_SHOW_DEAD_PLAYERS
                 ,GROUP_SPAWN_EGG // Group
                 ,GROUP_WATCHERS // Group
                 ,GROUP_SUBIN // Group
+                ,GROUP_MUTED // Group
 
 
                 //Group stuff
+
+                ,MUTE_DEAD_PLAYERS
+                ,WATCHERS_MUTED
+                ,MUTED_CHAT
+                ,MUTED_CHAT_ADMIN
                 ,SHOW_HEALTH_BELOW_NAME
                 ,BLACKLIST_ITEMS
                 ,BLACKLIST_RECIPES
@@ -159,15 +163,19 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 ,SPAWNER_RECIPE
 
                 ,WATCHERS_IN_TAB
-                ,WATCHERS_MUTED
                 ,SUBIN_CHANGE_SKIN
                 ,SUBIN_CHANGE_USERNAME
                 ,LIVES_LIFE_DIFF_MESSAGE
                 ,LIVES_RANDOMIZE
+                ,LIVES_RANDOMIZE_PSEUDORANDOM
                 ,LIVES_RANDOMIZE_MIN
                 ,LIVES_RANDOMIZE_MAX
                 , LIVES_RANDOMIZE_MINUTE
                 ,LIVES_LOSE_KILLS_ONLY
+
+                ,GROUP_DISABLE // Group
+                ,LIVES_SYSTEM_DISABLED
+                ,TEAMS_SYSTEM_DISABLED
         ));
     }
 
@@ -273,7 +281,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
             sendConfigEntry(player, teamEntry, index);
             index++;
         }
-        if (currentSeason.getSeason() == Seasons.SECRET_LIFE) {
+        if (LifeSeries.isSeason(Seasons.SECRET_LIFE)) {
             List<String> alreadySelected = SecretLifeUsedTasks.getUsedTasks(TaskManager.usedTasksConfig);
             for (String easyTask : TaskManager.easyTasks_all) {
 
@@ -301,7 +309,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 index++;
             }
         }
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+        if (LifeSeries.isSeason(Seasons.WILD_LIFE)) {
             for (TriviaQuestion question : TriviaWildcard.easyTrivia.tryGetTriviaQuestions()) {
                 List<String> info = new ArrayList<>();
                 info.add("easy");
@@ -342,7 +350,7 @@ public abstract class ConfigManager extends DefaultConfigValues {
                 index++;
             }
         }
-        if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+        if (LifeSeries.isSeason(Seasons.NICE_LIFE)) {
             for (TriviaQuestion question : NiceLifeTriviaManager.triviaQuestions.tryGetTriviaQuestions()) {
                 List<String> info = new ArrayList<>();
                 info.add("normal");

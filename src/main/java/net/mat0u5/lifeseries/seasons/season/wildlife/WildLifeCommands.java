@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.seasons.season.wildlife;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.entity.snail.Snail;
@@ -41,7 +42,7 @@ public class WildLifeCommands extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() == Seasons.WILD_LIFE;
+        return LifeSeries.isSeason(Seasons.WILD_LIFE);
     }
 
     @Override
@@ -426,7 +427,7 @@ public class WildLifeCommands extends Command {
         }
 
         sendCommandFeedback(source, ModifiableText.WILDLIFE_WILDCARD_GUI_OPEN.get());
-        SimplePackets.SELECT_WILDCARDS.target(source.getPlayer()).sendToClient();
+        SimplePackets.SELECT_WILDCARDS.sendToClient(source.getPlayer());
         return 1;
     }
 

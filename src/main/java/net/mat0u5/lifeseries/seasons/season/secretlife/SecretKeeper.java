@@ -3,8 +3,10 @@ package net.mat0u5.lifeseries.seasons.season.secretlife;
 import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.*;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
@@ -74,41 +76,50 @@ public class SecretKeeper {
 		Vec3 spawnPos = OtherUtils.getCenter(itemSpawnerPos);
 		for (int i = 0; i <= itemsNum; i++) {
 			if (i == 0) continue;
+			PlayerReference ref = PlayerReference.of(player);
 			TaskScheduler.scheduleTask(3*i, () -> {
-				server.overworld().playSound(null, spawnPos.x(), spawnPos.y(), spawnPos.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, 1.0F);
+				ServerPlayer playerNew = ref.get();
+				if (playerNew != null) {
+					server.overworld().playSound(null, spawnPos.x(), spawnPos.y(), spawnPos.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, 1.0F);
 
-				List<ItemStack> lootTableItems = new ArrayList<>();
+					List<ItemStack> lootTableItems = new ArrayList<>();
 
-				if (taskType == TaskTypes.HARD) {
-					lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), player, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable_hard"), true);
-				}
-				else if (taskType == TaskTypes.RED) {
-					lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), player, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable_red"), true);
-				}
+					if (taskType == TaskTypes.HARD) {
+						lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), playerNew, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable_hard"), true);
+					}
+					else if (taskType == TaskTypes.RED) {
+						lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), playerNew, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable_red"), true);
+					}
 
-				if (taskType == TaskTypes.EASY || lootTableItems.isEmpty()) {
-					lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), player, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable"), false);
-				}
+					if (taskType == TaskTypes.EASY || lootTableItems.isEmpty()) {
+						lootTableItems = ItemSpawner.getRandomItemsFromLootTable(server, server.overworld(), playerNew, IdentifierHelper.of("lifeseriesdynamic", "task_reward_loottable"), false);
+					}
 
-				if (!lootTableItems.isEmpty()) {
-					for (ItemStack item : lootTableItems) {
-						ItemStackUtils.spawnItemForPlayer(server.overworld(), spawnPos, item, player);
+					if (!lootTableItems.isEmpty()) {
+						for (ItemStack item : lootTableItems) {
+							ItemStackUtils.spawnItemForPlayer(server.overworld(), spawnPos, item, playerNew);
+						}
+					}
+					else {
+						ItemStack randomItem = season.itemSpawner.getRandomItem();
+						ItemStackUtils.spawnItemForPlayer(server.overworld(), spawnPos, randomItem, playerNew);
 					}
 				}
-				else {
-					ItemStack randomItem = season.itemSpawner.getRandomItem();
-					ItemStackUtils.spawnItemForPlayer(server.overworld(), spawnPos, randomItem, player);
-				}
-
 			});
 		}
 		TaskScheduler.scheduleTask(3*itemsNum+20, () -> secretKeeperBeingUsed = false);
 	}
 
-	public static boolean isBeingUsed(ServerPlayer player) {
-		if (!secretKeeperBeingUsed) return false;
-		((IPlayer) player).ls$message(ModifiableText.SECRETLIFE_SECRETKEEPER_INUSE.get());
-		return true;
+	public static boolean preventSecretKeeper(ServerPlayer player) {
+		if (((IPlayer) player).ls$isDead()) {
+			((IPlayer) player).ls$message(ModifiableText.SECRETLIFE_SECRETKEEPER_CANNOT.get());
+			return true;
+		}
+		if (secretKeeperBeingUsed) {
+			((IPlayer) player).ls$message(ModifiableText.SECRETLIFE_SECRETKEEPER_INUSE.get());
+			return true;
+		}
+		return false;
 	}
 
 
@@ -133,14 +144,15 @@ public class SecretKeeper {
 		if (server == null) return;
 		if (!fromCommand) {
 			if (!hasSessionStarted(player)) return;
-			if (isBeingUsed(player)) return;
+			if (preventSecretKeeper(player)) return;
 		}
 		TaskTypes type = getPlayersTaskType(player);
 		if (!hasTaskBookCheck(player, !fromCommand)) return;
+		UUID uuid = SubInManager.getOrSub(player);
 		if (!fromCommand) {
 			if (TASKS_NEED_CONFIRMATION) {
-				if (!pendingConfirmationTasks.contains(player.getUUID())) {
-					pendingConfirmationTasks.add(player.getUUID());
+				if (!pendingConfirmationTasks.contains(uuid)) {
+					pendingConfirmationTasks.add(uuid);
 					PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_TASK_PENDING.get(player));
 					PlayerUtils.broadcastMessageToAdmins(getShowTaskMessage(player));
 					PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_TASK_PENDING_ACCEPT.get(TextUtils.runCommandText("/task succeed "+player.getScoreboardName())));
@@ -149,7 +161,7 @@ public class SecretKeeper {
 				return;
 			}
 		}
-		pendingConfirmationTasks.remove(player.getUUID());
+		pendingConfirmationTasks.remove(uuid);
 		if (BROADCAST_SECRET_KEEPER) {
 			PlayerUtils.broadcastMessage(ModifiableText.SECRETLIFE_TASK_SUCCEED.get(player));
 		}
@@ -162,7 +174,8 @@ public class SecretKeeper {
 	public static void succeedTask(ServerPlayer player, TaskTypes type) {
 		SessionTranscript.successTask(player);
 		removePlayersTaskBook(player);
-		submittedOrFailed.add(player.getUUID());
+		UUID uuid = SubInManager.getOrSub(player);
+		submittedOrFailed.add(uuid);
 		secretKeeperBeingUsed = true;
 
 		Vec3 centerPos = OtherUtils.getCenter(itemSpawnerPos);
@@ -170,6 +183,7 @@ public class SecretKeeper {
 		TaskScheduler.scheduleTask(60, () -> {
 			AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 45);
 		});
+		PlayerReference ref = PlayerReference.of(player);
 		TaskScheduler.scheduleTask(130, () -> {
 			//? if < 1.21 {
 			/*server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -177,17 +191,20 @@ public class SecretKeeper {
 			server.overworld().playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.TRIAL_SPAWNER_EJECT_ITEM, SoundSource.PLAYERS, 1.0F, 1.0F);
 			//?}
 			AnimationUtils.spawnFireworkBall(server.overworld(), centerPos, 40, 0.3, new Vector3f(0, 1, 0));
-			if (type == TaskTypes.EASY) {
-				showHeartTitle(player, EASY_SUCCESS);
-				rewardHealth(player, EASY_SUCCESS, type);
-			}
-			if (type == TaskTypes.HARD) {
-				showHeartTitle(player, HARD_SUCCESS);
-				rewardHealth(player, HARD_SUCCESS, type);
-			}
-			if (type == TaskTypes.RED) {
-				showHeartTitle(player, RED_SUCCESS);
-				rewardHealth(player, RED_SUCCESS, type);
+			ServerPlayer playerNew = ref.get();
+			if (playerNew != null) {
+				if (type == TaskTypes.EASY) {
+					showHeartTitle(playerNew, EASY_SUCCESS);
+					rewardHealth(playerNew, EASY_SUCCESS, type);
+				}
+				if (type == TaskTypes.HARD) {
+					showHeartTitle(playerNew, HARD_SUCCESS);
+					rewardHealth(playerNew, HARD_SUCCESS, type);
+				}
+				if (type == TaskTypes.RED) {
+					showHeartTitle(playerNew, RED_SUCCESS);
+					rewardHealth(playerNew, RED_SUCCESS, type);
+				}
 			}
 		});
 		DatapackIntegration.EVENT_TASK_SUCCEED.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
@@ -197,7 +214,7 @@ public class SecretKeeper {
 	public static void clickReroll(ServerPlayer player, boolean fromCommand) {
 		if (!fromCommand) {
 			if (!hasSessionStarted(player)) return;
-			if (isBeingUsed(player)) return;
+			if (preventSecretKeeper(player)) return;
 		}
 		TaskTypes type = getPlayersTaskType(player);
 		if (!hasTaskBookCheck(player, !fromCommand)) return;
@@ -238,23 +255,27 @@ public class SecretKeeper {
 		PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
 		PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT1.get(),20,35,0);
 
+		PlayerReference ref = PlayerReference.of(player);
 		TaskScheduler.scheduleTask(35, () -> {
-			PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-			PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT2.get(),20,35,0);
+			ServerPlayer playerNew = ref.get();
+			PlayerUtils.playSoundToPlayer(playerNew, SoundEvents.UI_BUTTON_CLICK.value());
+			PlayerUtils.sendTitle(playerNew, ModifiableText.SECRETLIFE_TASK_REROLL_PT2.get(),20,35,0);
 		});
 		TaskScheduler.scheduleTask(70, () -> {
-			PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-			PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT3.get(),20,35,0);
+			ServerPlayer playerNew = ref.get();
+			PlayerUtils.playSoundToPlayer(playerNew, SoundEvents.UI_BUTTON_CLICK.value());
+			PlayerUtils.sendTitle(playerNew, ModifiableText.SECRETLIFE_TASK_REROLL_PT3.get(),20,35,0);
 		});
 		TaskScheduler.scheduleTask(105, () -> {
-			PlayerUtils.playSoundToPlayer(player, SoundEvents.UI_BUTTON_CLICK.value());
-			PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_TASK_REROLL_PT4.get(),20,30,0);
+			ServerPlayer playerNew = ref.get();
+			PlayerUtils.playSoundToPlayer(playerNew, SoundEvents.UI_BUTTON_CLICK.value());
+			PlayerUtils.sendTitle(playerNew, ModifiableText.SECRETLIFE_TASK_REROLL_PT4.get(),20,30,0);
 		});
 		TaskScheduler.scheduleTask(140, () -> {
-			AnimationUtils.playSecretLifeTotemAnimation(player, false);
+			AnimationUtils.playSecretLifeTotemAnimation(ref.get(), false);
 		});
 		TaskScheduler.scheduleTask(175, () -> {
-			assignRandomTaskToPlayer(player, newType);
+			assignRandomTaskToPlayer(ref.get(), newType);
 			secretKeeperBeingUsed = false;
 		});
 		DatapackIntegration.EVENT_TASK_REROLL.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
@@ -265,7 +286,7 @@ public class SecretKeeper {
 		if (server == null) return;
 		if (!fromCommand) {
 			if (!hasSessionStarted(player)) return;
-			if (isBeingUsed(player)) return;
+			if (preventSecretKeeper(player)) return;
 		}
 		SecretLife season = (SecretLife) currentSeason;
 		TaskTypes type = getPlayersTaskType(player);
@@ -283,7 +304,8 @@ public class SecretKeeper {
 		SecretLife season = (SecretLife) currentSeason;
 		SessionTranscript.failTask(player);
 		removePlayersTaskBook(player);
-		submittedOrFailed.add(player.getUUID());
+		UUID uuid = SubInManager.getOrSub(player);
+		submittedOrFailed.add(uuid);
 		secretKeeperBeingUsed = true;
 
 		Vec3 centerPos = OtherUtils.getCenter(itemSpawnerPos);
@@ -292,22 +314,26 @@ public class SecretKeeper {
 		TaskScheduler.scheduleTask(60, () -> {
 			AnimationUtils.createGlyphAnimation(server.overworld(), centerPos, 45);
 		});
+		PlayerReference ref = PlayerReference.of(player);
 		TaskScheduler.scheduleTask(140, () -> {
 			AnimationUtils.spawnFireworkBall(server.overworld(), centerPos, 40, 0.3, new Vector3f(1, 0, 0));
-			if (type == TaskTypes.EASY) {
-				showHeartTitle(player, EASY_FAIL);
-				season.removePlayerHealth(player, -EASY_FAIL);
-			}
-			if (type == TaskTypes.HARD) {
-				showHeartTitle(player, HARD_FAIL);
-				season.removePlayerHealth(player, -HARD_FAIL);
-			}
-			if (type == TaskTypes.RED) {
-				showHeartTitle(player, RED_FAIL);
-				season.removePlayerHealth(player, -RED_FAIL);
-			}
-			if (!((IPlayer) player).ls$isOnLastLife(false)) {
-				secretKeeperBeingUsed = false;
+			ServerPlayer playerNew = ref.get();
+			if (playerNew != null) {
+				if (type == TaskTypes.EASY) {
+					showHeartTitle(playerNew, EASY_FAIL);
+					season.removePlayerHealth(playerNew, -EASY_FAIL);
+				}
+				if (type == TaskTypes.HARD) {
+					showHeartTitle(playerNew, HARD_FAIL);
+					season.removePlayerHealth(playerNew, -HARD_FAIL);
+				}
+				if (type == TaskTypes.RED) {
+					showHeartTitle(playerNew, RED_FAIL);
+					season.removePlayerHealth(playerNew, -RED_FAIL);
+				}
+				if (!((IPlayer) playerNew).ls$isOnLastLife(false)) {
+					secretKeeperBeingUsed = false;
+				}
 			}
 		});
 		DatapackIntegration.EVENT_TASK_FAIL.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
@@ -319,11 +345,12 @@ public class SecretKeeper {
 
 		Task task = null;
 
-		if (hasTaskBookCheck(player, false) && assignedTasks.containsKey(player.getUUID())) {
-			task = assignedTasks.get(player.getUUID());
+		UUID uuid = SubInManager.getOrSub(player);
+		if (hasTaskBookCheck(player, false) && assignedTasks.containsKey(uuid)) {
+			task = assignedTasks.get(uuid);
 		}
-		else if (preAssignedTasks.containsKey(player.getUUID())) {
-			task = preAssignedTasks.get(player.getUUID());
+		else if (preAssignedTasks.containsKey(uuid)) {
+			task = preAssignedTasks.get(uuid);
 		}
 
 		if (task == null) return Component.empty();
@@ -342,9 +369,13 @@ public class SecretKeeper {
 	public static void chooseNewTaskForPlayerIfNecessary(ServerPlayer player) {
 		if (currentSession.statusFinished()) return;
 		if (((IPlayer) player).ls$isOnLastLife(false) || CONSTANT_TASKS) {
+			PlayerReference ref = PlayerReference.of(player);
 			TaskScheduler.scheduleTask(Time.seconds(6), () -> {
-				TaskTypes newType = ((IPlayer) player).ls$isOnLastLife(false) ? TaskTypes.RED : TaskTypes.EASY;
-				chooseTasks(List.of(player), newType);
+				ServerPlayer playerNew = ref.get();
+				if (playerNew != null) {
+					TaskTypes newType = ((IPlayer) playerNew).ls$isOnLastLife(false) ? TaskTypes.RED : TaskTypes.EASY;
+					chooseTasks(List.of(playerNew), newType);
+				}
 			});
 		}
 	}

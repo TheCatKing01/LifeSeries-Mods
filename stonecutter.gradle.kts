@@ -16,6 +16,21 @@ plugins {
 
 stonecutter active file(".sc_active_version")
 
+val cleanOutput by tasks.registering(Delete::class) {
+	val versionName = project.findProperty("mod.version")?.toString()
+	val versionPrefix = project.findProperty("mod.version_prefix")?.toString()
+	val versionSuffix = project.findProperty("mod.version_suffix")?.toString()
+	val version = versionPrefix+versionName+versionSuffix
+	delete(fileTree(rootProject.layout.projectDirectory.dir("output/"+ version)))
+}
+
+allprojects {
+	tasks.withType<Delete>().configureEach {
+		if (name == "clean") {
+			dependsOn(cleanOutput)
+		}
+	}
+}
 
 for (version in stonecutter.versions.map { it.version }.distinct()) tasks.register("publish$version") {
 	group = "publishing"

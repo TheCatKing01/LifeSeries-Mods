@@ -70,10 +70,13 @@ public class GuiMixin {
     *///?} else if <= 1.21.11 {
     /*@Redirect(method = "renderHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
     private void customHearts(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
-    *///?} else {
+    *///?} else if <= 26.2 {
     @Redirect(method = "extractHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
     private void customHearts(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
-    //?}
+    //?} else {
+    /*@Redirect(method = "extractHeart", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private void customHearts(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
+    *///?}
 
         String texturePath = identifier.getPath();
         String playerTeamColor = ClientUtils.getPlayerTeamColor();
@@ -81,7 +84,7 @@ public class GuiMixin {
         if (!LifeSeriesClient.COLORED_HEARTS || playerTeamColor == null || playerTeamName == null ||
                 !RenderUtils.lifeSkinsAllowedColors.contains(playerTeamColor.toLowerCase(Locale.ROOT)) ||
                 !RenderUtils.lifeSkinsAllowedHearts.contains(texturePath) || LifeSeries.modFullyDisabled()) {
-            if (LifeSeriesClient.clientCurrentSeason == Seasons.SECRET_LIFE && texturePath.startsWith("hud/heart/container")) {
+            if (LifeSeries.isSeason(Seasons.SECRET_LIFE) && texturePath.startsWith("hud/heart/container")) {
                 return;
             }
             //? if <= 1.20 {
@@ -133,7 +136,7 @@ public class GuiMixin {
     *///?} else {
     private void ls$afterHeartDraw(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier identifier, int x, int y, int u, int v) {
     //?}
-        if (LifeSeriesClient.clientCurrentSeason != Seasons.SECRET_LIFE || LifeSeries.modFullyDisabled()) {
+        if (!LifeSeries.isSeason(Seasons.SECRET_LIFE) || LifeSeries.modFullyDisabled()) {
             return;
         }
         String name = identifier.getPath();
@@ -159,7 +162,7 @@ public class GuiMixin {
     //? if <= 1.20.3 {
     /*@WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getSleepTimer()I"))
     private int stopSleepDarkness(LocalPlayer instance, Operation<Integer> original) {
-        if (!LifeSeries.modDisabled() && LifeSeriesClient.clientCurrentSeason == Seasons.NICE_LIFE && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
+        if (!LifeSeries.modDisabled() && LifeSeries.isSeason(Seasons.NICE_LIFE) && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
             return 0;
         }
         return original.call(instance);
@@ -167,21 +170,21 @@ public class GuiMixin {
     *///?} else if <= 1.20.5 {
     /*@Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
     private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, float f, CallbackInfo ci) {
-        if (!LifeSeries.modDisabled() && LifeSeriesClient.clientCurrentSeason == Seasons.NICE_LIFE && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
+        if (!LifeSeries.modDisabled() && LifeSeries.isSeason(Seasons.NICE_LIFE) && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
             ci.cancel();
         }
     }
     *///?} else if <= 1.21.11 {
     /*@Inject(method = "renderSleepOverlay", at = @At("HEAD"), cancellable = true)
     private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!LifeSeries.modDisabled() && LifeSeriesClient.clientCurrentSeason == Seasons.NICE_LIFE && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
+        if (!LifeSeries.modDisabled() && LifeSeries.isSeason(Seasons.NICE_LIFE) && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
             ci.cancel();
         }
     }
     *///?} else {
     @Inject(method = "extractSleepOverlay", at = @At("HEAD"), cancellable = true)
     private void stopSleepDarkness(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!LifeSeries.modDisabled() && LifeSeriesClient.clientCurrentSeason == Seasons.NICE_LIFE && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
+        if (!LifeSeries.modDisabled() && LifeSeries.isSeason(Seasons.NICE_LIFE) && !(RenderUtils.getScreen() instanceof InBedChatScreen) && LifeSeriesClient.hideSleepDarkness) {
             ci.cancel();
         }
     }

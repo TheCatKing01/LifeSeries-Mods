@@ -7,12 +7,14 @@ import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.seasons.session.SessionAction;
 import net.mat0u5.lifeseries.seasons.session.SessionStatus;
 import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
+import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.OtherUtils;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.AttributeUtils;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.ItemSpawner;
 import net.mat0u5.lifeseries.utils.world.ItemStackUtils;
@@ -116,6 +118,7 @@ public class SecretLife extends Season {
     @Override
     public void onPlayerRespawn(ServerPlayer player) {
         super.onPlayerRespawn(player);
+        UUID uuid = SubInManager.getOrSub(player);
         if (giveBookOnRespawn.containsKey(player.getUUID())) {
             ItemStack book = giveBookOnRespawn.get(player.getUUID());
             giveBookOnRespawn.remove(player.getUUID());
@@ -123,8 +126,11 @@ public class SecretLife extends Season {
                 player.getInventory().add(book);
             }
         }
+
+        if (((IPlayer) player).ls$isDead()) return;
+
         TaskTypes type = TaskManager.getPlayersTaskType(player);
-        if (((IPlayer) player).ls$isOnLastLife(false) && TaskManager.submittedOrFailed.contains(player.getUUID()) && type == null && currentSession.statusStarted()) {
+        if (((IPlayer) player).ls$isOnLastLife(false) && TaskManager.submittedOrFailed.contains(uuid) && type == null && currentSession.statusStarted()) {
             TaskManager.chooseTasks(List.of(player), TaskTypes.RED);
         }
     }
@@ -280,7 +286,8 @@ public class SecretLife extends Season {
         if (player.hasEffect(MobEffects.HEALTH_BOOST)) {
             player.removeEffect(MobEffects.HEALTH_BOOST);
         }
-        TaskScheduler.scheduleTask(1, () -> syncPlayerHealth(player));
+        PlayerReference ref = PlayerReference.of(player);
+        TaskScheduler.scheduleTask(1, () -> syncPlayerHealth(ref.get()));
     }
 
     @Override
@@ -293,8 +300,14 @@ public class SecretLife extends Season {
     public void onPlayerJoin(ServerPlayer player) {
         super.onPlayerJoin(player);
 
-        if (TaskManager.tasksChosen && !TaskManager.tasksChosenFor.contains(player.getUUID())) {
-            TaskScheduler.scheduleTask(Time.seconds(5), () -> TaskManager.chooseTasks(List.of(player), null));
+        if (((IPlayer) player).ls$isDead()) return;
+        UUID uuid = SubInManager.getOrSub(player);
+        if (TaskManager.tasksChosen && !TaskManager.tasksChosenFor.contains(uuid)) {
+            PlayerReference ref = PlayerReference.of(player);
+            TaskScheduler.scheduleTask(Time.seconds(5), () -> {
+                ServerPlayer playerNew = ref.get();
+                if (playerNew != null) TaskManager.chooseTasks(List.of(playerNew), null);
+            });
         }
     }
 
@@ -313,6 +326,9 @@ public class SecretLife extends Season {
 
     @Override
     public boolean sessionStart() {
+        TaskScheduler.scheduleTask(200, () -> {
+            PlayerUtils.broadcastMessageToAdmins(ModifiableText.SECRETLIFE_SESSION_START_INFO.get(TextUtils.openURLText("https://mat0u5.github.io/LifeSeries-docs/dev/seasons/secret-life.html#task-selection")));
+        });
         if (SecretKeeper.checkSecretLifePositions()) {
             super.sessionStart();
             SecretLifeCommands.playersGiven.clear();
@@ -345,8 +361,9 @@ public class SecretLife extends Season {
         super.sessionEnd();
         List<String> playersWithTaskBooks = new ArrayList<>();
         for (ServerPlayer player : livesManager.getNonRedPlayers()) {
+            UUID uuid = SubInManager.getOrSub(player);
             if (((IPlayer) player).ls$isDead()) continue;
-            if (TaskManager.submittedOrFailed.contains(player.getUUID())) continue;
+            if (TaskManager.submittedOrFailed.contains(uuid)) continue;
             if (TaskManager.CONSTANT_TASKS) continue;
             playersWithTaskBooks.add(player.getScoreboardName());
         }
@@ -366,17 +383,18 @@ public class SecretLife extends Season {
     @Override
     public void onPlayerKilledByPlayer(ServerPlayer victim, ServerPlayer killer) {
         super.onPlayerKilledByPlayer(victim, killer);
-        checkKillHeartGain(killer);
+        checkKillHeartGain(killer, victim);
     }
 
     @Override
     public void onClaimKill(ServerPlayer killer, ServerPlayer victim) {
         super.onClaimKill(killer, victim);
-        checkKillHeartGain(killer);
+        checkKillHeartGain(killer, victim);
     }
 
-    public void checkKillHeartGain(ServerPlayer player) {
+    public void checkKillHeartGain(ServerPlayer player, ServerPlayer victim) {
         if (!((IPlayer) player).ls$isOnLastLife(false)) return;
+        if (((IPlayer) victim).ls$isDead()) return;
         double amountGained = Math.min(Math.max(MAX_KILL_HEALTH, MAX_HEALTH) - getPlayerHealth(player), 20);
         if (amountGained > 0) {
             addPlayerHealth(player, amountGained);
@@ -385,7 +403,7 @@ public class SecretLife extends Season {
             String roundedHeartsStr = String.valueOf(roundedHearts);
             if (roundedGained % 2 == 0) roundedHeartsStr = String.valueOf((int)roundedHearts);
             if (roundedGained >= 0) {
-                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_ADD.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
+                PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_ADD_RED.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);
             }
             else {
                 PlayerUtils.sendTitle(player, ModifiableText.SECRETLIFE_HEART_REMOVE.get(roundedHeartsStr, TextUtils.pluralize("Heart", roundedHearts)), 0, 40, 20);

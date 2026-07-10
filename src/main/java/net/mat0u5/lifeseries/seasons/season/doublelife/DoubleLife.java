@@ -13,6 +13,8 @@ import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IHungerManager;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.*;
+import net.mat0u5.lifeseries.utils.player.PlayerListReference;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
@@ -207,7 +209,12 @@ public class DoubleLife extends Season {
     }
 
     public boolean isMainSoulmate(ServerPlayer player) {
-		return soulmatesOrdered.containsKey(player.getUUID());
+        UUID playerUUID = player.getUUID();
+        if (SubInManager.isSubbingIn(playerUUID)) {
+            playerUUID = SubInManager.getSubstitutedPlayerUUID(playerUUID);
+        }
+        if (playerUUID == null) return false;
+        return soulmatesOrdered.containsKey(playerUUID);
     }
 
     public boolean hasSoulmate(ServerPlayer player) {
@@ -215,6 +222,9 @@ public class DoubleLife extends Season {
         return hasSoulmate(player.getUUID());
     }
     public boolean hasSoulmate(UUID playerUUID) {
+        if (SubInManager.isSubbingIn(playerUUID)) {
+            playerUUID = SubInManager.getSubstitutedPlayerUUID(playerUUID);
+        }
         if (playerUUID == null) return false;
         return soulmates.containsKey(playerUUID);
     }
@@ -225,8 +235,14 @@ public class DoubleLife extends Season {
 
     public boolean isSoulmateOnline(UUID playerUUID) {
         if (!hasSoulmate(playerUUID)) return false;
+        if (SubInManager.isSubbingIn(playerUUID)) {
+            playerUUID = SubInManager.getSubstitutedPlayerUUID(playerUUID);
+        }
         if (playerUUID == null) return false;
         UUID soulmateUUID = soulmates.get(playerUUID);
+        if (SubInManager.isBeingSubstituted(soulmateUUID)) {
+            soulmateUUID = SubInManager.getSubstitutingPlayerUUID(soulmateUUID);
+        }
         return PlayerUtils.getPlayer(soulmateUUID) != null;
     }
 
@@ -238,21 +254,39 @@ public class DoubleLife extends Season {
     @Nullable
     public ServerPlayer getSoulmate(UUID playerUUID) {
         if (!isSoulmateOnline(playerUUID)) return null;
+        if (SubInManager.isSubbingIn(playerUUID)) {
+            playerUUID = SubInManager.getSubstitutedPlayerUUID(playerUUID);
+        }
         if (playerUUID == null) return null;
         UUID soulmateUUID = soulmates.get(playerUUID);
+        if (SubInManager.isBeingSubstituted(soulmateUUID)) {
+            soulmateUUID = SubInManager.getSubstitutingPlayerUUID(soulmateUUID);
+        }
         return PlayerUtils.getPlayer(soulmateUUID);
     }
 
     @Nullable
     public UUID getSoulmateUUID(UUID playerUUID) {
         if (playerUUID == null) return null;
+        if (SubInManager.isSubbingIn(playerUUID)) {
+            playerUUID = SubInManager.getSubstitutedPlayerUUID(playerUUID);
+        }
         if (playerUUID == null) return null;
         if (!soulmates.containsKey(playerUUID)) return null;
         UUID soulmateUUID = soulmates.get(playerUUID);
+        if (SubInManager.isBeingSubstituted(soulmateUUID)) {
+            soulmateUUID = SubInManager.getSubstitutingPlayerUUID(soulmateUUID);
+        }
         return soulmateUUID;
     }
 
     public void setOfflineSoulmate(UUID player1UUID, UUID player2UUID) {
+        if (SubInManager.isSubbingIn(player1UUID)) {
+            player1UUID = SubInManager.getSubstitutedPlayerUUID(player1UUID);
+        }
+        if (SubInManager.isSubbingIn(player2UUID)) {
+            player2UUID = SubInManager.getSubstitutedPlayerUUID(player2UUID);
+        }
         soulmates.put(player1UUID, player2UUID);
         soulmates.put(player2UUID, player1UUID);
         updateOrderedSoulmates();
@@ -264,6 +298,12 @@ public class DoubleLife extends Season {
     public void setSoulmate(ServerPlayer player1, ServerPlayer player2) {
         UUID player1UUID = player1.getUUID();
         UUID player2UUID = player2.getUUID();
+        if (SubInManager.isSubbingIn(player1UUID)) {
+            player1UUID = SubInManager.getSubstitutedPlayerUUID(player1UUID);
+        }
+        if (SubInManager.isSubbingIn(player2UUID)) {
+            player2UUID = SubInManager.getSubstitutedPlayerUUID(player2UUID);
+        }
 
         soulmates.put(player1UUID, player2UUID);
         soulmates.put(player2UUID, player1UUID);
@@ -316,21 +356,25 @@ public class DoubleLife extends Season {
         }
         PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
         PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_3.get(),5,20,5);
+        PlayerListReference ref = PlayerListReference.of(playersToRoll);
         TaskScheduler.scheduleTask(25, () -> {
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_2.get(),5,20,5);
+            var listNew = ref.get();
+            PlayerUtils.playSoundToPlayers(listNew, SoundEvents.UI_BUTTON_CLICK.value());
+            PlayerUtils.sendTitleToPlayers(listNew, ModifiableText.COUNTDOWN_GREEN_2.get(),5,20,5);
         });
         TaskScheduler.scheduleTask(50, () -> {
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvents.UI_BUTTON_CLICK.value());
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.COUNTDOWN_GREEN_1.get(),5,20,5);
+            var listNew = ref.get();
+            PlayerUtils.playSoundToPlayers(listNew, SoundEvents.UI_BUTTON_CLICK.value());
+            PlayerUtils.sendTitleToPlayers(listNew, ModifiableText.COUNTDOWN_GREEN_1.get(),5,20,5);
         });
         TaskScheduler.scheduleTask(75, () -> {
-            PlayerUtils.sendTitleToPlayers(playersToRoll, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(),10,50,20);
-            PlayerUtils.playSoundToPlayers(playersToRoll, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
+            var listNew = ref.get();
+            PlayerUtils.sendTitleToPlayers(listNew, ModifiableText.DOUBLELIFE_SOULMATE_TITLE.get(),10,50,20);
+            PlayerUtils.playSoundToPlayers(listNew, SoundEvent.createVariableRangeEvent(IdentifierHelper.vanilla("doublelife_soulmate_wait")));
         });
         TaskScheduler.scheduleTask(165, () -> {
             chooseRandomSoulmates();
-            for (ServerPlayer player : playersToRoll) {
+            for (ServerPlayer player : ref.get()) {
                 Component text = ModifiableText.DOUBLELIFE_SOULMATE_TITLE_UNKNOWN.get();
                 if (hasSoulmate(player) && ANNOUNCE_SOULMATES) {
                     ServerPlayer soulmate = getSoulmate(player);
@@ -433,7 +477,9 @@ public class DoubleLife extends Season {
 
         float newHealth = Math.min(soulmate.getHealth() + amount, soulmate.getMaxHealth());
         soulmate.setHealth(newHealth);
-        TaskScheduler.scheduleTask(1,()-> syncPlayers(player, soulmate));
+        PlayerReference playerRef = PlayerReference.of(player);
+        PlayerReference soulmateRef = PlayerReference.of(soulmate);
+        TaskScheduler.scheduleTask(1,()-> syncPlayers(playerRef.get(), soulmateRef.get()));
     }
 
     @Override
@@ -480,7 +526,9 @@ public class DoubleLife extends Season {
         if (newHealth <= 0.0F) newHealth = 0.01F;
         soulmate.setHealth(newHealth);
 
-        TaskScheduler.scheduleTask(1,() -> syncPlayers(player, soulmate));
+        PlayerReference playerRef = PlayerReference.of(player);
+        PlayerReference soulmateRef = PlayerReference.of(soulmate);
+        TaskScheduler.scheduleTask(1,() -> syncPlayers(playerRef.get(), soulmateRef.get()));
     }
 
     @Override
@@ -704,10 +752,12 @@ public class DoubleLife extends Season {
     }
 
     public void syncStatusEffectsFrom(ServerPlayer player, MobEffectInstance effect, boolean add) {
-        TaskScheduler.scheduleTask(0, () -> delayedSyncStatusEffectsFrom(player, effect, add));
+        PlayerReference ref = PlayerReference.of(player);
+        TaskScheduler.scheduleTask(0, () -> delayedSyncStatusEffectsFrom(ref.get(), effect, add));
     }
 
     public void delayedSyncStatusEffectsFrom(ServerPlayer player, MobEffectInstance effect, boolean add) {
+        if (player == null) return;
         if (!SOULBOUND_EFFECTS) return;
         ServerPlayer soulmate = getSoulmate(player);
         if (soulmate == null) return;
@@ -735,18 +785,27 @@ public class DoubleLife extends Season {
             if (hasSoulmate(player1) && hasSoulmate(player2)) {
                 if (getSoulmate(player1) == player2) {
                     resetSoulmate(player1);
-                    List<ServerPlayer> allPlayers = PlayerUtils.getAllPlayers();
+                    PlayerListReference allPlayersRef = PlayerListReference.of(PlayerUtils.getAllPlayers());
+                    PlayerReference ref1 = PlayerReference.of(player1);
+                    PlayerReference ref2 = PlayerReference.of(player2);
+
                     TaskScheduler.scheduleTask(Time.seconds(10), () -> {
-                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, ModifiableText.DOUBLELIFE_LASTPAIR_PT1_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT1_SUBTITLE.get(), 20, 40, 20);
+                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayersRef.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT1_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT1_SUBTITLE.get(), 20, 40, 20);
                     });
                     TaskScheduler.scheduleTask(Time.seconds(15), () -> {
-                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayers, ModifiableText.DOUBLELIFE_LASTPAIR_PT2_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT2_SUBTITLE.get(), 20, 40, 20);
+                        PlayerUtils.sendTitleWithSubtitleToPlayers(allPlayersRef.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT2_TITLE.get(), ModifiableText.DOUBLELIFE_LASTPAIR_PT2_SUBTITLE.get(), 20, 40, 20);
                     });
                     TaskScheduler.scheduleTask(Time.seconds(19), () -> {
-                        LevelUtils.summonHarmlessLightning(player1);
-                        LevelUtils.summonHarmlessLightning(player2);
-                        ((IPlayer) player1).ls$hurt(player1.damageSources().lightningBolt(), 0.0000001F);
-                        ((IPlayer) player2).ls$hurt(player2.damageSources().lightningBolt(), 0.0000001F);
+                        ServerPlayer player1New = ref1.get();
+                        ServerPlayer player2New = ref2.get();
+                        if (player1New != null) {
+                            LevelUtils.summonHarmlessLightning(player1New);
+                            ((IPlayer) player1New).ls$hurt(player1New.damageSources().lightningBolt(), 0.0000001F);
+                        }
+                        if (player2New != null) {
+                            LevelUtils.summonHarmlessLightning(player2New);
+                            ((IPlayer) player2New).ls$hurt(player2New.damageSources().lightningBolt(), 0.0000001F);
+                        }
                     });
                 }
             }

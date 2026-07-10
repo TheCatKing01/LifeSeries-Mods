@@ -2,6 +2,7 @@ package net.mat0u5.lifeseries.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.NetworkHandlerServer;
@@ -25,7 +26,7 @@ public class SessionCommand extends Command {
 
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() != Seasons.UNASSIGNED;
+        return !LifeSeries.isSeason(Seasons.UNASSIGNED);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class SessionCommand extends Command {
 
         if (self == null) return -1;
         if (NetworkHandlerServer.wasHandshakeSuccessful(self)) {
-            SimplePackets.TOGGLE_TIMER.target(self).sendToClient();
+            SimplePackets.TOGGLE_TIMER.sendToClient(self);
         }
 
         boolean isInDisplayTimer = currentSession.isInDisplayTimer(self);

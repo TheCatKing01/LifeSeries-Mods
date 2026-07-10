@@ -155,7 +155,7 @@ public class NetworkHandlerServer {
 
         SimplePackets.TRIVIA_ANSWER.setServerReceive((player, payload) -> {
             if (VersionControl.isDevVersion()) LifeSeries.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Received trivia answer (from {}): {}", player, payload.number()));
-            if (currentSeason.getSeason() == Seasons.NICE_LIFE) {
+            if (LifeSeries.isSeason(Seasons.NICE_LIFE)) {
                 NiceLifeTriviaManager.handleAnswer(player, payload.number());
             }
             else {
@@ -164,12 +164,12 @@ public class NetworkHandlerServer {
         });
 
         SimplePackets.HOLDING_JUMP.setServerReceive((player, payload) -> {
-            if (currentSeason.getSeason() == Seasons.WILD_LIFE && WildcardManager.isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
+            if (LifeSeries.isSeason(Seasons.WILD_LIFE) && WildcardManager.isActiveWildcard(Wildcards.SIZE_SHIFTING)) {
                 SizeShifting.onHoldingJump(player);
             }
         });
         SimplePackets.SUPERPOWER_KEY.setServerReceive((player, payload) -> {
-            if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+            if (LifeSeries.isSeason(Seasons.WILD_LIFE)) {
                 SuperpowersWildcard.pressedSuperpowerKey(player);
             }
         });
@@ -185,7 +185,7 @@ public class NetworkHandlerServer {
             }
         });
         SimplePackets.SET_SEASON.setServerReceive((player, payload) -> {
-            if (PermissionManager.isAdmin(player) || currentSeason.getSeason() == Seasons.UNASSIGNED) {
+            if (PermissionManager.isAdmin(player) || LifeSeries.isSeason(Seasons.UNASSIGNED)) {
                 Seasons currentSeason = LifeSeries.getSeason();
                 Seasons newSeason = Seasons.getSeasonFromStringName(payload.value());
                 if (newSeason == Seasons.UNASSIGNED) return;
@@ -202,7 +202,7 @@ public class NetworkHandlerServer {
             }
         });
         SimplePackets.TRIPLE_JUMP.setServerReceive((player, payload) -> {
-            if (currentSeason.getSeason() == Seasons.WILD_LIFE && SuperpowersWildcard.hasActivatedPower(player, Superpowers.TRIPLE_JUMP)) {
+            if (LifeSeries.isSeason(Seasons.WILD_LIFE) && SuperpowersWildcard.hasActivatedPower(player, Superpowers.TRIPLE_JUMP)) {
                 Superpower power = SuperpowersWildcard.getSuperpowerInstance(player);
                 if (power instanceof TripleJump tripleJump) {
                     tripleJump.isInAir = true;
@@ -319,7 +319,7 @@ public class NetworkHandlerServer {
                     }catch(Exception e) {}
                 }
                 TriviaQuestionManager manager = null;
-                if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+                if (LifeSeries.isSeason(Seasons.WILD_LIFE)) {
                     if (type.equalsIgnoreCase("easy")) {
                         manager = TriviaWildcard.easyTrivia;
                     }
@@ -364,11 +364,21 @@ public class NetworkHandlerServer {
         //?}
         if (LifeSeries.DEBUG) LifeSeries.LOGGER.info(TextUtils.formatString("[{} -> PACKET_SERVER] Received {}", player, id.toString()));
 
+        if (server != null) {
+            server.execute(() -> onCustomPayloadSync(customPacketPayload, player, id));
+        }
+    }
+
+    private static void onCustomPayloadSync(CustomPacketPayload customPacketPayload, ServerPlayer player, Identifier id) {
+        if (player.hasDisconnected()) {
+            return;
+        }
+
         if (customPacketPayload instanceof HandshakePayload payload) {
-            server.execute(() -> handleHandshakeResponse(player, payload));
+            handleHandshakeResponse(player, payload);
         }
         if (customPacketPayload instanceof ConfigPayload payload) {
-            server.execute(() -> handleConfigPacket(player, payload));
+            handleConfigPacket(player, payload);
         }
 
         //Simple Packets
@@ -592,7 +602,7 @@ public class NetworkHandlerServer {
     }
     
     public static void sendTriviaPacket(ServerPlayer player, String question, int difficulty, long timestamp, int timeToComplete, List<String> answers, TriviaGuiType guiType) {
-        if (guiType != null) SimplePackets.TRIVIA_GUI_TYPE.target(player).sendToClient(guiType.name());
+        if (guiType != null) SimplePackets.TRIVIA_GUI_TYPE.sendToClient(guiType.name(), player);
         TriviaQuestionPayload triviaQuestionPacket = new TriviaQuestionPayload(question, difficulty, timestamp, timeToComplete, answers);
         if (VersionControl.isDevVersion()) LifeSeries.LOGGER.info(TextUtils.formatString("[PACKET_SERVER] Sending trivia question packet to {}): {{}, {}, {}, {}, {}}", player, question, difficulty, timestamp, timeToComplete, answers));
 
@@ -622,50 +632,52 @@ public class NetworkHandlerServer {
 
     }
 
-    public static void sendUpdatePacketTo(ServerPlayer player) {
+    public static void sendSmallUpdatePacket(List<ServerPlayer> players) {
+        SimplePackets.CURRENT_SEASON.sendToClient(currentSeason.getSeason().getId(), players);
+        SimplePackets.MOD_DISABLED.sendToClient(LifeSeries.MOD_DISABLED, players);
+    }
+
+    public static void sendUpdatePacket(List<ServerPlayer> players) {
+        sendSmallUpdatePacket(players);
         if (currentSeason instanceof WildLife) {
-            SimplePackets.PLAYER_MIN_MSPT.target(player).sendToClient(TimeDilation.MIN_PLAYER_MSPT);
+            SimplePackets.PLAYER_MIN_MSPT.sendToClient((double)TimeDilation.MIN_PLAYER_MSPT, players);
 
             List<String> activeWildcards = new ArrayList<>();
             for (Wildcards wildcard : WildcardManager.activeWildcards.keySet()) {
                 activeWildcards.add(wildcard.getStringName());
             }
-            SimplePackets.ACTIVE_WILDCARDS.target(player).sendToClient(activeWildcards);
+            SimplePackets.ACTIVE_WILDCARDS.sendToClient(activeWildcards, players);
         }
-        SimplePackets.CURRENT_SEASON.target(player).sendToClient(currentSeason.getSeason().getId());
-        SimplePackets.TABLIST_SHOW_EXACT.target(player).sendToClient(Season.TAB_LIST_SHOW_EXACT_LIVES);
-        SimplePackets.TAB_LIST_LIVES_CUTOFF.target(player).sendToClient(LivesManager.MAX_TAB_NUMBER);
-        SimplePackets.FIX_SIZECHANGING_BUGS.target(player).sendToClient(SizeShifting.FIX_SIZECHANGING_BUGS);
-        SimplePackets.SIZESHIFTING_CHANGE.target(player).sendToClient(SizeShifting.SIZE_CHANGE_STEP * SizeShifting.SIZE_CHANGE_MULTIPLIER);
+        SimplePackets.TABLIST_SHOW_EXACT.sendToClient(Season.TAB_LIST_SHOW_EXACT_LIVES, players);
+        SimplePackets.TAB_LIST_LIVES_CUTOFF.sendToClient(LivesManager.MAX_TAB_NUMBER, players);
+        SimplePackets.FIX_SIZECHANGING_BUGS.sendToClient(SizeShifting.FIX_SIZECHANGING_BUGS, players);
+        SimplePackets.SIZESHIFTING_CHANGE.sendToClient(SizeShifting.SIZE_CHANGE_STEP * SizeShifting.SIZE_CHANGE_MULTIPLIER, players);
 
-        SimplePackets.ANIMAL_DISGUISE_ARMOR.target(player).sendToClient(AnimalDisguise.SHOW_ARMOR);
-        SimplePackets.ANIMAL_DISGUISE_HANDS.target(player).sendToClient(AnimalDisguise.SHOW_HANDS);
-        SimplePackets.HUNGER_NON_EDIBLE.target(player).sendToClient(Hunger.nonEdibleStr);
-        SimplePackets.SNOWY_NETHER.target(player).sendToClient(NiceLife.SNOWY_NETHER);
+        SimplePackets.ANIMAL_DISGUISE_ARMOR.sendToClient(AnimalDisguise.SHOW_ARMOR, players);
+        SimplePackets.ANIMAL_DISGUISE_HANDS.sendToClient(AnimalDisguise.SHOW_HANDS, players);
+        SimplePackets.HUNGER_NON_EDIBLE.sendToClient(Hunger.nonEdibleStr, players);
+        SimplePackets.SNOWY_NETHER.sendToClient(NiceLife.SNOWY_NETHER, players);
 
         if (Season.skyColor != null) {
-            SimplePackets.SKYCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.skyColorSetMode), String.valueOf((int)Season.skyColor.x), String.valueOf((int)Season.skyColor.y), String.valueOf((int)Season.skyColor.z)));
+            SimplePackets.SKYCOLOR.sendToClient(List.of(String.valueOf(Season.skyColorSetMode), String.valueOf((int)Season.skyColor.x), String.valueOf((int)Season.skyColor.y), String.valueOf((int)Season.skyColor.z)), players);
         }
         else {
-            SimplePackets.SKYCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.skyColorSetMode)));
+            SimplePackets.SKYCOLOR.sendToClient(List.of(String.valueOf(Season.skyColorSetMode)), players);
         }
         if (Season.fogColor != null) {
-            SimplePackets.FOGCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.fogColorSetMode), String.valueOf((int)Season.fogColor.x), String.valueOf((int)Season.fogColor.y), String.valueOf((int)Season.fogColor.z)));
+            SimplePackets.FOGCOLOR.sendToClient(List.of(String.valueOf(Season.fogColorSetMode), String.valueOf((int)Season.fogColor.x), String.valueOf((int)Season.fogColor.y), String.valueOf((int)Season.fogColor.z)), players);
         }
         else {
-            SimplePackets.FOGCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.fogColorSetMode)));
+            SimplePackets.FOGCOLOR.sendToClient(List.of(String.valueOf(Season.fogColorSetMode)), players);
         }
         if (Season.cloudColor != null) {
-            SimplePackets.CLOUDCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.cloudColorSetMode), String.valueOf((int)Season.cloudColor.x), String.valueOf((int)Season.cloudColor.y), String.valueOf((int)Season.cloudColor.z)));
+            SimplePackets.CLOUDCOLOR.sendToClient(List.of(String.valueOf(Season.cloudColorSetMode), String.valueOf((int)Season.cloudColor.x), String.valueOf((int)Season.cloudColor.y), String.valueOf((int)Season.cloudColor.z)), players);
         }
         else {
-            SimplePackets.CLOUDCOLOR.target(player).sendToClient(List.of(String.valueOf(Season.cloudColorSetMode)));
+            SimplePackets.CLOUDCOLOR.sendToClient(List.of(String.valueOf(Season.cloudColorSetMode)), players);
         }
 
-        SimplePackets.ADMIN_INFO.target(player).sendToClient(PermissionManager.isAdmin(player));
-        SimplePackets.MOD_DISABLED.target(player).sendToClient(LifeSeries.MOD_DISABLED);
-        Season.updateClientPlayerTeam(player);
-        LifeSkinsManager.sendTeamNumUpdatesTo(player);
+        LifeSkinsManager.sendTeamNumUpdatesTo(players);
         if (blacklist != null) {
             List<ResourceKey<Enchantment>> lvl1ClampedEnchants = blacklist.getClampedEnchants().get(1);
             if (lvl1ClampedEnchants != null) {
@@ -677,13 +689,21 @@ public class NetworkHandlerServer {
                     result.add(enchant.identifier().toString());
                     //?}
                 }
-                SimplePackets.LVL1_CLAMPED_ENCHANTS.target(player).sendToClient(result);
+                SimplePackets.LVL1_CLAMPED_ENCHANTS.sendToClient(result, players);
             }
+        }
+        for (ServerPlayer player : players) {
+            SimplePackets.ADMIN_INFO.sendToClient(PermissionManager.isAdmin(player), player);
+            Season.updateClientPlayerTeam(player);
         }
     }
 
     public static void sendUpdatePackets() {
-        PlayerUtils.getAllPlayers().forEach(NetworkHandlerServer::sendUpdatePacketTo);
+        sendUpdatePacket(PlayerUtils.getAllPlayers());
+    }
+
+    public static void sendSmallUpdatePackets() {
+        sendSmallUpdatePacket(PlayerUtils.getAllPlayers());
     }
 
     public static void sendPlayerDisguise(String hiddenUUID, String hiddenName, String shownUUID, String shownName) {
@@ -694,11 +714,11 @@ public class NetworkHandlerServer {
     }
 
     public static void sendPlayerInvisible(UUID uuid, long timestamp) {
-        SimplePackets.PLAYER_INVISIBLE.sendToClient(List.of(uuid.toString(), String.valueOf(timestamp)));
+        SimplePackets.PLAYER_INVISIBLE.sendToAllClients(List.of(uuid.toString(), String.valueOf(timestamp)));
     }
 
     public static void sendVignette(ServerPlayer player, long durationMillis) {
-        SimplePackets.SHOW_VIGNETTE.target(player).sendToClient(durationMillis);
+        SimplePackets.SHOW_VIGNETTE.sendToClient(durationMillis, player);
     }
 
     public static void tryKickFailedHandshake(ServerPlayer player) {
@@ -719,8 +739,7 @@ public class NetworkHandlerServer {
 
     public static boolean wasHandshakeSuccessful(ServerPlayer player) {
         if (player == null) return false;
-        UUID uuid = ProfileManager.getRealUUID(player).get();
-        return handshakeSuccessful.contains(uuid) || preLoginHandshake.contains(uuid);
+        return wasHandshakeSuccessful(player.getUUID());
     }
 
     public static boolean wasHandshakeSuccessful(UUID uuid) {

@@ -63,7 +63,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 //? if <= 1.20.3 {
 /*import net.minecraft.network.FriendlyByteBuf;
 *///?}
@@ -201,7 +200,7 @@ public class NetworkHandlerClient {
         SimplePackets.TEAM_NAME.setClientReceive(payload -> LifeSeriesClient.teamName = payload.value());
         SimplePackets.TEAM_COLOR.setClientReceive(payload -> LifeSeriesClient.teamColor = payload.value());
         SimplePackets.CURRENT_SEASON.setClientReceive(payload -> {
-            if (VersionControl.isDevVersion()) LifeSeries.LOGGER.info("[PACKET_CLIENT] Updated current season to {}", payload.value());
+            if (LifeSeries.DEBUG) LifeSeries.LOGGER.info("[PACKET_CLIENT] Updated current season to {}", payload.value());
             LifeSeriesClient.clientCurrentSeason = Seasons.getSeasonFromStringName(payload.value());
             ClientResourcePacks.checkClientPacks();
             LifeSeriesClient.reloadConfig();

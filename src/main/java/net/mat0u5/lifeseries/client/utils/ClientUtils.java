@@ -127,7 +127,7 @@ public class ClientUtils {
         if (!LifeSeriesClient.isClientPlayer(player.getUUID())) return false;
         Holder<Attribute> scaleAttribute = Attributes.SCALE;
         if (instance.getAttribute() != scaleAttribute) return false;
-        if (LifeSeriesClient.clientCurrentSeason != Seasons.WILD_LIFE) return false;
+        if (!LifeSeries.isSeason(Seasons.WILD_LIFE)) return false;
         if (!LifeSeriesClient.clientActiveWildcards.contains(Wildcards.SIZE_SHIFTING)) return false;
         if (!LifeSeriesClient.FIX_SIZECHANGING_BUGS) return false;
 
@@ -253,8 +253,10 @@ public class ClientUtils {
         if (!LifeSeriesClient.COLORBLIND_SUPPORT) return original;
         if (original == null) return original;
         if (team == null) return original;
+        String name = team.getDisplayName().getString();
+        if (name == null || name.isEmpty()) return original;
         //~ if >= 26.2 '.withStyle(team.getColor())' -> '.withColor(team.getColor().orElse(TeamColor.WHITE).textColor())' {
-        return TextUtils.format("[{}] ",team.getDisplayName().getString()).withColor(team.getColor().orElse(TeamColor.WHITE).textColor()).append(original);
+        return TextUtils.format("[{}] ", name).withColor(team.getColor().orElse(TeamColor.WHITE).textColor()).append(original);
         //~}
     }
 }

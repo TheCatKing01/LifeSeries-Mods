@@ -12,7 +12,6 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.WildLife;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.WildcardManager;
 import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.trivia.TriviaWildcard;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
-import net.mat0u5.lifeseries.utils.other.TextUtils;
 import net.mat0u5.lifeseries.utils.player.PermissionManager;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.network.chat.Component;
@@ -69,24 +68,8 @@ public class ServerGamePacketListenerImplMixin {
     private void onHandleDecoratedMessage(PlayerChatMessage message, CallbackInfo ci) {
         if (LifeSeries.isClientOrDisabled()) return;
         ServerGamePacketListenerImpl handler = (ServerGamePacketListenerImpl) (Object) this;
-        ServerPlayer player = handler.player;
-
-        if (ls$mute(handler.player, ci)) {
+        if (ls$mute(handler.player, false, message, ci)) {
             return;
-        }
-
-        Component originalText = message.decoratedContent();
-        String originalContent = originalText.getString();
-        if (!originalContent.contains(":")) return;
-
-        String formattedContent = TextUtils.replaceEmotes(originalContent);
-
-        if (!originalContent.equals(formattedContent)) {
-            Component formattedContentText = Component.literal(formattedContent).setStyle(originalText.getStyle());
-            Component finalMessage = TextUtils.format("<{}> {}",player, formattedContentText);
-
-            PlayerUtils.broadcastMessage(finalMessage);
-            ci.cancel();
         }
     }
 
@@ -131,7 +114,7 @@ public class ServerGamePacketListenerImplMixin {
         ServerGamePacketListenerImpl handler = (ServerGamePacketListenerImpl) (Object) this;
         for (String mutedCmd : mutedCommands) {
             if (command.startsWith(mutedCmd + " ")) {
-                boolean stoppedCommand = ls$mute(handler.player, ci);
+                boolean stoppedCommand = ls$mute(handler.player, true, null, ci);
                 if (stoppedCommand) return;
             }
         }
@@ -152,14 +135,14 @@ public class ServerGamePacketListenerImplMixin {
         ServerGamePacketListenerImpl handler = (ServerGamePacketListenerImpl) (Object) this;
         for (String command : mutedCommands) {
             if (packet.command().startsWith(command + " ")) {
-                boolean stoppedCommand = ls$mute(handler.player, ci);
+                boolean stoppedCommand = ls$mute(handler.player, true, null, ci);
                 if (stoppedCommand) return;
             }
         }
     }
 
     @Unique
-    private boolean ls$mute(ServerPlayer player, CallbackInfo ci) {
+    private boolean ls$mute(ServerPlayer player, boolean command, PlayerChatMessage message, CallbackInfo ci) {
         if (player == null || PermissionManager.isAdmin(player) || LifeSeries.isClientOrDisabled()) {
             return false;
         }
@@ -172,13 +155,23 @@ public class ServerGamePacketListenerImplMixin {
             }
         }
 
-        if (currentSeason.WATCHERS_MUTED && ((IPlayer) player).ls$isWatcher()) {
-            ((IPlayer) player).ls$message(ModifiableText.MUTED_WATCHER.get());
+        if (currentSeason.MUTE_WATCHERS && ((IPlayer) player).ls$isWatcher()) {
+            if (message == null || !currentSeason.MUTED_CHAT) {
+                ((IPlayer) player).ls$message(ModifiableText.MUTED_WATCHER.get());
+            }
+            else {
+                currentSeason.mutedPlayersChat(player, message);
+            }
             ci.cancel();
             return true;
         }
         if (currentSeason.MUTE_DEAD_PLAYERS && ((IPlayer) player).ls$isDead() && !((IPlayer) player).ls$isWatcher()) {
-            ((IPlayer) player).ls$message(ModifiableText.MUTED_DEADPLAYER.get());
+            if (message == null || !currentSeason.MUTED_CHAT) {
+                ((IPlayer) player).ls$message(ModifiableText.MUTED_DEADPLAYER.get());
+            }
+            else {
+                currentSeason.mutedPlayersChat(player, message);
+            }
             ci.cancel();
             return true;
         }

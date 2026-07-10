@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class UpdateChecker {
+    private static final String UPDATES_URL = "https://api.github.com/repos/Mat0u5/LifeSeries/releases";
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     public static boolean majorUpdateAvailable = false;
     public static boolean updateAvailable = false;
@@ -44,7 +45,7 @@ public class UpdateChecker {
             HttpURLConnection connection = null;
             try {
                 // Connect to the GitHub API
-                connection = (HttpURLConnection) new URI(LifeSeries.UPDATES_URL + "/latest").toURL().openConnection();
+                connection = (HttpURLConnection) new URI(UPDATES_URL + "/latest").toURL().openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0");
                 connection.setConnectTimeout(5000);
@@ -92,7 +93,7 @@ public class UpdateChecker {
             HttpURLConnection connection = null;
             try {
                 // Connect to the GitHub API
-                connection = (HttpURLConnection) new URI(LifeSeries.UPDATES_URL).toURL().openConnection();
+                connection = (HttpURLConnection) new URI(UPDATES_URL).toURL().openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0");
                 connection.setConnectTimeout(5000);
@@ -184,7 +185,7 @@ public class UpdateChecker {
     }
 
     public static void onPlayerJoin(ServerPlayer player) {
-        if (!updateAvailable || versionName == null) {
+        if (!updateAvailable || versionName == null || versionDescription == null) {
             return;
         }
         if (!VersionControl.isDevVersion()) {
@@ -195,7 +196,7 @@ public class UpdateChecker {
                         .withStyle(style -> style
                             .withHoverEvent(
                                 TextUtils.showTextHoverEvent(TextUtils.formatLoosely(
-                                    "§7§nUpdate Description:§r\n\n{}", versionDescription
+                                    "§7§nUpdate Description:§r\n\n{}", versionDescription.replace("\r", "")
                                 ))
                             )
                         )

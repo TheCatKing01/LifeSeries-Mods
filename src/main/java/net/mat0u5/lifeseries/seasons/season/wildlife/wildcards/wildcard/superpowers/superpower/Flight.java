@@ -6,6 +6,7 @@ import net.mat0u5.lifeseries.seasons.season.wildlife.wildcards.wildcard.superpow
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.TaskScheduler;
 import net.mat0u5.lifeseries.utils.other.Time;
+import net.mat0u5.lifeseries.utils.player.PlayerReference;
 import net.mat0u5.lifeseries.utils.player.PlayerUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -67,13 +68,13 @@ public class Flight extends Superpower {
         }
         if (!isLaunchedUp) {
             onGroundTicks = 0;
-            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(ELYTRA_LAUNCH_NEEDED);
+            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.sendToClient(ELYTRA_LAUNCH_NEEDED, player);
             return;
         }
 
         if (player.onGround()) {
             onGroundTicks++;
-            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.target(player).sendToClient(ELYTRA_LAUNCH_NEEDED);
+            if (timer.isMultipleOf(Time.ticks(5))) SimplePackets.PREVENT_GLIDING.sendToClient(ELYTRA_LAUNCH_NEEDED, player);
         }
 
         else {
@@ -98,10 +99,10 @@ public class Flight extends Superpower {
 
         MobEffectInstance effect = new MobEffectInstance(MobEffects.JUMP_BOOST, 20, LAUNGH_JUMP_AMPLIFIER, false, false, false);
         player.addEffect(effect);
-        SimplePackets.JUMP.target(player).sendToClient();
+        SimplePackets.JUMP.sendToClient(player);
 
         isLaunchedUp = true;
-        SimplePackets.PREVENT_GLIDING.target(player).sendToClient(false);
+        SimplePackets.PREVENT_GLIDING.sendToClient(false, player);
     }
 
     @Override
@@ -109,11 +110,15 @@ public class Flight extends Superpower {
         super.deactivate();
         ServerPlayer player = getPlayer();
         if (player == null) return;
+        PlayerReference ref = PlayerReference.of(player);
         TaskScheduler.scheduleTask(1, () -> {
-            player.getInventory().setChanged();
-            PlayerUtils.updatePlayerInventory(player);
+            ServerPlayer playerNew = ref.get();
+            if (playerNew != null) {
+                playerNew.getInventory().setChanged();
+                PlayerUtils.updatePlayerInventory(playerNew);
+            }
         });
-        SimplePackets.PREVENT_GLIDING.target(player).sendToClient(false);
+        SimplePackets.PREVENT_GLIDING.sendToClient(false, player);
     }
 
     private void giveHelmet() {

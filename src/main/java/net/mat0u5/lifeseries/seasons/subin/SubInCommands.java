@@ -3,6 +3,7 @@ package net.mat0u5.lifeseries.seasons.subin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.command.manager.Command;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
@@ -24,7 +25,7 @@ import net.minecraft.server.players.NameAndId;
 public class SubInCommands extends Command {
     @Override
     public boolean isAllowed() {
-        return currentSeason.getSeason() != Seasons.UNASSIGNED;
+        return !LifeSeries.isSeason(Seasons.UNASSIGNED);
     }
 
     @Override
@@ -40,8 +41,8 @@ public class SubInCommands extends Command {
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             literal("subin")
-                .requires(PermissionManager::isAdmin)
                     .then(literal("add")
+                        .requires(PermissionManager::isAdmin)
                         .then(argument("player", EntityArgument.player())
                                 .then(argument("subin", StringArgumentType.string())
                                         .executes(context -> addSubIn(
@@ -53,6 +54,7 @@ public class SubInCommands extends Command {
                         )
                     )
                     .then(literal("remove")
+                            .requires(PermissionManager::isAdmin)
                             .then(argument("player", EntityArgument.player())
                                     .executes(context -> removeSubIn(
                                             context.getSource(),
@@ -104,8 +106,8 @@ public class SubInCommands extends Command {
             return -1;
         }
 
-        if (SubInManager.isSubbingIn(player)) {
-            GameProfile profile = SubInManager.getTargetPlayer(player);
+        if (SubInManager.isSubbingIn(player.getUUID())) {
+            GameProfile profile = SubInManager.getSubstitutedPlayer(player.getUUID());
             sendCommandFailure(source, ModifiableText.SUBIN_ERROR_ALREADY_SUBBING.get(player, OtherUtils.profileName(profile)));
             return -1;
         }
@@ -125,12 +127,12 @@ public class SubInCommands extends Command {
     public int removeSubIn(CommandSourceStack source, ServerPlayer player) {
         if (checkBanned(source)) return -1;
 
-        if (!SubInManager.isSubbingIn(player)) {
+        if (!SubInManager.isSubbingIn(player.getUUID())) {
             sendCommandFailure(source, ModifiableText.SUBIN_ERROR_MISSING.get(player));
             return -1;
         }
 
-        GameProfile profile = SubInManager.getTargetPlayer(player);
+        GameProfile profile = SubInManager.getSubstitutedPlayer(player.getUUID());
 
         sendCommandFeedback(source, ModifiableText.SUBIN_STOP.get(player, OtherUtils.profileName(profile)));
         SubInManager.removeSubIn(player);

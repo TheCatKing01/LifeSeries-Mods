@@ -58,7 +58,7 @@ public class DefaultConfigValues {
             "Blacklisted Enchants", "List of banned enchants."
     );
     public final ConfigFileEntry<Boolean> MUTE_DEAD_PLAYERS = new ConfigFileEntry<>(
-            "mute_dead_players", false, "global",
+            "mute_dead_players", false, "global.muted",
             "Mute Dead Players", "Controls whether dead players should be allowed to type in chat."
     );
     public final ConfigFileEntry<String> BLACKLIST_BANNED_POTION_EFFECTS = new ConfigFileEntry<>(
@@ -98,8 +98,12 @@ public class DefaultConfigValues {
             "Tick Freeze When Not In Session", "Automatically freezes the game when the session is paused or ended or not started."
     );
     public final ConfigFileEntry<Boolean> LIVES_SYSTEM_DISABLED = new ConfigFileEntry<>(
-            "lives_system_disabled", false, "global.lives",
+            "lives_system_disabled", false, "global.disable",
             "Fully Disable Lives System", "Fully disables the lives system, if you want to implement a custom one for example :)"
+    );
+    public final ConfigFileEntry<Boolean> TEAMS_SYSTEM_DISABLED = new ConfigFileEntry<>(
+            "teams_system_disabled", false, "global.disable[new]",
+            "Fully Disable Teams System", "Fully disables the teams system, if you want to implement a custom one for example :)"
     );
     public final ConfigFileEntry<Boolean> CUSTOM_ENCHANTER_ALGORITHM = new ConfigFileEntry<>(
             "custom_enchanter_algorithm", false, "global",
@@ -289,7 +293,7 @@ public class DefaultConfigValues {
             "Show Watchers In Tab", "Controls whether Watchers should show up in the tab list."
     );
     public final ConfigFileEntry<Boolean> WATCHERS_MUTED = new ConfigFileEntry<>(
-            "watchers_muted", false, "global.watchers",
+            "watchers_muted", false, "global.muted",
             "Mute Watchers", "Controls whether the Watchers should be allowed to type in chat."
     );
     public final ConfigFileEntry<Boolean> ALLOW_SELF_DEFENSE = new ConfigFileEntry<>(
@@ -340,6 +344,10 @@ public class DefaultConfigValues {
             "lives_randomize", false, "{global.lives.random}",
             "Randomize Lives", "Makes every player get a random amount of lives."
     );
+    public final ConfigFileEntry<Boolean> LIVES_RANDOMIZE_PSEUDORANDOM = new ConfigFileEntry<>(
+            "lives_randomize_pseudorandom", true, "global.lives.random[new]",
+            "Pseudorandom Lives", "If there are enough players, it forces at least one occurrence of every possible life amount."
+    );
     public final ConfigFileEntry<Integer> LIVES_RANDOMIZE_MIN = new ConfigFileEntry<>(
             "lives_randomize_min", 2, "global.lives.random",
             "Minimum Lives", "The minimum number of lives any player can have after randomization."
@@ -359,6 +367,14 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Boolean> LIVES_LOSE_KILLS_ONLY = new ConfigFileEntry<>(
             "lives_lose_kills_only", false, "global.lives",
             "Only Lose Lives From PvP Kills", "Makes players not lose lives from natural deaths."
+    );
+    public final ConfigFileEntry<Boolean> MUTED_CHAT = new ConfigFileEntry<>(
+            "muted_chat", true, "{global.muted.chat}[new]",
+            "Allow Muted Only Chat", "Controls whether the muted players can still talk to each other, or to noone at all."
+    );
+    public final ConfigFileEntry<Boolean> MUTED_CHAT_ADMIN = new ConfigFileEntry<>(
+            "muted_chat_admin", true, "global.muted.chat[new]",
+            "Muted Chat Admin Broadcast", "Controls whether the muted player chat gets broadcast to admins too."
     );
 
 
@@ -414,6 +430,14 @@ public class DefaultConfigValues {
     public final ConfigFileEntry<Object> GROUP_TEXTS = new ConfigFileEntry<>(
             "group_texts", null, ConfigTypes.TEXT, "{text}",
             "Modifiable Texts", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_MUTED = new ConfigFileEntry<>(
+            "group_muted", null, ConfigTypes.TEXT, "{global.muted}[new]",
+            "Muted Players", ""
+    );
+    public final ConfigFileEntry<Object> GROUP_DISABLE = new ConfigFileEntry<>(
+            "group_disable", null, ConfigTypes.TEXT, "{global.disable}[new]",
+            "Disable Functionality", ""
     );
 
 

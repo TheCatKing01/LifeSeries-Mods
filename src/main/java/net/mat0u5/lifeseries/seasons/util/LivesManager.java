@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.seasons.util;
 
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.config.ModifiableText;
 import net.mat0u5.lifeseries.network.packets.simple.SimplePackets;
 import net.mat0u5.lifeseries.seasons.boogeyman.advanceddeaths.AdvancedDeathsManager;
@@ -12,10 +13,7 @@ import net.mat0u5.lifeseries.seasons.session.SessionTranscript;
 import net.mat0u5.lifeseries.seasons.subin.SubInManager;
 import net.mat0u5.lifeseries.utils.interfaces.IPlayer;
 import net.mat0u5.lifeseries.utils.other.*;
-import net.mat0u5.lifeseries.utils.player.LifeSkinsManager;
-import net.mat0u5.lifeseries.utils.player.PlayerUtils;
-import net.mat0u5.lifeseries.utils.player.ScoreboardUtils;
-import net.mat0u5.lifeseries.utils.player.TeamUtils;
+import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.AnimationUtils;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
@@ -54,6 +52,7 @@ public class LivesManager {
     public static int MAX_TAB_NUMBER = 4;
     public boolean LIVES_SYSTEM_DISABLED = false;
     public boolean ROLL_LIVES = false;
+    public boolean ROLL_LIVES_PSEUDORANDOM = true;
     public int ROLL_MIN_LIVES = 2;
     public int ROLL_MAX_LIVES = 6;
     public double LIVES_RANDOMIZE_MINUTE = 1.0;
@@ -74,6 +73,7 @@ public class LivesManager {
         updateTeams();
 
         ROLL_LIVES = seasonConfig.LIVES_RANDOMIZE.get();
+        ROLL_LIVES_PSEUDORANDOM = seasonConfig.LIVES_RANDOMIZE_PSEUDORANDOM.get();
         int minLivesConfig = seasonConfig.LIVES_RANDOMIZE_MIN.get();
         int maxLivesConfig = seasonConfig.LIVES_RANDOMIZE_MAX.get();
         ROLL_MIN_LIVES = Math.min(minLivesConfig, maxLivesConfig);
@@ -105,7 +105,7 @@ public class LivesManager {
             MAX_TAB_NUMBER = Math.max(MAX_TAB_NUMBER, entry.getKey());
             entry.getValue().setSeeFriendlyInvisibles(SEE_FRIENDLY_INVISIBLE_PLAYERS);
         }
-        SimplePackets.TAB_LIST_LIVES_CUTOFF.sendToClient(MAX_TAB_NUMBER);
+        SimplePackets.TAB_LIST_LIVES_CUTOFF.sendToAllClients(MAX_TAB_NUMBER);
     }
 
     public Integer getTeamCanKill(String teamName) {
@@ -138,12 +138,12 @@ public class LivesManager {
     }
 
     public int defaultTeamCanKill(String teamName) {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+        if (LifeSeries.isSeason(Seasons.WILD_LIFE)) {
             if (teamName.equals("lives_2")) {
                 return 3;
             }
         }
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
             if (teamName.equals("lives_2")) {
                 return LimitedLifeLivesManager.YELLOW_TIME;
             }
@@ -155,12 +155,12 @@ public class LivesManager {
     }
 
     public int defaultTeamGainLife(String teamName) {
-        if (currentSeason.getSeason() == Seasons.WILD_LIFE) {
+        if (LifeSeries.isSeason(Seasons.WILD_LIFE)) {
             if (teamName.equals("lives_1") || teamName.equals("lives_2")) {
                 return 4;
             }
         }
-        if (currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
             if (teamName.equals("lives_1")) {
                 return 1;
             }
@@ -362,6 +362,7 @@ public class LivesManager {
     }
 
     public void receiveLifeFromOtherPlayer(Component playerName, ServerPlayer target, boolean isRevive) {
+        if (target == null) return;
         ((IPlayer) target).ls$playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 10, 1);
         if (seasonConfig.GIVELIFE_BROADCAST.get()) {
             PlayerUtils.broadcastMessageExcept(ModifiableText.GIVELIFE_RECEIVE_OTHER.get(target, playerName), target);
@@ -394,8 +395,8 @@ public class LivesManager {
         }
         currentSeason.reloadPlayerTeam(player);
 
-        if (SubInManager.isSubbingIn(player)) {
-            String substitutedPlayerName = OtherUtils.profileName(SubInManager.getTargetPlayer(player));
+        if (SubInManager.isSubbingIn(player.getUUID())) {
+            String substitutedPlayerName = OtherUtils.profileName(SubInManager.getSubstitutedPlayer(player.getUUID()));
             setScore(substitutedPlayerName, lives);
         }
         if (livesChanged) {
@@ -475,7 +476,8 @@ public class LivesManager {
                 if (FINAL_DEATH_SOUND != null) {
                     PlayerUtils.playSoundToPlayers(PlayerUtils.getAllPlayers(), FINAL_DEATH_SOUND);
                 }
-                TaskScheduler.schedulePriorityTask(1, () -> showDeathTitle(player));
+                PlayerReference ref = PlayerReference.of(player);
+                TaskScheduler.schedulePriorityTask(1, () -> showDeathTitle(ref.get()));
                 DatapackIntegration.EVENT_PLAYER_FINAL_DEATH.trigger(new DatapackIntegration.Events.MacroEntry("Player", player.getScoreboardName()));
                 SessionTranscript.onPlayerLostAllLives(player);
             }
@@ -484,6 +486,7 @@ public class LivesManager {
     }
 
     public void showDeathTitle(ServerPlayer player) {
+        if (player == null) return;
         if (SHOW_DEATH_TITLE) {
             List<ServerPlayer> otherPlayers = PlayerUtils.getAllPlayers();
             otherPlayers.remove(player);
@@ -587,7 +590,8 @@ public class LivesManager {
     public void assignRandomLives(List<ServerPlayer> players) {
         players.forEach(this::resetPlayerLife);
         PlayerUtils.sendTitleToPlayers(players, ModifiableText.LIVES_RANDOMIZE_TITLE.get(), 10, 40, 10);
-        TaskScheduler.scheduleTask(Time.seconds(3), ()-> rollLives(players));
+        PlayerListReference ref = PlayerListReference.of(players);
+        TaskScheduler.scheduleTask(Time.seconds(3), ()-> rollLives(ref.get()));
     }
 
     public Map<ServerPlayer, Integer> getFinalRandomLives(List<ServerPlayer> players) {
@@ -596,11 +600,13 @@ public class LivesManager {
         int totalSize = players.size();
         int chosenNotRandomly = ROLL_MIN_LIVES;
         for (ServerPlayer player : players) {
-            int diff = ROLL_MAX_LIVES-ROLL_MIN_LIVES+2;
-            if (chosenNotRandomly <= ROLL_MAX_LIVES && totalSize > diff) {
-                lives.put(player, chosenNotRandomly);
-                chosenNotRandomly++;
-                continue;
+            if (ROLL_LIVES_PSEUDORANDOM) {
+                int diff = ROLL_MAX_LIVES-ROLL_MIN_LIVES+2;
+                if (chosenNotRandomly <= ROLL_MAX_LIVES && totalSize > diff) {
+                    lives.put(player, chosenNotRandomly);
+                    chosenNotRandomly++;
+                    continue;
+                }
             }
 
             int randomLives = getRandomLife();
@@ -610,10 +616,12 @@ public class LivesManager {
     }
 
     public void rollLives(List<ServerPlayer> players) {
+        if (players == null || players.isEmpty()) return;
         int delay = showRandomNumbers(players) + 20;
 
         Map<ServerPlayer, Integer> lives = getFinalRandomLives(players);
 
+        PlayerListReference ref = PlayerListReference.of(players);
         TaskScheduler.scheduleTask(delay, () -> {
             //Show the actual amount of lives for one cycle
             for (Map.Entry<ServerPlayer, Integer> playerEntry : lives.entrySet()) {
@@ -622,7 +630,7 @@ public class LivesManager {
                 Component textLives = getFormattedLives(livesNum);
                 PlayerUtils.sendTitle(player, textLives, 0, 25, 0);
             }
-            PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+            PlayerUtils.playSoundToPlayers(ref.get(), SoundEvents.UI_BUTTON_CLICK.value());
         });
 
         delay += 20;
@@ -656,9 +664,11 @@ public class LivesManager {
             int lives = getRandomLife(lastLives);
             lastLives = lives;
 
+            PlayerListReference ref = PlayerListReference.of(players);
             TaskScheduler.scheduleTask(currentDelay, () -> {
-                PlayerUtils.sendTitleToPlayers(players, getFormattedLives(lives), 0, 25, 0);
-                PlayerUtils.playSoundToPlayers(players, SoundEvents.UI_BUTTON_CLICK.value());
+                var listNew = ref.get();
+                PlayerUtils.sendTitleToPlayers(listNew, getFormattedLives(lives), 0, 25, 0);
+                PlayerUtils.playSoundToPlayers(listNew, SoundEvents.UI_BUTTON_CLICK.value());
             });
         }
 

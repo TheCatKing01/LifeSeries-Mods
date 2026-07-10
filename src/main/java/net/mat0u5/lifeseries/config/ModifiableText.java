@@ -1,5 +1,6 @@
 package net.mat0u5.lifeseries.config;
 
+import net.mat0u5.lifeseries.LifeSeries;
 import net.mat0u5.lifeseries.seasons.season.Seasons;
 import net.mat0u5.lifeseries.utils.enums.Formatted;
 import net.minecraft.network.chat.Component;
@@ -328,6 +329,7 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_SHOW(Seasons.SECRET_LIFE, "§7Click {}§7 to show the task they have.", List.of("ClickHere"))
     ,SECRETLIFE_TASK_SHOW_PAST(Seasons.SECRET_LIFE, "§7Click {}§7 to see what {}§7's task was.", List.of("ClickHere", "Player"))
     ,SECRETLIFE_SECRETKEEPER_INUSE(Seasons.SECRET_LIFE, "§cSomeone else is using the Secret Keeper right now.")
+    ,SECRETLIFE_SECRETKEEPER_CANNOT(Seasons.SECRET_LIFE, "§cDead players and Watchers cannot use the Secret Keeper.")
     ,SECRETLIFE_TASK_PENDING(Seasons.SECRET_LIFE, "{} wants to succeed their task.", List.of("Player"))
     ,SECRETLIFE_TASK_PENDING_ACCEPT(Seasons.SECRET_LIFE, "§7Click {}§7 to confirm this action.", List.of("ClickHere"))
     ,SECRETLIFE_TASK_PENDING_NOTIFICATION(Seasons.SECRET_LIFE, "§cYour task confirmation needs to be approved by an admin.")
@@ -336,6 +338,7 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_REROLL_HARD_FAIL_RED(Seasons.SECRET_LIFE, "§cYou cannot re-roll a Hard task. If you want your red task instead, click the Fail button.")
     ,SECRETLIFE_TASK_NOT_SUBMITTED(Seasons.SECRET_LIFE, Formatted.LOOSELY_STYLED,"§4{}§c still {} not submitted / failed a task this session.", List.of("Players", "has/have"))
     ,SECRETLIFE_HEART_ADD(Seasons.SECRET_LIFE, Formatted.LOOSELY_STYLED,"§a+{} {}", List.of("amount", "heart/hearts"))
+    ,SECRETLIFE_HEART_ADD_RED(Seasons.SECRET_LIFE, Formatted.LOOSELY_STYLED,"§c+{} {}", List.of("amount", "heart/hearts"))
     ,SECRETLIFE_HEART_REMOVE(Seasons.SECRET_LIFE, Formatted.LOOSELY_STYLED,"§c-{} {}", List.of("amount", "heart/hearts"))
     ,SECRETLIFE_TASK_NAME(Seasons.SECRET_LIFE, "{}'s Secret Task", List.of("Player"))
     ,SECRETLIFE_TASK_AUTHOR(Seasons.SECRET_LIFE, "Secret Keeper")
@@ -344,6 +347,7 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_SET_MULTIPLE(Seasons.SECRET_LIFE, "Changed or pre-assigned task of {} targets", List.of("number of targets"))
     ,SECRETLIFE_TASK_SET_RANDOM_SINGLE(Seasons.SECRET_LIFE, "Assigning random task to {}", List.of("Player"))
     ,SECRETLIFE_TASK_SET_RANDOM_MULTIPLE(Seasons.SECRET_LIFE, "Assigning random tasks to {} targets", List.of("number of targets"))
+    ,SECRETLIFE_TASK_SET_DEAD(Seasons.SECRET_LIFE, "Dead players and Watchers cannot have tasks.")
     ,SECRETLIFE_TASK_REMOVE_SINGLE(Seasons.SECRET_LIFE, "Removed task book from {}", List.of("Player"))
     ,SECRETLIFE_TASK_REMOVE_MULTIPLE(Seasons.SECRET_LIFE, "Removed task book from {} targets", List.of("number of targets"))
     ,SECRETLIFE_TASK_SUCCESS_SINGLE(Seasons.SECRET_LIFE, "§7Succeeding task for {}§7...", List.of("Player"))
@@ -382,6 +386,7 @@ public enum ModifiableText {
     ,SECRETLIFE_TASK_REROLL_PT3(Seasons.SECRET_LIFE, "§e§lLet me open the door")
     ,SECRETLIFE_TASK_REROLL_PT4(Seasons.SECRET_LIFE, "§c§lAccept your fate")
     ,SECRETLIFE_TASK_RESET_USED(Seasons.SECRET_LIFE, "Reset all saved tasks")
+    ,SECRETLIFE_SESSION_START_INFO(Seasons.SECRET_LIFE, "§fClick {}§f to learn more about Task Selection on the Wiki.", List.of("ClickHere"))
 
     ,WILDLIFE_SNAIL_TEXTURE_INFO(Seasons.WILD_LIFE,"§fClick {}§f to open the Snail Textures info page on the Wiki.", List.of("ClickHere"))
     ,WILDLIFE_SNAIL_DEFAULT_NAME(Seasons.WILD_LIFE, Formatted.PLAIN,"{}'s Snail", List.of("Player"))
@@ -629,7 +634,7 @@ public enum ModifiableText {
     }
 
     public String getRegisterDefaultValue() {
-        if (currentSeason != null && currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason != null && LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
             String modified = null;
 
             if (this == GIVELIFE_RECEIVE_OTHER) modified = "{} received {} from {}";
@@ -672,7 +677,7 @@ public enum ModifiableText {
     }
 
     public List<String> getRegisterArgs() {
-        if (currentSeason != null && currentSeason.getSeason() == Seasons.LIMITED_LIFE) {
+        if (currentSeason != null && LifeSeries.isSeason(Seasons.LIMITED_LIFE)) {
 
             if (this == GIVELIFE_RECEIVE_OTHER) return List.of("Receiver", "time", "Giver");
             else if (this == GIVELIFE_RECEIVE_SELF) return List.of("time", "Player");

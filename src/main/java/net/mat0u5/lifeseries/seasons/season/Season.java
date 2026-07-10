@@ -33,6 +33,11 @@ import net.mat0u5.lifeseries.utils.other.Time;
 import net.mat0u5.lifeseries.utils.player.*;
 import net.mat0u5.lifeseries.utils.world.DatapackIntegration;
 import net.mat0u5.lifeseries.utils.world.LevelUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -95,7 +100,9 @@ public abstract class Season {
     public static boolean SHOW_HEALTH_BELOW_NAME = false;
     public boolean WATCHERS_IN_TAB = true;
     public boolean MUTE_DEAD_PLAYERS = false;
-    public boolean WATCHERS_MUTED = false;
+    public boolean MUTE_WATCHERS = false;
+    public boolean MUTED_CHAT = true;
+    public boolean MUTED_CHAT_ADMIN = true;
     public boolean ALLOW_SELF_DEFENSE = true;
     public static boolean GIVELIFE_CAN_REVIVE = false;
     public boolean SHOW_LOGIN_COMMAND_INFO = true;
@@ -111,6 +118,7 @@ public abstract class Season {
     public static boolean fogColorSetMode = false;
     public static Vec3 cloudColor = null;
     public static boolean cloudColorSetMode = false;
+    public boolean TEAMS_SYSTEM_DISABLED = false;
 
     public BoogeymanManager boogeymanManager = createBoogeymanManager();
     public SecretSociety secretSociety = createSecretSociety();
@@ -158,7 +166,7 @@ public abstract class Season {
     public void reloadStart() {
     }
 
-    public void updateStuff() {
+    public void postReload() {
         if (server == null) return;
 
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
@@ -234,7 +242,9 @@ public abstract class Season {
         TAB_LIST_SHOW_EXACT_LIVES = seasonConfig.TAB_LIST_SHOW_EXACT_LIVES.get();
         SHOW_HEALTH_BELOW_NAME = seasonConfig.SHOW_HEALTH_BELOW_NAME.get();
         WATCHERS_IN_TAB = seasonConfig.WATCHERS_IN_TAB.get();
-        WATCHERS_MUTED = seasonConfig.WATCHERS_MUTED.get();
+        MUTE_WATCHERS = seasonConfig.WATCHERS_MUTED.get();
+        MUTED_CHAT = seasonConfig.MUTED_CHAT.get();
+        MUTED_CHAT_ADMIN = seasonConfig.MUTED_CHAT_ADMIN.get();
         ALLOW_SELF_DEFENSE = seasonConfig.ALLOW_SELF_DEFENSE.get();
         GIVELIFE_CAN_REVIVE = seasonConfig.GIVELIFE_CAN_REVIVE.get();
         SHOW_LOGIN_COMMAND_INFO = seasonConfig.SHOW_LOGIN_COMMAND_INFO.get();
@@ -245,13 +255,14 @@ public abstract class Season {
         BROADCAST_LIFE_GAIN = seasonConfig.BROADCAST_LIFE_GAIN.get();
         ADDITIONAL_WITHER_SKULL_RATE = seasonConfig.ADDITIONAL_WITHER_SKULL_RATE.get();
         LOCATOR_BAR = seasonConfig.LOCATOR_BAR.get();
+        TEAMS_SYSTEM_DISABLED = seasonConfig.TEAMS_SYSTEM_DISABLED.get();
 
         NetworkHandlerServer.reload();
         boogeymanManager.onReload();
         secretSociety.onReload();
         createTeams();
         createScoreboards();
-        updateStuff();
+        postReload();
         reloadAllPlayerTeams();
         reloadPlayers();
         Events.updatePlayerListsNextTick = true;
@@ -307,7 +318,7 @@ public abstract class Season {
     }
 
     public void sendSetSeasonPacket(ServerPlayer player) {
-        SimplePackets.SEASON_INFO.target(player).sendToClient(List.of(currentSeason.getSeason().getId(), currentSeason.getAdminCommands(), currentSeason.getNonAdminCommands()));
+        SimplePackets.SEASON_INFO.sendToClient(List.of(currentSeason.getSeason().getId(), currentSeason.getAdminCommands(), currentSeason.getNonAdminCommands()), player);
     }
 
     public void reloadPlayers() {
@@ -317,7 +328,7 @@ public abstract class Season {
     public void createTeams() {
         Collection<PlayerTeam> allTeams = TeamUtils.getAllTeams();
         if (allTeams != null) {
-            if (currentSeason.getSeason() != Seasons.WILD_LIFE || CreakingPower.allCreatedEntities.isEmpty() || !SuperpowersWildcard.anyoneHasActivatedPower(Superpowers.CREAKING)) {
+            if (!LifeSeries.isSeason(Seasons.WILD_LIFE) || CreakingPower.allCreatedEntities.isEmpty() || !SuperpowersWildcard.anyoneHasActivatedPower(Superpowers.CREAKING)) {
                 for (PlayerTeam team : allTeams) {
                     if (team.getName().startsWith("creaking_")) {
                         TeamUtils.deleteTeam(team.getName());
@@ -352,10 +363,12 @@ public abstract class Season {
     }
 
     private void reloadPlayerTeam(ServerPlayer player, boolean waited) {
+        if (TEAMS_SYSTEM_DISABLED) return;
         if (player == null) return;
 
         if (!player.isAlive() && !waited) {
-            TaskScheduler.scheduleTask(1, () -> reloadPlayerTeam(player, true));
+            PlayerReference ref = PlayerReference.of(player);
+            TaskScheduler.scheduleTask(1, () -> reloadPlayerTeam(ref.get(), true));
             return;
         }
 
@@ -377,14 +390,14 @@ public abstract class Season {
         LifeSkinsManager.sendTeamNumUpdatesFrom(player);
         Team team = player.getTeam();
         if (team != null) {
-            SimplePackets.TEAM_NAME.target(player).sendToClient(team.getName());
+            SimplePackets.TEAM_NAME.sendToClient(team.getName(), player);
             //~ if >= 26.2 'team.getColor().getName()' -> 'team.getColor().orElse(TeamColor.WHITE).getSerializedName()' {
-            SimplePackets.TEAM_COLOR.target(player).sendToClient(team.getColor().orElse(TeamColor.WHITE).getSerializedName());
+            SimplePackets.TEAM_COLOR.sendToClient(team.getColor().orElse(TeamColor.WHITE).getSerializedName(), player);
             //~}
         }
         else {
-            SimplePackets.TEAM_NAME.target(player).sendToClient("");
-            SimplePackets.TEAM_COLOR.target(player).sendToClient("");
+            SimplePackets.TEAM_NAME.sendToClient("", player);
+            SimplePackets.TEAM_COLOR.sendToClient("", player);
         }
     }
 
@@ -469,6 +482,12 @@ public abstract class Season {
             reloadPlayerTeams = false;
             reloadAllPlayerTeams();
         }
+        if (timer.isMultipleOf(Time.seconds(1))) {
+            NetworkHandlerServer.sendSmallUpdatePackets();
+        }
+        if (timer.isMultipleOf(Time.seconds(60))) {
+            NetworkHandlerServer.sendUpdatePackets();
+        }
     }
     public void tickSessionOn(MinecraftServer server) {}
     public void addSessionActions() {
@@ -476,10 +495,6 @@ public abstract class Season {
         secretSociety.addSessionActions();
         livesManager.addSessionActions();
     }
-
-    /*
-        Events
-     */
 
     public void onPlayerDeath(ServerPlayer player, DamageSource source) {
         boolean soulmateKill = source.is(DoubleLife.SOULMATE_DAMAGE);
@@ -625,19 +640,25 @@ public abstract class Season {
         boolean isAllowedToAttack = isAllowedToAttack(killer, victim, false);
         boolean isBoogeyCure = boogeymanManager.isBoogeymanThatCanBeCured(killer, victim);
 
-        if (!isAllowedToAttack(killer, victim) && !HIDE_UNJUSTIFIED_KILL_MESSAGES) {
-            if (livesManager.SHOW_LIFE_DIFF) {
-                TaskScheduler.schedulePriorityTask(1, () -> {
+        List<DatapackIntegration.Events.MacroEntry> eventMacros = List.of(
+                new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
+                new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
+        );
+
+        if (!isAllowedToAttack(killer, victim)) {
+            if (!HIDE_UNJUSTIFIED_KILL_MESSAGES) {
+                if (livesManager.SHOW_LIFE_DIFF) {
+                    var msg = ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer);
+                    TaskScheduler.schedulePriorityTask(1, () -> PlayerUtils.broadcastMessageToAdmins(msg));
+                }
+                else {
                     PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
-                });
+                }
             }
-            else {
-                PlayerUtils.broadcastMessageToAdmins(ModifiableText.SEASON_KILL_UNJUSTIFIED.get(victim, killer));
-            }
-            DatapackIntegration.EVENT_UNJUSTIFIED_KILL.trigger(List.of(
-                    new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
-                    new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
-            ));
+            DatapackIntegration.EVENT_UNJUSTIFIED_KILL.trigger(eventMacros);
+        }
+        else {
+            DatapackIntegration.EVENT_JUSTIFIED_KILL.trigger(eventMacros);
         }
 
         if (isBoogeyCure) {
@@ -645,10 +666,7 @@ public abstract class Season {
         }
         SessionTranscript.onPlayerKilledByPlayer(victim, killer);
 
-        DatapackIntegration.EVENT_PLAYER_PVP_KILLED.trigger(List.of(
-                new DatapackIntegration.Events.MacroEntry("Killer", killer.getScoreboardName()),
-                new DatapackIntegration.Events.MacroEntry("Victim", victim.getScoreboardName())
-        ));
+        DatapackIntegration.EVENT_PLAYER_PVP_KILLED.trigger(eventMacros);
         if (!DatapackIntegration.EVENT_PLAYER_PVP_KILLED.isCanceled() && !isBoogeyCure && isAllowedToAttack) {
             tryKillLifeGain(killer, victim);
         }
@@ -723,7 +741,8 @@ public abstract class Season {
     public void onPlayerJoin(ServerPlayer player) {
         AttributeUtils.resetAttributesOnPlayerJoin(player);
         reloadPlayerTeam(player);
-        TaskScheduler.scheduleTask(2, () -> PlayerUtils.applyResourcepack(player));
+        UUID uuid = player.getUUID();
+        TaskScheduler.scheduleTask(2, () -> PlayerUtils.applyResourcepack(uuid));
         if (!((IPlayer) player).ls$hasAssignedLives()) {
             assignDefaultLives(player);
         }
@@ -731,12 +750,13 @@ public abstract class Season {
             player.setGameMode(GameType.SPECTATOR);
         }
 
+        PlayerReference ref = PlayerReference.of(player);
         TaskScheduler.scheduleTask(1, () -> {
-            if (SubInManager.isBeingSubstituted(ProfileManager.getRealUUID(player).get())) {
-                SubInManager.removeSubIn(player);
+            if (SubInManager.isBeingSubstituted(uuid)) {
+                SubInManager.removeSubIn(ref.get());
             }
-            if (SubInManager.isSubbingIn(player)) {
-                SubInManager.reloadPlayerProfile(player);
+            if (SubInManager.isSubbingIn(uuid)) {
+                SubInManager.reloadPlayerProfile(ref.get());
             }
         });
     }
@@ -798,5 +818,19 @@ public abstract class Season {
 
     public void usernameChanged(ServerPlayer player) {
 
+    }
+
+    public void mutedPlayersChat(ServerPlayer sender, PlayerChatMessage message) {
+        OutgoingChatMessage outgoingChatMessage = OutgoingChatMessage.create(message);
+        Component prefixedName = Component.literal("§7[MUTED] ").append(sender.getDisplayName());
+        var bind = ChatType.bind(net.minecraft.network.chat.ChatType.CHAT, sender.level().registryAccess(), prefixedName);
+        for (ServerPlayer player : PlayerUtils.getAllPlayers()) {
+            boolean adminPass = PermissionManager.isAdmin(player) && MUTED_CHAT_ADMIN;
+            boolean deadPass = MUTE_DEAD_PLAYERS && ((IPlayer) player).ls$isDead() && !((IPlayer) player).ls$isWatcher();
+            boolean watcherPass = MUTE_WATCHERS && ((IPlayer) player).ls$isWatcher();
+            if (adminPass || deadPass || watcherPass) {
+                player.sendChatMessage(outgoingChatMessage, true, bind);
+            }
+        }
     }
 }
