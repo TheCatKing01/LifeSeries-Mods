@@ -19,22 +19,15 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.entity.animal.equine.TraderLlama;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.commands.arguments.item.ItemParser;
-import com.mojang.brigadier.StringReader;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 
 //? if <= 1.20.3 {
-import net.minecraft.world.item.ItemStack;
+/*import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.NaturalSpawner;
-//?} else {
+*///?} else {
 import net.minecraft.world.item.trading.ItemCost;
 //?}
 
@@ -102,51 +95,44 @@ public class SimpleLife extends ThirdLife {
 
                     MerchantOffers offers = wanderingTraderEntity.getOffers();
                     offers.clear();
-					//? if <= 1.20.3 {
-					/*offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    //? if <= 1.20.3 {
+                    /*offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 40), ItemStack.EMPTY, Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 5), ItemStack.EMPTY, Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 1), ItemStack.EMPTY, Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
-					int rand = rnd.nextInt(2);
-					if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					*///?} else {
-						
+                    int rand = rnd.nextInt(2);
+                    if (rand == 0) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    if (rand == 1) offers.add(new MerchantOffer(new ItemStack(Items.DIRT, 32), ItemStack.EMPTY, Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    *///?} else {
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.IRON_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.WATER_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.LAVA_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-
-					//? if >= 26.2 {
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(),
-							Items.SULFUR_CUBE_BUCKET.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					//?}
-
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.SAND.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.GRAVEL.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 5), Optional.empty(), Items.GOLD_INGOT.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 1), Optional.empty(), Items.REDSTONE.getDefaultInstance(), 0, 999999, 0, 0, 0));
 
                     int rand = rnd.nextInt(2);
                     if (rand == 0) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.OAK_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
                     if (rand == 1) offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 32), Optional.empty(), Items.SPRUCE_SAPLING.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    //?}
 					
-					//? if >= 26.2 {
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(),
-							Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					//? if <= 26.2 {
+					/*offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.HAPPY_GHAST_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+                    offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(), Items.SULFUR_CUBE_SPAWN_EGG.getDefaultInstance(), 0, 999999, 0, 0, 0));
+					*///?}
 
-					offers.add(new MerchantOffer(new ItemCost(Items.DIRT, 40), Optional.empty(),
-							Items.RED_HARNESS.getDefaultInstance(), 0, 999999, 0, 0, 0));
-					//?}
-			
-					wanderingTraderEntity.overrideOffers(offers);
-					wanderingTraderEntity.addTag("SimpleLifeTrader");
-					return true;
-				}
-			}
+                    wanderingTraderEntity.overrideOffers(offers);
+                    wanderingTraderEntity.addTag("SimpleLifeTrader");
+                    return true;
+                }
+            }
 
-			return false;  
+            return false;
         }
     }
 
