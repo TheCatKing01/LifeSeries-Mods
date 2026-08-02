@@ -186,9 +186,13 @@ public class SnailModel extends EntityModel<SnailRenderState> {
         boolean parachuteHidden = !state.glideAnimationState.isStarted();
         boolean propellerHidden = !state.flyAnimationState.isStarted() && !state.startFlyAnimationState.isStarted();
         boolean triviaHidden = !state.fromTrivia;
+        boolean underbodyHidden = state.flyAnimationState.isStarted() || state.glideAnimationState.isStarted()
+                || state.startFlyAnimationState.isStarted() || state.stopFlyAnimationState.isStarted();
 
         this.parachute.getAllParts().forEach(part -> part.skipDraw = parachuteHidden);
         this.propeller.getAllParts().forEach(part -> part.skipDraw = propellerHidden);
+        this.back.getAllParts().forEach(part -> part.skipDraw = underbodyHidden);
+        this.midback.getAllParts().forEach(part -> part.skipDraw = underbodyHidden);
         //this.trivia.traverse().forEach(part -> part.hidden = triviaHidden);
     }
     //?}
