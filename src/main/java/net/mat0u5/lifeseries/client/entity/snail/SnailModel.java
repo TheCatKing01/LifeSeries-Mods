@@ -77,7 +77,6 @@ public class SnailModel extends EntityModel<SnailRenderState> {
 
         PartDefinition head = main.addOrReplaceChild("head", CubeListBuilder.create().texOffs(28, 57).addBox(-2.0F, -8.0F, 4.0F, 1.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
                 .texOffs(48, 53).addBox(-2.0F, -5.0F, 3.0F, 4.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(16, 57).addBox(-2.0F, -2.0F, 1.0F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(12, 58).addBox(1.0F, -8.0F, 4.0F, 1.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, -3.0F, 0.0F, 3.1416F, 0.0F));
 
         PartDefinition trivia = head.addOrReplaceChild("trivia", CubeListBuilder.create().texOffs(0, 51).addBox(-3.0F, -8.0F, 3.0F, 6.0F, 5.0F, 2.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 0.0F));
